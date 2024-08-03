@@ -1,0 +1,3 @@
+displayName = VFXPlus
+author = Linty
+version = 0.1

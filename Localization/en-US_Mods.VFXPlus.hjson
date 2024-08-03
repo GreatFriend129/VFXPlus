@@ -1,0 +1,24 @@
+Items: {
+	DebugItem: {
+		DisplayName: Debug Item
+		Tooltip: ""
+	}
+}
+
+Projectiles.MusketHeldProj.DisplayName: Musket Held Proj
+
+Configs: {
+	VFXPlusClientConfig: {
+		DisplayName: V F X Plus Client Config
+
+		ScreenshakeIntensity: {
+			Label: Screenshake Intensity
+			Tooltip: ""
+		}
+
+		CyvercryAIOverride: {
+			Label: Cyvercry A I Override
+			Tooltip: ""
+		}
+	}
+}
