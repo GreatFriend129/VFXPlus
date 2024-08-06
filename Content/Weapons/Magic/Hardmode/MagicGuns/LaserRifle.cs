@@ -69,7 +69,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
     public class LaserRifleShotOverride : GlobalProjectile
     {
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
+        { 
             return lateInstantiation && (entity.type == ProjectileID.PurpleLaser);
         }
 
