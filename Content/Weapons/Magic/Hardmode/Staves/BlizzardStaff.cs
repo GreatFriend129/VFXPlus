@@ -115,11 +115,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ice_hit") with { Volume = 0.1f, Pitch = 0.15f, PitchVariance = .5f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .12f, Pitch = .55f, PitchVariance = 0.65f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .1f, Pitch = .55f, PitchVariance = 0.8f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
-            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .05f, Pitch = .3f, PitchVariance = 0.5f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, projectile.Center);
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_death_1") with { Volume = 0.05f, Pitch = .85f, PitchVariance = 0.45f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style4, projectile.Center);
+
+            //Main.NewText(projectile.ai[1]); <- Current proj spite (blizz staff chooses between 1 of 5 sprites for each shot)
 
             return false;
 
@@ -130,6 +132,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public static List<Vector2> previousPostions; //Makes it easier to tweak the length of the trail without restarting everything (also skill issue prolly)
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPosOffset = (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * 84f * projectile.scale;
@@ -157,7 +160,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
             #endregion
 
-            Main.spriteBatch.Draw(vanillaTex, drawPos, sourceRectangle, Color.White * 1f, drawRot, TexOrigin, projectile.scale, SpriteEffects.None, 0f); //0.3
+            for (int i = 0; i < 5; i++)
+            {
+                Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle, Color.White with { A = 0 } * 0.5f, drawRot, TexOrigin, projectile.scale, SpriteEffects.None, 0f); //0.3
+            }
+
+            Main.spriteBatch.Draw(vanillaTex, drawPos, sourceRectangle, Color.White * 0.95f, drawRot, TexOrigin, projectile.scale, SpriteEffects.None, 0f); //0.3
 
 
             /*

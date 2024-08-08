@@ -34,25 +34,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            /*
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = .12f, Pitch = .1f, PitchVariance = .15f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_1") with { Pitch = .85f, PitchVariance = .2f, Volume = 0.25f };
-            SoundEngine.PlaySound(style2, player.Center);
-
-            //Dust
-            for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
-            {
-                Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<LineSpark>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(6, 19),
-                    newColor: Color.Purple, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
-
-                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    1f, 0.5f); //80
-
-            }
-            */
             return true;
         }
 
@@ -80,6 +62,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
                 previousRotations.RemoveAt(0);
             }
 
+            if (projectile.ai[2] % 3 == 0 && Main.rand.NextBool(2) && projectile.ai[2] > 2)
+            {
+                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), 
+                    projectile.rotation.ToRotationVector2().RotatedBy(-MathHelper.PiOver2 + Main.rand.NextFloat(-0.25f, 0.25f)) * Main.rand.NextFloat(2, 4),
+                    newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.15f, 0.2f));
+            }
+
+            projectile.ai[2]++;
 
             base.AI(projectile);
         }
@@ -103,10 +93,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
                 Main.EntitySpriteDraw(arrowTex, previousPositions[i] - Main.screenPosition, null, Color.LightSkyBlue with { A = 0 } * progress * 1f, projectile.rotation, arrowTex.Size() / 2, vec2Scale2, SpriteEffects.None);
 
             }
-
-            //Main.EntitySpriteDraw(arrowTex, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, projectile.rotation, arrowTex.Size() / 2, projectile.scale * 1.1f, SpriteEffects.None);
-            //Main.EntitySpriteDraw(arrowTex, projectile.Center - Main.screenPosition, null, lightColor, projectile.rotation, arrowTex.Size() / 2, projectile.scale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(arrowTex, projectile.Center - Main.screenPosition, null, Color.Orange with { A = 0 }, projectile.rotation, arrowTex.Size() / 2, projectile.scale, SpriteEffects.None);
 
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/DiamondGlowPMA").Value;
@@ -132,35 +118,37 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
         public override void OnKill(Projectile projectile, int timeLeft)
         {
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .05f, Pitch = .7f, PitchVariance = 0.35f, MaxInstances = -1 };
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .05f, Pitch = .75f, PitchVariance = 0.3f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .3f, Pitch = .7f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
-            /*
-            Color pinkToUse = Color.Lerp(Color.Purple, Color.DeepPink, 0.1f);
-
-            for (int i = 0; i < 4 + Main.rand.Next(1, 3); i++)
+            //Dust
+            for (int i = 0; i < 5 + Main.rand.Next(1, 3); i++)
             {
-                Dust p = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<GlowPixelCross>(),
-                    projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-2f, 2f)) * Main.rand.Next(1, 3),
-                    newColor: pinkToUse, Scale: Main.rand.NextFloat(0.3f, 0.5f));
+                //The less straight the dust flies, the slower it should be
+                Vector2 velDir = projectile.rotation.ToRotationVector2().RotatedBy(-MathHelper.PiOver2);
+                float randomTilt = Main.rand.NextFloat(0f, 1f); 
+                float tiltPercent = randomTilt / 1f;
+                float velVal = 1.25f * ((1f - tiltPercent) * 2.75f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), 
+                    velDir.RotatedBy(randomTilt * (Main.rand.NextBool() ? 1f : -1f)) * velVal, 
+                    newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.28f, 0.32f));
             }
-            */
+
             base.OnKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            
-
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
+            Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
