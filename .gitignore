@@ -16,3 +16,8 @@ bin/Debug/net8.0/VFXPlus.pdb
 *.cache
 /obj/Debug/net8.0
 /obj/Debug/net8.0/refint
+*.dll
+*.pdb
+obj/Debug/net8.0/VFXPlus.dll
+*.cache
+obj/Debug/net8.0/VFXPlus.AssemblyInfo.cs

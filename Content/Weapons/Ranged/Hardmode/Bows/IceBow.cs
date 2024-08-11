@@ -118,10 +118,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
         public override void OnKill(Projectile projectile, int timeLeft)
         {
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .05f, Pitch = .75f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_1") with { Volume = .05f, Pitch = .85f, PitchVariance = 0.3f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .3f, Pitch = .7f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .3f, Pitch = .8f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
             //Dust
