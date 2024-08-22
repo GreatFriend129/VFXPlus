@@ -89,7 +89,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, projectile.scale * 0.15f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.7f, drawRot, Tex2Origin, projectile.scale * 0.1f, SpriteEffects.None, 0f);
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.7f, drawRot, TexOrigin, new Vector2(1.75f, 0.35f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.7f, drawRot, TexOrigin, new Vector2(1.75f, 0.3f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale, SpriteEffects.None, 0f);
 
             //Main.spriteBatch.Draw(Tex, drawPos, null, Color.LimeGreen with { A = 0 } * 0.7f, drawRot, TexOrigin, new Vector2(2f, 0.35f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale, SpriteEffects.None, 0f); //0.3
 

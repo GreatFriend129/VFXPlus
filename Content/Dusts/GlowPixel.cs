@@ -291,7 +291,7 @@ namespace VFXPlus.Content.Dusts
 
 		public override bool PreDraw(Dust dust)
 		{
-			Texture2D Core = (Texture2D)ModContent.Request<Texture2D>("AerovelenceMod/Content/Dusts/GlowDusts/DustTextures/PixelCrossInner");
+			Texture2D Core = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Content/Dusts/Textures/PixelCrossInner");
 			Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, new Vector2(34f, 34f), dust.scale, SpriteEffects.None, 0f);
 			
 			Main.spriteBatch.Draw(Core, dust.position - Main.screenPosition, null, Color.White with { A = 0 }, dust.rotation, new Vector2(34, 34f), dust.scale * 0.5f, SpriteEffects.None, 0f);

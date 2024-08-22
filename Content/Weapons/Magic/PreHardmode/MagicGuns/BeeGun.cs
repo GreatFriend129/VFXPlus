@@ -65,7 +65,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
         public override void AI(Projectile projectile)
         {
-            projectile.localAI[1] = Math.Clamp(MathHelper.Lerp(projectile.localAI[1], 1.25f, 0.05f), 0f, 1f);
+            projectile.localAI[1] = Math.Clamp(MathHelper.Lerp(projectile.localAI[1], 1.25f, 0.04f), 0f, 1f);
             base.AI(projectile);
         }
 
@@ -82,7 +82,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             //Border
             for (int i = 0; i < 6; i++)
             {
-                Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle, Color.White with { A = 0 } * 0.75f * projectile.localAI[1], drawRot, TexOrigin, projectile.scale, SE, 0f); //0.3
+                Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, Color.White with { A = 0 } * 0.75f * projectile.localAI[1], drawRot, TexOrigin, projectile.scale, SE, 0f); //0.3
             }
 
             Main.spriteBatch.Draw(vanillaTex, drawPos, sourceRectangle, Color.White * projectile.localAI[1], drawRot, TexOrigin, projectile.scale, SE, 0f); //0.3
