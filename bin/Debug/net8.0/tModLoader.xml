@@ -501,7 +501,7 @@
             <summary>
             Visually opens the chest at <paramref name="worldPosition"/> for <paramref name="duration"/> ticks.
             </summary>
-            <param name="worldPosition">The position of the chest to ask, in tile coordinates.</param>
+            <param name="worldPosition">The position of the chest to ask, in world coordinates.</param>
             <param name="duration">The duration of the eating animation in ticks.</param>
         </member>
         <member name="M:Terraria.Chest.UpdateChestFrames">
@@ -534,6 +534,16 @@
             Abstract base class for entities which come from a tile. <br/><br/>
             
             If the entity comes from a Player/NPC/Projectile, and a tile is only incidentally involved, consider making your own subclass of <see cref="T:Terraria.DataStructures.EntitySource_Parent"/> instead
+            </summary>
+        </member>
+        <member name="M:Terraria.DataStructures.AnchorData.#ctor(Terraria.Enums.AnchorType,System.Int32,System.Int32)">
+            <summary>
+            Defines an anchor, meaning the surrounding tiles required for a multitile to be placeable at a location. <paramref name="type"/> dictates which types of tiles are eligible for the anchor while <paramref name="start"/> and <paramref name="count"/> dictate how much of the multitile edge need to have that specific anchor.
+            For example, most furniture tiles will simply set a bottom anchor spanning the full width of the tile requiring solid tiles:
+            <br/><c>TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, TileObjectData.newTile.Width, 0);</c>
+            <para/> <paramref name="type"/> can be defined using multiple options with the logical OR operator (<c>|</c>) to combine <see cref="T:Terraria.Enums.AnchorType"/> values, allowing tiles satisfying any of the AnchorTypes to work:
+            <br/><c>AnchorType.SolidTile | AnchorType.SolidWithTop | AnchorType.SolidSide</c>
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#anchorbottomanchorleftanchorrightanchortop">Anchor section of the Basic Tile wiki guide</see> has more information and visualizations.
             </summary>
         </member>
         <member name="T:Terraria.DataStructures.BossBarDrawParams">
@@ -1179,6 +1189,15 @@
             </summary>
             <param name="npc">The NPC to apply immunities to.</param>
         </member>
+        <member name="M:Terraria.DataStructures.PlacementHook.#ctor(System.Func{System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32},System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Used by <see cref="T:Terraria.ObjectData.TileObjectData"/> to provide custom logic to tile placement.
+            <para/> <paramref name="hook"/>: The method to call. The return value will be compared against <see cref="F:Terraria.DataStructures.PlacementHook.badReturn"/> if relevant. The parameters are: X tile coordinate, Y tile coordinate, tile type, tile style, direction, and alternate index. Use these parameters to execute extra logic for this tile placement. <see cref="T:Terraria.ModLoader.ModTileEntity"/> has a few existing methods to use for various placement hooks.
+            <para/> <paramref name="badReturn"/>: Declares what return value from the <see cref="F:Terraria.DataStructures.PlacementHook.hook"/> should be interpreted as a failure. Typically -1.
+            <para/> <paramref name="badResponse"/>: Set to 0.
+            <para/> <paramref name="processedCoordinates"/>: If true, the top left corner coordinates of the tile will be passed into <see cref="F:Terraria.DataStructures.PlacementHook.hook"/> rather than the placement coordinate (the placement coordinate is where the mouse would be (<see cref="F:Terraria.Player.tileTargetX"/> and <see cref="F:Terraria.Player.tileTargetY"/>), accounting for the <see cref="P:Terraria.ObjectData.TileObjectData.Origin"/> offset). Typically a true value will make all the logic in the <paramref name="hook"/> method much simpler.
+            </summary>
+        </member>
         <member name="M:Terraria.DataStructures.PlayerDeathReason.TryGetCausingEntity(Terraria.Entity@)">
             <summary>
             Only safe for use when the local player is the one taking damage! <br/>
@@ -1693,6 +1712,21 @@
             The center position of this entity in world coordinates. Calculated from <see cref="F:Terraria.Entity.position"/>, <see cref="F:Terraria.Entity.width"/>, and <see cref="F:Terraria.Entity.height"/>.
             </summary>
         </member>
+        <member name="F:Terraria.Enums.AnchorType.SolidTile">
+            <summary> Solid tiles: <see cref="F:Terraria.Main.tileSolid"/> but not <see cref="F:Terraria.Main.tileSolidTop"/>, <see cref="F:Terraria.Main.tileNoAttach"/>, or sloped (unless <see cref="P:Terraria.ObjectData.TileObjectData.FlattenAnchors"/> is true). </summary>
+        </member>
+        <member name="F:Terraria.Enums.AnchorType.SolidWithTop">
+            <summary> Platforms with a top surface and tiles that are <see cref="F:Terraria.Main.tileSolid"/> and <see cref="F:Terraria.Main.tileSolidTop"/> (such as <see cref="F:Terraria.ID.TileID.PlanterBox"/> and <see cref="F:Terraria.ID.TileID.MetalBars"/>) </summary>
+        </member>
+        <member name="F:Terraria.Enums.AnchorType.Table">
+            <summary> Table tiles: <see cref="F:Terraria.Main.tileTable"/> but not <see cref="F:Terraria.ID.TileID.Sets.Platforms"/>. Also includes <see cref="F:Terraria.Enums.AnchorType.SolidWithTop"/> tiles. </summary>
+        </member>
+        <member name="F:Terraria.Enums.AnchorType.AlternateTile">
+            <summary> The tile is contained in <see cref="P:Terraria.ObjectData.TileObjectData.AnchorAlternateTiles"/> </summary>
+        </member>
+        <member name="F:Terraria.Enums.AnchorType.EmptyTile">
+            <summary> Either no tile exists or the tile is actuated </summary>
+        </member>
         <member name="M:Terraria.GameContent.Bestiary.BestiaryDatabase.GetBestiaryEntriesByMod(Terraria.ModLoader.Mod)">
             <summary>
             Gets entries from the database created by the mod specified
@@ -2042,6 +2076,18 @@
         <member name="F:Terraria.GameContent.PlayerEyeHelper.EyeState.IsPoisoned">
             <summary>
             <br/> Out of 120 ticks, 19 of them will have eyes closed; otherwise eyes are half closed.
+            </summary>
+        </member>
+        <member name="T:Terraria.GameContent.Prefixes.PrefixLegacy.ItemSets">
+            <summary>
+            These sets determine which vanilla weapons belong to which prefix categories.
+            <para/> Modded items should not use these as modded item prefix categories are derived automatically from their <see cref="P:Terraria.Item.DamageType"/> and/or <see cref="M:Terraria.ModLoader.ModItem.MeleePrefix"/>/<see cref="M:Terraria.ModLoader.ModItem.MagicPrefix"/>/<see cref="M:Terraria.ModLoader.ModItem.RangedPrefix"/>/<see cref="M:Terraria.ModLoader.ModItem.WeaponPrefix"/> usage instead.
+            <para/> <see cref="F:Terraria.GameContent.Prefixes.PrefixLegacy.ItemSets.ItemsThatCanHaveLegendary2"/>, however, can be used by modded items if needed.
+            </summary>
+        </member>
+        <member name="F:Terraria.GameContent.Prefixes.PrefixLegacy.ItemSets.ItemsThatCanHaveLegendary2">
+            <summary>
+            If true, this item can receive the <see cref="F:Terraria.ID.ItemID.Terrarian"/>-specific Legendary modifier.
             </summary>
         </member>
         <member name="T:Terraria.GameContent.Profiles.DefaultNPCProfile">
@@ -6668,6 +6714,11 @@
             Set of Grapple Hook Projectile IDs that determines whether or not said projectile can only have one copy of it within the world per player.
             </summary>
         </member>
+        <member name="F:Terraria.ID.ProjectileID.Sets.FiresFewerFromDaedalusStormbow">
+            <summary>
+            Set of Projectile IDs that have a chance to fire fewer projectiles from <see cref="F:Terraria.ID.ItemID.DaedalusStormbow"/>
+            </summary>
+        </member>
         <member name="F:Terraria.ID.ProjectileID.Sets.SummonTagDamageMultiplier">
             <summary>
             Used to scale down summon tag damage for fast hitting minions and sentries. 
@@ -7529,6 +7580,7 @@
             <summary>
             The number of copper coins this item is worth (aka, cost to buy from a merchant). Setting it to <c>10462</c> would mean the item cost 1 gold, 4 silver, and 62 copper. The sell price of an item is one fifth of its value. Value also influences reforge costs with the goblin tinkerer.
             <br/> For convenience, you can also use the <see cref="M:Terraria.Item.buyPrice(System.Int32,System.Int32,System.Int32,System.Int32)"/> method for setting values: <c>Item.value = Item.buyPrice(0, 1, 4, 62);</c> You can also use the <see cref="M:Terraria.Item.sellPrice(System.Int32,System.Int32,System.Int32,System.Int32)"/> method if you would rather think about an item's value the other way. Both <c>Item.buyPrice(0, 0, 10, 55)</c> and <c>Item.sellPrice(0, 0, 2, 11)</c> would set the value to <c>1055</c>.
+            <para/> If custom purchase prices disconnected from the item value are needed, <see cref="F:Terraria.Item.shopCustomPrice"/> should be set for the item instance added to a shop entry.
             </summary>
         </member>
         <member name="F:Terraria.Item.vanity">
@@ -7620,7 +7672,8 @@
         <member name="F:Terraria.Item.reuseDelay">
             <summary>
             A delay in frames added at the end of the using animation for the item, during which the player wont be able to use any items.
-            <br/> Defaults to 0.
+            <para/> One notable example usage is the <see cref="F:Terraria.ID.ItemID.ClockworkAssaultRifle"/> with a value of 14, but most other usages are smaller values like 2.
+            <para/> Defaults to 0.
             </summary>
         </member>
         <member name="F:Terraria.Item.hasVanityEffects">
@@ -7643,6 +7696,12 @@
         <member name="P:Terraria.Item.PaintOrCoating">
             <summary>
             <see langword="true"/> if <c><see cref="F:Terraria.Item.paint"/> &gt; 0 || <see cref="F:Terraria.Item.paintCoating"/> &gt; 0</c> and <see langword="false"/> otherwise.
+            </summary>
+        </member>
+        <member name="P:Terraria.Item.Variant">
+            <summary>
+            If not null, indicates that this item has a special seed variant active.
+            <para/> Item variants are not supported for modded items.
             </summary>
         </member>
         <member name="M:Terraria.Item.StartCachingType(System.Int32)">
@@ -8146,6 +8205,25 @@
             Clears the overridden value of <see cref="P:Terraria.Item.Name"/>.
             </summary>
         </member>
+        <member name="M:Terraria.Item.Refresh(System.Boolean)">
+            <summary>
+            Resets the stats of this item while preserving modded data, prefix, stack, and favorited. Used to update the stats of this item to facilitate <see cref="T:Terraria.GameContent.Items.ItemVariants"/>. This is called on most items when a player enters a world to ensure that their stats match the variant expected for the world seed.
+            <para/> If <paramref name="onlyIfVariantChanged"/> is true (it usually is), then the item is only refreshed if <see cref="P:Terraria.Item.Variant"/> and <see cref="M:Terraria.GameContent.Items.ItemVariants.SelectVariant(System.Int32)"/> differ.
+            </summary>
+            <param name="onlyIfVariantChanged"></param>
+        </member>
+        <member name="P:Terraria.Item.ModItem">
+            <summary>
+            The ModItem instance attached to this Item. All modded items will have an appropriate instance of the ModItem-inheriting class assigned to this field. Will be null for vanilla items. Can be used to check if an Item is a modded item or not.
+            <para/> If you need to access members of a specific ModItem class from code outside of the ModItem, you can cast to your class:
+            <code>
+            if (item.ModItem is MyItem myItem)
+            {
+                myItem.myField = 5;
+            }
+            </code>
+            </summary>
+        </member>
         <member name="M:Terraria.Item.GetGlobalItem``1">
             <summary> Gets the instance of the specified GlobalItem type. This will throw exceptions on failure. </summary>
             <exception cref="T:System.Collections.Generic.KeyNotFoundException"/>
@@ -8331,6 +8409,12 @@
             <br/><br/>This particular overload uses a Rectangle instead of X, Y, Width, and Height to determine the actual spawn position.
             </summary>
             <returns><inheritdoc cref="M:Terraria.Item.NewItem(Terraria.DataStructures.IEntitySource,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean,System.Int32,System.Boolean,System.Boolean)"/></returns>
+        </member>
+        <member name="M:Terraria.Item.GetPrefixCategories">
+            <summary>
+            Determines the <see cref="T:Terraria.ModLoader.PrefixCategory">prefix categories</see> of this <see cref="T:Terraria.Item"/>.
+            </summary>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> of every category this <see cref="T:Terraria.Item"/> matches, the <see cref="T:System.Collections.Generic.List`1"/> will be empty if this <see cref="T:Terraria.Item"/> doesn't have any categories.</returns>
         </member>
         <member name="P:Terraria.Item.ResearchUnlockCount">
             <summary>
@@ -8634,6 +8718,12 @@
         <member name="F:Terraria.Main.zenithWorld">
             <summary> If true, the world was generated with the <see href="https://terraria.wiki.gg/wiki/Get_fixed_boi">Get fixed boi (aka Zenith)</see> secret world seed. This seed combines multiple secret seeds. Note that the other secret world seed bools inherited by this seed will be set as well, so there is no need to specifically check both those bools and this bool. See also <see cref="F:Terraria.WorldGen.everythingWorldGen"/>. </summary>
         </member>
+        <member name="F:Terraria.Main.xMas">
+            <summary> If true the <see href="https://terraria.wiki.gg/wiki/Christmas">Christmas</see> seasonal event is currently active. </summary>
+        </member>
+        <member name="F:Terraria.Main.halloween">
+            <summary> If true the <see href="https://terraria.wiki.gg/wiki/Halloween">Halloween</see> seasonal event is currently active. </summary>
+        </member>
         <member name="F:Terraria.Main.dayRate">
             <summary>
             The rate at which <see cref="F:Terraria.Main.time"/> updates per tick.
@@ -8693,6 +8783,11 @@
             Defaults to false; most, if not all, status effects which have their entries set to true here are related to mounts, pets, and summons.<br/>
             </summary>
         </member>
+        <member name="F:Terraria.Main.hardMode">
+            <summary>
+            True if the world is in hard mode. This doubles as an indicator if <see cref="F:Terraria.ID.NPCID.WallofFlesh"/> has been defeated since they are tied together.
+            </summary>
+        </member>
         <member name="F:Terraria.Main.maxTilesX">
             <summary>
             The width of the currently-loaded world in tiles.
@@ -8719,6 +8814,12 @@
             </summary>
             <remarks>Players in this layer will have <see cref="P:Terraria.Player.ZoneRockLayerHeight"/> set to <see langword="true"/>.</remarks>
         </member>
+        <member name="F:Terraria.Main.dayTime">
+            <summary>
+            True during the day hours (4:30 AM to 7:30 PM), false during night hours (7:30 PM to 4:30 AM). In conjunction with <see cref="F:Terraria.Main.time"/> these represent the in-game time of the world.
+            <para/> Note that <see cref="M:Terraria.Main.IsItDay"/> additionally takes into account the constant night state of <see cref="F:Terraria.Main.remixWorld"/> worlds and should be used instead for logic taking into account the state of the world rather the specific hour. Some examples include boss spawners and boss despawn behaviors.
+            </summary>
+        </member>
         <member name="F:Terraria.Main.time">
             <summary>
             The time that has passed since it last became day/night.
@@ -8728,6 +8829,21 @@
             <remarks>
             If you need 24-hour time, use <see cref="M:Terraria.Utils.GetDayTimeAs24FloatStartingFromMidnight"/>.
             </remarks>
+        </member>
+        <member name="F:Terraria.Main.moonPhase">
+            <summary> The current <see href="https://terraria.wiki.gg/wiki/Moon_phase">moon phase</see> expressed as an int. Use <see cref="M:Terraria.Main.GetMoonPhase"/> to get the moon phase as a <see cref="T:Terraria.Enums.MoonPhase"/> instead. </summary>
+        </member>
+        <member name="F:Terraria.Main.bloodMoon">
+            <summary> If true a <see href="https://terraria.wiki.gg/wiki/Blood_Moon">Blood Moon</see> is currently happening. </summary>
+        </member>
+        <member name="F:Terraria.Main.pumpkinMoon">
+            <summary> If true a <see href="https://terraria.wiki.gg/wiki/Pumpkin_Moon">Pumpkin Moon</see> is currently happening. </summary>
+        </member>
+        <member name="F:Terraria.Main.snowMoon">
+            <summary> If true a <see href="https://terraria.wiki.gg/wiki/Frost_Moon">Frost Moon</see> is currently happening. </summary>
+        </member>
+        <member name="F:Terraria.Main.eclipse">
+            <summary> If true a <see href="https://terraria.wiki.gg/wiki/Solar_Eclipse">Solar Eclipse</see> is currently happening. </summary>
         </member>
         <member name="F:Terraria.Main.projFrames">
             <summary>
@@ -8810,7 +8926,7 @@
         </member>
         <member name="F:Terraria.Main.tileSolid">
             <summary>
-            If true, this tile will be solid. Projectiles will collide with it and NPC and Players can stand on it and collide with it. Typical terrain tiles such as <see cref="F:Terraria.ID.TileID.Stone"/> and <see cref="F:Terraria.ID.TileID.Demonite"/> set this. Other examples include <see cref="F:Terraria.ID.TileID.ClosedDoor"/> and <see cref="F:Terraria.ID.TileID.Boulder"/>
+            If true, this tile will be solid (unless <see cref="F:Terraria.Main.tileSolidTop"/> is also true). Projectiles will collide with it and NPC and Players can stand on it and collide with it. Typical terrain tiles such as <see cref="F:Terraria.ID.TileID.Stone"/> and <see cref="F:Terraria.ID.TileID.Demonite"/> set this. Other examples include <see cref="F:Terraria.ID.TileID.ClosedDoor"/> and <see cref="F:Terraria.ID.TileID.Boulder"/>
             <para/> The <see href="https://terraria.wiki.gg/wiki/Placement">wiki</see> refers to tiles with tileSolid set to true as "solid" tiles and those with tileSolid set to false as "background" tiles.
             </summary>
         </member>
@@ -8911,6 +9027,27 @@
         <member name="F:Terraria.Main.mouseItem">
             <summary> The item currently being carried by the mouse. </summary>
         </member>
+        <member name="F:Terraria.Main.recipe">
+            <summary>
+            Contains all the <see cref="T:Terraria.Recipe"/> in the game. Be sure to read <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Recipes">the Basic Recipes wiki page</see> to learn how to create and edit recipes.
+            <para/> Modders should not attempt to manually edit Main.recipe, doing so will break things. Recipes can be disabled or edited but should not be removed. Recipe ordering can be done through the sort methods, such as <see cref="M:Terraria.Recipe.SortBefore(Terraria.Recipe)"/>. Main.recipe is populated during mod loading and should not be changed in-game. Dynamic recipe availability is done through recipe conditions. 
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.availableRecipe">
+            <summary>
+            Contains recipe indexes (<see cref="P:Terraria.Recipe.RecipeIndex"/>) of the recipes currently being shown in the UI, either for crafting or a Guide query.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.numAvailableRecipes">
+            <summary>
+            The count of Recipes being shown. The length of <see cref="F:Terraria.Main.availableRecipe"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.focusRecipe">
+            <summary>
+            An index into <see cref="F:Terraria.Main.availableRecipe"/> indicating the currently selected Recipe.
+            </summary>
+        </member>
         <member name="F:Terraria.Main.myPlayer">
             <summary>
             The index in <see cref="F:Terraria.Main.player"/> of this client's Player.
@@ -8923,6 +9060,16 @@
             Contains all the <see cref="T:Terraria.Player"/>s in the game world.
             <para/> Only entries in this array that are <see cref="F:Terraria.Entity.active"/> are relevant. Each player has a <see cref="F:Terraria.Entity.whoAmI"/> corresponding to their index within Main.player. <see cref="F:Terraria.Main.myPlayer"/> is the index of the local player as well. The last entry is a dummy entry used for server operations and should not be accessed.
             <para/> Modders seeking to run logic on all players should use <see cref="P:Terraria.Main.ActivePlayers"/> to iterate over the Main.player entries to easily account for inactive entries and the dummy entry.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.spawnTileX">
+            <summary>
+            The x tile coordinate of the default spawn location of the world. Players without a bed spawn point (<see cref="F:Terraria.Player.SpawnX"/>) will spawn at this location and invasions will target this location.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.spawnTileY">
+            <summary>
+            The y tile coordinate of the default spawn location of the world. Players without a bed spawn point (<see cref="F:Terraria.Player.SpawnY"/>) will spawn at this location and invasions will target this location.
             </summary>
         </member>
         <member name="F:Terraria.Main.npcChatCornerItem">
@@ -8938,6 +9085,20 @@
         <member name="F:Terraria.Main.gameMenu">
             <summary>
             If true, the game is currently in the main menus. If false the game is in the game world.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.invasionType">
+            <summary>
+            If not 0, an invasion event is currently active:
+            <br/> If 1 (<see cref="F:Terraria.ID.InvasionID.GoblinArmy"/>), a <see href="https://terraria.wiki.gg/wiki/Goblin_Army">Goblin Army</see> is happening.
+            <br/> If 2 (<see cref="F:Terraria.ID.InvasionID.SnowLegion"/>), a <see href="https://terraria.wiki.gg/wiki/Frost_Legion">Frost Legion</see> is happening.
+            <br/> If 3 (<see cref="F:Terraria.ID.InvasionID.PirateInvasion"/>), a <see href="https://terraria.wiki.gg/wiki/Pirate_Invasion">Pirate Invasion</see> is happening.
+            <br/> If 4 (<see cref="F:Terraria.ID.InvasionID.MartianMadness"/>), a <see href="https://terraria.wiki.gg/wiki/Martian_Madness">Martian Madness</see> is happening.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.npcFrameCount">
+            <summary>
+            The number of animation frames this NPC's texture has. ModNPC should use <see cref="M:Terraria.ModLoader.ModNPC.FindFrame(System.Int32)"/> to adjust <c>NPC.frame.Y</c> to change the drawn frame.
             </summary>
         </member>
         <member name="F:Terraria.Main.clientPlayer">
@@ -8980,6 +9141,11 @@
             Useful for making things functionally happen near the cursor, such as projectile or NPC spawns.<br/>
             </summary>
         </member>
+        <member name="P:Terraria.Main.GameUpdateCount">
+            <summary>
+            Counts game updates since the world was loaded. Updates even while gameplay is paused, but does not update on the main menus. Can be used to drive regular logic that doesn't need to run every update. The <see href="https://github.com/tModLoader/tModLoader/wiki/Time-and-Timers#modulo-timer">Modulo Timer section of the Time and Timers wiki page</see> has examples. <see cref="F:Terraria.Player.miscCounter"/> is a similar counter that should be used specifically for player effects.
+            </summary>
+        </member>
         <member name="P:Terraria.Main.UnderworldLayer">
             <summary>
             The y-coordinate of the top of the underworld, in tile coordinates.
@@ -8991,6 +9157,9 @@
             Retrieves the <see cref="T:Terraria.Player"/> object for the local user. Shorthand for <c><see cref="F:Terraria.Main.player"/>[<see cref="F:Terraria.Main.myPlayer"/>]</c>.<br/>
             Many gameplay elements such as recipes, UI, TownNPC chat, and Biome logic are only executed locally, <see cref="P:Terraria.Main.LocalPlayer"/> is suitable for code relating to those situations. If the hook has a <see cref="T:Terraria.Player"/> parameter, it is likely not suitable to use <see cref="P:Terraria.Main.LocalPlayer"/> in it.
             </summary>
+        </member>
+        <member name="M:Terraria.Main.GetMoonPhase">
+            <summary> The current <see href="https://terraria.wiki.gg/wiki/Moon_phase">moon phase</see> expressed as a <see cref="T:Terraria.Enums.MoonPhase"/>. Use <see cref="F:Terraria.Main.moonPhase"/> to get the moon phase as an int instead. </summary>
         </member>
         <member name="M:Terraria.Main.RegisterItemAnimation(System.Int32,Terraria.DataStructures.DrawAnimation)">
             <summary>
@@ -9099,6 +9268,11 @@
             <para/> Use <see cref="F:Terraria.GameContent.TextureAssets.Tile"/> to access the tile texture: <c>TextureAssets.Tile[Type].Value</c>
             </summary>
             <param name="i"></param>
+        </member>
+        <member name="M:Terraria.Main.IsItDay">
+            <summary>
+            Similar to <see cref="F:Terraria.Main.dayTime"/>, but always returns false in <see cref="F:Terraria.Main.remixWorld"/> worlds. This should be used instead of <see cref="F:Terraria.Main.dayTime"/> for logic taking into account the state of the world rather the specific hour. Some examples include boss spawners and boss despawn behaviors.
+            </summary>
         </member>
         <member name="M:Terraria.Main.NewText(System.Object,System.Nullable{Microsoft.Xna.Framework.Color})">
             <inheritdoc cref="M:Terraria.Main.NewText(System.String,System.Byte,System.Byte,System.Byte)"/>
@@ -9561,6 +9735,9 @@
             Called when the toggle is right clicked.<br/>
             Use this if you want to implement special right click feature (such as cycling through states backwards).
             </summary>
+        </member>
+        <member name="F:Terraria.ModLoader.BuildInfo.stableVersion">
+            <summary>The Major.Minor version of the stable release at the time this build was created.</summary>
         </member>
         <member name="F:Terraria.ModLoader.BuildInfo.BuildDate">
             <summary>
@@ -10038,10 +10215,20 @@
             <summary> 
             This lets you define the classes that this <see cref="T:Terraria.ModLoader.DamageClass"/> will count as (other than itself) for the purpose of armor and accessory effects, such as Spectre armor's bolts on magic attacks, or Magma Stone's Hellfire debuff on melee attacks.<br/>
             For a more in-depth explanation and demonstration, see <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/DamageClasses/ExampleDamageClass.cs">ExampleMod's ExampleDamageClass.cs</see>
+            This method is only meant to be overridden. Modders should call <see cref="M:Terraria.ModLoader.DamageClass.CountsAsClass(Terraria.ModLoader.DamageClass)"/> to query effect inheritance.
             </summary>
             <remarks>Return <see langword="true"/> for each <see cref="T:Terraria.ModLoader.DamageClass"/> you want to inherit from</remarks>
             <param name="damageClass">The <see cref="T:Terraria.ModLoader.DamageClass"/> you want to inherit effects from.</param>
             <returns><see langword="false"/> by default - which does not let any other classes' effects trigger on this <see cref="T:Terraria.ModLoader.DamageClass"/>.</returns>
+        </member>
+        <member name="M:Terraria.ModLoader.DamageClass.GetPrefixInheritance(Terraria.ModLoader.DamageClass)">
+            <summary> 
+            This lets you define the classes that this <see cref="T:Terraria.ModLoader.DamageClass"/> will count as (other than itself) for the purpose of prefixes.<br/>
+            This method is only meant to be overridden. Modders should call <see cref="M:Terraria.ModLoader.DamageClass.GetsPrefixesFor(Terraria.ModLoader.DamageClass)"/> to query prefix inheritance.
+            </summary>
+            <remarks>Return <see langword="true"/> for each <see cref="T:Terraria.ModLoader.DamageClass"/> you want to inherit from</remarks>
+            <param name="damageClass">The <see cref="T:Terraria.ModLoader.DamageClass"/> you want to inherit prefixes from.</param>
+            <returns><see cref="M:Terraria.ModLoader.DamageClass.GetEffectInheritance(Terraria.ModLoader.DamageClass)"/> by default - which lets the prefixes of any class this class inherits effects from roll and remain on items of this <see cref="T:Terraria.ModLoader.DamageClass"/>.</returns>
         </member>
         <member name="M:Terraria.ModLoader.DamageClass.SetDefaultStats(Terraria.Player)">
             <summary> 
@@ -10072,6 +10259,16 @@
             </summary>
             <param name="damageClass">The DamageClass you want to check if effects are inherited by this DamageClass.</param>
             <returns><see langword="true"/> if this damage class is inheriting effects from <paramref name="damageClass"/>, <see langword="false"/> otherwise</returns>
+        </member>
+        <member name="M:Terraria.ModLoader.DamageClass.GetsPrefixesFor``1">
+            <inheritdoc cref="M:Terraria.ModLoader.DamageClass.GetsPrefixesFor(Terraria.ModLoader.DamageClass)"/>
+        </member>
+        <member name="M:Terraria.ModLoader.DamageClass.GetsPrefixesFor(Terraria.ModLoader.DamageClass)">
+            <summary>
+            This is used to check if this <see cref="T:Terraria.ModLoader.DamageClass"/> has been set to inherit prefixes from the provided <see cref="T:Terraria.ModLoader.DamageClass"/>, as dictated by <see cref="M:Terraria.ModLoader.DamageClass.GetPrefixInheritance(Terraria.ModLoader.DamageClass)"/>
+            </summary>
+            <param name="damageClass">The DamageClass you want to check if prefixes are inherited by this DamageClass.</param>
+            <returns><see langword="true"/> if this damage class inherits prefixes from <paramref name="damageClass"/>, <see langword="false"/> otherwise</returns>
         </member>
         <member name="M:Terraria.ModLoader.DamageClassLoader.GetDamageClass(System.Int32)">
             <summary>
@@ -10463,6 +10660,11 @@
         <member name="T:Terraria.ModLoader.EquipType">
             <summary>
             This is an enum of all the types of equipment that exist. An equipment type is defined as a type or layer of texture that is drawn on the player (for example, body and shield and wings).
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.ExtendsFromModAttribute">
+            <summary>
+            Excludes a class from JIT and also from autoloading. Annotate classes that inherit from classes from <see href="https://github.com/tModLoader/tModLoader/wiki/Expert-Cross-Mod-Content#weak-references-aka-weakreferences-expert">weakly referenced mods</see> with this attribute to prevent the game from attempting to autoload the class, which would cause load errors otherwise. See <see href="https://github.com/tModLoader/tModLoader/wiki/JIT-Exception#weak-references">this wiki page</see> for more information.
             </summary>
         </member>
         <member name="T:Terraria.ModLoader.ExtraJump">
@@ -11595,7 +11797,8 @@
         </member>
         <member name="T:Terraria.ModLoader.GlobalItem">
             <summary>
-            This class allows you to modify and use hooks for all items, including vanilla items. Create an instance of an overriding class then call Mod.AddGlobalItem to use this.
+            This class allows you to modify and use hooks for all items, both vanilla and modded.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.OnCreated(Terraria.Item,Terraria.DataStructures.ItemCreationContext)">
@@ -12121,8 +12324,8 @@
              Allows you to determine special visual effects a vanity has on the player without having to code them yourself.
             
              This method is not instanced.
-             </summary>
              <example><code>player.armorEffectDrawShadow = true;</code></example>
+             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.SetMatch(System.Int32,System.Int32,System.Boolean,System.Int32@,System.Boolean@)">
              <summary>
@@ -12325,8 +12528,8 @@
              Return null to use the item's default holdout offset; returns null by default.
             
              This method is not instanced.
-             </summary>
              <example><code>return new Vector2(10, 0);</code></example>
+             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.HoldoutOrigin(System.Int32)">
              <summary>
@@ -12475,7 +12678,8 @@
         </member>
         <member name="T:Terraria.ModLoader.GlobalNPC">
             <summary>
-            This class allows you to modify and use hooks for all NPCs, including vanilla mobs. Create an instance of an overriding class then call Mod.AddGlobalNPC to use this.
+            This class allows you to modify and use hooks for all NPCs, both vanilla and modded.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalNPC.SetDefaultsFromNetId(Terraria.NPC)">
@@ -12758,6 +12962,7 @@
             Allows you to determine whether an NPC can be collided with the player melee weapon when swung. <br/>
             Use <see cref="M:Terraria.ModLoader.GlobalNPC.CanBeHitByItem(Terraria.NPC,Terraria.Player,Terraria.Item)"/> instead for Guide Voodoo Doll-type effects.
             </summary>
+            <param name="npc">The NPC being collided with</param>
             <param name="player">The player wielding this item.</param>
             <param name="item">The weapon item the player is holding.</param>
             <param name="meleeAttackHitbox">Hitbox of melee attack.</param>
@@ -13124,7 +13329,8 @@
         </member>
         <member name="T:Terraria.ModLoader.GlobalProjectile">
             <summary>
-            This class allows you to modify and use hooks for all projectiles, including vanilla projectiles. Create an instance of an overriding class then call Mod.AddGlobalProjectile to use this.
+            This class allows you to modify and use hooks for all projectiles, both vanilla and modded.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalProjectile.OnSpawn(Terraria.Projectile,Terraria.DataStructures.IEntitySource)">
@@ -13505,7 +13711,8 @@
         </member>
         <member name="T:Terraria.ModLoader.GlobalTile">
             <summary>
-            This class allows you to modify the behavior of any tile in the game. Create an instance of an overriding class then call Mod.AddGlobalTile to use this.
+            This class allows you to modify the behavior of any tile in the game, both vanilla and modded.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalTile.AddToArray(System.Int32[]@,System.Int32)">
@@ -13827,7 +14034,8 @@
         </member>
         <member name="T:Terraria.ModLoader.GlobalWall">
             <summary>
-            This class allows you to modify the behavior of any wall in the game (although admittedly walls don't have much behavior). Create an instance of an overriding class then call Mod.AddGlobalWall to use this.
+            This class allows you to modify the behavior of any wall in the game (although admittedly walls don't have much behavior).
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalWall.Drop(System.Int32,System.Int32,System.Int32,System.Int32@)">
@@ -14607,6 +14815,21 @@
         <member name="T:Terraria.ModLoader.ItemLoot">
             <summary> This readonly struct is a simple shortcut to <see cref="T:Terraria.GameContent.ItemDropRules.ItemDropDatabase"/>'s methods. </summary>
         </member>
+        <member name="T:Terraria.ModLoader.PreJITFilter">
+            <summary>
+            Allows custom JIT logic to be applied to classes in this mod.
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.NoJITAttribute">
+            <summary>
+            Excludes a class, method, or property from the load time JIT. 
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.JITWhenModsEnabledAttribute">
+            <summary>
+            Excludes a class, method, or property from the <see href="https://github.com/tModLoader/tModLoader/wiki/JIT-Exception#what-are-jit-exceptions">load time JIT</see> unless the specified mods are also loaded. Use this on any member which directly references a Type from a <see href="https://github.com/tModLoader/tModLoader/wiki/Expert-Cross-Mod-Content#weak-references-aka-weakreferences-expert">weakly referenced mod</see> that might not be present. See <see href="https://github.com/tModLoader/tModLoader/wiki/JIT-Exception#weak-references">this wiki page</see> for more information.
+            </summary>
+        </member>
         <member name="M:Terraria.ModLoader.KeybindLoader.RegisterKeybind(Terraria.ModLoader.Mod,System.String,Microsoft.Xna.Framework.Input.Keys)">
             <summary>
             Registers a keybind with a <paramref name="name"/> and <paramref name="defaultBinding"/>. Use the returned <see cref="T:Terraria.ModLoader.ModKeybind"/> to detect when buttons are pressed.
@@ -14733,8 +14956,12 @@
             <summary>
             Provides access to assets (textures, sounds, shaders, etc) contained within this mod. The main usage is to call the <see cref="M:ReLogic.Content.AssetRepository.Request``1(System.String)"/> method to retrieve an Asset&lt;T&gt; instance:
             <code>Asset&lt;Texture2D&gt; balloonTexture = Mod.Assets.Request&lt;Texture2D&gt;("Content/Items/Armor/SimpleAccessory_Balloon");</code>
-            Do not include the mod name in the Request method call, the path supplied should not include the mod name. This is different from using <see cref="M:Terraria.ModLoader.ModContent.Request``1(System.String,ReLogic.Content.AssetRequestMode)"/> where the mod name is required. 
+            Do not include the mod name in the Request method call, the path supplied should not include the mod name. This is different from using <see cref="M:Terraria.ModLoader.ModContent.Request``1(System.String,ReLogic.Content.AssetRequestMode)"/> where the mod name is required.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Assets">Assets guide on the wiki</see> for more information.
             </summary>
+        </member>
+        <member name="P:Terraria.ModLoader.Mod.PreJITFilter">
+            <inheritdoc cref="T:Terraria.ModLoader.PreJITFilter"/>
         </member>
         <member name="M:Terraria.ModLoader.Mod.AddContent``1">
             <summary> Call this to manually add a content instance of the specified type (with a parameterless constructor) to the game. </summary>
@@ -15869,8 +16096,9 @@
         </member>
         <member name="T:Terraria.ModLoader.ModItem">
             <summary>
-            This class serves as a place for you to place all your properties and hooks for each item. Create instances of ModItem (preferably overriding this class) to pass as parameters to Mod.AddItem.<br/>
-            The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Item">Basic Item Guide</see> teaches the basics of making a modded item.
+            This class serves as a place for you to place all your properties and hooks for each item.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Item">Basic Item Guide</see> teaches the basics of making a modded item.
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModItem.Item">
@@ -15936,20 +16164,16 @@
         <member name="M:Terraria.ModLoader.ModItem.MeleePrefix">
             <summary>
             Allows you to change whether or not a weapon receives melee prefixes. Return true if the item should receive melee prefixes and false if it should not.
-            Takes priority over WeaponPrefix, RangedPrefix, and MagicPrefix
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.WeaponPrefix">
             <summary>
-            Allows you to change whether or not a weapon only receives generic prefixes. Return true if the item should only receive generic prefixes and false if it should not.
-            Takes priority over RangedPrefix and MagicPrefix
-            Ignored if MeleePrefix returns true
+            Allows you to change whether or not a weapon receives generic prefixes. Return true if the item should receive generic prefixes and false if it should only receive them from another category.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.RangedPrefix">
             <summary>
             Allows you to change whether or not a weapon receives ranged prefixes. Return true if the item should receive ranged prefixes and false if it should not.
-            Takes priority over MagicPrefix
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.MagicPrefix">
@@ -16479,8 +16703,8 @@
         <member name="M:Terraria.ModLoader.ModItem.ArmorSetShadows(Terraria.Player)">
             <summary>
             Allows you to determine special visual effects this vanity set has on the player without having to code them yourself. Note that this hook is only ever called through this item's associated equipment texture. Use the player.armorEffectDraw bools to activate the desired effects.
-            </summary>
             <example><code>player.armorEffectDrawShadow = true;</code></example>
+            </summary>
             <param name="player">The player.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.SetMatch(System.Boolean,System.Int32@,System.Boolean@)">
@@ -17015,9 +17239,11 @@
         </member>
         <member name="T:Terraria.ModLoader.ModMount">
             <summary>
-            This class serves as a place for you to place all your properties and hooks for each mount. Create instances of ModMoundData (preferably overriding this class) to pass as parameters to Mod.AddMount.
-            Only one instance of ModMount will exist for each mount, so storing player specific data on the ModMount is not good.
-            Modders can use player.mount._mountSpecificData or a ModPlayer class to store player specific data relating to a mount. Use SetMount to assign these fields.
+            This class serves as a place for you to place all your properties and hooks for each mount.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
+            <para/> Only one instance of ModMount will exist for each mount, so storing player specific data on the ModMount is not good.
+            Modders can use <i>player.mount._mountSpecificData</i> or a ModPlayer class to store player specific data relating to a mount. Use SetMount to assign these fields.
+            <para/> Note that texture autoloading is unique for ModMount, see <see cref="P:Terraria.ModLoader.ModMount.Texture"/> for more information.
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModMount.MountData">
@@ -17033,6 +17259,8 @@
         <member name="P:Terraria.ModLoader.ModMount.Texture">
             <summary>
             The file name of this type's texture file in the mod loader's file space.
+            <para/> For mounts, this path isn't used directly to autoload a texture, but it is combined with <see cref="T:Terraria.ModLoader.MountTextureType"/> values to autoload textures for each of the different layers that mounts support, if that texture exists.
+            <para/> ModMount typically want at least one of either a "Back" or "Front" texture. For example, a mount named "MyMount" would need to include a "MyMount_Back.png" or "MyMount_Front.png" texture.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModMount.SetStaticDefaults">
@@ -17139,7 +17367,9 @@
         </member>
         <member name="T:Terraria.ModLoader.ModNPC">
             <summary>
-            This class serves as a place for you to place all your properties and hooks for each NPC. Create instances of ModNPC (preferably overriding this class) to pass as parameters to Mod.AddNPC.
+            This class serves as a place for you to place all your properties and hooks for each NPC.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-NPC">Basic NPC Guide</see> teaches the basics of making a modded NPC.
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModNPC.NPC">
@@ -17600,6 +17830,9 @@
         <member name="M:Terraria.ModLoader.ModNPC.CanTownNPCSpawn(System.Int32)">
             <summary>
             Whether or not the conditions have been met for this town NPC to be able to move into town. For example, the Demolitionist requires that any player has an explosive.
+            <para/> Town NPC spawn conditions typically check if specific bosses have been defeated (<see cref="F:Terraria.NPC.downedGolemBoss"/>), the npc has been "saved" somewhere in the world, or any player has specific items in their inventory. To check for inventory items, iterate over <see cref="P:Terraria.Main.ActivePlayers"/> and check <see cref="M:Terraria.Player.HasItem(System.Int32)"/> or <see cref="M:Terraria.Player.CountItem(System.Int32,System.Int32)"/>, returning true if any player satisfies the requirement.
+            <para/> To support allowing town NPC to respawn without needing to meet the original respawn requirements, a feature added in Terraria v1.4.4, store a bool in a <see cref="T:Terraria.ModLoader.ModSystem"/> and check it. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/ExamplePerson.cs#L184">ExamplePerson.CanTownNPCSpawn</see> and <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Common/Systems/TownNPCRespawnSystem.cs">TownNPCRespawnSystem.cs</see> show an example of this.
+            <para/> Returns false by default, preventing the town NPC from spawning.
             </summary>
             <param name="numTownNPCs"></param>
             <returns></returns>
@@ -17607,12 +17840,10 @@
         <member name="M:Terraria.ModLoader.ModNPC.CheckConditions(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Allows you to define special conditions required for this town NPC's house. For example, Truffle requires the house to be in an aboveground mushroom biome.
+            <para/> The <paramref name="left"/>, <paramref name="right"/>, <paramref name="top"/>, and <paramref name="bottom"/> parameters define the bounds of the room being checked.
+            <para/> Methods like <see cref="M:Terraria.WorldGen.Housing_GetTestedRoomBounds(System.Int32@,System.Int32@,System.Int32@,System.Int32@)"/> and <see cref="M:Terraria.WorldGen.CountTileTypesInArea(System.Int32[],System.Int32,System.Int32,System.Int32,System.Int32)"/> can facilitate implementing specific checks.
+            <para/> Return false to prevent the npc from spawning due to failed condition checks.
             </summary>
-            <param name="left"></param>
-            <param name="right"></param>
-            <param name="top"></param>
-            <param name="bottom"></param>
-            <returns></returns>
         </member>
         <member name="M:Terraria.ModLoader.ModNPC.UsesPartyHat">
             <summary>
@@ -17978,7 +18209,9 @@
         </member>
         <member name="T:Terraria.ModLoader.ModPlayer">
             <summary>
-            A ModPlayer instance represents an extension of a Player instance. You can store fields in the ModPlayer classes, much like how the Player class abuses field usage, to keep track of mod-specific information on the player that a ModPlayer instance represents. It also contains hooks to insert your code into the Player class.
+            A ModPlayer instance represents an extension of a Player instance.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
+            <br/> You can store fields in the ModPlayer classes, much like how the Player class abuses field usage, to keep track of mod-specific information on the player that a ModPlayer instance represents. It also contains hooks to insert your code into the Player class.
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModPlayer.Player">
@@ -19004,8 +19237,9 @@
         </member>
         <member name="T:Terraria.ModLoader.ModProjectile">
             <summary>
-            This class serves as a place for you to place all your properties and hooks for each projectile. Create instances of ModProjectile (preferably overriding this class) to pass as parameters to Mod.AddProjectile.<br/>
-            The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Projectile">Basic Projectile Guide</see> teaches the basics of making a modded projectile.
+            This class serves as a place for you to place all your properties and hooks for each projectile.
+            <br/> To use it, simply create a new class deriving from this one. Implementations will be registered automatically.
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Projectile">Basic Projectile Guide</see> teaches the basics of making a modded projectile.
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModProjectile.Projectile">
@@ -20112,7 +20346,11 @@
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModTile.AnimationFrameHeight">
-            <summary> The height of a group of animation frames for this tile. Defaults to 0, which disables animations. </summary>
+            <summary> The height of a group of animation frames for this tile. Defaults to 0, which disables animations. 
+            <para/> Used in conjunction with <see cref="M:Terraria.ModLoader.ModTile.AnimateTile(System.Int32@,System.Int32@)"/> to automatically animate tiles. Use <see cref="M:Terraria.ModLoader.ModTile.AnimateIndividualTile(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/> as well if needed.
+            <para/> An easy way to set this correctly without doing any math is to set this to the value of <see cref="P:Terraria.ObjectData.TileObjectData.CoordinateFullHeight"/>.
+            <para/> Note that this assumes animation frames are laid out vertically in the tile spritesheet, if that is not the case then <see cref="M:Terraria.ModLoader.ModTile.AnimateIndividualTile(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/> will need to be used to apply AnimationFrameHeight to X coordinates instead.
+            </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModTile.MineResist">
             <summary> A multiplier describing how much this block resists harvesting. Higher values will make it take longer to harvest. <br/> Defaults to 1f.
@@ -20336,23 +20574,28 @@
         </member>
         <member name="M:Terraria.ModLoader.ModTile.AnimateTile(System.Int32@,System.Int32@)">
              <summary>
-             Allows you to animate your tile. Use frameCounter to keep track of how long the current frame has been active, and use frame to change the current frame. This is called once an update. Use AnimateIndividualTile to animate specific tile instances directly.
-             </summary>
-             <example><code>if (++frameCounter > 8)
-            {
+             Allows you to animate your tile. Use frameCounter to keep track of how long the current frame has been active, and use frame to change the current frame. This is called once an update.
+             <para/> <see cref="P:Terraria.ModLoader.ModTile.AnimationFrameHeight"/> must be set for the animation timing set in this method to actually apply to the tile drawing. Use <see cref="M:Terraria.ModLoader.ModTile.AnimateIndividualTile(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)"/> to animate specific tile instances directly.
+             <example><code>// Cycle 5 frames of animation spending 8 ticks on each
+            if (++frameCounter >= 8) {
             	frameCounter = 0;
-            	if (++frame > 5)
-            	{
+            	if (++frame >= 5) {
             		frame = 0;
             	}
             }</code>
+             or, more compactly:
+             <code>if (++frameCounter >= 8) {
+             	frameCounter = 0;
+             	frame = ++frame % 5;
+            }</code>
             	or, to mimic another tile, simply:
             	<code>frame = Main.tileFrame[TileID.FireflyinaBottle];</code></example>
+             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModTile.AnimateIndividualTile(System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@)">
             <summary>
-            Animates an individual tile. i and j are the coordinates of the Tile in question. frameXOffset and frameYOffset should be used to specify an offset from the tiles frameX and frameY. "frameYOffset = modTile.animationFrameHeight * Main.tileFrame[type];" will already be set before this hook is called, taking into account the TileID-wide animation set via AnimateTile.
-            Use this hook for off-sync animations (lightning bug in a bottle), temporary animations (trap chests), or TileEntities to achieve unique animation behaviors without having to manually draw the tile via PreDraw.
+            Animates an individual tile. <paramref name="i"/> and <paramref name="j"/> are the coordinates of the Tile in question. <paramref name="frameXOffset"/> and <paramref name="frameYOffset"/> should be used to specify an offset from the tiles <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/>. <c>frameYOffset = modTile.AnimationFrameHeight * Main.tileFrame[type];</c> will already be set before this hook is called, taking into account the TileID-wide animation set via <see cref="M:Terraria.ModLoader.ModTile.AnimateTile(System.Int32@,System.Int32@)"/>.
+            <para/> Use this hook for off-sync animations (lightning bug in a bottle), state specific animations (campfires), temporary animations (trap chests), or TileEntities to achieve unique animation behaviors without having to manually draw the tile via <see cref="M:Terraria.ModLoader.ModBlockType.PreDraw(System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.SpriteBatch)"/>.
             </summary>
             <param name="type">The tile type.</param>
             <param name="i">The x position in tile coordinates.</param>
@@ -20386,6 +20629,39 @@
             <param name="j">The y position in tile coordinates.</param>
             <param name="resetFrame"></param>
             <param name="noBreak"></param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModTile.PostTileFrame(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Allows you to modify the frame of a tile after the vanilla framing code has set <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/>. Useful for offsetting the final frame position without entirely overriding the vanilla framing logic
+            <br/> Only called if <see cref="M:Terraria.ModLoader.ModTile.TileFrame(System.Int32,System.Int32,System.Boolean@,System.Boolean@)"/> returns true
+            </summary>
+            <param name="i">The x position in tile coordinates.</param>
+            <param name="j">The y position in tile coordinates.</param>
+            <param name="up">The merge type of the tile above. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="down">The merge type of the tile below. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="left">The merge type of the tile to the left. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="right">The merge type of the tile to the right. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="upLeft">The merge type of the tile on the top left. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="upRight">The merge type of the tile on the top right. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="downLeft">The merge type of the tile on the bottom left. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+            <param name="downRight">The merge type of the tile on the bottom right. Unitializaed if the tile is <see cref="F:Terraria.Main.tileFrameImportant"/>.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModTile.ModifyFrameMerge(System.Int32,System.Int32,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@)">
+            <summary>
+            Allows you to change the merge type of the adjacent tiles before <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/> is picked by vanilla framing code. Useful to make tiles that only selectively connect with others, or for tiles
+            <br/> Tiles can be easily made to use custom merge frames with non-dirt tiles by using <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> in combination with <see cref="M:Terraria.WorldGen.TileMergeAttempt(System.Int32,System.Boolean[],System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Int32@)"/> to set the adjacent tile's merge type to -2
+            <br/> Only called if <see cref="M:Terraria.ModLoader.ModTile.TileFrame(System.Int32,System.Int32,System.Boolean@,System.Boolean@)"/> returns true
+            </summary>
+            <param name="i">The x position in tile coordinates.</param>
+            <param name="j">The y position in tile coordinates.</param>
+            <param name="up">The merge type of the tile above. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="down">The merge type of the tile below. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="left">The merge type of the tile to the keft. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="right">The merge type of the tile to the right. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="upLeft">The merge type of the tile on the top left. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="upRight">The merge type of the tile on the top right. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="downLeft">The merge type of the tile on the bottom left. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
+            <param name="downRight">The merge type of the tile on the bottom right. The tile will merge with it if the value is the same as its tile type <br/>-1 Means it'll consider the tile empty, and -2 means tiles that use <see cref="F:Terraria.Main.tileMergeDirt"/> or <see cref="F:Terraria.ID.TileID.Sets.ChecksForMerge"/> will attempt to use their custom merge frames with that tile</param>
         </member>
         <member name="M:Terraria.ModLoader.ModTile.RightClick(System.Int32,System.Int32)">
             <summary>
@@ -20926,7 +21202,8 @@
         </member>
         <member name="T:Terraria.ModLoader.MountTextureType">
             <summary>
-            This is an enum of all possible types of extra mount textures for custom mounts. Use these as keys in the extraTextures dictionary passed to Mod.AddMount to give your mount front and back textures.
+            This is an enum of all possible types of extra mount textures for custom mounts.
+            <br/> The enum's keys are used in default texture autoloading lookup paths, which can be overriden in <see cref="M:Terraria.ModLoader.ModMount.GetExtraTexture(Terraria.ModLoader.MountTextureType)"/>.
             </summary>
         </member>
         <member name="F:Terraria.ModLoader.MusicLoader.musicToItem">
@@ -21072,6 +21349,23 @@
             <param name="items">Array to be filled.</param>
             <param name="npc">The NPC the player is talking to</param>
             <param name="overflow">True if some items were unable to fit in the provided array</param>
+        </member>
+        <member name="M:Terraria.ModLoader.NPCShop.Add(Terraria.Item,Terraria.Condition[])">
+            <summary>
+            <inheritdoc cref="M:Terraria.ModLoader.NPCShop.Add(System.Int32,Terraria.Condition[])"/>
+            <para/> This overload takes an <see cref="T:Terraria.Item"/> instance instead of just an item type. This Item can be customized prior to being registered. This is commonly used to provide a custom shop price or currency for this shop entry:
+            <code>npcShop.Add(new Item(ItemID.MagicDagger) {
+            	shopCustomPrice = 2,
+            	shopSpecialCurrency = ExampleMod.ExampleCustomCurrencyId
+            }, Condition.RemixWorld);
+            </code>
+            </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.NPCShop.Add(System.Int32,Terraria.Condition[])">
+            <summary> Adds the specified item with the provided conditions to this shop. If all of the conditions are satisfied, the item will be available in the shop. </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.NPCShop.Add``1(Terraria.Condition[])">
+            <inheritdoc cref="M:Terraria.ModLoader.NPCShop.Add(System.Int32,Terraria.Condition[])"/>
         </member>
         <member name="M:Terraria.ModLoader.NPCShop.FillShop(Terraria.Item[],Terraria.NPC,System.Boolean@)">
             <summary>
@@ -21562,7 +21856,8 @@
             Use this to apply the modifiers of this <see cref="T:Terraria.ModLoader.StatModifier"/> to the <paramref name="baseValue"/>. You should assign
             the value passed in to the return result. For example:
             <para><br><c>damage = CritDamage.ApplyTo(damage)</c></br></para>
-            <br></br>could be used to apply a crit damage modifier to a base damage value 
+            <br></br>could be used to apply a crit damage modifier to a base damage value
+            <para/> Note that when using this to calculate the final damage of a <see cref="T:Terraria.ModLoader.DamageClass"/> make sure to use <see cref="M:Terraria.Player.GetTotalDamage(Terraria.ModLoader.DamageClass)"/> not <see cref="M:Terraria.Player.GetDamage(Terraria.ModLoader.DamageClass)"/> to account for inherited damage modifiers such as Generic damage.
             </summary>
             <remarks>For help understanding the meanings of the applied values please make note of documentation for:
             <list type="bullet">
@@ -21581,6 +21876,16 @@
             </remarks>
             <param name="baseValue">The starting value to apply modifiers to</param>
             <returns>The result of <paramref name="baseValue"/> after all modifiers are applied</returns>
+        </member>
+        <member name="M:Terraria.ModLoader.StatModifier.CombineWith(Terraria.ModLoader.StatModifier)">
+            <summary>
+            Combines the components of two StatModifiers. Typically used to apply the effects of ammo-specific StatModifier to the DamageClass StatModifier values.
+            </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.StatModifier.Scale(System.Single)">
+            <summary>
+            Scales all components of this StatModifier for the purposes of applying damage class modifier inheritance.<para/>This is <b>NOT</b> intended for typical modding usage, if you are looking to increase this stat by some percentage, use the addition (<c>+</c>) operator.
+            </summary>
         </member>
         <member name="T:Terraria.ModLoader.SystemLoader">
             <summary>
@@ -21837,6 +22142,12 @@
             Gets the ModWall instance with the given type. If no ModWall with the given type exists, returns null.
             </summary>
         </member>
+        <member name="F:Terraria.Mount.MountData.backTexture">
+            <summary> Texture drawn behind the player while in use. </summary>
+        </member>
+        <member name="F:Terraria.Mount.MountData.frontTexture">
+            <summary> Texture drawn in front of the player while in use. </summary>
+        </member>
         <member name="P:Terraria.Mount.Active">
             <summary> True if the player is currently using a mount. </summary>
         </member>
@@ -21928,12 +22239,21 @@
             <br/> Defaults to -1.
             </summary>
         </member>
+        <member name="F:Terraria.NPC.activeRangeX">
+            <summary> The X distance from the player determining the active range governing instant NPC despawning </summary>
+        </member>
+        <member name="F:Terraria.NPC.activeRangeY">
+            <summary> The Y distance from the player determining the active range governing instant NPC despawning </summary>
+        </member>
         <member name="F:Terraria.NPC.npcSlots">
             <summary>
             Represents how much this npc counts towards the npc spawn limit. Small critters like worms or flies have values around 0.1f and 0.25f. Enemies that are more difficult than normal have values higher than 1f, and bosses and mini bosses have values around 6.
             <br/> Proper npcSlots values help balance the game and prevents the player from randomly being overwhelmed by powerful enemies. The <see href="https://terraria.wiki.gg/wiki/NPC_spawning#Spawn_rates">Spawn rates section on the NPC spawning wiki page</see> lists vanilla npcSlots values. Use this as a guide to find a suitable value.
             <br/> Defaults to 1f.
             </summary>
+        </member>
+        <member name="F:Terraria.NPC.activeTime">
+            <summary> Default despawn time. Set to 750 or 12.5 seconds. Use to update <see cref="F:Terraria.NPC.timeLeft"/> when the NPC is close to any player. </summary>
         </member>
         <member name="F:Terraria.NPC.buffImmune">
             <summary>
@@ -21954,6 +22274,18 @@
             <br/> If this value reaches or exceeds <c>120</c>, the NPC gains <c><see cref="F:Terraria.NPC.lifeRegenCount"/> / 120</c> health and this value decreases until it no longer exceeds <c>120</c>.
             <br/> If this value reaches or exceeds <c>-120</c>, the NPC loses health in the same way.
             <br/> In either case, text will appear above the NPC indicating the life regeneration or life loss.
+            </summary>
+        </member>
+        <member name="F:Terraria.NPC.immortal">
+            <summary>
+            Indicates that damage dealt to this NPC will not cause its life to go down. It can still receive hits and damage numbers will be shown, but the damage will not be applied to <see cref="F:Terraria.NPC.life"/>. Only used by <see cref="F:Terraria.ID.NPCID.TargetDummy"/>.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="F:Terraria.NPC.chaseable">
+            <summary>
+            If false, this NPC will be ignored by <see cref="M:Terraria.NPC.CanBeChasedBy(System.Object,System.Boolean)"/>, meaning that entities won't specifically target this NPC. The cultists set this to true, helping ensure that they are not accidentally killed by minions or homing weapons. Duke Fishron uses this during his 3rd phase while he is invisible, resulting in homing weapons and minions being unable to target him effectively. 
+            <para/> Defaults to true.
             </summary>
         </member>
         <member name="F:Terraria.NPC.combatBookWasUsed">
@@ -22151,6 +22483,19 @@
             <para/> Defaults to 0 for vanilla NPC and -1 for modded NPC.
             </summary>
         </member>
+        <member name="F:Terraria.NPC.timeLeft">
+            <summary>
+            Despawn timer in charge of determining when an NPC that is offscreen but not far away enough to immediately despawn will despawn naturally. Gets set to <see cref="F:Terraria.NPC.activeTime"/> when near any player and decreases each update otherwise. The <see href="https://terraria.wiki.gg/wiki/NPC_despawning">NPC despawning wiki page</see> has more information. <see cref="M:Terraria.ModLoader.ModNPC.CheckActive"/> can be used to prevent an NPC outside the immediate despawn range from despawning.
+            </summary> 
+        </member>
+        <member name="F:Terraria.NPC.target">
+            <summary>
+            The Player that this NPC is currently targeting, represented as the index of that Player within <see cref="F:Terraria.Main.player"/> (the Player's <see cref="F:Terraria.Entity.whoAmI"/>).
+            <para/> This is typically set by calling the <see cref="M:Terraria.NPC.TargetClosest(System.Boolean)"/> method. Use <see cref="P:Terraria.NPC.HasValidTarget"/> to check if <see cref="F:Terraria.NPC.target"/> has a valid value before accessing <c>Main.player[NPC.target]</c> and doing logic dealing with the targeted player.
+            <para/> Defaults to -1.
+            <para/> Some NPC support targeting other NPC (<see cref="P:Terraria.NPC.SupportsNPCTargets"/>). For these NPC, <see cref="F:Terraria.NPC.target"/> will be set to a value between 300 and 500. See <see cref="P:Terraria.NPC.HasNPCTarget"/>, <see cref="P:Terraria.NPC.TranslatedTargetIndex"/>, and <see cref="F:Terraria.ID.NPCID.Sets.UsesNewTargetting"/> for more information on that feature.
+            </summary>
+        </member>
         <member name="F:Terraria.NPC.damage">
             <summary>
             The amount of contact damage this NPC deals.<br/>
@@ -22205,6 +22550,11 @@
         <member name="F:Terraria.NPC.lifeMax">
             <summary>
             The maximum life of this NPC.
+            </summary>
+        </member>
+        <member name="F:Terraria.NPC.frame">
+            <summary>
+            The portion ("frame") of this NPC's spritesheet that will be drawn. ModNPC should adjust this in <see cref="M:Terraria.ModLoader.ModNPC.FindFrame(System.Int32)"/>.
             </summary>
         </member>
         <member name="F:Terraria.NPC.alpha">
@@ -22267,6 +22617,12 @@
             How many copper coins the NPC will drop when killed (100 copper coins = 1 silver coin etc.).
             </summary>
         </member>
+        <member name="F:Terraria.NPC.dontTakeDamage">
+            <summary>
+            Indicates that this NPC does not currently take damage, attacks won't hit it. Some example usage includes Blazing Wheel, Spike Ball, Golem Head during 2nd phase, Jellyfish while electrified, and Granite Golem while shielding.
+            <para/> Defaults to false.
+            </summary>
+        </member>
         <member name="F:Terraria.NPC.netID">
             <summary>
             Similar to <see cref="F:Terraria.NPC.type"/>, but accounts for negative <see cref="T:Terraria.ID.NPCID"/> values. <br/>
@@ -22278,6 +22634,17 @@
             Indicates that an NPC is friendly to players. If true, a player won't damage the NPC and the NPC won't deal contact damage to players, unless otherwise forced. <br/>
             Mostly set to true for town npc and rescuable town npc. <br/>
             Naturally spawned critter NPC that are <see cref="F:Terraria.Main.npcCatchable"/> will automatically be friendly for 1.5 seconds after spawning. <br/>
+            </summary>
+        </member>
+        <member name="P:Terraria.NPC.HasValidTarget">
+            <summary>
+            Checks if <see cref="F:Terraria.NPC.target"/> is a valid Player to target. This checks that <see cref="F:Terraria.NPC.target"/> has a valid value and that the specified Player is alive, active, not a ghost.
+            <para/> If this NPC supports targeting other NPC (<see cref="P:Terraria.NPC.SupportsNPCTargets"/>), then this will check if that NPC is still active.
+            </summary>
+        </member>
+        <member name="P:Terraria.NPC.SupportsNPCTargets">
+            <summary>
+            Shorthand for checking <see cref="F:Terraria.ID.NPCID.Sets.UsesNewTargetting"/>.
             </summary>
         </member>
         <member name="P:Terraria.NPC.TypeName">
@@ -22313,6 +22680,16 @@
             Some vanilla examples of given names are Andrew (for the Guide), Yorai (for the Princess), Whitney (for the Steampunker), or Scarlett (for the Stylist).<br/>
             </summary>
         </member>
+        <member name="P:Terraria.NPC.Opacity">
+            <summary>
+            The transparency of the NPC expressed as a float value from 0f (transparent) to 1f (opaque). This property wraps <see cref="F:Terraria.NPC.alpha"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.NPC.isLikeATownNPC">
+            <summary>
+            Returns true if either <see cref="F:Terraria.ID.NPCID.Sets.ActsLikeTownNPC"/> or <see cref="F:Terraria.NPC.townNPC"/> is true.
+            </summary>
+        </member>
         <member name="M:Terraria.NPC.GetFullnameByID(System.Int32)">
             <summary>
             Returns the <see cref="P:Terraria.NPC.FullName"/> of the first active NPC of the given type in the world. If not found, the type name is returned instead.
@@ -22344,6 +22721,13 @@
             <inheritdoc cref="M:Terraria.NPC.HealEffect(System.Int32,System.Boolean)" />
             <br/><br/>This particular overload allows customizing the spawn location of the text.
             </summary>
+        </member>
+        <member name="M:Terraria.NPC.TargetClosest(System.Boolean)">
+            <summary>
+            Targets the closest alive Player and optionally faces towards that Player. This will set <see cref="F:Terraria.NPC.target"/> to the targeted player, as well as <see cref="F:Terraria.Entity.direction"/> if <paramref name="faceTarget"/> is true.
+            <para/> Make sure to check <see cref="P:Terraria.NPC.HasValidTarget"/> before accessing <see cref="F:Terraria.NPC.target"/>.
+            </summary>
+            <param name="faceTarget"></param>
         </member>
         <member name="M:Terraria.NPC.GetNPCInvasionGroup(System.Int32)">
             <summary>
@@ -22486,6 +22870,15 @@
             Removes the buff at the provided index and shuffles the remaining buff indexes down to fill the gap. The buff types and times will then be synced to clients. This method should only be called on the server or in single player. 
             </summary>
             <param name="buffIndex">The index of the buff to remove.</param>
+        </member>
+        <member name="M:Terraria.NPC.CanBeChasedBy(System.Object,System.Boolean)">
+            <summary>
+            Returns true if this NPC should be considered an enemy to attack. Used by various player, projectile, mount, and town npc logic. For example homing projectiles like Chlorophyte bullet won't target friendly NPC, critters, or NPC that are currently flagged as invulnerable. Note that the <paramref name="attacker"/> parameter is unused.
+            <para/> The logic checks that the NPC meets all of the following criteria: <see cref="F:Terraria.Entity.active"/>, <see cref="F:Terraria.NPC.chaseable"/>, <see cref="F:Terraria.NPC.lifeMax"/> > 5 (to ignore critters), <see cref="F:Terraria.NPC.dontTakeDamage"/> (unless <paramref name="ignoreDontTakeDamage"/>) is true), not <see cref="F:Terraria.NPC.friendly"/>, and not <see cref="F:Terraria.NPC.immortal"/>.
+            </summary>
+            <param name="attacker"></param>
+            <param name="ignoreDontTakeDamage"></param>
+            <returns></returns>
         </member>
         <member name="M:Terraria.NPC.UpdateNPC_UpdateGravity">
             <summary>
@@ -22646,7 +23039,14 @@
             </summary>
             <param name="buffType"></param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Terraria.NPC.ClearImmuneToBuffs(System.Boolean@)" -->
+        <member name="M:Terraria.NPC.ClearImmuneToBuffs(System.Boolean@)">
+            <summary>
+            Clears all buffs on this NPC that the NPC is currently immune (<see cref="F:Terraria.NPC.buffImmune"/>) to. The buff types and times will then be synced to clients. Use after manually changing <see cref="F:Terraria.NPC.buffImmune"/> or using <see cref="M:Terraria.NPC.BecomeImmuneTo(System.Int32)"/>.<br/><br/>
+            <paramref name="anyBuffsCleared"/> will be true if any buffs have been cleared by this method, it can be used to decide to spawn visual effects. Since this method should not be called on multiplayer clients, modders will need to manually sync any visual effects of this. <br/><br/>
+            This should not be called on multiplayer clients.
+            </summary>
+            <param name="anyBuffsCleared"></param>
+        </member>
         <member name="T:Terraria.NPC.HitModifiers">
             <summary>
             Represents a damage calculation in the process of being calculated for damage to be applied to an NPC. The final damage calculation will be present in the resulting <see cref="T:Terraria.NPC.HitInfo"/>.
@@ -22887,11 +23287,440 @@
             If true, damage number popups will not be shown for this hit.
             </summary>
         </member>
+        <member name="T:Terraria.ObjectData.TileObjectData">
+            <summary>
+            Contains tile properties for multitiles dictating how they are placed and how they behave. Multitiles are non-terrain tiles.
+            <para/> TileObjectData supports alternate placements as well as tile style-specific behaviors. 
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#tileobjectdata-or-frameimportantmultitiles">TileObjectData section of the Basic Tile wiki guide</see> has visuals and guides teaching how to use the TileObjectData system.
+            </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.newTile">
+            <summary>
+            Contains the tile properties for the current tile. This is used to control the behavior, size, and other properties of a non-terrain tiles.
+            <para/> Tiles using a TileObjectData are referred to as multitiles.
+            The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#tileobjectdata-or-frameimportantmultitiles">Basic Tile Guide on the wiki</see> has more information about multitiles.
+            <para/> After all properties are set, call <see cref="M:Terraria.ObjectData.TileObjectData.addTile(System.Int32)"/> to register the data to the tile type.
+            <para/> <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/> and <see cref="F:Terraria.ObjectData.TileObjectData.newAlternate"/> are used to provide subtile and alternate-specific properties. Alternates should be setup before subtiles.
+            </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.newSubTile">
+            <summary>
+            Contains the tile properties specific to a subtile, also known as a tile style, of the current <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/>.
+            <para/> Subtiles allow placed tile styles to have specific behaviors. This is most commonly used to declare certain tile styles as immune to lava or water. Another common usage is to declare specific tiles a tile style can anchor to.
+            The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#newsubtile---tile-styles">newSubTile section of the Tile wiki page</see> has more information about subtiles.
+            <para/> Calling <see cref="M:Terraria.ObjectData.TileObjectData.addSubTile(System.Int32)"/> registers the alternate placement.
+            <para/> If there are alternate placements (<see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>) for this tile, make sure to register those first and to set <see cref="P:Terraria.ObjectData.TileObjectData.LinkedAlternates"/> to true after copying the base tile.
+            </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.newAlternate">
+            <summary>
+            Contains the tile properties specific to an alternate placement of the current <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/>.
+            <para/> Alternate placements allow each style to be placed in multiple ways, using alternate sprites or alternate anchors.  Mostly useful for tiles that can anchor in multiple ways, such as how torches can anchor to tiles to the left, right, or bottom as well as to walls.
+            The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#newalternate---alternate-placement-styles">newAlternate section of the Tile wiki page</see> has more information about alternate placements.
+            <para/> Calling <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/> registers the alternate placement.
+            <para/> If there are subtiles (<see cref="M:Terraria.ObjectData.TileObjectData.addSubTile(System.Int32)"/>) for this tile, make sure to do those after alternates are registered and to set <see cref="P:Terraria.ObjectData.TileObjectData.LinkedAlternates"/> to true on newSubTile after copying the base tile.
+            </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style4x2">
+            <summary> Has left and right alternate placements. </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style1x1">
+            <summary> No anchors. </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style1x2Top">
+            <summary> Anchors to tiles above. </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style1xX">
+            <summary> Is 1x3. </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style2xX">
+            <summary> Is 2x3. </summary>
+        </member>
+        <member name="F:Terraria.ObjectData.TileObjectData.Style3x3Wall">
+            <summary> Anchors to walls. </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.LinkedAlternates">
+            <summary>
+            Call on <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/> only. If set to true, this subtile will be populated with its own copy of the <see cref="P:Terraria.ObjectData.TileObjectData.Alternates"/> data. This will allow changes made to this subtile to apply to alternate placements of this tile style as well.
+            <para/> This must be set to true after <c>TileObjectData.newSubTile.CopyFrom(TileObjectData.newTile);</c> and before adjusting any other properties. This should always be set for any subtile of a tile that has alternate placements.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.UsesCustomCanPlace">
+            <summary>
+            If true, this tile will use anchors to decide if the tile can be placed, otherwise it will fallback to being placed like a terrain tile. Aside from platforms and torches, all multitiles set this to true. 
+            <para/> Defaults to false, but most template styles set this to true. If not copying from a template style or existing tile <b>be sure to set this to true</b>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorTop">
+            <summary>
+            Defines the anchors needed above this tile. Defaults to null.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#anchorbottomanchorleftanchorrightanchortop">Anchor section of the Basic Tile Guide on the wiki</see> for more information.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorBottom">
+            <summary>
+            Defines the anchors needed below this tile. Defaults to null, but most template styles will have this set already if copied from.
+            <para/> Most typical furniture will define an AnchorBottom spanning the width of the multitile requiring solid tiles: <c>TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, TileObjectData.newTile.Width, 0);</c>
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#anchorbottomanchorleftanchorrightanchortop">Anchor section of the Basic Tile Guide on the wiki</see> for more information.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorLeft">
+            <summary>
+            Defines the anchors needed to the left of this tile. Defaults to null.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#anchorbottomanchorleftanchorrightanchortop">Anchor section of the Basic Tile Guide on the wiki</see> for more information.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorRight">
+            <summary>
+            Defines the anchors needed to the right of this tile. Defaults to null.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#anchorbottomanchorleftanchorrightanchortop">Anchor section of the Basic Tile Guide on the wiki</see> for more information.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorWall">
+            <summary>
+            If true, then this multitile requires walls behind each individual tile to place. Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorValidTiles">
+            <summary>
+            Limits which tile types are valid for anchoring to a specific set of types. 
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorInvalidTiles">
+            <summary>
+            Dictates specific tile types that are not valid for anchoring to. 
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorAlternateTiles">
+            <summary>
+            Tiles contained in this array are tiles that will satisfy the <see cref="F:Terraria.Enums.AnchorType.AlternateTile"/> anchor type. This can be used to provide specific additional valid anchors for a specific alternate placement or tile style.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.AnchorValidWalls">
+            <summary>
+            Unimplemented, has no effect.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.WaterDeath">
+            <summary>
+            If true, this tile will break when in contact with water. This supersedes the <see cref="F:Terraria.Main.tileWaterDeath"/> value.
+            <para/>By assigning to this on <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/> this can be used to allow specific tile styles to be immune to water. Modders should try to keep this and <see cref="F:Terraria.Main.tileWaterDeath"/> in sync and only deviate from that common value for specific tile styles that should behave differently if any. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L57">ExampleTorch</see> serves as an example of this and <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#conditional-behavior">the Conditional Behavior section of the Basic Tile wiki page</see> also has more information on this concept.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.LavaDeath">
+            <summary>
+            If true, this tile will break when in contact with lava. This supersedes the <see cref="F:Terraria.Main.tileLavaDeath"/> value.
+            <para/>By assigning to this on <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/> this can be used to allow specific tile styles to be immune to lava. Modders should try to keep this and <see cref="F:Terraria.Main.tileLavaDeath"/> in sync and only deviate from that common value for specific tile styles that should behave differently if any. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L57">ExampleTorch</see> serves as an example of this and <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#conditional-behavior">the Conditional Behavior section of the Basic Tile wiki page</see> also has more information on this concept.
+            <para/> Defaults to false, but many of the templates default this to true.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.WaterPlacement">
+            <summary>
+            Controls if a tile can be placed in water. Typically used in conjunction with <see cref="P:Terraria.ObjectData.TileObjectData.WaterDeath"/> for consistency. Many tiles with visual flames, for example, tend to not allow themselves to be placed in water.
+            <para/><see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L57">ExampleTorch</see> has an underwater style that is specifically placeable underwater.
+            <para/> Defaults to <see cref="F:Terraria.Enums.LiquidPlacement.Allowed"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.LavaPlacement">
+            <summary>
+            Controls if a tile can be placed in lava. Typically used in conjunction with <see cref="P:Terraria.ObjectData.TileObjectData.LavaDeath"/> for consistency. Aside from obsidian furniture, most tiles in the game can not be placed in lava. Many tiles can't be placed in lava but won't break in lava, while others will break.
+            <para/><see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L57">ExampleTorch</see> has a style that is specifically placeable in lava.
+            <para/> Defaults to <see cref="F:Terraria.Enums.LiquidPlacement.NotAllowed"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.HookCheckIfCanPlace">
+            <summary>
+            Designates a method to call to determine if the tile can't be placed by the player at the location. This method is only called on the client placing the tile. This is used by chest tiles to see if the chest limit has been reached and by pylons to check if the pylon has already been placed. 
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.HookPostPlaceEveryone">
+            <summary> Unused. </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.HookPostPlaceMyPlayer">
+            <summary>
+            Designates a method to call after this tile is placed by a player. This method facilitates binding extra data to a placed tile. This method is only called on the client placing the tile. This is used by chest tiles to place the actual <see cref="T:Terraria.Chest"/> and by other tiles to place a <see cref="T:Terraria.DataStructures.TileEntity"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.HookPlaceOverride">
+            <summary>
+            Designates a method that will run instead of the usual code that places each individual tile of a mutitile in the world. Used only be <see cref="F:Terraria.ID.TileID.ChristmasTree"/> due to its complicated logic.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawYOffset">
+            <summary>
+            Offsets the drawing of this tile in the Y direction. Can be used to draw a tile at a location other than the default. One example is how <see cref="F:Terraria.ID.TileID.Switches"/> appear slightly embedded into the tile they are anchored to. Another example is how the alternate placement of banners for  platforms shifts the drawing up.
+            <para/> Read <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#non-16-or-18-values">this section on the wiki</see> for a visual explanation of this.
+            <para/> Defaults to 0.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawXOffset">
+            <summary>
+            Offsets the drawing of this tile in the X direction. Can be used to draw a tile at a location other than the default. One example is how <see cref="F:Terraria.ID.TileID.Switches"/> appear slightly embedded into the tile they are anchored to.
+            <para/> Read <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#non-16-or-18-values">this section on the wiki</see> for a visual explanation of this.
+            <para/> Defaults to 0.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawFlipHorizontal">
+            <summary>
+            If true, the tile placement preview will draw this tile flipped horizontally at even X tile coordinates. This effect must be replicated in <see cref="M:Terraria.ModLoader.ModTile.SetSpriteEffects(System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.SpriteEffects@)"/> to work for the placed tile. The <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleLamp.cs#L66">ExampleLamp.SetSpriteEffects method</see> shows an example of this required code.
+            <para/> Use this for visual variety and to break up visual repetition. Tiles with normal left and right placements, such as <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/Furniture/ExampleChair.cs">ExampleChair</see>, will use alternate placements influenced by the player direction rather than this.
+            <para/> Note that this should only be used for multitiles that are 1 tile wide, the effect will not work correctly for wider tiles.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawFlipVertical">
+            <summary>
+            If true, the tile placement preview will draw this tile flipped vertically at even Y tile coordinates. This effect must be replicated in <see cref="M:Terraria.ModLoader.ModTile.SetSpriteEffects(System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.SpriteEffects@)"/> to work for the placed tile. The <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleLamp.cs#L66">ExampleLamp.SetSpriteEffects method</see> shows an example of this required code, albeit the example is for DrawFlipHorizontal usage.
+            <para/> Use this for visual variety and to break up visual repetition.
+            <para/> Note that this should only be used for multitiles that are 1 tile high, the effect will not work correctly for taller tiles.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawStepDown">
+            <summary>
+            Similar to <see cref="P:Terraria.ObjectData.TileObjectData.DrawYOffset"/>, this also offsets the drawing of this tile in the Y direction, but this offset will only be applied if there is a solid tile above this tile. Torches use this to shift the torch down 2 more pixels so it doesn't look like the roof is being burnt.
+            <para/> This is only applied to the tile placement preview and <see cref="M:Terraria.ModLoader.ModTile.SetDrawPositions(System.Int32,System.Int32,System.Int32@,System.Int32@,System.Int32@,System.Int16@,System.Int16@)"/> must be used to replicate this behavior in the placed tile. While torches use this, torches don't actually show a placement preview in the first place. The <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L57">ExampleTorch.SetDrawPositions method</see> shows an example of this.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.StyleHorizontal">
+            <summary>
+            If true, tile styles are arranged one after the other horizontally in the spritesheet, otherwise they are arranged vertically. New lines of styles will roll over to the next row once <see cref="P:Terraria.ObjectData.TileObjectData.StyleWrapLimit"/> is reached, if defined.
+            <para/> Some tiles keep this false but use a small <see cref="P:Terraria.ObjectData.TileObjectData.StyleWrapLimit"/> and <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/> value to provide space for alternate placements, resulting in the tile styles themselves appearing to be arranged horizontally in the resulting spritesheet with the alternate placements below.  
+            <para/> Defaults to <c>false</c>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.Style">
+            <summary>
+            Used by alternate placements to offset the calculated placement style.
+            <para/> Equal to the value passed into <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>. 
+            <para/> Defaults to 0.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.StyleWrapLimit">
+            <summary>
+            Defines how many tile placement styles (Number of styles times <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/>) will fit into a line (row if <see cref="P:Terraria.ObjectData.TileObjectData.StyleHorizontal"/> is true, column if StyleHorizontal is false) of the spritesheet before wrapping to the next line. This is used for organizational purposes and to keep spritesheets easy to work with.
+            <para/> Defaults to 0, which will be interpreted as 1.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.StyleWrapLimitVisualOverride">
+            <summary> A hack used by some vanilla tiles, do not use. </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.styleLineSkipVisualOverride">
+            <summary> A hack used by some vanilla tiles, do not use. </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.StyleLineSkip">
+            <summary>
+            How many lines (rows if StyleHorizontal is true, columns if StyleHorizontal is false) will be skipped between each line of styles when wrapping to the next line due to <see cref="P:Terraria.ObjectData.TileObjectData.StyleWrapLimit"/>. Skipping lines allows tile spritesheets to have space for animations or toggled states (manual changes to TileFrameX and TileFrameY). For example, <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleCampfire.cs">ExampleCampfire</see> sets this to 9 because it has 8 animation frames and an off state taking up additional lines. Failure to set this for a tile that can change states will result in tile drops being incorrectly calculated.
+            <para/> Defaults to 1, meaning no lines are skipped.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.StyleMultiplier">
+            <summary>
+            Applies a multiplier to style calculations to account for alternate placements (<see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>) and <see cref="P:Terraria.ObjectData.TileObjectData.RandomStyleRange"/>. For example, chair tiles can be placed facing left or right. These are intended to share the same style (<see cref="F:Terraria.Item.placeStyle"/>) value, but will have different placement style values. The multiplier accounts for these alternate placements allowing tile styles to be properly determined and consequently the correct item to drop when the tile is destroyed.
+            <para/> If tiles are mistakenly dropping items from different styles, StyleMultiplier might have the incorrect value.
+            <para/> Defaults to 1.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.Width">
+            <summary>
+            The width of this multitile in tile coordinates. For example, chests are 2 tiles wide while furnaces are 3 tiles wide.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#width">Width section of the Basic Tile Guide on the wiki</see> for more information and helpful visualizations.
+            <para/> Defaults to 1.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.Height">
+            <summary>
+            The height of this multitile in tile coordinates. For example, chests are 2 tiles high while grandfather clocks are 5 tiles high.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#height">Height section of the Basic Tile Guide on the wiki</see> for more information and helpful visualizations.
+            <para/> Defaults to 1. When changing this <see cref="P:Terraria.ObjectData.TileObjectData.CoordinateHeights"/> must be changed as well.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.Origin">
+            <summary>
+            The tile coordinate from which this multitile is placed from. This affects the position of the tile in relation to the users mouse and also the placement of the tile when placed through code such as <see cref="M:Terraria.WorldGen.PlaceTile(System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean,System.Int32,System.Int32)"/>
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#origin">Origin section of the Basic Tile wiki guide</see> has more information and useful visualizations of this property.
+            <para/> Defaults to Point16.Zero (0, 0), or the top left corner tile.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.Direction">
+            <summary>
+            The direction this TileObjectData will be eligible to be placed in.
+            <para/> Many furniture tiles allow the player to place them facing right or left controlled by the players current direction. These tiles do this by having the base tile place in one direction while an alternate is added placing in the other direction.
+            <para/> See <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/Furniture/ExampleChair.cs#L38">ExampleChair</see> for an example of this approach.
+            <para/> Defaults to <see cref="F:Terraria.Enums.TileObjectDirection.None"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.RandomStyleRange">
+            <summary>
+            Allows this tile to place a randomly selected placement style when placing. The placement preview will update randomly as the player attempts to place the tile.
+            <para/> For example, the <see cref="F:Terraria.ID.TileID.Coral"/> tile uses a RandomStyleRange value of 6, allowing 6 different tile placement styles to be selected when placing.
+            <para/> This can be used in conjunction with <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/> to ensure that each of these random placement styles are considered the same tile style, but sometimes they are not.
+            One interesting advanced usage of this feature is the <see cref="F:Terraria.ID.TileID.Painting2X3"/> tile. It uses RandomStyleRange only for tile style 15, which allows the <see cref="F:Terraria.ID.ItemID.StrangeGrowth"/> item to place one of four tile styles.
+            <para/> If used with alternate placement styles, the random styles of a specific alternate should be located together on the spritesheet. The <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/> parameter should account for RandomStyleRange as well.
+            <para/> Note that tiles placed with <see cref="M:Terraria.WorldGen.PlaceTile(System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean,System.Int32,System.Int32)"/> won't randomize if <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/> is also used, but a specific random placement style choice can be passed into <see cref="M:Terraria.WorldGen.PlaceObject(System.Int32,System.Int32,System.Int32,System.Boolean,System.Int32,System.Int32,System.Int32,System.Int32)"/>.
+            <para/> Defaults to 0.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.SpecificRandomStyles">
+            <summary>
+            Similar to <see cref="P:Terraria.ObjectData.TileObjectData.RandomStyleRange"/>, except a random placement style is selected from a selection of random placement styles. This is unused by vanilla tiles, but should work as expected.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.FlattenAnchors">
+            <summary>
+            If true, placing this tile will cause the anchored solid tiles to become unsloped. Otherwise, slopes on anchor tiles will prevent this tile from placing.
+            <para/> <see cref="F:Terraria.ID.TileID.Switches"/>, <see cref="F:Terraria.ID.TileID.Torches"/>, and <see cref="F:Terraria.ID.TileID.ProjectilePressurePad"/> (partially) all use this, allowing these tiles to be placed more conveniently.
+            <para/> Defaults to false.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinateHeights">
+            <summary>
+            An array defining how tall each individual tile within this multitile is, in pixels. This array must have exactly <see cref="P:Terraria.ObjectData.TileObjectData.Height"/> elements in it. In most cases, all values should be 16, but sometimes 18 is suitable for the last value.
+            <para/> For example, a 3 tile high multitile might set CoordinateHeights as follows: <c>TileObjectData.newTile.CoordinateHeights = new int[] { 16, 16, 18 };</c>.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#coordinateheights">CoordinateHeights section of the Basic Tile Guide on the wiki</see> for more information and helpful visualizations.
+            <para/> Defaults to <c>new int[] { 16 }</c>. If changing <see cref="P:Terraria.ObjectData.TileObjectData.Height"/> this must be changed as well.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinateWidth">
+            <summary>
+            How wide each individual tile within this multitile is, in pixels.
+            <para/> This should almost always be 16 since each tile in the world is 16x16 pixels, but in rare situations a different value might be suitable, such as in this <see cref="F:Terraria.ID.TileID.Coral"/> example on the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#non-16-or-18-values">Basic Tile Guide on the wiki</see> where the extra-wide tile will spill out and draw outside the normal tile bounds.
+            <para/> Defaults to 0, but most templates default this to 16. If not copying from a template or existing tile <b>be sure to set this to 16</b>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinatePadding">
+            <summary>
+            The number of empty padding pixels between each individual tile of a multitile in its spritesheet.
+            <para/> All vanilla tiles set this to 2. While it may be possible to use a value of 0 to make it easier on artists, there are plenty of places in the Terraria code that still assume a padding of 2 so it is not recommended. The examples shown in <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#framed-vs-frameimportant-tiles">the Basic Tile wiki guide</see> show what the padding looks like in practice.
+            <para/> The community has made tools such as <see href="https://forums.terraria.org/index.php?threads/tspritepadder-ready-to-use-sprites-for-terraria-tiles.96177/">tSpritePadder</see> to simplify adding padding pixels to tile sprites.
+            <para/> Defaults to 0 but most templates default this to 2.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinatePaddingFix">
+            <summary>
+            The number of pixels between each tile placement style of a multitile in its spritesheet in addition to the normal <see cref="P:Terraria.ObjectData.TileObjectData.CoordinatePadding"/> between each individual tile. Can be used to give more or less room between tile styles for the artist's convenience.
+            <para/> Defaults to (0, 0).
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinateFullWidth">
+            <summary>
+            The full width of a multitile in terms of the spritesheet texture coordinates (NOT world coordinates).
+            <para/> Used to determine which style and alternate placement a specific Tile with <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/> values belongs to.
+            <para/> Equal to <c>(<see cref="P:Terraria.ObjectData.TileObjectData.CoordinateWidth"/> + <see cref="P:Terraria.ObjectData.TileObjectData.CoordinatePadding"/>) * <see cref="P:Terraria.ObjectData.TileObjectData.Width"/> + <see cref="P:Terraria.ObjectData.TileObjectData.CoordinatePaddingFix"/>.X</c>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.CoordinateFullHeight">
+            <summary>
+            The full height of a multitile in terms of the spritesheet texture coordinates (NOT world coordinates).
+            <para/> Used to determine which style and alternate placement a specific Tile with <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/> values belongs to.
+            <para/> Equal to <c><see cref="P:Terraria.ObjectData.TileObjectData.CoordinateHeights"/>.Sum() + (<see cref="P:Terraria.ObjectData.TileObjectData.CoordinatePadding"/> * <see cref="P:Terraria.ObjectData.TileObjectData.Height"/>) + <see cref="P:Terraria.ObjectData.TileObjectData.CoordinatePaddingFix"/>.Y</c>.
+            </summary>
+        </member>
+        <member name="P:Terraria.ObjectData.TileObjectData.DrawStyleOffset">
+            <summary>
+            Offsets the tile placement preview by a number of placement styles.
+            <para/> This can be used for tiles that have custom draw code to show something resembling the final placed tile despite the actual placement sprite missing parts of the final visuals. <see cref="F:Terraria.ID.TileID.Mannequin"/> and <see cref="F:Terraria.ID.TileID.GolfCupFlag"/> use this.
+            <para/> Defaults to 0.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.CopyFrom(Terraria.ObjectData.TileObjectData)">
+            <summary>
+            Copies all tile object data from the <paramref name="copy"/> to this TileObjectData <b>except</b> the subtiles. <see cref="M:Terraria.ObjectData.TileObjectData.FullCopyFrom(Terraria.ObjectData.TileObjectData)"/> will additionally copy subtiles.
+            <para/> Copying tile data will copy anchors, sizes, origin, and all other properties of the tile dictating their placement behavior.
+            <para/> The most common usage is to copy the tile properties of one of the existing tile templates found in the TileObjectData class: <c>TileObjectData.newTile.CopyFrom(TileObjectData.Style3x4);</c>. After copying from a template, the properties would be further customized if desired. 
+            <para/> Another common usage would be to copy a vanilla furniture tile to easily create tiles matching the behavior of existing furniture: <c>TileObjectData.newTile.CopyFrom(TileObjectData.GetTileData(TileID.OpenDoor, 0));</c>. CopyFrom is used instead of FullCopyFrom in this situation because copying subtiles would incorrectly copy over subtile specific behavior, such as lava immunity for some subtiles.
+            <para/> One more usage is to copy over tile properties from <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/> to either <see cref="F:Terraria.ObjectData.TileObjectData.newAlternate"/> or <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/>: <c>TileObjectData.newSubTile.CopyFrom(TileObjectData.newTile);</c>.
+            <para/> Copying tile properties is a good approach to writing clean code and avoiding hard to troubleshoot bugs. Make sure to call this method before modifying any other properties as this method will overwrite any changes made earlier in the code.
+            </summary>
+            <param name="copy"></param>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.FullCopyFrom(System.UInt16)">
+            <inheritdoc cref="M:Terraria.ObjectData.TileObjectData.FullCopyFrom(Terraria.ObjectData.TileObjectData)"/>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.FullCopyFrom(Terraria.ObjectData.TileObjectData)">
+            <summary>
+            Similar to <see cref="M:Terraria.ObjectData.TileObjectData.CopyFrom(Terraria.ObjectData.TileObjectData)"/>, except subtile data will also be copied. This is useful for inheriting subtile specific data, such as how each herb tile type (ImmatureHerbs, MatureHerbs, BloomingHerbs) share the same water placement and lava death properties for their Fireblossom and Moonglow styles.
+            </summary>
+            <param name="copy"></param>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.isValidTileAnchor(System.Int32)">
+            <summary>
+            If the tile type is in <see cref="P:Terraria.ObjectData.TileObjectData.AnchorInvalidTiles"/>, returns false. If <see cref="P:Terraria.ObjectData.TileObjectData.AnchorValidTiles"/> exists and tile type isn't in it, returns false. Otherwise returns true.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.isValidAlternateAnchor(System.Int32)">
+            <summary>
+            If the tile type is in <see cref="P:Terraria.ObjectData.TileObjectData.AnchorAlternateTiles"/>, returns true.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.CalculatePlacementStyle(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Calculates a placement style from a provided tile style and random style offset. A placement style is the tile style multiplied by <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/> plus the alternate and random placement style offsets. 
+            <para/> The <paramref name="alternate"/> parameter is unused, but the <see cref="P:Terraria.ObjectData.TileObjectData.Style"/> of this TileObjectData (equivalent to the value passed into <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>) is used to offset the style to account for alternate placements. As such, this method should be called on the alternate TileObjectData if applicable, not the root TileObjectData for this tile style. Do this by first retrieving it by calling the <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/> method.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.addBaseTile(Terraria.ObjectData.TileObjectData@)">
+            <summary>
+            Similar to <see cref="M:Terraria.ObjectData.TileObjectData.addTile(System.Int32)"/> except the TileObjectData is not registered to a specific tile type. Instead, the completed TileObjectData is assigned to <paramref name="baseTile"/>. This can be used by modders to create their own tile templates.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.addTile(System.Int32)">
+            <summary>
+            Registers the current <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/> with the supplied tile type. Make sure to call this method last after all edits to <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/>, <see cref="F:Terraria.ObjectData.TileObjectData.newAlternate"/>, and <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/>.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.addSubTile(System.Int32[])">
+            <inheritdoc cref="M:Terraria.ObjectData.TileObjectData.addSubTile(System.Int32)"/>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.addSubTile(System.Int32)">
+            <summary>
+            Registers <see cref="F:Terraria.ObjectData.TileObjectData.newSubTile"/> as a subtile of <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/>. The style or styles parameter correspond to the tiles styles that should use these tile properties. This corresponds to the <see cref="F:Terraria.Item.placeStyle"/> of the item that will place this tile.
+            <para/> Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#multiple-styles">Multiple Styles section of the Basic Tile wiki guide</see> for more information and visualizations.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)">
+            <summary>
+            Registers <see cref="F:Terraria.ObjectData.TileObjectData.newAlternate"/> as an alternate placement of <see cref="F:Terraria.ObjectData.TileObjectData.newTile"/>. The <paramref name="baseStyle"/> parameter corresponds to which placement style sprite this alternate placement will use. This value will apply an offset to the tile style being placed. 
+            <para/> <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/ExampleTorch.cs#L44">ExampleTorch</see>, for example, shows alternate placements using the 0, 1, and 2 placement style sprites, showing how different anchors can result in different placements sprites. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/Tiles/Furniture/ExampleDoorClosed.cs#L59">ExampleDoorClosed</see>, on the other hand, adds multiple alternates all using the same 0 placement sprite but different <see cref="P:Terraria.ObjectData.TileObjectData.Origin"/> to allow the user an easier time placing the door in a doorway.
+            <para/> <see cref="P:Terraria.ObjectData.TileObjectData.StyleMultiplier"/> is usually used to account for alternate placements to allow them to be considered the same tile style. If <see cref="P:Terraria.ObjectData.TileObjectData.RandomStyleRange"/> is used, the random style will be added after the alternate placement style has been applied, so usually multiples of RandomStyleRange would be used for each addAlternate parameter. (For example, if RandomStyleRange is 5 for a tile with left and right placements, addAlternate(5) could be used for the right facing placement and StyleMultiplier should be set to 10.)
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.GetTileData(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Retrieves the TileObjectData corresponding to the passed in tile <paramref name="type"/>, tile <paramref name="style"/>, and optional <paramref name="alternate"/> parameter. Terrain tiles will return null.
+            <para/> Note that the alternate parameter in this method retrieves the alternate TileObjectData according to the order that they were registered, not according to a calculated alternate placement style. This parameter counts from 1, not 0, so the default parameter value of 0 will not attempt to retrieve an alternate TileObjectData. As such, it is not suitable for retrieving the TileObjectData of a placed Tile, use  <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/> for that.
+            <para/> Other related methods include <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/>, <see cref="M:Terraria.ObjectData.TileObjectData.GetTileInfo(Terraria.Tile,System.Int32@,System.Int32@)"/>, and <see cref="M:Terraria.ObjectData.TileObjectData.GetTileStyle(Terraria.Tile)"/>.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)">
+            <summary>
+            Retrieves the TileObjectData corresponding to the passed in Tile. Empty tiles and terrain tiles will return null. Any individual Tile of the multitile works. Will correctly retrieve the style or alternate specific TileObjectData if it exists.
+            <para/> Other related methods include <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(System.Int32,System.Int32,System.Int32)"/>, <see cref="M:Terraria.ObjectData.TileObjectData.GetTileInfo(Terraria.Tile,System.Int32@,System.Int32@)"/>, and <see cref="M:Terraria.ObjectData.TileObjectData.GetTileStyle(Terraria.Tile)"/>.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.GetTileStyle(Terraria.Tile)">
+            <summary>
+            Retrieves the tile style corresponding to the passed in Tile. Empty tiles and terrain tiles will return -1. Any Tile of the multitile works.
+            <para/> This is most useful in replacing hard-coded math where the tile style is calculated from <see cref="P:Terraria.Tile.TileFrameX"/> and <see cref="P:Terraria.Tile.TileFrameY"/> directly, such as mouse over icons and other tile style specific behaviors.
+            <para/> Other related methods include <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/>, <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(System.Int32,System.Int32,System.Int32)"/>, and <see cref="M:Terraria.ObjectData.TileObjectData.GetTileInfo(Terraria.Tile,System.Int32@,System.Int32@)"/>.
+            </summary>
+        </member>
+        <member name="M:Terraria.ObjectData.TileObjectData.GetTileInfo(Terraria.Tile,System.Int32@,System.Int32@)">
+            <summary>
+            Retrieves the tile <paramref name="style"/> and <paramref name="alternate"/> placement corresponding to the passed in Tile. Empty tiles and terrain tiles will return without setting the ref parameters. Any Tile of the multitile works.
+            <para/> Other related methods include <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/>, <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(System.Int32,System.Int32,System.Int32)"/>, and <see cref="M:Terraria.ObjectData.TileObjectData.GetTileStyle(Terraria.Tile)"/>.
+            </summary>
+        </member>
         <member name="F:Terraria.Player.name">
             <summary>
             This player's displayed name.
             <br/> Usually capped at 20 characters.
             </summary>
+        </member>
+        <member name="F:Terraria.Player.loadStatus">
+            <summary> 0: Success <br/> 1: Future version <br/> 2: Read error </summary>;
         </member>
         <member name="F:Terraria.Player.dashType">
             <summary>
@@ -22973,6 +23802,11 @@
             A value of 2 or more doesn't give this limitation, allowing the player to stay holding onto a wall indefinitely.
             </summary>
         </member>
+        <member name="F:Terraria.Player.miscCounter">
+            <summary>
+            Counts updates from 0 up to 299 and then resets back to 0. Can be used to drive visuals and other player effects. The <see href="https://github.com/tModLoader/tModLoader/wiki/Time-and-Timers#modulo-timer">Modulo Timer section of the Time and Timers wiki page</see> has more details about how to use a counter like this.
+            </summary>
+        </member>
         <member name="F:Terraria.Player.sticky">
             <summary> Player is on <see cref="F:Terraria.ID.TileID.HoneyBlock"/>. Affects movement parameters. </summary>
         </member>
@@ -23024,6 +23858,11 @@
             <br/> If <c><see cref="F:Terraria.Player.townNPCs"/> &gt; 2f</c>, then this player is in a town.
             </summary>
         </member>
+        <member name="F:Terraria.Player.nearbyActiveNPCs">
+            <summary>
+            The sum of the <see cref="F:Terraria.NPC.npcSlots"/> values of NPC within the active range of this Player. Used to set NPC spawn rates.
+            </summary>
+        </member>
         <member name="F:Terraria.Player.mouseInterface">
             <summary>
             If true, the mouse is currently overlapping with a user interface so any mouse interaction should be not be interpreted as gameplay input, such as using items.
@@ -23037,10 +23876,16 @@
             The corresponding dye items are found in <see cref="F:Terraria.Player.dye"/>. The player's inventory is <see cref="F:Terraria.Player.inventory"/>. For equipment, see <see cref="F:Terraria.Player.miscEquips"/> and <see cref="F:Terraria.Player.miscDyes"/>. <see cref="F:Terraria.Player.trashItem"/> is the trash slot.<br/><br/>
             </summary>
         </member>
+        <member name="F:Terraria.Player.dye">
+            <summary> The dye items corresponding to the <see cref="F:Terraria.Player.armor"/> items. </summary>
+        </member>
         <member name="F:Terraria.Player.miscEquips">
             <summary>
             The player's equipment items. From indexes 0-4: Pet, Light Pet, Minecart, Mount, and Hook.
             </summary>
+        </member>
+        <member name="F:Terraria.Player.miscDyes">
+            <summary> The dye items corresponding to the <see cref="F:Terraria.Player.miscEquips"/> items. </summary>
         </member>
         <member name="F:Terraria.Player.buffType">
             <summary>
@@ -23090,6 +23935,18 @@
             For armor and accessories, see <see cref="F:Terraria.Player.armor"/> and <see cref="F:Terraria.Player.dye"/>. For equipment, see <see cref="F:Terraria.Player.miscEquips"/> and <see cref="F:Terraria.Player.miscDyes"/>. <see cref="F:Terraria.Player.trashItem"/> is the trash slot.<br/>
             </summary>
         </member>
+        <member name="F:Terraria.Player.bank">
+            <summary> Piggy Bank items </summary>
+        </member>
+        <member name="F:Terraria.Player.bank2">
+            <summary> Safe items </summary>
+        </member>
+        <member name="F:Terraria.Player.bank3">
+            <summary> Defender's Forge items </summary>
+        </member>
+        <member name="F:Terraria.Player.bank4">
+            <summary> Void Vault items </summary>
+        </member>
         <member name="F:Terraria.Player.gfxOffY">
             <summary>
             An offset from the actual position of the player that will be added to the draw position. Used to fake the effect of the player smoothly traveling up single block obstacles.
@@ -23099,6 +23956,12 @@
             <summary>
             Has nothing to do with the speed that this player travels, that is dictated by <see cref="F:Terraria.Player.moveSpeed"/> and related fields. This affects how quickly <see cref="F:Terraria.Player.gfxOffY"/> is adjusted.
             </summary>
+        </member>
+        <member name="F:Terraria.Player.dead">
+            <summary> Indicates if this player is dead </summary>
+        </member>
+        <member name="F:Terraria.Player.respawnTimer">
+            <summary> The amount of time in ticks before this player respawns after death. Most suitably modified in <see cref="M:Terraria.ModLoader.ModPlayer.Kill(System.Double,System.Int32,System.Boolean,Terraria.DataStructures.PlayerDeathReason)"/> </summary>
         </member>
         <member name="F:Terraria.Player.manaCost">
             <summary>
@@ -23236,6 +24099,16 @@
             <br/> Chilled buff (<see cref="F:Terraria.Player.chilled"/>): <c>*= 0.75f</c>
             </summary>
         </member>
+        <member name="F:Terraria.Player.SpawnX">
+            <summary>
+            The x tile coordinate of the bed spawn location for this player in this world. When -1 <see cref="F:Terraria.Main.spawnTileX"/> is used instead.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.SpawnY">
+            <summary>
+            The y tile coordinate of the bed spawn location for this player in this world. When -1 <see cref="F:Terraria.Main.spawnTileY"/> is used instead.
+            </summary>
+        </member>
         <member name="F:Terraria.Player.jumpSpeed">
             <summary>
             The speed, in pixels/tick, that this players jumps at.
@@ -23268,6 +24141,26 @@
             <para/> When on a mount, all other modifiers are ignored and it is set to <see cref="P:Terraria.Mount.Acceleration"/>
             </summary>
             <remarks>To apply a global run speed modifier, use <see cref="F:Terraria.Player.moveSpeed"/>.</remarks>
+        </member>
+        <member name="F:Terraria.Player.adjWater">
+            <summary> True if the player is within crafting range of a tile with water or a <see cref="F:Terraria.ID.TileID.Sets.CountsAsWaterSource"/> tile. (adjWater stands for adjacent to water) </summary>
+        </member>
+        <member name="F:Terraria.Player.adjHoney">
+            <summary> True if the player is within crafting range of a tile with honey or a <see cref="F:Terraria.ID.TileID.Sets.CountsAsHoneySource"/> tile. (adjHoney stands for adjacent to honey) </summary>
+        </member>
+        <member name="F:Terraria.Player.adjShimmer">
+            <summary> True if the player is within crafting range of a tile with shimmer or a <see cref="F:Terraria.ID.TileID.Sets.CountsAsShimmerSource"/> tile. (adjShimmer stands for adjacent to shimmer) </summary>
+        </member>
+        <member name="F:Terraria.Player.adjLava">
+            <summary> True if the player is within crafting range of a tile with lava or a <see cref="F:Terraria.ID.TileID.Sets.CountsAsLavaSource"/> tile. (adjLava stands for adjacent to lava) </summary>
+        </member>
+        <member name="P:Terraria.Player.adjTile">
+            <summary>
+            An array indexed by tile type (<see cref="P:Terraria.Tile.TileType"/>, <see cref="T:Terraria.ID.TileID"/>) indicating if the player is within crafting range of each tile type. Used to determine if a player satisfies crafting station requirements for recipes. Note that this includes tiles acting like other tiles (<see cref="P:Terraria.ModLoader.ModTile.AdjTiles"/>, <see cref="M:Terraria.Player.AdjTiles"/>), so the player might not actually be near specific tiles. For example a player near a <see cref="F:Terraria.ID.TileID.MythrilAnvil"/> tile will count as being near <see cref="F:Terraria.ID.TileID.Anvils"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.hostile">
+            <summary> If true, the player has PvP enabled </summary>
         </member>
         <member name="F:Terraria.Player.jumpSpeedBoost">
             <summary>
@@ -23543,6 +24436,12 @@
             <param name="item">The item whose grab range is being evaluated.</param>
             <returns>The item grab range of the player, in pixels.</returns>
         </member>
+        <member name="M:Terraria.Player.RefreshItems(System.Boolean)">
+            <summary>
+            Calls <see cref="M:Terraria.Item.Refresh(System.Boolean)"/> on all player-owned storage (inventory, banks, equipment). Also refreshes recipe and shop entries.
+            <para/> This is called when entering a world and serves to ensure that items with <see cref="T:Terraria.GameContent.Items.ItemVariants"/> have the correct stats.
+            </summary>
+        </member>
         <member name="M:Terraria.Player.BuyItem(System.Int64,System.Int32)">
             <summary>
             Attempts to "purchase" something that costs the given <paramref name="price"/>.<br/>
@@ -23553,6 +24452,20 @@
             <param name="price"></param>
             <param name="customCurrency"></param>
             <returns>true if the player had enough currency to pay the price.</returns>
+        </member>
+        <member name="M:Terraria.Player.CanAfford(System.Int64,System.Int32)">
+            <summary>
+            Checks if the player has the provided amount of money or custom currency (if <paramref name="customCurrency"/> is set) in their inventory and banks combined. Use <see cref="M:Terraria.Player.BuyItem(System.Int64,System.Int32)"/> if the player does have enough money to take that money from the player.
+            </summary>
+        </member>
+        <member name="M:Terraria.Player.PayCurrency(System.Int64,System.Int32)">
+            <summary>
+            Attempts to "purchase" something that costs the given <paramref name="price"/>.<br/>
+            Items will be taken from all of the player inventories and banks combined.<br/>
+            If <paramref name="customCurrency"/> is provided, the price will be in terms of the custom currency instead of coins.<br/>
+            The currency will be taken from the inventories.
+            <para/> This method does not check if the player has enough currency (use <see cref="M:Terraria.Player.CanAfford(System.Int64,System.Int32)"/> to check that), the <b>game will crash if called on a player without enough currency</b>. Use <see cref="M:Terraria.Player.BuyItem(System.Int64,System.Int32)"/> instead for the more typical usage.
+            </summary>
         </member>
         <member name="M:Terraria.Player.GetItem(System.Int32,Terraria.Item,Terraria.GetItemSettings)">
             <summary>
@@ -25133,7 +26046,22 @@
             Assumes Intialize has been run prior to use.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Terraria.Social.Steam.WorkshopHelper.GetWorkshopFolder(Steamworks.AppId_t)" -->
+        <member name="M:Terraria.Social.Steam.WorkshopHelper.GetWorkshopFolder(Steamworks.AppId_t)">
+            <summary>
+            <code>
+            Priority is given to "-steamworkshopfolder" argument to ensure if someone has a custom steamapps/workshop folder away from tml, it can be found
+            If SteamClient is true (ie it is a steam user running a client or host and play),
+            	InstallDir: SteamFiles/Steamapps/common/tModLoader is GetAppInstallDir
+            	WorkshopFolder: SteamFiles/Steamapps/workshop is Path.Combine(GetAppInstallDir, .., .., Workshop)
+            If SteamClient is false, SteamAvailable = True -> Is FamilyShare or GoG Client. SteamedWraps.FamilyShare differentiates if needed
+            	InstallDir: anywhere, manual.
+            	WorkshopFolder: InstallDir/Steamapps/workshop
+            If Main.DedServ is true
+            	Use SteamClient reference path if it exists &amp;&amp; Not "-nosteam" supplied
+            	Use NotSteamClient working folder path if "-nosteam" supplied or SteamClient ref path not exists
+            </code>
+            </summary>
+        </member>
         <member name="M:Terraria.Social.Steam.WorkshopHelper.QueryHelper.AQueryInstance.ReleaseWorkshopQuery">
             <summary>
             Ought be called to release the existing query when we are done with it. Frees memory associated with the handle.
@@ -25146,11 +26074,17 @@
             If the Mod is not found, the space is filled with a null.
             </summary>
         </member>
-        <member name="M:Terraria.Social.Steam.WorkshopHelper.QueryHelper.AQueryInstance.TrySearchByInternalName(System.Collections.Generic.List{Terraria.ModLoader.UI.ModBrowser.ModDownloadItem}@)">
+        <member name="M:Terraria.Social.Steam.WorkshopHelper.QueryHelper.AQueryInstance.TryGroupSearchByInternalName(System.Collections.Generic.List{Terraria.ModLoader.UI.ModBrowser.ModDownloadItem}@)">
             <summary>
             Only Use if we don't have a PublishID source.
             Outputs a List of ModDownloadItems of equal length to QueryParameters.SearchModSlugs
             Uses null entries to fill gaps to ensure length consistency
+            </summary>
+        </member>
+        <member name="M:Terraria.Social.Steam.WorkshopHelper.QueryHelper.AQueryInstance.TrySearchByInternalName(System.String,Terraria.ModLoader.UI.ModBrowser.ModDownloadItem@)">
+            <summary>
+            Only Use if we don't have a PublishID source.
+            Returns false if unable to check Workshop and outs item as null if item not found
             </summary>
         </member>
         <member name="T:Terraria.Tile">
@@ -25776,6 +26710,9 @@
             Intended to be used to set all the persistent data about a tile. For example, when loading a schematic from serialized NonFrameBits.
             </summary>
         </member>
+        <member name="F:Terraria.TileObject.alternate">
+            <summary> Note: The index of the alternate within the <see cref="P:Terraria.ObjectData.TileObjectData.Alternates"/>, not the alternate placement style offset (<see cref="P:Terraria.ObjectData.TileObjectData.Style"/>) </summary>
+        </member>
         <member name="M:Terraria.UI.InGameNotificationsTracker.AddNotification(Terraria.UI.IInGameNotification)">
             <summary>
             Adds an in-game notification to the tracker.
@@ -25816,6 +26753,11 @@
             <para/> <see cref="M:Terraria.UI.UIElement.MouseOver(Terraria.UI.UIMouseEvent)"/> will be called when it is hovered once again.
             </summary>
         </member>
+        <member name="M:Terraria.Utilities.CrashDump.WriteExceptionAsZipAndClearOld(Terraria.Utilities.CrashDump.Options,System.IntPtr)">
+            <summary>
+            Writes a dump to the logs folder, zips it, and deletes old dumps. Intended to preserve a single dump for client and server to not waste harddrive space.
+            </summary>
+        </member>
         <member name="M:Terraria.Utilities.FileUtilities.ConvertToRelativePath(System.String,System.String)">
             <summary>
             Converts the full 'path' to remove the base path component.
@@ -25845,6 +26787,12 @@
             <param name="maxValue"></param>
             <returns></returns>
             <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+        </member>
+        <member name="M:Terraria.Utils.GetDayTimeAs24FloatStartingFromMidnight">
+            <summary>
+            Returns the current world time in a 24 hour clock representation. This value is derived from <see cref="F:Terraria.Main.dayTime"/> and <see cref="F:Terraria.Main.time"/>.
+            <para/> For example <c>Utils.GetDayTimeAs24FloatStartingFromMidnight() &lt; 6.50f</c> would check if the time is before 6:30 AM.
+            </summary>
         </member>
         <member name="M:Terraria.Utils.NextFloat(Terraria.Utilities.UnifiedRandom)">
             <summary>
@@ -26093,6 +27041,9 @@
             Adds an area of the world to the protected structures listing to be protected from other world generation code. Use this after placing a structure if you do not wish other world generation code to overlap with it.
             </summary>
         </member>
+        <member name="F:Terraria.WorldGen.crimson">
+            <summary> Indicates the selected world evil. If true, the world is a Crimson world, when false the world is a Corruption world. </summary>
+        </member>
         <member name="F:Terraria.WorldGen.remixWorldGen">
             <summary> If true, the world is generating with the <see href="https://terraria.wiki.gg/wiki/Don%27t_dig_up">Don't dig up (aka Remix)</see> secret world seed. See also <see cref="F:Terraria.Main.remixWorld"/>. </summary>
         </member>
@@ -26223,7 +27174,7 @@
         <member name="M:Terraria.WorldGen.PlaceTile(System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean,System.Int32,System.Int32)">
             <summary>
             PlaceTile is the main way to place individual tiles while obeying anchor considerations. Most of the other PlaceX methods in the WorldGen class are called by this method. i and j are the tile coordinates. These coordinates relate to the origin of the tile, not necessarily the top left corner of the tile. Read <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile">the Basic Tile wiki guide</see> to familiarize yourself with the concepts of Anchors and Origins. <paramref name="mute"/> indicates if a sound should be made, this only applies to in-game usage as sounds are all muted during world gen. <paramref name="forced"/> attempts to place the tile even if other tiles are already at the coordinates, but it is unreliable. <paramref name="plr"/> does nothing except affect bathtubs. <paramref name="style"/> refers to the style of the tile type provided. Styles are explained in the Basic Tile guide.
-            <para/> PlaceTile returns a bool indicating placement success. Unfortunately, it doesn't work, don't use it. Checking the coordinates after calling PlaceTile is a good way to check if the placement was a success: <c>if(Main.tile[x, y].type == TileID.Campfire)</c>
+            <para/> PlaceTile returns a bool indicating placement success. Unfortunately, it doesn't work, don't use it. Checking the coordinates after calling PlaceTile is a good way to check if the placement was a success: <c>if(Main.tile[x, y].TileType == TileID.Campfire)</c>
             <para/> PlaceTile doesn't expose everything. For example, attempting to place a tile with a specific style will be ignored by many of the underlying methods. Another issue is that it is impossible to place a tile that has left and right placement orientations facing right. In these situations, you might need to manually place each tile in the multitile or use <see cref="M:Terraria.WorldGen.PlaceObject(System.Int32,System.Int32,System.Int32,System.Boolean,System.Int32,System.Int32,System.Int32,System.Int32)"/> instead. WorldGen.PlaceObject requires more input. For example, placing Coral with PlaceObject means you have to manually specify the style, as the random style (<see cref="P:Terraria.ObjectData.TileObjectData.RandomStyleRange"/>) choosing is a feature of PlaceTile.
             <para/> If called in-game, the changed tiles would need to be synced if placement is successful. See <see cref="M:Terraria.NetMessage.SendTileSquare(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,Terraria.ID.TileChangeType)"/> for more information and examples.
             </summary>

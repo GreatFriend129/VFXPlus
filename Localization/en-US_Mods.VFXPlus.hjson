@@ -5,7 +5,10 @@ Items: {
 	}
 }
 
-Projectiles.MusketHeldProj.DisplayName: Musket Held Proj
+Projectiles: {
+	MusketHeldProj.DisplayName: Musket Held Proj
+	ShadowflameTendrilVFX.DisplayName: Shadowflame Tendril V F X
+}
 
 Configs: {
 	VFXPlusClientConfig: {

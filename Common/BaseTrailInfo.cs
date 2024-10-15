@@ -199,7 +199,7 @@ namespace VFXPlus.Common
                 customEffect.Parameters["scrollColor"].SetValue(shouldScrollColor);
             }
 
-            customEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+            //customEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
             customEffect.CurrentTechnique.Passes["MainPS"].Apply();
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -227,6 +227,14 @@ namespace VFXPlus.Common
 
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            //We have to do this twice for some godforsaken reason
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
         }
     }
 }

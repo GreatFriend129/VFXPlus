@@ -113,33 +113,21 @@ namespace VFXPlus.Content.Dusts
 			dust.frame = new Rectangle(0, texture.Height / 5 * Main.rand.Next(5), texture.Width, texture.Height / 5);
 		}
 
-		public override Color? GetAlpha(Dust dust, Color lightColor)
-		{
-			return dust.color;
-		}
-
 		public override bool Update(Dust dust)
 		{
-
-			if (dust.customData is false)
-			{
-				dust.position = dust.position + (new Vector2(-34, -34) * dust.scale); 
-				dust.customData = true;
-			}
-
-
 			dust.color.A = 0;
 			dust.scale *= 0.94f;
 			dust.position += dust.velocity; 
 
 			//Makes shit more accurate to velocity, idfk why the value is pi/2
-			dust.position += new Vector2(1.57f, 1.57f) * dust.scale;
+			//dust.position += new Vector2(1.57f, 1.57f) * dust.scale;
 			dust.velocity *= 0.95f;
 
 			if (!dust.noLight && dust.scale > 0.2f)
 				Lighting.AddLight(dust.position, dust.color.R * dust.scale * 0.002f, dust.color.G * dust.scale * 0.002f, dust.color.B * dust.scale * 0.002f);
 
 
+			//If alpha isn't 0, fade the color
 			if (dust.alpha != 0)
 				dust.color *= 0.95f;
 
@@ -153,7 +141,17 @@ namespace VFXPlus.Content.Dusts
 			return false;
 		}
 
-	}
+
+        public override bool PreDraw(Dust dust)
+        {
+            //Texture2D Tex = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Content/Dusts/Textures/PixelCrossInner");
+
+            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = 0 }, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+			return false;
+
+            return base.PreDraw(dust);
+        }
+    }
 
 	public class GlowPixelRise : GlowPixelAlts
     {
