@@ -34,20 +34,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            for (int i = 0; i < 4 + Main.rand.Next(2); i++)
+            for (int i = 0; i < 3 + Main.rand.Next(2); i++)
             {
-                /*
-                Vector2 v = Main.rand.NextVector2Unit();
-                Dust sa = Dust.NewDustPerfect(player.Center + velocity.SafeNormalize(Vector2.UnitX) * 50, ModContent.DustType<GlowPixelCross>(), 
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1f) * Main.rand.NextFloat(2f, 4f), 0,
-                    Color.Purple, Main.rand.NextFloat(0.35f, 0.5f));
+                
+                Vector2 v = Main.rand.NextVector2Circular(1.5f, 1.5f);
+                Dust sa = Dust.NewDustPerfect(player.Center + v + velocity.SafeNormalize(Vector2.UnitX) * 40f, ModContent.DustType<GlowPixelCross>(), 
+                    velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.9f) * Main.rand.NextFloat(1f, 4f), 0,
+                    new Color(42, 2, 82) * 3f, Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
 
                 sa.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5, postSlowPower: 0.9f, velToBeginShrink: 1.5f, fadePower: 0.9f, shouldFadeColor: false);
-                */
 
-                Dust sa = Dust.NewDustPerfect(player.Center + velocity.SafeNormalize(Vector2.UnitX) * 35, ModContent.DustType<MuraLineBasic>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1.8f) * Main.rand.NextFloat(2f, 4f), 255,
-                    new Color(42, 2, 82), Main.rand.NextFloat(0.35f, 0.5f) * 0.5f);
+                Vector2 v2 = Main.rand.NextVector2Circular(3f, 3f);
+
+                Dust sa2 = Dust.NewDustPerfect(player.Center + v2 + velocity.SafeNormalize(Vector2.UnitX) * 45f, ModContent.DustType<MuraLineBasic>(),
+                    velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1.1f) * Main.rand.NextFloat(1.5f, 6f), 255,
+                    new Color(42, 2, 82) * 3f, Main.rand.NextFloat(0.25f, 0.65f) * 0.75f);
 
 
             }
@@ -69,6 +70,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
+            //TODO: cleanup
+            
             int trailCount = 8; ///12
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
@@ -79,26 +82,45 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
-            if (timer % 5 == 0 && Main.rand.NextBool())
+            if (timer % 4 == 0 && Main.rand.NextBool() && timer > 8)
             {
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(),
-                    projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * Main.rand.NextFloat(2f, 4f),
-                    newColor: Color.Purple, Scale: Main.rand.NextFloat(0.2f, 0.25f));
+                    projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.35f, 0.35f)) * Main.rand.NextFloat(2f, 4f),
+                    newColor: new Color(42, 2, 82) * 3f, Scale: Main.rand.NextFloat(0.15f, 0.25f) * 1.25f);
 
-                p.velocity += projectile.velocity * 0.2f;
+                p.velocity -= projectile.velocity * 0.4f;
             }
 
-            if (timer % 2 == 0)
+            if (timer % 3 == 0 && timer > 8 && true)
+            {
+                Vector2 sideOffset = new Vector2(0f, Main.rand.NextFloat(-10f, 10f)).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 vel = -projectile.velocity * 0.25f;
+
+                Dust line = Dust.NewDustPerfect(projectile.Center + sideOffset, ModContent.DustType<MuraLineBasic>(), vel, 255, 
+                    newColor: new Color(42, 2, 82) * 3f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.6f);
+
+            }
+
+            //Looks cool, but makes the weapon a little messy, maybe use this for shadowflame knife and/or bow?
+            if (timer % 1 == 0 && false)
             {
                 Vector2 posOffset = Main.rand.NextVector2Circular(2f, 2f);
                 Vector2 initVel = Main.rand.NextVector2Circular(1.25f, 1.25f);
 
-                Dust a = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowPixelAlts>(), Velocity: initVel, newColor: Color.White/*new Color(42, 2, 82)*/, Scale: Main.rand.NextFloat(0.85f, 1.15f));
+                Dust a = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowPixelAlts>(), Velocity: initVel, newColor: new Color(42, 2, 82), Scale: Main.rand.NextFloat(0.85f, 1.15f) * 0.45f);
 
                 a.velocity *= 0.25f;
-                a.velocity += projectile.velocity * 0.5f;
-            }
+                a.velocity += projectile.velocity * 0.15f;
 
+
+                Vector2 posOffset2 = Main.rand.NextVector2Circular(2f, 2f);
+                Vector2 initVel2 = Main.rand.NextVector2Circular(1.25f, 1.25f);
+
+                Dust a2 = Dust.NewDustPerfect(projectile.Center + posOffset2 + (projectile.velocity * 0.5f), ModContent.DustType<GlowPixelAlts>(), Velocity: initVel2, newColor: new Color(42, 2, 82), Scale: Main.rand.NextFloat(0.85f, 1.15f) * 0.45f);
+
+                a2.velocity *= 0.25f;
+                a2.velocity += projectile.velocity * 0.15f;
+            }
 
 
             /*
@@ -116,6 +138,47 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             timer++;
 
+            #region vanillaAI
+            if (projectile.localAI[1] < 15f)
+            {
+                projectile.localAI[1] += 1f;
+            }
+            else
+            {
+                //int num314 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y + 4f), 8, 8, 27, projectile.oldVelocity.X, projectile.oldVelocity.Y, 100, default(Color), 0.6f);
+                //Dust dust54 = Main.dust[num314];
+                //Dust dust2 = dust54;
+                //dust2.velocity *= -0.25f;
+
+                if (projectile.localAI[0] == 0f)
+                {
+                    projectile.scale -= 0.02f;
+                    projectile.alpha += 30;
+                    if (projectile.alpha >= 250)
+                    {
+                        projectile.alpha = 255;
+                        projectile.localAI[0] = 1f;
+                    }
+                }
+                else if (projectile.localAI[0] == 1f)
+                {
+                    projectile.scale += 0.02f;
+                    projectile.alpha -= 30;
+                    if (projectile.alpha <= 0)
+                    {
+                        projectile.alpha = 0;
+                        projectile.localAI[0] = 0f;
+                    }
+                }
+            }
+
+            projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) + 0.785f;
+            if (projectile.velocity.Y > 16f)
+            {
+                projectile.velocity.Y = 16f;
+            }
+            #endregion
+            return false;
             return base.PreAI(projectile);
         }
 
@@ -123,9 +186,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            Utils.DrawBorderString(Main.spriteBatch, "" + fadeInAlpha, new Vector2(0f, -120f) + projectile.Center - Main.screenPosition, Color.White);
-            
+        {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -169,7 +230,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             for (int i = 0; i < 3; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.Purple with { A = 0 } * 0.75f, projectile.rotation, TexOrigin, projectile.scale * 1.05f * fadeInAlpha, SpriteEffects.None);
+                    Color.Purple with { A = 0 } * 0.9f, projectile.rotation, TexOrigin, projectile.scale * 1.05f * fadeInAlpha, SpriteEffects.None);
             }
 
 

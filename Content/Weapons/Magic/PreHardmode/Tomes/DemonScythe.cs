@@ -56,21 +56,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             return lateInstantiation && (entity.type == ProjectileID.DemonScythe);
         }
 
-        BaseTrailInfo trail1 = new BaseTrailInfo();
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
 
             if (timer % 2 == 0 && Main.rand.NextBool())
             {
-                /*
-                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(),
-                    projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * Main.rand.NextFloat(2f, 4f),
-                    newColor: Color.Purple, Scale: Main.rand.NextFloat(0.2f, 0.25f));
-
-                p.velocity += projectile.velocity * 0.2f;
-                */
-
                 Vector2 offset2 = projectile.rotation.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-10, 10);
                 Vector2 vel2 = projectile.rotation.ToRotationVector2().RotatedByRandom(0.15f) * Main.rand.NextFloat(2, 7);
 
@@ -86,7 +77,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             timer++;
 
-            //return base.PreAI(projectile);
 
             #region vanillaAI
             projectile.rotation += (float)projectile.direction * 0.8f;

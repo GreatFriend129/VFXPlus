@@ -217,7 +217,7 @@ namespace VFXPlus.Common
 
                 }
                 else
-                    vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), ColorFunction, WidthFunction, -Main.screenPosition, includeBacksides: true);
+                    vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), ColorFunction, WidthFunction, -Main.screenPosition, includeBacksides: false);
 
                 for (int i = 0; i < timesToDraw; i++)
                 {
@@ -232,6 +232,15 @@ namespace VFXPlus.Common
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
+            Texture2D DebugTest = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight");
+
+            for (int i = 0; i < trailPositions.Count; i++)
+            {
+                float rot = trailRotations[i];
+                Vector2 pos = trailPositions[i];
+
+                //Main.spriteBatch.Draw(DebugTest, pos - Main.screenPosition, null, Color.White with { A = 0 }, rot, DebugTest.Size() / 2f, 0.2f, SpriteEffects.None, 0f);
+            }
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
 

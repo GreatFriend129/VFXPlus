@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Terraria.Audio;
 using System;
 using Microsoft.CodeAnalysis;
+using Terraria.GameContent.Drawing;
 
 namespace VFXPlus.Content
 {
@@ -38,11 +39,14 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundEngine.PlaySound(SoundID.Item14, player.Center);
+            //int a = Projectile.NewProjectile(null, position + new Vector2(0f, -125f), velocity, ProjectileID.Bat, 2, 0, player.whoAmI);
+
 
             //Projectile.NewProjectile(null, position, velocity, ProjectileID.ShadowFlame, 2, 0, player.whoAmI);
 
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(-2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
+            //Projectile.NewProjectile(null, position, velocity.RotatedBy(2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
+            //Projectile.NewProjectile(null, position, velocity.RotatedBy(-2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
 
 
             return false;
