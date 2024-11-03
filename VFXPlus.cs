@@ -8,11 +8,16 @@ using Terraria.ID;
 using Terraria;
 using Terraria.ModLoader;
 using ReLogic.Content;
+using VFXPlus.Common;
+using System.Reflection;
+using VFXPlus.Common.Interfaces;
 
 namespace VFXPlus
 {
 	public class VFXPlus : Mod
 	{
+        private List<IOrderedLoadable> loadCache;
+
         internal static VFXPlus Instance { get; set; }
         public VFXPlus()
         {
@@ -24,6 +29,26 @@ namespace VFXPlus
 
         public override void Load()
         {
+            // Literally ripped from SLR
+            #region IOrderedLoadable Loading
+            loadCache = new List<IOrderedLoadable>();
+
+            foreach (Type type in Code.GetTypes())
+            {
+                if (!type.IsAbstract && type.GetInterfaces().Contains(typeof(IOrderedLoadable)))
+                {
+                    object instance = Activator.CreateInstance(type);
+                    loadCache.Add(instance as IOrderedLoadable);
+                }
+            }
+
+            for (int k = 0; k < loadCache.Count; k++)
+            {
+                loadCache[k].Load();
+                SetLoadingText("Loading: " + loadCache[k].GetType().Name);
+            }
+            #endregion
+
             if (Main.netMode != NetmodeID.Server)
             {
                 BasicTrailShader = Instance.Assets.Request<Effect>("Effects/TrailShaders/BasicTrailShader", AssetRequestMode.ImmediateLoad).Value;
@@ -31,12 +56,36 @@ namespace VFXPlus
             }
         }
 
+        public static void SetLoadingText(string text)
+        {
+            FieldInfo Interface_loadMods = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface")!.GetField("loadMods", BindingFlags.NonPublic | BindingFlags.Static)!;
+            MethodInfo UIProgress_set_SubProgressText = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UIProgress")!.GetProperty("SubProgressText", BindingFlags.Public | BindingFlags.Instance)!.GetSetMethod()!;
+
+            UIProgress_set_SubProgressText.Invoke(Interface_loadMods.GetValue(null), new object[] { text });
+        }
+
         public override void Unload()
         {
-            BasicTrailShader = null;
-            TrailShaderGradient = null;
+            if (loadCache != null)
+            {
+                foreach (IOrderedLoadable loadable in loadCache)
+                {
+                    loadable.Unload();
+                }
 
-            Instance = null;
+                loadCache = null;
+            }
+            else
+            {
+                Logger.Warn("load cache was null, ILoadables may not have been unloaded...");
+            }
+
+            if (!Main.dedServ)
+            {
+                BasicTrailShader = null;
+                TrailShaderGradient = null;
+                Instance = null;
+            }
         }
     }
 }

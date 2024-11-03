@@ -16,6 +16,7 @@ using Terraria.GameContent;
 using System.Threading;
 using Terraria.Graphics;
 using rail;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -276,73 +277,76 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            Color purple = new Color(61, 2, 92); //new Color(121, 7, 179);
-            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                Color purple = new Color(61, 2, 92); //new Color(121, 7, 179);
+                Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
 
-            #region Portal
-            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/Starlight").Value;
+                #region Portal
+                Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/Starlight").Value;
 
-            Vector2 drawPos = startPos - Main.screenPosition;
-            Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
+                Vector2 drawPos = startPos - Main.screenPosition;
+                Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
 
-            Main.EntitySpriteDraw(portal, drawPos, null, Color.Black * 0.3f * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-
-
-            Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
-
-            Main.EntitySpriteDraw(portal, drawPos, null, Color.White with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
-
-            #endregion
-
-            #region trail
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LintyTrail").Value;
+                Main.EntitySpriteDraw(portal, drawPos, null, Color.Black * 0.3f * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
 
 
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("AerovelenceMod/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+                Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+                Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
 
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = l_positions.ToArray();
-            float[] rot_arr = l_rotations.ToArray();
+                Main.EntitySpriteDraw(portal, drawPos, null, Color.White with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+                #endregion
 
-            VertexStrip vertexStrip2 = new VertexStrip();
-            vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * -0.03f);
+                #region trail
+                Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
+                Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LintyTrail").Value;
 
 
-            //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["ColorOne"].SetValue(darkPurple.ToVector3() * 2.5f); //*2f | 2.5f | 3f
+                if (myEffect == null)
+                    myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect.Parameters["glowThreshold"].SetValue(0.9f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.1f);
+                //Convert lists to arrays for use in vertex strip
+                Vector2[] pos_arr = l_positions.ToArray();
+                float[] rot_arr = l_rotations.ToArray();
+
+                VertexStrip vertexStrip = new VertexStrip();
+                vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+                VertexStrip vertexStrip2 = new VertexStrip();
+                vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
+
+                myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+                myEffect.Parameters["progress"].SetValue(timer * -0.03f);
 
 
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip2.DrawTrail();
-            vertexStrip2.DrawTrail();
+                //Over layer
+                myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+                myEffect.Parameters["ColorOne"].SetValue(darkPurple.ToVector3() * 2.5f); //*2f | 2.5f | 3f
 
-            //Under Layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(purple.ToVector3() * 3f);
+                myEffect.Parameters["glowThreshold"].SetValue(0.9f);
+                myEffect.Parameters["glowIntensity"].SetValue(1.1f);
 
 
-            myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-            myEffect.Parameters["glowIntensity"].SetValue(2f);
+                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+                vertexStrip2.DrawTrail();
+                vertexStrip2.DrawTrail();
 
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            vertexStrip.DrawTrail();
+                //Under Layer
+                myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+                myEffect.Parameters["ColorOne"].SetValue(purple.ToVector3() * 3f);
 
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            #endregion
+
+                myEffect.Parameters["glowThreshold"].SetValue(0.5f);
+                myEffect.Parameters["glowIntensity"].SetValue(2f);
+
+                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+                vertexStrip.DrawTrail();
+                vertexStrip.DrawTrail();
+
+                Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+                #endregion
+            });
 
             return false;
         }

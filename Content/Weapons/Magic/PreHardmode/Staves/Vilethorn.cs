@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
@@ -92,14 +93,17 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            //Border
-            for (int i = 0; i < 10; i++)
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                float myAlpha = projectile.Opacity * alpha;// 1f - scale; // * projectile.Opacity;
-                //float opacitySquared = projectile.Opacity * projectile.Opacity;
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                    new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None);
-            }
+                for (int i = 0; i < 8; i++) //4
+                {
+                    Vector2 offset = new Vector2(4f, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                    Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+                    float myAlpha = projectile.Opacity * alpha;
+                    Main.spriteBatch.Draw(vanillaTex, offsetDrawPos, null,
+                        new Color(61, 2, 92) with { A = 0 } * 3f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                }
+            });
 
             //Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
             return false;
@@ -178,18 +182,28 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            //Border
-            for (int i = 0; i < 10; i++)
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                float myAlpha = projectile.Opacity * alpha;// 1f - scale; // * projectile.Opacity;
+                for (int i = 0; i < 10; i++)
+                {
+                    float myAlpha = projectile.Opacity * alpha;
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
+                        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f);
+                }
+            });
+
+
+
+            ////Border
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    float myAlpha = projectile.Opacity * alpha;// 1f - scale; // * projectile.Opacity;
                 //float opacitySquared = projectile.Opacity * projectile.Opacity;
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                    new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None);
-            }
+            //    Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
+            //        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None);
+            //}
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
             return false;

@@ -1,0 +1,5 @@
+This shit is HEAVILY based off of Starlight River's Pixelization System, so much so that 
+
+https://github.com/ProjectStarlight/StarlightRiver/blob/general-polish/Core/Systems/PixelationSystem/PixelationSystem.cs
+
+SLR uses  GPL v3

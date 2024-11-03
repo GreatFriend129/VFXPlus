@@ -9,6 +9,7 @@ using Terraria.Audio;
 using System;
 using Microsoft.CodeAnalysis;
 using Terraria.GameContent.Drawing;
+using VFXPlus.Content.VFXTest;
 
 namespace VFXPlus.Content
 {
@@ -39,9 +40,12 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundEngine.PlaySound(SoundID.Item14, player.Center);
-            //int a = Projectile.NewProjectile(null, position + new Vector2(0f, -125f), velocity, ProjectileID.Bat, 2, 0, player.whoAmI);
+            int a = Projectile.NewProjectile(null, position, velocity * 1.25f, ModContent.ProjectileType<ThunderBall>(), 2, 0, player.whoAmI);
+            SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .45f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styleb, player.Center);
 
+            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Pitch = 1f, Volume = 0.9f, PitchVariance = 0.11f };
+            SoundEngine.PlaySound(styla, player.Center);
 
             //Projectile.NewProjectile(null, position, velocity, ProjectileID.ShadowFlame, 2, 0, player.whoAmI);
 

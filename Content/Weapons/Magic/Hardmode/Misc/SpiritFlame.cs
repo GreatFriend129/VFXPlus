@@ -66,13 +66,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
+            if (timer == 0)
+            {
+                Color littleLessPurple = new Color(121, 7, 179);
+
+                //little offset because proj center is not center of fireball visually
+                Vector2 dustSpawnPos = projectile.Center;// + new Vector2(0f, 7f * projectile.scale);
+
+                Dust d1 = Dust.NewDustPerfect(dustSpawnPos, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: littleLessPurple, Scale: 1f);
+                d1.rotation = 0f;
+                d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
+                Dust d2 = Dust.NewDustPerfect(dustSpawnPos, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: littleLessPurple, Scale: 1f);
+                d2.rotation = MathHelper.PiOver4;
+                d2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
+                for (int i = 0; i < 4 + Main.rand.Next(0, 2); i++)
+                {
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+                    Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: littleLessPurple, Scale: Main.rand.NextFloat(0.75f, 1.25f) * 0.4f);
+                    d.fadeIn = Main.rand.Next(0, 4);
+                    d.alpha = Main.rand.Next(0, 2);
+                    d.noLight = false;
+                }
+            }
+
             if (timer % 5 == 0 && Main.rand.NextBool())
             {
 
-                Vector2 vel = Main.rand.NextVector2Circular(4f, 4f) + projectile.velocity * 0.25f;
+                Vector2 vel = Main.rand.NextVector2Circular(2.75f, 2.75f) + projectile.velocity * 0.25f;
+
+                Color purp = new Color(61, 2, 92); //42 2 82
 
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel,
-                    newColor: Color.Purple * 3f, Scale: Main.rand.NextFloat(0.2f, 0.25f));
+                    newColor: purp * 3f, Scale: Main.rand.NextFloat(0.2f, 0.25f));
 
                 p.velocity += projectile.velocity * 0.2f;
 
@@ -82,6 +109,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             timer++;
 
+            inFadePower = Math.Clamp(MathHelper.Lerp(inFadePower, 1.35f, 0.1f), 0f, 1f);
+
             return base.PreAI(projectile);
         }
 
@@ -90,14 +119,24 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            Utils.DrawBorderString(Main.spriteBatch, "" + projectile.aiStyle, projectile.Center - Main.screenPosition + new Vector2(0f, -50f), Color.White);
-            Utils.DrawBorderString(Main.spriteBatch, "" + projectile.type, projectile.Center - Main.screenPosition + new Vector2(0f, -75f), Color.Black);
+            //Utils.DrawBorderString(Main.spriteBatch, "" + inFadePower, projectile.Center + new Vector2(0f, -50) - Main.screenPosition, Color.White);
 
+            Color purp = new Color(121, 7, 179) * inFadePower;
+            Color purp2 = new Color(61, 2, 92);
+
+            Texture2D SoftGlow = Mod.Assets.Request<Texture2D>("Assets/Orbs/SoftGlow64").Value;
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            Vector2 posOffset = new Vector2(0f, -6f * projectile.scale).RotatedBy(projectile.rotation);
+            Vector2 drawPos = projectile.Center - Main.screenPosition + posOffset;
+            
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+
+            float easeVal = Easings.easeInOutBack(inFadePower, 0f, 10f);
+            //Vector2 vec2Scale = new Vector2(easeVal, (easeVal * 0.25f) + 0.75f);
+            Vector2 vec2Scale = new Vector2(easeVal, 1f);
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -105,92 +144,122 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
                     float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
 
-                    Color col = Color.Purple * progress * projectile.Opacity;
+                    Color col = (purp2 * 3f) * progress * inFadePower;
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+                    float size2 = (0.25f + (progress * 0.75f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + posOffset;
 
                     Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
+                            previousRotations[i], TexOrigin, vec2Scale * size2, SpriteEffects.None);
                 }
 
             }
 
+            //Orb glow
+            Vector2 orbScale = new Vector2(0.75f * inFadePower, 1.25f) * projectile.scale * 0.5f;
+            Main.EntitySpriteDraw(SoftGlow, drawPos, null, purp with { A = 0 } * inFadePower * 0.75f, projectile.rotation, SoftGlow.Size() / 2f, orbScale, SpriteEffects.None);
+
+
             //Border
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 8; i++)
             {
-                float opacitySquared = projectile.Opacity * projectile.Opacity;
+                float opacitySquared = inFadePower * inFadePower;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.Purple with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f, SpriteEffects.None);
+                    purp2 with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, vec2Scale * 1.05f, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * inFadePower, projectile.rotation, TexOrigin, vec2Scale * projectile.scale, SpriteEffects.None);
             return false;
 
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            /*
+            //return true;
+            if (projectile.ai[0] < 0f)
+                return false;
+
+            #region CerobaImpact
+            Color littleLessPurple = new Color(121, 7, 179);
+
+            Color newPurple = new Color(61, 2, 92); //new Color(121, 7, 179);
+            Color darkPurple = new Color(42, 2, 82);
+
+            Color purp1 = newPurple; //deep pink
+            Color purp2 = Color.Purple; // hot pink
+
+            //Impact
+            for (int i = 0; i < 6 + Main.rand.Next(0, 4); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: littleLessPurple * 3f, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 13, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+            }
+
+            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
+            {
+                if (i > 4)
+                {
+                    Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+                    Dust sm = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), smvel, newColor: littleLessPurple * 1f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
+                    sm.customData = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f, 
+                        overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
+                }
+
+                Color col = Main.rand.NextBool() ? newPurple * 2f : newPurple;
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 5f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.75f, 1.25f) * 1f);
+                d.fadeIn = Main.rand.Next(0, 4);
+                d.alpha = Main.rand.Next(0, 2);
+                d.noLight = false;
+            }
+
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: littleLessPurple * 2f, Scale: 0.2f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
+
+            //Sound
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_14") with { Pitch = .3f, MaxInstances = -1, PitchVariance = 0.2f, Volume = 0.3f };
+            SoundEngine.PlaySound(style, projectile.Center);
+
+            string randomSound = Main.rand.NextBool() ? "2" : "1";
+
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Custom/dd2_flameburst_tower_shot_" + randomSound) with { Pitch = .25f, PitchVariance = .32f, MaxInstances = -1, Volume = 0.35f };
+            SoundEngine.PlaySound(style4, projectile.Center);
+
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_62") with { Volume = .23f, Pitch = .51f, PitchVariance = .27f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style2, projectile.Center);
+
+            #endregion
+
             #region vanillaKillStuff
             if (projectile.ai[0] >= 0f)
             {
+                int num143 = 80;
                 projectile.position = projectile.Center;
-                projectile.width = (projectile.height = 40);
+                projectile.width = (projectile.height = num143);
                 projectile.Center = projectile.position;
                 projectile.Damage();
-
-                SoundEngine.PlaySound(SoundID.Item14, )
-
-                Main.PlaySound(SoundID.Item14, base.position);
-                for (int num130 = 0; num130 < 2; num130++)
-                {
-                    int num131 = Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 31, 0f, 0f, 100, default(Color), 1.5f);
-                    Main.dust[num131].position = base.Center + Vector2.UnitY.RotatedByRandom(3.1415927410125732) * (float)Main.rand.NextDouble() * base.width / 2f;
-                }
-                for (int num132 = 0; num132 < 10; num132++)
-                {
-                    int num133 = Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 27, 0f, 0f, 0, default(Color), 2.5f);
-                    Main.dust[num133].position = base.Center + Vector2.UnitY.RotatedByRandom(3.1415927410125732) * (float)Main.rand.NextDouble() * base.width / 2f;
-                    Main.dust[num133].noGravity = true;
-                    Dust dust52 = Main.dust[num133];
-                    Dust dust2 = dust52;
-                    dust2.velocity *= 2f;
-                }
-                for (int num134 = 0; num134 < 5; num134++)
-                {
-                    int num135 = Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 31, 0f, 0f, 0, default(Color), 1.5f);
-                    Main.dust[num135].position = base.Center + Vector2.UnitX.RotatedByRandom(3.1415927410125732).RotatedBy(base.velocity.ToRotation()) * base.width / 2f;
-                    Main.dust[num135].noGravity = true;
-                    Dust dust53 = Main.dust[num135];
-                    Dust dust2 = dust53;
-                    dust2.velocity *= 2f;
-                }
+                SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+                int num144 = 15;
             }
-            
+
             #endregion
-            */
+
             return false;
-
-            for (int i = 0; i < 9 + Main.rand.Next(1, 6); i++)
-            {
-                Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
-
-                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                    newColor: Color.Purple * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
-            }
-
-            return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
 
-            base.OnHitNPC(projectile, target, hit, damageDone);
+            //base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)

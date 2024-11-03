@@ -3914,6 +3914,9 @@
             Set to <see langword="true"/> to make this Item set its mana cost to 0 whenever <see cref="F:Terraria.Player.spaceGun"/> is set to <see langword="true"/>.
             </summary>
         </member>
+        <member name="F:Terraria.ID.ItemID.Search">
+            <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
+        </member>
         <member name="T:Terraria.ID.ItemRarityID">
             <summary>Enumerates the values used with Item.rare</summary>
         </member>
@@ -5399,6 +5402,9 @@
             <para/> Defaults to false.
             </summary>
         </member>
+        <member name="F:Terraria.ID.NPCID.Search">
+            <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
+        </member>
         <member name="F:Terraria.ID.PlayerVariantID.Sets.Male">
             <summary>
             If <see langword="true"/> for a given skin variant (<see cref="F:Terraria.Player.skinVariant"/>), then that variant is for a male (<see cref="P:Terraria.Player.Male"/>) player.
@@ -6741,6 +6747,9 @@
             <para/> Note that code should check both <c>(projectile.aiStyle == ProjAIStyleID.Explosive || ProjectileID.Sets.Explosive[projectile.type])</c> for any code targeting explosive projectiles since this set might not be complete.
             </summary>
         </member>
+        <member name="F:Terraria.ID.ProjectileID.Search">
+            <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
+        </member>
         <member name="T:Terraria.ID.RecipeGroupID">
             <summary>
             Contains recipe group ids suitable for use in <see cref="M:Terraria.Recipe.AddRecipeGroup(System.Int32,System.Int32)"/>.
@@ -7049,6 +7058,12 @@
         </member>
         <member name="M:Terraria.ID.TileID.Sets.AddCrimsonTile(System.UInt16,System.Int32)">
             Functions to simplify modders adding a tile to the crimson, corruption, or jungle regardless of a remix world or not. Can still add manually as needed.
+        </member>
+        <member name="F:Terraria.ID.TileID.Search">
+            <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
+        </member>
+        <member name="F:Terraria.ID.WallID.Search">
+            <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
         </member>
         <member name="M:Terraria.IO.WorldFileData.TryGetModVersionGeneratedWith(System.String,System.Version@)">
             <summary>
@@ -9164,7 +9179,7 @@
         <member name="M:Terraria.Main.RegisterItemAnimation(System.Int32,Terraria.DataStructures.DrawAnimation)">
             <summary>
             Registers an animation for an item type to draw inside UI (not world or held item on player).
-            To enable its animation in the world, use ItemID.Sets.AnimatesAsSoul in conjunction with this
+            To enable its animation in the world, use <see cref="F:Terraria.ID.ItemID.Sets.AnimatesAsSoul"/> in conjunction with this
             </summary>
             <param name="index">Item type</param>
             <param name="animation">Draw animation</param>
@@ -10446,6 +10461,13 @@
             Shows an OS-provided modal message box displaying a message and a number of buttons and returns the button index of the user-selected option. The first option will be mapped to return key and the last option to escape key. The options are displayed from right to left in order.
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:Terraria.ModLoader.Engine.ErrorReporting.TMLErrorCode">
+            <summary> Various error codes to show in Visual Studio. Mainly used to cross reference with source code. Subject to change if more granular error codes are needed. </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.Engine.ErrorReporting.LogStandardDiagnosticError(System.String,Terraria.ModLoader.Engine.ErrorReporting.TMLErrorCode,System.Boolean,System.String,System.String)">
+            <summary> Writes an error to stderr using the <see href="https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-diagnostic-format-for-tasks?view=vs-2022">"MSBuild and Visual Studio format for diagnostic messages"</see>.
+            <para/> This means the error will show up in "Error List" in VS directly. </summary>
         </member>
         <member name="T:Terraria.ModLoader.Engine.FallbackSyncContext">
             <summary>
@@ -11787,7 +11809,7 @@
         </member>
         <member name="M:Terraria.ModLoader.GlobalInfoDisplay.ModifyDisplayParameters(Terraria.ModLoader.InfoDisplay,System.String@,System.String@,Microsoft.Xna.Framework.Color@,Microsoft.Xna.Framework.Color@)">
             <summary>
-            Allows modifying the display value (the text displayed next to the icon), the display name (texxt shown when hovering over the InfoDisplay in-game), and the display colors of an InfoDisplay.
+            Allows modifying the display value (the text displayed next to the icon), the display name (text shown when hovering over the InfoDisplay in-game), and the display colors of an InfoDisplay.
             </summary>
             <param name="currentDisplay">The display you're modifying the parameters for.</param>
             <param name="displayValue">The display value of the current display.</param>
@@ -12503,22 +12525,22 @@
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.PreDrawInWorld(Terraria.Item,Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single@,System.Single@,System.Int32)">
             <summary>
-            Allows you to draw things behind an item, or to modify the way an item is drawn in the world. Return false to stop the game from drawing the item (useful if you're manually drawing the item). Returns true by default.
+            <inheritdoc cref="M:Terraria.ModLoader.ModItem.PreDrawInWorld(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single@,System.Single@,System.Int32)"/>
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.PostDrawInWorld(Terraria.Item,Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single,System.Single,System.Int32)">
             <summary>
-            Allows you to draw things in front of an item. This method is called even if PreDrawInWorld returns false.
+            <inheritdoc cref="M:Terraria.ModLoader.ModItem.PostDrawInWorld(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single,System.Single,System.Int32)"/>
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.PreDrawInInventory(Terraria.Item,Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)">
             <summary>
-            Allows you to draw things behind an item in the inventory. Return false to stop the game from drawing the item (useful if you're manually drawing the item). Returns true by default.
+            <inheritdoc cref="M:Terraria.ModLoader.ModItem.PreDrawInInventory(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)"/>
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.PostDrawInInventory(Terraria.Item,Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)">
             <summary>
-            Allows you to draw things in front of an item in the inventory. This method is called even if PreDrawInInventory returns false.
+            <inheritdoc cref="M:Terraria.ModLoader.ModItem.PostDrawInInventory(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)"/>
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.HoldoutOffset(System.Int32)">
@@ -12841,7 +12863,8 @@
         </member>
         <member name="M:Terraria.ModLoader.GlobalNPC.OnKill(Terraria.NPC)">
             <summary>
-            Allows you to make things happen when an NPC dies (for example, setting ModSystem fields). This hook runs on the server/single player. For client-side effects, such as dust, gore, and sounds, see HitEffect
+            Allows you to make things happen when an NPC dies (for example, setting ModSystem fields). This hook runs on the server/single player. For client-side effects, such as dust, gore, and sounds, see HitEffect.
+            <para/> Most item drops should be done via drop rules registered in <see cref="M:Terraria.ModLoader.GlobalNPC.ModifyNPCLoot(Terraria.NPC,Terraria.ModLoader.NPCLoot)"/> or <see cref="M:Terraria.ModLoader.GlobalNPC.ModifyGlobalLoot(Terraria.ModLoader.GlobalLoot)"/>. Some dynamic NPC drops, such as additional hearts, are more suited for OnKill instead. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/MinionBoss/MinionBossMinion.cs#L101">MinionBossMinion.cs</see> shows an example of an NPC that drops additional hearts. See <see cref="F:Terraria.NPC.lastInteraction"/> and <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-NPC-Drops-and-Loot-1.4#player-who-killed-npc">Player who killed NPC wiki section</see> as well for determining which players attacked or killed this NPC.
             </summary>
             <param name="npc"></param>
         </member>
@@ -16724,7 +16747,8 @@
         </member>
         <member name="M:Terraria.ModLoader.ModItem.RightClick(Terraria.Player)">
             <summary>
-            Allows you to make things happen when this item is right-clicked in the inventory.
+            Allows you to make things happen when this item is right-clicked in the inventory. By default this will consume the item by 1 stack, so return false in <see cref="M:Terraria.ModLoader.ModItem.ConsumeItem(Terraria.Player)"/> if that behavior is undesired.
+            <para/> This is only called if the item can be right-clicked, meaning <see cref="F:Terraria.ID.ItemID.Sets.OpenableBag"/> is true for the item type or either <see cref="M:Terraria.ModLoader.ModItem.CanRightClick"/> or <see cref="M:Terraria.ModLoader.GlobalItem.CanRightClick(Terraria.Item)"/> return true.
             </summary>
             <param name="player">The player.</param>
         </member>
@@ -16896,51 +16920,67 @@
         </member>
         <member name="M:Terraria.ModLoader.ModItem.PreDrawInWorld(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single@,System.Single@,System.Int32)">
             <summary>
-            Allows you to draw things behind this item, or to modify the way this item is drawn in the world. Return false to stop the game from drawing the item (useful if you're manually drawing the item). Returns true by default.
+            Allows you to draw things behind this item, or to modify the way this item is drawn in the world. Return false to stop the game from drawing the item (useful if you're manually drawing the item).
+            <para/> Note that items in the world are drawn centered horizontally sitting at the bottom of the item hitbox, not in the center of the hitbox. To replicate the normal drawing calculations, use the following and then use <see cref="M:Microsoft.Xna.Framework.Graphics.SpriteBatch.DrawString(Microsoft.Xna.Framework.Graphics.SpriteFont,System.String,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Color,System.Single,Microsoft.Xna.Framework.Vector2,System.Single,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)"/>:
+            <code>
+            Main.GetItemDrawFrame(Item.type, out var itemTexture, out var itemFrame);
+            Vector2 drawOrigin = itemFrame.Size() / 2f;
+            Vector2 drawPosition = Item.Bottom - Main.screenPosition - new Vector2(0, drawOrigin.Y);
+            </code>
+            <para/> Returns true by default.
             </summary>
             <param name="spriteBatch">The sprite batch.</param>
             <param name="lightColor">Color of the light.</param>
             <param name="alphaColor">Color of the alpha.</param>
-            <param name="rotation">The rotation.</param>
-            <param name="scale">The scale.</param>
-            <param name="whoAmI">The who am i.</param>
+            <param name="rotation">The item rotation. Items rotate slightly as they are thrown.</param>
+            <param name="scale">The draw scale. Items are usually drawn in the world at a scale of 1f but some effects like pulsing Soul items change this.</param>
+            <param name="whoAmI">The <see cref="F:Terraria.Entity.whoAmI"/>.</param>
             <returns></returns>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.PostDrawInWorld(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single,System.Single,System.Int32)">
             <summary>
             Allows you to draw things in front of this item. This method is called even if PreDrawInWorld returns false.
+            <para/> Note that items in the world are drawn centered horizontally sitting at the bottom of the item hitbox, not in the center of the hitbox. To replicate the normal drawing calculations, use the following and then use <see cref="M:Microsoft.Xna.Framework.Graphics.SpriteBatch.DrawString(Microsoft.Xna.Framework.Graphics.SpriteFont,System.String,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Color,System.Single,Microsoft.Xna.Framework.Vector2,System.Single,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)"/>:
+            <code>
+            Main.GetItemDrawFrame(Item.type, out var itemTexture, out var itemFrame);
+            Vector2 drawOrigin = itemFrame.Size() / 2f;
+            Vector2 drawPosition = Item.Bottom - Main.screenPosition - new Vector2(0, drawOrigin.Y);
+            </code>
             </summary>
             <param name="spriteBatch">The sprite batch.</param>
             <param name="lightColor">Color of the light.</param>
             <param name="alphaColor">Color of the alpha.</param>
-            <param name="rotation">The rotation.</param>
-            <param name="scale">The scale.</param>
-            <param name="whoAmI">The who am i.</param>
+            <param name="rotation">The item rotation. Items rotate slightly as they are thrown.</param>
+            <param name="scale">The draw scale. Items are usually drawn in the world at a scale of 1f but some effects like pulsing Soul items change this.</param>
+            <param name="whoAmI">The <see cref="F:Terraria.Entity.whoAmI"/>.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.PreDrawInInventory(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)">
             <summary>
-            Allows you to draw things behind this item in the inventory. Return false to stop the game from drawing the item (useful if you're manually drawing the item). Returns true by default.
+            Allows you to draw things behind this item in the inventory. Return false to stop the game from drawing the item (useful if you're manually drawing the item).
+            <para/> Note that <paramref name="position"/> is the center of the inventory slot and <paramref name="origin"/> is the center of the texture <paramref name="frame"/> to be drawn, so the provided parameters can be passed into <see cref="M:Microsoft.Xna.Framework.Graphics.SpriteBatch.DrawString(Microsoft.Xna.Framework.Graphics.SpriteFont,System.String,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Color,System.Single,Microsoft.Xna.Framework.Vector2,System.Single,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)"/> to draw a texture in the typical manner.
+            <para/> Returns true by default.
             </summary>
             <param name="spriteBatch">The sprite batch.</param>
-            <param name="position">The position.</param>
-            <param name="frame">The frame.</param>
+            <param name="position">The screen position of the center of the inventory slot.</param>
+            <param name="frame">The frame of the item texture to be drawn.</param>
             <param name="drawColor">Color of the draw.</param>
             <param name="itemColor">Color of the item.</param>
-            <param name="origin">The origin.</param>
-            <param name="scale">The scale.</param>
+            <param name="origin">The draw origin, the center of the frame to be drawn.</param>
+            <param name="scale">The scale the item has been calculated to draw in to fit in the inventory slot.</param>
             <returns></returns>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.PostDrawInInventory(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Vector2,System.Single)">
             <summary>
             Allows you to draw things in front of this item in the inventory. This method is called even if PreDrawInInventory returns false.
+            <para/> Note that <paramref name="position"/> is the center of the inventory slot and <paramref name="origin"/> is the center of the texture <paramref name="frame"/> to be drawn, so the provided parameters can be passed into <see cref="M:Microsoft.Xna.Framework.Graphics.SpriteBatch.DrawString(Microsoft.Xna.Framework.Graphics.SpriteFont,System.String,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Color,System.Single,Microsoft.Xna.Framework.Vector2,System.Single,Microsoft.Xna.Framework.Graphics.SpriteEffects,System.Single)"/> to draw a texture in the typical manner.
             </summary>
             <param name="spriteBatch">The sprite batch.</param>
-            <param name="position">The position.</param>
-            <param name="frame">The frame.</param>
+            <param name="position">The screen position of the center of the inventory slot.</param>
+            <param name="frame">The frame of the item texture to be drawn.</param>
             <param name="drawColor">Color of the draw.</param>
             <param name="itemColor">Color of the item.</param>
-            <param name="origin">The origin.</param>
-            <param name="scale">The scale.</param>
+            <param name="origin">The draw origin, the center of the frame to be drawn.</param>
+            <param name="scale">The scale of the item drawing to to fit in the inventory slot.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.HoldoutOffset">
             <summary>
@@ -17582,7 +17622,7 @@
         <member name="M:Terraria.ModLoader.ModNPC.OnKill">
             <summary>
             Allows you to make things happen when this NPC dies (for example, dropping items manually and setting ModSystem fields). This hook runs on the server/single player. For client-side effects, such as dust, gore, and sounds, see HitEffect.
-            <para/> Most item drops should be done via drop rules registered in <see cref="M:Terraria.ModLoader.ModNPC.ModifyNPCLoot(Terraria.ModLoader.NPCLoot)"/>. Some dynamic NPC drops, such as additional hearts, are more suited for OnKill instead. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/MinionBoss/MinionBossMinion.cs#L101">MinionBossMinion.cs</see> shows an example of an NPC that drops additional hearts.
+            <para/> Most item drops should be done via drop rules registered in <see cref="M:Terraria.ModLoader.ModNPC.ModifyNPCLoot(Terraria.ModLoader.NPCLoot)"/>. Some dynamic NPC drops, such as additional hearts, are more suited for OnKill instead. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/MinionBoss/MinionBossMinion.cs#L101">MinionBossMinion.cs</see> shows an example of an NPC that drops additional hearts. See <see cref="F:Terraria.NPC.lastInteraction"/> and <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-NPC-Drops-and-Loot-1.4#player-who-killed-npc">Player who killed NPC wiki section</see> as well for determining which players attacked or killed this NPC.
             <para/> Bosses need to set flags when they are defeated, and some bosses run world generation code such as spawning new ore. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/MinionBoss/MinionBossBody.cs#L218">MinionBossMinion.cs</see> shows an example of these effects.
             </summary>
         </member>
@@ -18076,6 +18116,9 @@
             The cactus will share a tile ID with the vanilla cacti (80), so that the cacti can freely convert between each other if the sand below is converted.
             </summary>
         </member>
+        <member name="M:Terraria.ModLoader.ModCactus.GetFruitTexture">
+            <summary> The fruit texture has a special layout that needs to be followed, see ExampleCactus_Fruit.png in ExampleMod for a template. </summary>
+        </member>
         <member name="T:Terraria.ModLoader.ModTree">
             <summary>
             This class represents a type of modded tree.
@@ -18347,8 +18390,25 @@
         <member name="M:Terraria.ModLoader.ModPlayer.ProcessTriggers(Terraria.GameInput.TriggersSet)">
             <summary>
             Use this to check on keybinds you have registered. While SetControls is set even while in text entry mode, this hook is only called during gameplay.
+            <para/> Read <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Common/Players/ExampleKeybindPlayer.cs">ExampleKeybindPlayer.cs</see> for examples and information on using this hook.
             </summary>
             <param name="triggersSet"></param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModPlayer.ArmorSetBonusActivated">
+            <summary>
+            This is called when the player activates their armor set bonus by double tapping down (or up if <see cref="F:Terraria.Main.ReversedUpDownArmorSetBonuses"/> is true). As an example, the Vortex armor uses this to toggle stealth mode.
+            <para /> Use this to implement armor set bonuses that need to be activated by the player.
+            <para /> Don't forget to check if your armor set is active.
+            <para/> While this technically can be used for other effects, it will likely be frustrating for your players if non-armor set effects are being triggered in tandem with armor set bonus effects. Modders can use <see cref="F:Terraria.Player.holdDownCardinalTimer"/> and <see cref="F:Terraria.Player.doubleTapCardinalTimer"/> directly in other hooks for similar effects if needed.
+            </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.ModPlayer.ArmorSetBonusHeld(System.Int32)">
+            <summary>
+            This is called when the player activates their armor set bonus by holding down (or up if <see cref="F:Terraria.Main.ReversedUpDownArmorSetBonuses"/> is true) for some amount of time. The <paramref name="holdTime"/> parameter indicates how many ticks the key has been held down for. As an example, the Stardust armor prior to 1.4.4 used to use this to set the location of the Stardust Guardian if <paramref name="holdTime"/> was greater than 60.
+            <para /> Use this to implement armor set bonuses that need to be activated by the player.
+            <para /> Don't forget to check if your armor set is active.
+            <para/> While this technically can be used for other effects, it will likely be frustrating for your players if non-armor set effects are being triggered in tandem with armor set bonus effects. Modders can use <see cref="F:Terraria.Player.holdDownCardinalTimer"/> and <see cref="F:Terraria.Player.doubleTapCardinalTimer"/> directly in other hooks for similar effects if needed.
+            </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModPlayer.SetControls">
             <summary>
@@ -23759,7 +23819,7 @@
         </member>
         <member name="F:Terraria.Player.accRunSpeed">
             <summary>
-            Similar to <see cref="F:Terraria.Player.maxRunSpeed"/>, except this is usually set to a specific value for the active shoe accessory. If accRunSpeed ends up larger than maxRunSpeed, then sprint dust will spawn at high speeds. Basically, this exists to differentiate between sprinting ("run super fast") and running. 
+            Similar to <see cref="F:Terraria.Player.maxRunSpeed"/>, except this is usually set to a specific value for the active shoe accessory. If accRunSpeed ends up larger than maxRunSpeed, then sprint dust will spawn at high speeds. Basically, this exists to differentiate between sprinting ("run super fast") and running.
             <para/> Defaults to 3f. Accessories set this to specific values, resulting in the last equipped accessories to dictate the final value. Vanilla shoe accessories set this to <c>6f</c> (<see cref="F:Terraria.ID.ItemID.HermesBoots"/>) or <c>6.75</c> (<see cref="F:Terraria.ID.ItemID.LightningBoots"/>). This assignment should happen in <see cref="M:Terraria.ModLoader.ModItem.UpdateEquip(Terraria.Player)"/>.
             <para/> This value is later multiplied by other effects in the same manner as <see cref="F:Terraria.Player.maxRunSpeed"/>. They are usually modified in tandem, but not always depending on the desired result. For example, asphalt triples maxRunSpeed but does not affect accRunSpeed, whereas Shadow Armor affects both equally.
             <para/> These multiplicative adjustments should only be done in <see cref="M:Terraria.ModLoader.ModPlayer.PostUpdateRunSpeeds"/> or <see cref="M:Terraria.ModLoader.ModItem.HorizontalWingSpeeds(Terraria.Player,System.Single@,System.Single@)"/> to correctly function.
@@ -23852,6 +23912,22 @@
             <br/> A minion's value is stored as <see cref="F:Terraria.Projectile.minionSlots"/>.
             </summary>
         </member>
+        <member name="F:Terraria.Player.doubleTapCardinalTimer">
+            <summary>
+            Used to count time between repeated directional movement key presses. When a directional key is pressed it is set to a value of 15. The value will count down each update until it reaches 0. If the key is pressed again before it reaches 0 it will trigger <see cref="M:Terraria.Player.KeyDoubleTap(System.Int32)" />, which will call <see cref="M:Terraria.ModLoader.ModPlayer.ArmorSetBonusActivated" /> if the armor set bonus direction key has been pressed. Updated immediately before <see cref="M:Terraria.ModLoader.ModPlayer.SetControls" />.
+            <CardinalDirections>
+		<para /> The index values are as follows: <br /> 0: Down <br /> 1: Up <br /> 2: Right <br /> 3: Left
+	</CardinalDirections>
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.holdDownCardinalTimer">
+            <summary>
+            Counts how long (in ticks) the player has been holding directional movement keys. Updated immediately before <see cref="M:Terraria.ModLoader.ModPlayer.SetControls" />.
+            <CardinalDirections>
+		<para /> The index values are as follows: <br /> 0: Down <br /> 1: Up <br /> 2: Right <br /> 3: Left
+	</CardinalDirections>
+            </summary>
+        </member>
         <member name="F:Terraria.Player.townNPCs">
             <summary>
             The sum of the <see cref="F:Terraria.NPC.npcSlots"/> of all town NPCs near this player.
@@ -23868,6 +23944,9 @@
             If true, the mouse is currently overlapping with a user interface so any mouse interaction should be not be interpreted as gameplay input, such as using items.
             <para/> UIElements that should block user interaction typically check <c>ContainsPoint(Main.MouseScreen)</c> in the Update method to determine if mouseInterface should be set to true.
             </summary>
+        </member>
+        <member name="F:Terraria.Player.selectedItem">
+            <summary> The index of the <see cref="T:Terraria.Item"/> within the <see cref="F:Terraria.Player.inventory"/> currently selected by the player. To access the <see cref="T:Terraria.Item"/> directly use <see cref="P:Terraria.Player.HeldItem"/> instead. </summary>
         </member>
         <member name="F:Terraria.Player.armor">
             <summary>
@@ -23962,6 +24041,9 @@
         </member>
         <member name="F:Terraria.Player.respawnTimer">
             <summary> The amount of time in ticks before this player respawns after death. Most suitably modified in <see cref="M:Terraria.ModLoader.ModPlayer.Kill(System.Double,System.Int32,System.Boolean,Terraria.DataStructures.PlayerDeathReason)"/> </summary>
+        </member>
+        <member name="F:Terraria.Player.controlDownHold">
+            <summary> True when the player has been holding <see cref="F:Terraria.Player.controlDown"/> for at least 45 ticks. Used by <see cref="F:Terraria.ID.ItemID.ShimmerCloak"/>. See also <see cref="F:Terraria.Player.holdDownCardinalTimer"/>. </summary>
         </member>
         <member name="F:Terraria.Player.manaCost">
             <summary>
@@ -24275,6 +24357,9 @@
             <summary>
             If <see langword="true"/>, then this player is in the Underworld (<see cref="P:Terraria.Main.UnderworldLayer"/>).
             </summary>
+        </member>
+        <member name="P:Terraria.Player.HeldItem">
+            <summary> The <see cref="T:Terraria.Item"/> within the <see cref="F:Terraria.Player.inventory"/> currently selected by the player. </summary>
         </member>
         <member name="P:Terraria.Player.UsingSuperCart">
             <summary>
@@ -25562,7 +25647,7 @@
         <member name="F:Terraria.Projectile.hide">
             <summary>
             Projectile is not drawn normally. Held projectiles (<see cref="F:Terraria.Player.heldProj"/>) and projectiles specified to be drawn at specific layers (<see cref="M:Terraria.ModLoader.ModProjectile.DrawBehind(System.Int32,System.Collections.Generic.List{System.Int32},System.Collections.Generic.List{System.Int32},System.Collections.Generic.List{System.Int32},System.Collections.Generic.List{System.Int32},System.Collections.Generic.List{System.Int32})"/>)  use this.
-            <para/> Be default this will also influence the lighting of this projectile to match the players lighting, as if it were a held projectile. Projectiles that are not held ny the player should set <see cref="F:Terraria.ID.ProjectileID.Sets.DontAttachHideToAlpha"/> to true in SetStaticDefaults: <c>ProjectileID.Sets.DontAttachHideToAlpha[Type] = true;</c>
+            <para/> Be default this will also influence the lighting of this projectile to match the players lighting, as if it were a held projectile. Projectiles that are not held by the player should set <see cref="F:Terraria.ID.ProjectileID.Sets.DontAttachHideToAlpha"/> to true in SetStaticDefaults: <c>ProjectileID.Sets.DontAttachHideToAlpha[Type] = true;</c>
             <para/> Defaults to <see langword="false"/>.
             </summary>
         </member>
@@ -26726,10 +26811,15 @@
             Here in case someone proves my statement wrong later.
             </summary>
         </member>
+        <member name="F:Terraria.UI.UIElement.IgnoresMouseInteraction">
+            <summary>
+            If true, this element will be ignored for mouse interactions. This can be used to allow UIElement placed over other  UIElement to not be the target of mouse clicks. Defaults to false.
+            </summary>
+        </member>
         <member name="P:Terraria.UI.UIElement.IsMouseHovering">
             <summary>
             True when the mouse is hovering over this UIElement. Useful for setting hover tooltips in DrawSelf or drawing hover visual indicators.
-            <para/> Note that this is true for all elements in the heiarchy that are hovered, not just the topmost element. For example, hovering over a button that is appended to a panel will mean that IsMouseHovering is true for the button and the panel. Use this or <c>ContainsPoint(Main.MouseScreen)</c> for behaviors that use this logic, such as setting <see cref="F:Terraria.Player.mouseInterface"/> to true.
+            <para/> Note that this is true for all elements in the hierarchy that are hovered, not just the topmost element. For example, hovering over a button that is appended to a panel will mean that IsMouseHovering is true for the button and the panel. Use this or <c>ContainsPoint(Main.MouseScreen)</c> for behaviors that use this logic, such as setting <see cref="F:Terraria.Player.mouseInterface"/> to true.
             </summary>
         </member>
         <member name="E:Terraria.UI.UIElement.OnMouseOver">
@@ -26737,6 +26827,13 @@
         </member>
         <member name="E:Terraria.UI.UIElement.OnMouseOut">
             <summary> Called by <see cref="M:Terraria.UI.UIElement.MouseOut(Terraria.UI.UIMouseEvent)"/>. Use this event instead of inheritance if suitable. </summary>
+        </member>
+        <member name="M:Terraria.UI.UIElement.LeftMouseDown(Terraria.UI.UIMouseEvent)">
+            <summary>
+            Called when the UIElement under the mouse is left clicked. The default code calls the <see cref="E:Terraria.UI.UIElement.OnLeftMouseDown"/> event and then calls <see cref="M:Terraria.UI.UIElement.LeftMouseDown(Terraria.UI.UIMouseEvent)"/> on the <see cref="P:Terraria.UI.UIElement.Parent"/> element.
+            <para/> Since the method is called on all parent elements in the hierarchy, check <c>if (evt.Target == this)</c> for code only interested in direct clicks to this element. Children elements overlaying this element can be ignored by setting <see cref="F:Terraria.UI.UIElement.IgnoresMouseInteraction"/> to true on them.
+            </summary>
+            <param name="evt"></param>
         </member>
         <member name="M:Terraria.UI.UIElement.MouseOver(Terraria.UI.UIMouseEvent)">
             <summary>
@@ -26751,6 +26848,21 @@
             Called once when this UIElement is no longer moused over. Default implementation sets <see cref="P:Terraria.UI.UIElement.IsMouseHovering"/> to false, calls <see cref="E:Terraria.UI.UIElement.OnMouseOut"/> event, then calls this same method on the <see cref="P:Terraria.UI.UIElement.Parent"/> element.
             <para/> Useful for changing visuals to indicate the element is no longer interactable, as is the <see cref="E:Terraria.UI.UIElement.OnMouseOut"/> event.
             <para/> <see cref="M:Terraria.UI.UIElement.MouseOver(Terraria.UI.UIMouseEvent)"/> will be called when it is hovered once again.
+            </summary>
+        </member>
+        <member name="M:Terraria.UI.UIElement.OnActivate">
+            <summary>
+            Called each time this element is activated, which is usually when a <see cref="T:Terraria.UI.UIState"/> is activated via <see cref="M:Terraria.UI.UserInterface.SetState(Terraria.UI.UIState)"/>. Use this to run code to update elements whenever the UI is toggled on.
+            </summary>
+        </member>
+        <member name="M:Terraria.UI.UIElement.OnInitialize">
+            <summary>
+            Called before the first time this element is activated (see <see cref="M:Terraria.UI.UIElement.OnActivate"/>). Use this method to create and append other UIElement to this to build a UI. 
+            </summary>
+        </member>
+        <member name="F:Terraria.UI.UIEvent.Target">
+            <summary>
+            The element targeted by the mouse event. This is usually the element lowest in the UI hierarchy overlapping with mouse position unless <see cref="F:Terraria.UI.UIElement.IgnoresMouseInteraction"/> is true.
             </summary>
         </member>
         <member name="M:Terraria.Utilities.CrashDump.WriteExceptionAsZipAndClearOld(Terraria.Utilities.CrashDump.Options,System.IntPtr)">
@@ -26788,6 +26900,47 @@
             <returns></returns>
             <exception cref="T:System.ArgumentOutOfRangeException"></exception>
         </member>
+        <member name="M:Terraria.Utils.Turn01ToCyclic010(System.Single)">
+            <summary>
+            Remaps a provided value from 0->1 to a cosine curve. Provides a method of turning an input sawtooth pattern into a smooth cyclic curve. This is useful when using repeating timers to drive effects that should return smoothly to their initial value before repeating rather than reset abruptly.
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Terraria.Utils.PingPongFrom01To010(System.Single)">
+            <summary>
+            Remaps a provided value from 0->1 to 0->1->0, essentially turning a sawtooth pattern into a triangle wave pattern:
+            <code>
+                     Original:   Remap:    Range Values ↓    
+                            /      / \          1        
+                         /        /   \        0.5      
+                      /          /     \        0        
+            Input→    0 .5  1    0 .5  1
+            Output→   0 .5  1    0  1  0
+            </code>
+            This is useful when using repeating timers to drive effects that should return linearly to their initial value before repeating rather than reset abruptly.
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Terraria.Utils.MultiLerp(System.Single,System.Single[])">
+            <summary>
+            Linearly interpolates between several values denoting a continuous piecewise linear function (<see href="https://en.wikipedia.org/wiki/Piecewise_linear_function">Piecewise linear function wikipedia page</see>).
+            <para/> This can be used to interpolate between several values, providing finer control over the transition between values.
+            <code>
+            floats parameter→ 0      4      1    Range Values ↓
+                                    /   \            3    
+                                  /        \         2   
+                                /                    1
+                              /                      0
+            percent input→    0 .25 .5 .75  1 
+            output→           0  2   4  3   2    
+            </code>
+            </summary>
+            <param name="percent"></param>
+            <param name="floats"></param>
+            <returns></returns>
+        </member>
         <member name="M:Terraria.Utils.GetDayTimeAs24FloatStartingFromMidnight">
             <summary>
             Returns the current world time in a 24 hour clock representation. This value is derived from <see cref="F:Terraria.Main.dayTime"/> and <see cref="F:Terraria.Main.time"/>.
@@ -26800,6 +26953,15 @@
             </summary>
             <param name="r"></param>
             <returns></returns>
+        </member>
+        <member name="M:Terraria.Utils.Frame(ReLogic.Content.Asset{Microsoft.Xna.Framework.Graphics.Texture2D},System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <inheritdoc cref="M:Terraria.Utils.Frame(Microsoft.Xna.Framework.Graphics.Texture2D,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:Terraria.Utils.Frame(Microsoft.Xna.Framework.Graphics.Texture2D,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Returns a Rectangle region ("frame") of the Texture2D corresponding to the layout provided. Can be used to easily retrieve coordinates for drawing a specific frame of a texture.
+            <para/> For example <c>texture.Frame(1, 3, 0, 2)</c> indicates that the texture has 1 column and 3 rows and returns the coordinates of the bottom (index #2, or 3rd) frame of the only column. 
+            </summary>
         </member>
         <member name="M:Terraria.Utils.ToWorldCoordinates(Microsoft.Xna.Framework.Point,System.Single,System.Single)">
             <summary> <ToWorldCoordinates>
