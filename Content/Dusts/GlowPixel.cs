@@ -95,7 +95,7 @@ namespace VFXPlus.Content.Dusts
 		{
 			Texture2D texture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/PixelGlowShapes").Value;
 
-			dust.customData = false;
+			//dust.customData = false;
 			dust.noGravity = true;
 			dust.frame = new Rectangle(0, texture.Height / 5 * Main.rand.Next(5), texture.Width, texture.Height / 5);
 		}

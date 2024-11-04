@@ -14,7 +14,6 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.Graphics;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using VFXPlus.Common.Drawing;
 
 
@@ -36,35 +35,42 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = .12f, Pitch = .1f, PitchVariance = .15f, MaxInstances = 1 };
-            //SoundEngine.PlaySound(style, player.Center);
+            Vector2 spawnPos = position + velocity.SafeNormalize(Vector2.UnitX) * 28f;
 
-            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_1") with { Pitch = .85f, PitchVariance = .2f, Volume = 0.35f };
-            //SoundEngine.PlaySound(style2, player.Center);
-
-            //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.1f, Pitch = -.33f, PitchVariance = 0.1f, };
-            //SoundEngine.PlaySound(style);
-
-            //Dust
-            for (int i = 10; i < 6 + Main.rand.Next(0, 4); i++) //2 //0,3
+            for (int i = 0; i < 7 + Main.rand.Next(0, 2); i++)
             {
-                Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<LineSpark>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(6, 19),
-                    newColor: Color.OrangeRed, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
+                Vector2 randomStart = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1) * 3f;
 
-                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    1f, 0.25f); //80
-
+                Dust gd = Dust.NewDustPerfect(spawnPos, ModContent.DustType<GlowPixelAlts>(), randomStart * Main.rand.NextFloat(0.3f, 1.35f) * 1.5f, newColor: new Color(255, 130, 20) * 0.85f,
+                    Scale: Main.rand.NextFloat(0.75f, 1.4f) * 1f);
+                gd.alpha = 2;
             }
 
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_108") with { Pitch = .78f, PitchVariance = 0.1f, Volume = 0.3f };
-            //SoundEngine.PlaySound(style, player.Center);
 
-            //SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Pitch = 1f, Volume = 0.9f, PitchVariance = 0.11f };
-            //SoundEngine.PlaySound(styla, player.Center);
+            //Smoke
+            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+                Dust sm = Dust.NewDustPerfect(spawnPos, ModContent.DustType<HighResSmoke>(), smvel, newColor: new Color(255, 130, 20) * 0.85f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
+                sm.customData = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f,
+                    overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
+            }
 
+            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .07f, Pitch = 0.55f, PitchVariance = .1f };
+            SoundEngine.PlaySound(style2, player.Center);
+
+            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Volume = 0.1f, Pitch = .9f, PitchVariance = 0.11f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styla, player.Center);
+
+            /* very cool
             SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .1f, Pitch = 0.5f, PitchVariance = .1f };
             SoundEngine.PlaySound(style2, player.Center);
+
+            SoundEngine.PlaySound(SoundID.Item70 with { Pitch = .9f, Volume = 0.4f, MaxInstances = -1, PitchVariance = 0.25f }, player.Center);
+
+            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Volume = 0.25f, Pitch = .9f, PitchVariance = 0.11f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styla, player.Center);
+            */
 
             return true;
         }
@@ -79,16 +85,35 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             return lateInstantiation && (entity.type == ProjectileID.HeatRay);
         }
 
+        int timer = 0;
         int vfxIndex = -1;
         public override bool PreAI(Projectile projectile)
         {
             if (vfxIndex == -1)
             {
-                int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<HeatRayVFX>(), 0, 0, projectile.owner);
+                Vector2 offset = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 25f;
+                int p = Projectile.NewProjectile(null, offset, Vector2.Zero, ModContent.ProjectileType<HeatRayVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
                 vfxIndex = p;
             }
 
+
+            if (timer % 4 == 0 && false)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(5f, 5f) + projectile.velocity * 1.25f;
+
+                Color ora = new Color(255, 160, 20);
+
+                Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelatedLineSpark>(), 
+                    vel, newColor: Color.Orange, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 2.45f);
+
+                dp.velocity += projectile.velocity * 2.15f;
+
+                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
+                    1f, 0.25f);
+            }
+
+            timer++;
 
             return base.PreAI(projectile);
         }
@@ -100,6 +125,50 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void OnKill(Projectile projectile, int timeLeft)
         {
+            //Dust
+            for (int i = 0; i < 12 + Main.rand.Next(0, 2); i++) //4 //2,2
+            {
+                Vector2 vel = new Vector2(-8, 0).RotatedBy(projectile.velocity.ToRotation());
+
+                Color col = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<LineSpark>(),
+                    vel.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-1.15f, 1.15f)) * Main.rand.Next(7, 18),
+                    newColor: col, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.3f);
+
+                p.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
+                    1f, 0.5f);
+            }
+
+            for (int fg = 0; fg < 18 + Main.rand.Next(0, 4); fg++)
+            {
+                Vector2 randomStart = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1) * 3f * -1f;
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), randomStart * Main.rand.NextFloat(0.3f, 1.35f) * 1.5f, newColor: new Color(255, 130, 20) * 0.85f, 
+                    Scale: Main.rand.NextFloat(0.75f, 1.4f) * 0.5f);
+                gd.alpha = 2;
+            }
+
+            for (int i = 0; i < 3 + Main.rand.Next(3); i++)
+            {
+                Vector2 v = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(2) * -1f;
+                Dust sa = Dust.NewDustPerfect(projectile.Center, DustID.PortalBoltTrail, v * Main.rand.NextFloat(2f, 6f), 0,
+                    Color.Orange, Main.rand.NextFloat(0.4f, 0.7f) * 1.35f);
+
+                if (sa.velocity.Y > 0)
+                    sa.velocity.Y *= -1;
+
+                //sa.velocity += vec * 2f;
+            }
+
+            //Smoke
+            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+                Dust sm = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), smvel, newColor: new Color(255, 130, 20) * 1f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
+                sm.customData = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f,
+                    overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
+            }
+
             if (vfxIndex != -1)
                 (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;
 
@@ -161,19 +230,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         float true_width = 1f;
         float true_alpha = 1f;
 
+        float startingScroll = 0;
+
         public Vector2 startPos = Vector2.Zero;
         public Vector2 endPos = Vector2.Zero;
         public override void AI()
         {
             if (timer == 0)
             {
+                startingScroll = Main.rand.NextFloat(0f, 1000f);
                 startPos = Projectile.Center;
                 Projectile.velocity = Vector2.Zero;
             }
 
             true_width = Math.Clamp(MathHelper.Lerp(true_width, -0.5f, 0.05f), 0, 1f); //0.04
 
-            if (timer == 100 || true_width == 0)
+            if (timer == 100 || true_width <= 0.05f)
                 Projectile.active = false;
 
             timer++;
@@ -184,29 +256,32 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             #region endPoints
             Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
             //Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
+            Color inBetweenOrange = Color.Lerp(Color.Orange, Color.OrangeRed, 0.25f);
 
+            int dir = Projectile.rotation.ToRotationVector2().X >= 0 ? 1 : -1; 
             float rot = Projectile.rotation;
 
-            float starOuterScale = 0.8f * true_width;
-            float starInnerScale = 0.4f * true_width;
+            float starRot = (float)(Main.timeForVisualEffects * 0.05f * dir);
+            float starOuterScale = 1.6f * true_width;
+            float starInnerScale = 0.8f * true_width;
+
             //Start star
-            Main.EntitySpriteDraw(portal, startPos - Main.screenPosition, null, Color.Orange with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(glorb, startPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha * 0.5f, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, startPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha * 1.15f, rot, portal.Size() / 2, starOuterScale, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, startPos - Main.screenPosition, null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
 
             //End star
-            Main.EntitySpriteDraw(portal, endPos - Main.screenPosition, null, Color.Orange with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(glorb, endPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, endPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha * 1.15f, rot, portal.Size() / 2, starOuterScale, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, endPos - Main.screenPosition, null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
 
             #endregion
 
-            //if (myEffect == null)
-            //myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/ComboLaserVertex", AssetRequestMode.ImmediateLoad).Value;
-
             if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/ComboLaserVertex", AssetRequestMode.ImmediateLoad).Value;
 
             #region laser
             if (endPos.Equals(Vector2.Zero))
@@ -218,58 +293,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 Vector2[] pos_arr = { startPos, endPos };
                 float[] rot_arr = { Projectile.rotation, Projectile.rotation };
 
-                Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Trail5Loop").Value;
-                Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value;
-
-
-
                 VertexStrip vertexStrip = new VertexStrip();
                 vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-                VertexStrip vertexStripBlack = new VertexStrip();
-                vertexStripBlack.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
-
-
-                myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                myEffect.Parameters["progress"].SetValue(timer * -0.04f);
-
-                //Black Layer
-                #region black
-                myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-                myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 1f);
-                myEffect.Parameters["glowThreshold"].SetValue(1f);
-
-                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-
-                //vertexStripBlack.DrawTrail();
-                #endregion
-
-                //Main layer
-                myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-                myEffect.Parameters["ColorOne"].SetValue(Color.DeepSkyBlue.ToVector3() * 2f);
-
-                myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-                myEffect.Parameters["glowIntensity"].SetValue(1.3f);
-
+                NewShaderParams();
 
                 myEffect.CurrentTechnique.Passes["MainPS"].Apply();
                 vertexStrip.DrawTrail();
-                vertexStrip.DrawTrail();
-
-                //Layer 2
-                myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-                myEffect.Parameters["ColorOne"].SetValue(Color.SkyBlue.ToVector3() * 2f);
-
-                myEffect.Parameters["glowThreshold"].SetValue(0.9f);
-                myEffect.Parameters["glowIntensity"].SetValue(1.1f);
-
-
-                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-                vertexStripBlack.DrawTrail();
-                vertexStripBlack.DrawTrail();
 
                 Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-
             });
             #endregion
 
@@ -282,34 +313,35 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
-            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
+            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
-            myEffect.Parameters["satPower"].SetValue(0.45f); //higher power -> less affected by background 
+            myEffect.Parameters["satPower"].SetValue(0.6f); //higher power -> less affected by background 
 
-            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
-            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/FlameTrail").Value);
-            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail7").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/smokeTrail4_512").Value);
+            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/smokeTrail4_512").Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value); //smokeTrail4_512
 
             // orange = 255, 165, 0 
             // orangeRed = 255 69 0 
             Color a = Color.Orange;
             Color b = Color.OrangeRed;
+            Color c = new Color(255, 110, 5);
             Color c1 = new Color(255, 96, 30, 255);
             Color c2 = new Color(240, 79, 30, 255);
             Color c3 = new Color(255, 173, 30, 255);
             Color c4 = new Color(255, 169, 30, 255);
 
-            myEffect.Parameters["Color1"].SetValue(a.ToVector4());
-            myEffect.Parameters["Color2"].SetValue(c2.ToVector4());
+            myEffect.Parameters["Color1"].SetValue(c.ToVector4());
+            myEffect.Parameters["Color2"].SetValue(Color.White.ToVector4());
             myEffect.Parameters["Color3"].SetValue(c3.ToVector4());
             myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
 
-            myEffect.Parameters["Color1Mult"].SetValue(1.75f * 1f); //1.75
-            myEffect.Parameters["Color2Mult"].SetValue(1.15f * 1f);
-            myEffect.Parameters["Color3Mult"].SetValue(1.25f * 1f); //0.25f
-            myEffect.Parameters["Color4Mult"].SetValue(1.75f * 1f); //0.75f
-            myEffect.Parameters["totalMult"].SetValue(1f);
+            myEffect.Parameters["Color1Mult"].SetValue(1f * 1f); //1.75
+            myEffect.Parameters["Color2Mult"].SetValue(0.75f * 1f);
+            myEffect.Parameters["Color3Mult"].SetValue(0.5f * 1f); //0.25f
+            myEffect.Parameters["Color4Mult"].SetValue(0.75f * 1f); //0.75f
+            myEffect.Parameters["totalMult"].SetValue(1.15f);
 
 
             //We want the number of repititions to be relative to the length of the laser
@@ -319,11 +351,61 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
             myEffect.Parameters["tex2reps"].SetValue(3f * repValue);
             myEffect.Parameters["tex3reps"].SetValue(3f * repValue);
-            myEffect.Parameters["tex4reps"].SetValue(10f * repValue);
+            myEffect.Parameters["tex4reps"].SetValue(3f * repValue);
 
-            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.04f * 1f);
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.02f * 1f);
             
         }
+
+        public void NewShaderParams()
+        {
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+
+            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
+            myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
+            myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
+
+            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value); //smokeTrail4_512
+
+            // orange = 255, 165, 0 
+            // orangeRed = 255 69 0 
+            Color a = Color.Orange;
+            Color b = Color.OrangeRed;
+            Color c = new Color(255, 110, 5);
+            Color c1 = new Color(255, 96, 30, 255);
+            Color c2 = new Color(240, 79, 30, 255);
+            Color c3 = new Color(255, 173, 30, 255);
+            Color c4 = new Color(255, 169, 30, 255);
+
+            myEffect.Parameters["Color1"].SetValue(a.ToVector4());
+            myEffect.Parameters["Color2"].SetValue(c1.ToVector4());
+            myEffect.Parameters["Color3"].SetValue(Color.White.ToVector4());
+            myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
+
+            myEffect.Parameters["Color1Mult"].SetValue(1.25f * 1f); //1.75
+            myEffect.Parameters["Color2Mult"].SetValue(1.25f * 1f);
+            myEffect.Parameters["Color3Mult"].SetValue(0.75f * 1f); //0.25f
+            myEffect.Parameters["Color4Mult"].SetValue(1f * 0f); //0.75f
+            myEffect.Parameters["totalMult"].SetValue(1.15f);
+
+
+            //We want the number of repititions to be relative to the length of the laser
+            float dist = (Projectile.Center - endPos).Length();
+            float repValue = dist / 1000f;
+
+            myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
+            myEffect.Parameters["tex2reps"].SetValue(1f * repValue);
+            myEffect.Parameters["tex3reps"].SetValue(3f * repValue);
+            myEffect.Parameters["tex4reps"].SetValue(3f * repValue);
+
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.03f + startingScroll);
+
+        }
+
 
         public Color StripColor(float progress)
         {
@@ -336,7 +418,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         }
         public float StripWidth(float progress)
         {
-            return 50f * true_width; //80f
+            return 80f * true_width; //80f
 
             //float num = 1f;
             //float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
@@ -346,7 +428,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public float StripWidth2(float progress)
         {
-            return 180f;
+            return 40f;
             
             float num = 1f;
             float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);

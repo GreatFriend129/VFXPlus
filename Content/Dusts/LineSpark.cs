@@ -16,6 +16,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 using static Terraria.ModLoader.ModContent;
+using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Dusts
 {
@@ -116,7 +117,6 @@ namespace VFXPlus.Content.Dusts
 		public override bool PreDraw(Dust dust)
 		{
 			Color White = Color.White with { A = 0 } * (dust.alpha / 255f);
-			Color Black = Color.Black * (dust.alpha / 255f);
 			Texture2D tex = Texture2D.Value;
 
             if (dust.customData != null)
@@ -140,6 +140,38 @@ namespace VFXPlus.Content.Dusts
 		}
 
 	}
+
+	public class PixelatedLineSpark : LineSpark
+	{
+        public override bool PreDraw(Dust dust)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("Dusts", () =>
+            {
+                Color White = Color.White with { A = 0 } * (dust.alpha / 255f);
+                Texture2D tex = Texture2D.Value;
+
+                if (dust.customData != null)
+                {
+                    if (dust.customData is LineSparkBehavior behavior)
+                    {
+                        Vector2 scale = behavior.Vector2DrawScale * dust.scale;
+
+                        Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
+
+                        if (behavior.DrawWhiteCore)
+                            Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 } * 1f, dust.rotation, tex.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0f);
+                    }
+                }
+                else
+                {
+                    Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 0.65f, SpriteEffects.None, 0f);
+                }
+            });
+
+            return false;
+        }
+    }
 
 	public class LineSparkBehavior
 	{
