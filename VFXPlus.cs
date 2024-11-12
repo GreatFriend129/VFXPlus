@@ -11,6 +11,9 @@ using ReLogic.Content;
 using VFXPlus.Common;
 using System.Reflection;
 using VFXPlus.Common.Interfaces;
+using System.IO;
+using Terraria.Graphics.Effects;
+using Terraria.Graphics.Shaders;
 
 namespace VFXPlus
 {
@@ -54,6 +57,11 @@ namespace VFXPlus
                 BasicTrailShader = Instance.Assets.Request<Effect>("Effects/TrailShaders/BasicTrailShader", AssetRequestMode.ImmediateLoad).Value;
                 TrailShaderGradient = Instance.Assets.Request<Effect>("Effects/TrailShaders/TrailShaderGradient", AssetRequestMode.ImmediateLoad).Value;
             }
+
+            var screenRef = new Ref<Effect>(VFXPlus.Instance.Assets.Request<Effect>("Effects/GlowDustShader", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value);
+            Filters.Scene["GlowDustShader"] = new Filter(new ScreenShaderData(screenRef, "ArmorBasic"), EffectPriority.High);
+            Filters.Scene["GlowDustShader"].Load();
+
         }
 
         public static void SetLoadingText(string text)
@@ -84,7 +92,7 @@ namespace VFXPlus
             {
                 BasicTrailShader = null;
                 TrailShaderGradient = null;
-                Instance = null;
+                Instance ??= null;
             }
         }
     }

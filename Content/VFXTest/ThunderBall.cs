@@ -111,4 +111,161 @@ namespace VFXPlus.Content.VFXTest
             return false;
         }
     }
+
+    public class SolsearBombExplosion : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        int timer = 0;
+        public float opacity = 1f;
+        public float size = 0.5f;
+        public bool maxPower = false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 1;
+            Projectile.height = 1;
+            Projectile.timeLeft = 200;
+            Projectile.penetrate = -1;
+            Projectile.scale = 0.1f;
+
+            Projectile.friendly = false;
+            Projectile.hostile = false;
+            Projectile.tileCollide = false;
+
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
+        }
+
+        Vector2 startingCenter;
+        public override void AI()
+        {
+            if (timer == 0)
+            {
+                startingCenter = Projectile.Center;
+                timer = Main.rand.Next(0, 200);
+            }
+
+            timer++;
+
+            Projectile.scale = MathHelper.Clamp(MathHelper.Lerp(Projectile.scale, 1.25f * size, 0.08f), 0f, 1.25f * size);
+
+            if (Projectile.scale >= 0.8f * size)
+                opacity = MathHelper.Clamp(MathHelper.Lerp(opacity, -0.2f, 0.15f), 0, 2);
+
+            if (opacity <= 0)
+                Projectile.active = false;
+
+            Projectile.width = (int)(375 * Projectile.scale);
+            Projectile.height = (int)(375 * Projectile.scale);
+            Projectile.Center = startingCenter;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Orbs/ElectricPopDA").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/ElectricPopE").Value;
+
+            float scale = Projectile.scale * 0.25f;
+            float timeFade = 1f - (0.25f * (Projectile.scale / size));
+
+            float timeA = timer * 0.045f * timeFade;
+            float timeB = timer * -0.07f * timeFade;
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeA, Tex.Size() / 2, scale * 1.65f, SpriteEffects.None, 0f);
+                //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeB, Tex.Size() / 2, scale * 1.65f + (0.15f * scale), SpriteEffects.None, 0f);
+
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.EffectMatrix);
+
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), new Color(255, 130, 30) * opacity, timeA, Tex.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Red * opacity, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
+
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), new Color(255, 130, 30) * opacity, timeA, Tex.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.OrangeRed * opacity, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
+
+                Main.spriteBatch.Draw(Tex2, Projectile.Center - Main.screenPosition, Tex2.Frame(1, 1, 0, 0), new Color(255, 130, 30) * opacity * 1f, timeA, Tex.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex2, Projectile.Center - Main.screenPosition, Tex2.Frame(1, 1, 0, 0), Color.OrangeRed * opacity * 1f, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
+
+                Main.spriteBatch.Draw(Tex2, Projectile.Center - Main.screenPosition, Tex2.Frame(1, 1, 0, 0), new Color(255, 130, 30) * opacity * 1f, timeA, Tex.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex2, Projectile.Center - Main.screenPosition, Tex2.Frame(1, 1, 0, 0), Color.OrangeRed * opacity * 1f, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
+
+
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            });
+            return false;
+        }
+
+    }
+
+    public class OrbTests : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        int timer = 0;
+        public float opacity = 1f;
+        public float size = 1f;
+        public bool maxPower = false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 1;
+            Projectile.height = 1;
+            Projectile.timeLeft = 200;
+            Projectile.penetrate = -1;
+            //Projectile.scale = 0.1f;
+
+            Projectile.friendly = false;
+            Projectile.hostile = false;
+            Projectile.tileCollide = false;
+        }
+
+        Vector2 startingCenter;
+        public override void AI()
+        {
+            //if (timer > 0)
+
+            Projectile.velocity *= 0.96f;
+
+            if (Projectile.velocity.Length() < 1.5f)
+                Projectile.scale *= 0.98f;
+
+            if (Projectile.scale < 0f)
+                Projectile.active = false;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Orbs/anotheranotherorb").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/ElectricPopE").Value;
+
+            float scale = Projectile.scale * 2f;
+
+            Color innerCol = Color.White with { A = 0 };
+            Color outerCol = Color.DodgerBlue with { A = 0 };
+
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+            Vector2 origin = Tex.Size() / 2f;
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+
+                Main.spriteBatch.Draw(Tex, drawPos, null, outerCol * 0.5f, 0f, origin, scale * 1f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, drawPos, null, innerCol * 1f, 0f, origin, scale * 0.2f, SpriteEffects.None, 0f);
+
+            });
+
+            //Main.spriteBatch.Draw(Tex, drawPos, null, outerCol, 0f, origin, scale * 1f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, drawPos, null, innerCol, 0f, origin, scale * 0.4f, SpriteEffects.None, 0f);
+
+            return false;
+        }
+
+    }
 }

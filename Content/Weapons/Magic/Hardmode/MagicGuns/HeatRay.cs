@@ -56,10 +56,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
             }
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .07f, Pitch = 0.55f, PitchVariance = .1f };
+            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .1f, Pitch = 0.55f, PitchVariance = .1f };
             SoundEngine.PlaySound(style2, player.Center);
 
-            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Volume = 0.1f, Pitch = .9f, PitchVariance = 0.11f, MaxInstances = -1 };
+            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Volume = 0.15f, Pitch = .9f, PitchVariance = 0.11f, MaxInstances = -1 };
             SoundEngine.PlaySound(styla, player.Center);
 
             /* very cool

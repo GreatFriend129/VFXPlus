@@ -12,6 +12,7 @@ using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
+using VFXPlus.Common.Drawing;
 
 
 
@@ -105,7 +106,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
         float fadeInAlpha = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            trail1.TrailDrawing(Main.spriteBatch);
+            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            //{
+                trail1.TrailDrawing(Main.spriteBatch);
+
+            //});
 
             Texture2D fireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/SapphireFireball").Value;
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlorbPMA3").Value;

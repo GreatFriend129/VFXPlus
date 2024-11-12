@@ -10,6 +10,8 @@ Projectiles: {
 	ShadowflameTendrilVFX.DisplayName: Shadowflame Tendril V F X
 	HeatRayVFX.DisplayName: Heat Ray V F X
 	ThunderBall.DisplayName: Thunder Ball
+	SolsearBombExplosion.DisplayName: Solsear Bomb Explosion
+	OrbTests.DisplayName: Orb Tests
 }
 
 Configs: {
