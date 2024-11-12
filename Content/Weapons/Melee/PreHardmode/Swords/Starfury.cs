@@ -40,13 +40,13 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         }
 
     }
-    public class IceBowShotOverride : GlobalProjectile
+    public class StarfuryShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.FrostArrow);
+            return lateInstantiation && (entity.type == ProjectileID.Starfury);
         }
 
         public List<Vector2> previousPositions = new List<Vector2>();
@@ -91,9 +91,10 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             Texture2D Line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Nightglow").Value;
             Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
 
+            Texture2D Glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
             //Starfury uses 0.8 scale so x1.25 that is one
-            float scale = projectile.scale * 1f;
+            float scale = projectile.scale * 1.25f;
 
             //Nightglow
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -107,7 +108,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
                     float colVal = progress * alpha;
 
-                    Color col = Color.Lerp(Color.HotPink * 0.75f, Color.DeepPink, progress) * progress * 0.5f;
+                    Color col = Color.Lerp(Color.LightGoldenrodYellow * 0.75f, Color.HotPink, progress) * progress * 0.5f;
 
                     float size2 = (1f - (progress * 0.15f)) * scale;
                     Vector2 vec2Scale = new Vector2(2f, 3f) * size;
@@ -116,15 +117,20 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                     Main.EntitySpriteDraw(Line, previousPositions[i] - Main.screenPosition, null, Color.Black * 0.15f * (colVal * colVal),
                             previousVelRots[i] + MathHelper.PiOver2, Line.Size() / 2f, vec2Scale * size2, SpriteEffects.None);
 
-                    Main.EntitySpriteDraw(StarBlack, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.7f * colVal,
+                    Main.EntitySpriteDraw(StarBlack, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * colVal,
                             previousVelRots[i], StarBlack.Size() / 2f, size2, SpriteEffects.None);
 
-                    Main.EntitySpriteDraw(Line, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 2f * colVal,
+                    Main.EntitySpriteDraw(Line, previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, col with { A = 0 } * 2f * colVal,
                             previousVelRots[i] + MathHelper.PiOver2, Line.Size() / 2f, vec2Scale * size2, SpriteEffects.None);
 
                 }
 
             }
+            float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
+
+            Main.EntitySpriteDraw(Glorb, drawPos, null, Color.HotPink with { A = 0 } * alpha * 0.2f, projectile.rotation, Glorb.Size() / 2f, scale * 1.5f + sineScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glorb, drawPos, null, Color.LightPink with { A = 0 } * alpha * 0.3f, projectile.rotation, Glorb.Size() / 2f, scale * 1f + sineScale, SpriteEffects.None);
+
 
             for (int i = 0; i < 6; i++)
             {
@@ -137,7 +143,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
             for (int i = 0; i < 4; i++)
             {
-                Vector2 fireballPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -15f;
+                Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -15f;
                 float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
                 float dist = 5f;
@@ -145,7 +151,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, Color.DeepPink with { A = 0 } * 0.15f, fireballRot, FireBall.Size() / 2f, projectile.scale * 1.05f * alpha, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, Color.HotPink with { A = 0 } * 0.35f, fireballRot, FireBall.Size() / 2f, projectile.scale * 1.05f * alpha, SpriteEffects.None);
             }
 
 

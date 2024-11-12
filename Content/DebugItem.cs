@@ -57,7 +57,7 @@ namespace VFXPlus.Content
 
             ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.StellarTune, particleSettings);
 
-            //int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 7f, ProjectileID.WaterStream, 2, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.Starfury, 2, 0, player.whoAmI);
 
             //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
 
@@ -75,10 +75,9 @@ namespace VFXPlus.Content
             //d2.customData = cpb2;
 
 
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .8f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(style, player.Center);
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .8f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
 
-            //SoundEngine.PlaySound(SoundID.Item93 with { Pitch = 0.4f, Volume = 0.2f, MaxInstances = -1 }, player.Center);
 
             //SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .45f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
             //SoundEngine.PlaySound(styleb, player.Center);
