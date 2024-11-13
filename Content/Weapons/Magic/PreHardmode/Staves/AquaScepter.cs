@@ -37,10 +37,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = .3f, Pitch = .80f, PitchVariance = .2f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = .17f, Pitch = .80f, PitchVariance = .2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, player.Center);
 
-            return true;
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/CommonWaterFallLight00") with { Volume = .1f, Pitch = .2f, PitchVariance = .2f, MaxInstances = 1 }; 
+            SoundEngine.PlaySound(style2, player.Center);
+
+            //return true;
 
             Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, 0.75f);
             for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
@@ -233,7 +236,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             }
 
             //CHANGE BACK TO 0.2 Vol
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.13f, Pitch = .5f, PitchVariance = 0.5f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.08f, Pitch = .5f, PitchVariance = 0.5f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
 

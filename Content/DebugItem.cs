@@ -57,7 +57,7 @@ namespace VFXPlus.Content
 
             ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.StellarTune, particleSettings);
 
-            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.Starfury, 2, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 7f, ProjectileID.WaterStream, 2, 0, player.whoAmI);
 
             //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
 
