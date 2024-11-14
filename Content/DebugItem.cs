@@ -55,9 +55,10 @@ namespace VFXPlus.Content
                 
             };
 
-            ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.StellarTune, particleSettings);
+            ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.PrincessWeapon, particleSettings);
+            //ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.StellarTune, particleSettings);
 
-            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 7f, ProjectileID.WaterStream, 2, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
 
             //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
 
@@ -68,11 +69,11 @@ namespace VFXPlus.Content
             //d.customData = cpb;
 
 
-            //Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * -0.3f, newColor: Color.DodgerBlue);
-            //CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 2, 0.4f, 0.8f);
-            //cpb2.drawBlackUnder = false;
-            //cpb2.blackUnderPower = 1f;
-            //d2.customData = cpb2;
+            Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * -0.3f, newColor: Color.HotPink);
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 2, 0.8f, 0.8f);
+            cpb2.drawBlackUnder = false;
+            cpb2.blackUnderPower = 1f;
+            d2.customData = cpb2;
 
 
             SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .8f, MaxInstances = -1 };

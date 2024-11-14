@@ -97,6 +97,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 dust212.velocity += projectile.velocity * 0.5f;
             }
 
+
+            Lighting.AddLight(projectile.Center, Color.DodgerBlue.ToVector3() * 0.85f);
+
+
             /*
             if (timer % 4 == 0 && Main.rand.NextBool() && timer > 8)
             {
@@ -118,12 +122,16 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             }
             */
+
+            fadeInAlpha = Math.Clamp(MathHelper.Lerp(fadeInAlpha, 1.25f, 0.04f), 0f, 1f);
+
             timer++;
 
             return false;
             return base.PreAI(projectile);
         }
 
+        float fadeInAlpha = 0f;
 
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
@@ -240,11 +248,35 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 1f,
                     projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(1.25f, 0.7f) * 0.5f, SpriteEffects.None);
             }
+
+            return;
+
+            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+
+            Vector2 starDrawPos = projectile.Center - Main.screenPosition + projectile.velocity.SafeNormalize(Vector2.UnitX) * 10f * projectile.scale;
+
+            float dir = projectile.velocity.X > 0 ? 1 : -1;
+
+            float starRotation = MathHelper.Lerp(0f, MathHelper.Pi * 3f * dir, Easings.easeOutQuad(fadeInAlpha)) + ((float)Main.timeForVisualEffects * 0.05f * dir);
+            float starScale = Easings.easeOutQuint(1f - fadeInAlpha) * projectile.scale * 1f;
+
+            Main.EntitySpriteDraw(star, starDrawPos, null, Color.DodgerBlue with { A = 0 } * fadeInAlpha * 0.25f, starRotation, star.Size() / 2f, starScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha * 0.25f, starRotation, star.Size() / 2f, starScale * 0.5f, SpriteEffects.None);
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            //return false;
+            for (int i = 0; i < 6 + Main.rand.Next(3, 8); i++)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(4f, 2.5f).RotatedBy(projectile.velocity.ToRotation());
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowFlare>(), vel, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.35f, 0.8f));
+                d.customData = new GlowFlareBehavior(GlowThreshold: 0.45f, GlowPower: 2.5f, TotalBoost: 0.95f);
+            }
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.15f, Pitch = .5f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, projectile.Center);
+
+            return false;
             return base.PreKill(projectile, timeLeft);
         }
 
@@ -271,11 +303,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             }
 
 
-            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 1f);
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.8f);
             d1.rotation = 0f + oldVelocity.ToRotation();
             d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 1f);
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.8f);
             d2.rotation = MathHelper.PiOver4 + oldVelocity.ToRotation();
             d2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
 
