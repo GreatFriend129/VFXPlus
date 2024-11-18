@@ -12,6 +12,8 @@ using Terraria.GameContent.Drawing;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 using VFXPlus.Content.Dusts;
+using System.Runtime.Intrinsics.Arm;
+using System.Linq;
 
 namespace VFXPlus.Content
 {
@@ -42,23 +44,36 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //Dust d = Dust.NewDustPerfect(position, ModContent.DustType<GlowFlare>(), velocity.RotatedByRandom(0.2f) * 3f, newColor: Color.DodgerBlue);
+            int a21 = Projectile.NewProjectile(null, position, velocity * 0f, ModContent.ProjectileType<GoozmaPrismStudy>(), 2, 0, player.whoAmI);
+
+            Main.projectile[a21].direction = (Main.rand.Next(5) > 2 ? 1 : -1);
+            Main.projectile[a21].rotation = Main.rand.NextFloat(-2f, 2f);
+            Main.projectile[a21].ai[0] = -66;
+            Main.projectile[a21].ai[1] = 0;
+            Main.projectile[a21].ai[2] = Main.rand.NextFloat(-3f, 3f);
+
+
+            //Dust d = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(), velocity.RotatedByRandom(0.2f) * 1f, newColor: Color.SkyBlue);
             //d.scale = 2f;
             //d.customData = new GlowFlareBehavior(GlowThreshold: 0.45f, GlowPower: 2.5f);
 
-
-            ParticleOrchestraSettings particleSettings = new()
+            for (int i = 20; i < 15; i++)
             {
-                PositionInWorld = position,
-                MovementVector = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-1.5f, 1.5f)) * Main.rand.NextFloat(0f, 4f),
-                UniqueInfoPiece = 4
-                
-            };
+                int a = Dust.NewDust(Main.MouseWorld, 20, 20, ModContent.DustType<ElectricSparkGlow>(), 0f, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.75f, 1f) * 1.15f);
+                Main.dust[a].velocity = Main.rand.NextVector2CircularEdge(9f, 9f) * Main.rand.NextFloat(0.5f, 1.5f);
+                Main.dust[a].velocity += velocity;
 
-            ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.PrincessWeapon, particleSettings);
-            //ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.StellarTune, particleSettings);
+                //Dust dp = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(), velocity.RotatedBy(Main.rand.NextFloat(-0.75f, 0.75f)),
+                    //newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.5f);
 
-            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
+                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 1f, FadeVelPower: 0.91f, Pixelize: true, XScale: 1f, YScale: 0.75f);
+                esb.randomVelRotatePower = 0.3f; //5f
+                //esb.killEarlyTime = 15;
+                Main.dust[a].customData = esb;
+            }
+
+
+            //!!!!!!!int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
 
             //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
 
@@ -69,16 +84,22 @@ namespace VFXPlus.Content
             //d.customData = cpb;
 
 
-            Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * -0.3f, newColor: Color.HotPink);
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 2, 0.8f, 0.8f);
-            cpb2.drawBlackUnder = false;
-            cpb2.blackUnderPower = 1f;
-            d2.customData = cpb2;
+            //Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * -0.3f, newColor: Color.HotPink);
+            //CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 2, 0.8f, 0.8f);
+            //cpb2.drawBlackUnder = false;
+            //cpb2.blackUnderPower = 1f;
+            //d2.customData = cpb2;
 
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .8f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Volume = 1f, Pitch = .8f, PitchVariance = 0.1f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
 
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .4f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
+
+
+            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Pitch = 1f, PitchVariance = 0.2f, Volume = 0.4f };
+            SoundEngine.PlaySound(style2, player.Center);
 
             //SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .45f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
             //SoundEngine.PlaySound(styleb, player.Center);
@@ -91,27 +112,6 @@ namespace VFXPlus.Content
             //Projectile.NewProjectile(null, position, velocity.RotatedBy(2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
             //Projectile.NewProjectile(null, position, velocity.RotatedBy(-2f), ProjectileID.MagicDagger, 2, 0, player.whoAmI);
 
-
-            return false;
-
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = 0.8f, Pitch = .25f, PitchVariance = 0.05f };
-            SoundEngine.PlaySound(style4, player.Center);
-
-            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_etherian_portal_dryad_touch") with { Volume = .3f, Pitch = 1f, PitchVariance = .15f, MaxInstances = -1, };
-            SoundEngine.PlaySound(style3, player.Center);
-
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_20") with { Volume = 0.65f, Pitch = .45f, PitchVariance = 0.1f };
-            SoundEngine.PlaySound(style2, player.Center);
-
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(-0.15), ProjectileID.TopazBolt, 2, 0, player.whoAmI);
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(-0.1), ProjectileID.EmeraldBolt, 2, 0, player.whoAmI);
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(-0.05), ProjectileID.SapphireBolt, 2, 0, player.whoAmI);
-
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(0), ProjectileID.DiamondBolt, 2, 0, player.whoAmI);
-
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(0.05), ProjectileID.RubyBolt, 2, 0, player.whoAmI);
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(0.1), ProjectileID.AmethystBolt, 2, 0, player.whoAmI);
-            Projectile.NewProjectile(null, position, velocity.RotatedBy(0.15), ProjectileID.AmberBolt, 2, 0, player.whoAmI);
 
             return false;
         }

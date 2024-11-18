@@ -12,6 +12,7 @@ Projectiles: {
 	ThunderBall.DisplayName: Thunder Ball
 	SolsearBombExplosion.DisplayName: Solsear Bomb Explosion
 	OrbTests.DisplayName: Orb Tests
+	GoozmaPrismStudy.DisplayName: Goozma Prism Study
 }
 
 Configs: {
