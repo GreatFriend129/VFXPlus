@@ -44,7 +44,7 @@ namespace VFXPlus.Content.Dusts
 
 			dust.fadeIn *= 0.89f;
 
-            if (dust.fadeIn <= 0)
+            if (dust.fadeIn <= 0.02f)
                 dust.active = false;
 
             if (!dust.noLight)

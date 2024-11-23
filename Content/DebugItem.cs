@@ -44,22 +44,23 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int a21 = Projectile.NewProjectile(null, position, velocity * 0f, ModContent.ProjectileType<GoozmaPrismStudy>(), 2, 0, player.whoAmI);
+            //int a21 = Projectile.NewProjectile(null, position, velocity * 0f, ModContent.ProjectileType<GoozmaPrismStudy>(), 2, 0, player.whoAmI);
 
-            Main.projectile[a21].direction = (Main.rand.Next(5) > 2 ? 1 : -1);
-            Main.projectile[a21].rotation = Main.rand.NextFloat(-2f, 2f);
-            Main.projectile[a21].ai[0] = -66;
-            Main.projectile[a21].ai[1] = 0;
-            Main.projectile[a21].ai[2] = Main.rand.NextFloat(-3f, 3f);
+            //Main.projectile[a21].direction = (Main.rand.Next(5) > 2 ? 1 : -1);
+            //Main.projectile[a21].rotation = Main.rand.NextFloat(-2f, 2f);
+            //Main.projectile[a21].ai[0] = -66;
+            //Main.projectile[a21].ai[1] = 0;
+            //Main.projectile[a21].ai[2] = Main.rand.NextFloat(-3f, 3f);
 
-
-            //Dust d = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(), velocity.RotatedByRandom(0.2f) * 1f, newColor: Color.SkyBlue);
-            //d.scale = 2f;
-            //d.customData = new GlowFlareBehavior(GlowThreshold: 0.45f, GlowPower: 2.5f);
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .0f, Pitch = .6f, PitchVariance = 0.5f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
+            
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .3f, Pitch = .8f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style2, player.Center);
 
             for (int i = 20; i < 15; i++)
             {
-                int a = Dust.NewDust(Main.MouseWorld, 20, 20, ModContent.DustType<ElectricSparkGlow>(), 0f, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.75f, 1f) * 1.15f);
+                int a = Dust.NewDust(Main.MouseWorld, 20, 20, ModContent.DustType<ElectricSparkGlow>(), 0f, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.75f, 1f) * 1.15f);
                 Main.dust[a].velocity = Main.rand.NextVector2CircularEdge(9f, 9f) * Main.rand.NextFloat(0.5f, 1.5f);
                 Main.dust[a].velocity += velocity;
 
@@ -74,7 +75,7 @@ namespace VFXPlus.Content
 
 
             //!!!!!!!int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
-
+            //int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
             //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
 
             //Dust d = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * 0.3f, newColor: Color.DodgerBlue);
@@ -98,8 +99,8 @@ namespace VFXPlus.Content
             //SoundEngine.PlaySound(style, player.Center);
 
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Pitch = 1f, PitchVariance = 0.2f, Volume = 0.4f };
-            SoundEngine.PlaySound(style2, player.Center);
+            //SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Pitch = 1f, PitchVariance = 0.2f, Volume = 0.4f };
+            //SoundEngine.PlaySound(style2, player.Center);
 
             //SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .45f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
             //SoundEngine.PlaySound(styleb, player.Center);

@@ -100,26 +100,32 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
 
             //OPTION A:
-            
+
             //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .035f, Pitch = .6f, PitchVariance = 0.5f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style, projectile.Center);
 
             //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .1f, Pitch = .8f, PitchVariance = 0.3f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style2, projectile.Center);
-            
-            //return false;
-            
 
-            //Option B:
-            
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ice_hit") with { Volume = 0.1f, Pitch = 0.15f, PitchVariance = .5f, MaxInstances = -1 };
+            //return false;
+
+
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_1") with { Volume = .05f, Pitch = 0.9f, PitchVariance = 0.3f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .1f, Pitch = .55f, PitchVariance = 0.8f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Item_107Trim") with { Volume = .27f, Pitch = .7f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_death_1") with { Volume = 0.05f, Pitch = .85f, PitchVariance = 0.45f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style4, projectile.Center);
+            //Option B:
+
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ice_hit") with { Volume = 0.1f, Pitch = 0.15f, PitchVariance = .5f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, projectile.Center);
+
+            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .1f, Pitch = .55f, PitchVariance = 0.8f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, projectile.Center);
+
+            //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_death_1") with { Volume = 0.05f, Pitch = .85f, PitchVariance = 0.45f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style4, projectile.Center);
 
             //Main.NewText(projectile.ai[1]); <- Current proj spite (blizz staff chooses between 1 of 5 sprites for each shot)
 

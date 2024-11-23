@@ -16,7 +16,7 @@ using Terraria.GameContent;
 using System.Threading;
 
 
-namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Other
+namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
     
     public class WeatherPain : GlobalItem 
@@ -54,7 +54,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Other
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            
+
             int trailCount = 5;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
@@ -70,12 +70,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Other
 
 
             scale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress));
-            //scale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress));
 
 
             //So apparently the tornado already leans with velocity lmao
             //projectile.rotation = 0f + projectile.velocity.X * 0.1f;
-
 
             timer++;
             return base.PreAI(projectile);

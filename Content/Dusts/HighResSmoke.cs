@@ -12,6 +12,7 @@ using Terraria.UI;
 using static Terraria.ModLoader.ModContent;
 using Steamworks;
 using System;
+using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Dusts
 {
@@ -107,11 +108,26 @@ namespace VFXPlus.Content.Dusts
                     float myscale = dust.scale * 0.25f;
                     Color col = dust.color * dust.fadeIn * behavior.overallAlpha;
 
-                    //Yes the extra '* dust.fadeIn' is intentional
-                    if (behavior.drawSoftGlowUnder) 
-						Main.EntitySpriteDraw(ExtraGlow, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.1f * behavior.softGlowIntensity * dust.fadeIn, dust.rotation, ExtraGlow.Size() / 2f, myscale * 0.5f, SpriteEffects.None);
-                    
-					Main.EntitySpriteDraw(Smoke, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.2f, dust.rotation, Smoke.Size() / 2f, myscale, SpriteEffects.None);
+                    if (behavior.isPixelated)
+                    {
+                        ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+                        {
+                            //Yes the extra '* dust.fadeIn' is intentional
+                            if (behavior.drawSoftGlowUnder)
+                                Main.EntitySpriteDraw(ExtraGlow, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.1f * behavior.softGlowIntensity * dust.fadeIn, dust.rotation, ExtraGlow.Size() / 2f, myscale * 0.5f, SpriteEffects.None);
+
+                            Main.EntitySpriteDraw(Smoke, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.2f, dust.rotation, Smoke.Size() / 2f, myscale, SpriteEffects.None);
+                        });
+                    }
+                    else
+                    {
+                        //Yes the extra '* dust.fadeIn' is intentional
+                        if (behavior.drawSoftGlowUnder)
+                            Main.EntitySpriteDraw(ExtraGlow, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.1f * behavior.softGlowIntensity * dust.fadeIn, dust.rotation, ExtraGlow.Size() / 2f, myscale * 0.5f, SpriteEffects.None);
+
+                        Main.EntitySpriteDraw(Smoke, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.2f, dust.rotation, Smoke.Size() / 2f, myscale, SpriteEffects.None);
+                    }
+
                 }
             }
 			else
@@ -146,6 +162,9 @@ namespace VFXPlus.Content.Dusts
 		public float velSlowAmount = 1f;
 
         public float rotMult = 0f;
+
+        public bool isPixelated = false;
+
     }
 
 }
