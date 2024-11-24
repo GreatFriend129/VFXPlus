@@ -356,7 +356,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ice_hit") with { Volume = 0.2f, Pitch = 0f, PitchVariance = .5f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style, projectile.Center);
 
-                SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Item_107Trim") with { Volume = .2f, Pitch = .55f, PitchVariance = 0.8f, MaxInstances = -1 };
+                SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Item_107Trim") with { Volume = .2f, Pitch = .5f, PitchVariance = 0.8f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style2, projectile.Center);
 
                 justBecameTilePower = 1;
