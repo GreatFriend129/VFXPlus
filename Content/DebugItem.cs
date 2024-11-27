@@ -14,6 +14,7 @@ using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 using VFXPlus.Content.Dusts;
 using System.Runtime.Intrinsics.Arm;
 using System.Linq;
+using VFXPlus.Content.FeatheredFoe;
 
 namespace VFXPlus.Content
 {
@@ -44,6 +45,36 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            int[] orbitValues1 = { 20,  80, 140,
+                                  40,  100, 160,
+                                  60,  120, 180 };
+
+            int[] orbitValues2 = { 20,  60, 40,
+                                  100,  40, 100,
+                                  60,  80, 80 };
+
+            int[][] orbitValues = { orbitValues1, orbitValues2 };
+
+            int numberOfFeahters = 9;
+            for (int ab = 0; ab < 2; ab++)
+            {
+                for (int index = 1; index <= numberOfFeahters; index++)
+                {
+                    int orbfeather = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<OrbitingFeather>(), damage, 0, Main.myPlayer);
+
+                    if (Main.projectile[orbfeather].ModProjectile is OrbitingFeather of)
+                    {
+                        of.timeToOrbit = 60 + (orbitValues[ab][index - 1] * 2) + (180 * ab * 2);  //60 * index;
+                        of.orbitVector = new Vector2(355f - (100 * ab), 0f).RotatedBy(MathHelper.TwoPi * ((index - 1f) / numberOfFeahters));
+                        of.orbitVal = 355f - (100 * ab);
+                        of.rotSpeed = ab == 0 ? 1.85f : 1.5f;
+                    }
+
+                }
+            }
+
+            int barrier = Projectile.NewProjectile(null, player.Center + new Vector2(0f, -245f), Vector2.Zero, ModContent.ProjectileType<WindBarrier>(), 0, 0, Main.myPlayer);
+
             //int a21 = Projectile.NewProjectile(null, position, velocity * 0f, ModContent.ProjectileType<GoozmaPrismStudy>(), 2, 0, player.whoAmI);
 
             //Main.projectile[a21].direction = (Main.rand.Next(5) > 2 ? 1 : -1);
@@ -52,61 +83,10 @@ namespace VFXPlus.Content
             //Main.projectile[a21].ai[1] = 0;
             //Main.projectile[a21].ai[2] = Main.rand.NextFloat(-3f, 3f);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_0") with { Volume = .0f, Pitch = .6f, PitchVariance = 0.5f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
-            
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_107") with { Volume = .3f, Pitch = .8f, PitchVariance = 0.3f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, player.Center);
-
-            for (int i = 20; i < 15; i++)
-            {
-                int a = Dust.NewDust(Main.MouseWorld, 20, 20, ModContent.DustType<ElectricSparkGlow>(), 0f, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.75f, 1f) * 1.15f);
-                Main.dust[a].velocity = Main.rand.NextVector2CircularEdge(9f, 9f) * Main.rand.NextFloat(0.5f, 1.5f);
-                Main.dust[a].velocity += velocity;
-
-                //Dust dp = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(), velocity.RotatedBy(Main.rand.NextFloat(-0.75f, 0.75f)),
-                    //newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.5f);
-
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 1f, FadeVelPower: 0.91f, Pixelize: true, XScale: 1f, YScale: 0.75f);
-                esb.randomVelRotatePower = 0.3f; //5f
-                //esb.killEarlyTime = 15;
-                Main.dust[a].customData = esb;
-            }
-
 
             //!!!!!!!int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
-            //int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
-            //(Main.projectile[a].ModProjectile as SolsearBombExplosion).size = 0.75f * 1f;
-
-            //Dust d = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * 0.3f, newColor: Color.DodgerBlue);
-            //CirclePulseBehavior cpb = new CirclePulseBehavior(0.35f, true, 2, 0.4f, 0.8f);
-            //cpb.drawBlackUnder = true;
-            //cpb.blackUnderPower = 1f;
-            //d.customData = cpb;
 
 
-            //Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity * -0.3f, newColor: Color.HotPink);
-            //CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 2, 0.8f, 0.8f);
-            //cpb2.drawBlackUnder = false;
-            //cpb2.blackUnderPower = 1f;
-            //d2.customData = cpb2;
-
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Volume = 1f, Pitch = .8f, PitchVariance = 0.1f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(style, player.Center);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_hurt_1") with { Pitch = .4f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(style, player.Center);
-
-
-            //SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Pitch = 1f, PitchVariance = 0.2f, Volume = 0.4f };
-            //SoundEngine.PlaySound(style2, player.Center);
-
-            //SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .45f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(styleb, player.Center);
-
-            //SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Pitch = 1f, Volume = 0.9f, PitchVariance = 0.11f };
-            //SoundEngine.PlaySound(styla, player.Center);
 
             //Projectile.NewProjectile(null, position, velocity, ProjectileID.ShadowFlame, 2, 0, player.whoAmI);
 

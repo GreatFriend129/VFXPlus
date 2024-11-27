@@ -277,12 +277,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            {
-                Color purple = new Color(61, 2, 92); //new Color(121, 7, 179);
-                Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
 
-                #region Portal
+            Color purple = new Color(61, 2, 92); //new Color(121, 7, 179);
+            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+
+            #region Portal
                 Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/Starlight").Value;
 
                 Vector2 drawPos = startPos - Main.screenPosition;
@@ -298,7 +297,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 #endregion
 
-                #region trail
+            #region trail
                 Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
                 Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LintyTrail").Value;
 
@@ -346,7 +345,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 Main.pixelShader.CurrentTechnique.Passes[0].Apply();
                 #endregion
-            });
 
             return false;
         }

@@ -13,6 +13,12 @@ Projectiles: {
 	SolsearBombExplosion.DisplayName: Solsear Bomb Explosion
 	OrbTests.DisplayName: Orb Tests
 	GoozmaPrismStudy.DisplayName: Goozma Prism Study
+	CurvingFeather.DisplayName: Curving Feather
+	OrbitingFeather.DisplayName: Orbiting Feather
+	StopAndStartFeather.DisplayName: Stop And Start Feather
+	StraightFeather.DisplayName: Straight Feather
+	TalonSlash.DisplayName: Talon Slash
+	WindBarrier.DisplayName: Wind Barrier
 }
 
 Configs: {
@@ -30,3 +36,5 @@ Configs: {
 		}
 	}
 }
+
+NPCs.FeatheredFoe.DisplayName: Feathered Foe
