@@ -217,7 +217,7 @@ namespace VFXPlus.Common
 
                 }
                 else
-                    vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), ColorFunction, WidthFunction, -Main.screenPosition, includeBacksides: false);
+                    vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), ColorFunction, WidthFunction, -Main.screenPosition, includeBacksides: true);
 
                 for (int i = 0; i < timesToDraw; i++)
                 {

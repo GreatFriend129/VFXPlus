@@ -319,11 +319,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 myEffect.Parameters["progress"].SetValue(timer * -0.03f);
 
 
-                //Over layer
-                myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            //Over layer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
                 myEffect.Parameters["ColorOne"].SetValue(darkPurple.ToVector3() * 2.5f); //*2f | 2.5f | 3f
+            myEffect.Parameters["reps"].SetValue(1f);
 
-                myEffect.Parameters["glowThreshold"].SetValue(0.9f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.9f);
                 myEffect.Parameters["glowIntensity"].SetValue(1.1f);
 
 

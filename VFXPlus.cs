@@ -27,6 +27,8 @@ namespace VFXPlus
             Instance = this;
         }
 
+        public static Effect GlowingTrailShader;
+
         public static Effect BasicTrailShader;
         public static Effect TrailShaderGradient;
 

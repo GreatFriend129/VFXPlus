@@ -19,6 +19,7 @@ Projectiles: {
 	StraightFeather.DisplayName: Straight Feather
 	TalonSlash.DisplayName: Talon Slash
 	WindBarrier.DisplayName: Wind Barrier
+	SupernovaScatterSots.DisplayName: Supernova Scatter Sots
 }
 
 Configs: {

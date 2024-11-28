@@ -45,6 +45,9 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            int ar = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX), ModContent.ProjectileType<SupernovaScatterSots>(), 0, 0, Main.myPlayer);
+
+            return false;
             int[] orbitValues1 = { 20,  80, 140,
                                   40,  100, 160,
                                   60,  120, 180 };

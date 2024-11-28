@@ -1,0 +1,8 @@
+So this shader is taken from redemption, but they didn't have a .cs file for this shader so I dont know where it is originally from
+
+Known params:
+
+["transformMatrix"] -> Standard vertex shader info
+["sampleTexture"] -> Texture
+["time"].SetValue(Main.GameUpdateCount * 0.05f);
+ ["repeats"].SetValue(1f);
