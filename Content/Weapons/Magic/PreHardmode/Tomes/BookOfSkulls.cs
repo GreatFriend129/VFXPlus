@@ -213,11 +213,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 DrawVertexTrail(false);
             });
 
-
-            DrawVertexTrail(true);
-
-            /////////
-
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -226,7 +221,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             SpriteEffects se = projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
-
             //Orb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
@@ -234,13 +228,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             Color orbCol2 = Color.Orange * 0.525f;
             Color orbCol3 = Color.OrangeRed * 0.375f;
 
+            float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.5f;
             float scale1 = 0.75f;
             float scale2 = 1.6f;
-            float scale3 = 2.5f;
+            float scale3 = 2.5f + sineScale;
 
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol1 with { A = 0 } * fadeInAlpha * 0.15f, 0f, Glow.Size() / 2f, projectile.scale * scale1 * 0.7f, SpriteEffects.None);
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * fadeInAlpha * 0.15f, 0f, Glow.Size() / 2f, projectile.scale * scale2 * 0.7f, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * fadeInAlpha * 0.12f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.7f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * fadeInAlpha * 0.05f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.7f, SpriteEffects.None);
 
             //Border
             for (int i = 0; i < 4; i++)

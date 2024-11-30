@@ -34,11 +34,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/JuniorShot") with { Volume = .18f, Pitch = .4f, PitchVariance = .25f, MaxInstances = -1 }; 
-            SoundEngine.PlaySound(style, position);
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/JuniorShot") with { Volume = .18f, Pitch = .4f, PitchVariance = .25f, MaxInstances = -1 }; 
+            //SoundEngine.PlaySound(style, position);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_154") with { Volume = 0.5f, Pitch = .55f, PitchVariance = .25f, MaxInstances = -1 }; 
-            SoundEngine.PlaySound(style2, position);
+            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_154") with { Volume = 0.5f, Pitch = .55f, PitchVariance = .25f, MaxInstances = -1 }; 
+            //SoundEngine.PlaySound(style2, position);
 
             for (int k = 0; k < 7; k++)
             {
@@ -74,14 +74,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool PreAI(Projectile projectile)
         {
             if (timer == 0)
+            {
                 initialVel = projectile.velocity;
+                projectile.rotation = projectile.velocity.ToRotation();
+            }
 
-            projectile.rotation = projectile.velocity.ToRotation();
+            if (projectile.velocity.X > 0)
+                projectile.rotation += projectile.velocity.Length() * 0.02f;
+            else
+                projectile.rotation -= projectile.velocity.Length() * 0.02f;
+
+            trueAlpha = 0.1f + Math.Clamp(MathHelper.Lerp(trueAlpha, 1.5f, 0.12f), 0f, 1f) * 0.9f;
+
+            float progress = Math.Clamp((timer + 5) / 20f, 0f, 1f); //timer / 50
+            trueScale = 0.2f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 2f)) * 0.8f;
+
 
             timer++;
             return base.PreAI(projectile);
         }
 
+        float trueAlpha = 0f;
+        float trueScale = 0f;
         Vector2 initialVel = Vector2.Zero;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
@@ -94,27 +108,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SpriteEffects se = projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
             float easeProgress = projectile.velocity.Length() / initialVel.Length();
-            float adjustedEaseProgress = Math.Clamp(easeProgress * 0.65f, 0f, 1f);
+            float bubbleScale = trueScale * projectile.scale;
 
-            float easeA = Math.Clamp(projectile.velocity.Length() * 0.15f, 0f, 2f); //2f to 1f
-            float easeB = Math.Clamp(projectile.velocity.Length() * 0.05f, 0f, 0.8f); //0.8 to 0
-
-
-            float xScale = 1f + (easeA * Easings.easeInOutQuad(adjustedEaseProgress) * 1.75f);
-            float yScale = 1f - (easeB * Easings.easeInOutQuad(adjustedEaseProgress) * 2.1f);
-
-            //Utils.DrawBorderString(Main.spriteBatch, "" + adjustedEaseProgress, projectile.Center - Main.screenPosition, Color.White);
-
-            //Bubble is larger at start
-            float extraScale = MathHelper.Lerp(1.5f, 1f, Easings.easeOutCirc(1f - easeProgress));
-            Vector2 bubbleScale = new Vector2(xScale, yScale) * projectile.scale * extraScale;
-
-            //UnderGlow (starts bigger than bubble)
+            //OverrGlow (starts bigger than bubble)
             float glowScale = MathHelper.Lerp(2f, 1f, Easings.easeInOutCubic(1f - easeProgress));
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.DeepSkyBlue with { A = 0 } * projectile.Opacity * 0.2f * (1f - easeProgress), projectile.rotation, TexOrigin, bubbleScale * glowScale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.SkyBlue with { A = 0 } * trueAlpha * 0.15f * (1f - easeProgress), projectile.rotation, TexOrigin, bubbleScale * glowScale, se);
 
             //Normal Bubble
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, bubbleScale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * trueAlpha * 0.8f, projectile.rotation, TexOrigin, bubbleScale, se);
 
             return false;
         }
@@ -124,11 +125,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             for (int i = 0; i < 5 + Main.rand.Next(1, 3); i++)
             {
-                Vector2 vel = Main.rand.NextVector2Circular(3, 3);
+                Vector2 vel = Main.rand.NextVector2Circular(2.5f, 2.5f);
 
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel,
                     newColor: Color.LightSeaGreen * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale);
+
+                p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false, fadePower: 0.92f);
             }
+
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.05f * projectile.scale, true, 1, 0.4f, 0.4f);
+
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Aquamarine * 0.25f);
+            d1.customData = cpb2;
+            d1.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * 0.01f;
+
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Aquamarine * 0.25f);
+            d2.customData = cpb2;
+            d2.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * -0.01f;
+
+            d1.scale = 0.1f;
+            d2.scale = 0.1f;
 
             return base.PreKill(projectile, timeLeft);
         }

@@ -6,3 +6,6 @@ bin/
 obj/
 
 *.user
+/obj
+/obj
+/bin
