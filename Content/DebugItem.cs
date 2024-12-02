@@ -15,6 +15,7 @@ using VFXPlus.Content.Dusts;
 using System.Runtime.Intrinsics.Arm;
 using System.Linq;
 using VFXPlus.Content.FeatheredFoe;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 
 namespace VFXPlus.Content
 {
@@ -45,7 +46,7 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int ar = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX), ModContent.ProjectileType<SupernovaScatterSots>(), 0, 0, Main.myPlayer);
+            int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
 
             return false;
             int[] orbitValues1 = { 20,  80, 140,

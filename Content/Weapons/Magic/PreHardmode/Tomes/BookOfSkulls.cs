@@ -235,22 +235,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol1 with { A = 0 } * fadeInAlpha * 0.15f, 0f, Glow.Size() / 2f, projectile.scale * scale1 * 0.7f, SpriteEffects.None);
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * fadeInAlpha * 0.15f, 0f, Glow.Size() / 2f, projectile.scale * scale2 * 0.7f, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * fadeInAlpha * 0.05f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.7f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * fadeInAlpha * 0.075f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.7f, SpriteEffects.None);
 
             //Border
             for (int i = 0; i < 4; i++)
             {
-                /*
-                float dist = 3f;
-
-                float[] offsetAmounts = [0.08f, 0.11f, 0.06f, 0.09f];
-                float dir = i > 1 ? 1f : -1f;
-
-                float sinScale = 1.05f + (float)Math.Sin(Main.timeForVisualEffects * 0.03f) * 0.18f;
-
-                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                Vector2 offsetDrawPos = drawPos + offset.RotatedBy((Main.timeForVisualEffects * 3f) * offsetAmounts[i] * dir);
-                */
                 float dist = 4f + ((1f - fadeInAlpha) * 20f);
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
@@ -322,7 +311,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         {
             int soundID = Main.rand.Next(0, 3);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_skeleton_death_" + soundID) with { Volume = .5f, Pitch = -.25f, PitchVariance = .35f, MaxInstances = -1}; 
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_skeleton_death_" + soundID) with { Volume = .5f, Pitch = -.25f, PitchVariance = .35f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.PreKill(projectile, timeLeft);

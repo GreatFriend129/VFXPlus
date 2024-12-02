@@ -13,7 +13,7 @@ using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
 using Terraria.GameContent;
 using System.Linq;
-using Microsoft.Build.Evaluation;
+
 
 namespace VFXPlus.Content.VFXTest
 {
