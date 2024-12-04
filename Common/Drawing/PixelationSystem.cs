@@ -66,7 +66,7 @@ namespace VFXPlus.Common.Drawing
             {
                 foreach (PixelationTarget target in pixelationTargets.Where(t => t.Active && t.renderType == RenderLayer.UnderTiles))
                 {
-                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch, target.drawAdditive);
+                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch);
                 }
             }
 
@@ -74,7 +74,7 @@ namespace VFXPlus.Common.Drawing
             {
                 foreach (PixelationTarget target in pixelationTargets.Where(t => t.Active && t.renderType == RenderLayer.UnderNPCs))
                 {
-                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch, target.drawAdditive);
+                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch);
                 }
             }
 
@@ -82,7 +82,7 @@ namespace VFXPlus.Common.Drawing
             {
                 foreach (PixelationTarget target in pixelationTargets.Where(t => t.Active && t.renderType == RenderLayer.UnderProjectiles))
                 {
-                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch, target.drawAdditive);
+                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch);
                 }
             }
 
@@ -90,7 +90,7 @@ namespace VFXPlus.Common.Drawing
             {
                 foreach (PixelationTarget target in pixelationTargets.Where(t => t.Active && t.renderType == RenderLayer.OverPlayers))
                 {
-                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch, target.drawAdditive);
+                    DrawTarget(target, Main.spriteBatch, !startSpriteBatch);
                 }
             }
         }
@@ -102,18 +102,18 @@ namespace VFXPlus.Common.Drawing
 
             foreach (PixelationTarget target in pixelationTargets.Where(t => t.Active && t.renderType == RenderLayer.Dusts))
             {
-                DrawTarget(target, Main.spriteBatch, false, target.drawAdditive);
+                DrawTarget(target, Main.spriteBatch, false);
             }
         }
 
-        private void DrawTarget(PixelationTarget target, SpriteBatch sb, bool endSpriteBatch = true, bool drawAdditive = false)
+        private void DrawTarget(PixelationTarget target, SpriteBatch sb, bool endSpriteBatch = true)
         {
             if (endSpriteBatch)
             {
                 sb.End();
             }
 
-            BlendState blendState = drawAdditive ? BlendState.Additive : BlendState.AlphaBlend;
+            BlendState blendState = BlendState.AlphaBlend;
 
             sb.Begin(SpriteSortMode.Immediate, blendState, Main.DefaultSamplerState,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
@@ -121,12 +121,6 @@ namespace VFXPlus.Common.Drawing
             sb.Draw(target.pixelationTarget2.RenderTarget, Vector2.Zero, null, Color.White, 0, new Vector2(0, 0), 2f, SpriteEffects.None, 0);
 
             sb.End();
-
-            if (drawAdditive)
-            {
-                sb.Begin(default, BlendState.AlphaBlend, Main.DefaultSamplerState, default, RasterizerState.CullNone, default, Main.GameViewMatrix.TransformationMatrix);
-                sb.End();
-            }
 
 
             if (endSpriteBatch)
@@ -158,7 +152,6 @@ namespace VFXPlus.Common.Drawing
 
             target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
             target.renderTimer = 2;
-            target.drawAdditive = drawAdditive;
         }
     }
 
@@ -167,8 +160,6 @@ namespace VFXPlus.Common.Drawing
         public int renderTimer;
 
         public string id;
-
-        public bool drawAdditive = false;
 
         // list of actions, and their draw order. Default order is zero, but actions with an order of 1 are drawn over 0, etc.
         public List<Tuple<Action, int>> pixelationDrawActions;
@@ -239,6 +230,8 @@ namespace VFXPlus.Common.Drawing
 
 
     //Seperate Pixelization System for when we want to additive draw
+    //Is there a smarter way to have done this? Absolutely.
+    //However this was the path of least resistance so I did it anyway. v^v
     public class AdditivePixelationSystem : ModSystem
     {
         public List<PixelationTarget> pixelationTargets = new();
@@ -379,7 +372,6 @@ namespace VFXPlus.Common.Drawing
 
             target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
             target.renderTimer = 2;
-            target.drawAdditive = drawAdditive;
         }
     }
 

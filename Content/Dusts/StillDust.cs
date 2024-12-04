@@ -16,14 +16,14 @@ namespace VFXPlus.Content.Dusts
 
 		public override bool Update(Dust dust)
 		{
-            dust.color = Color.Lerp(dust.color, Color.Gray, 0.02f);
+            dust.color = Color.Lerp(dust.color, Color.Black, 0.004f);
 
             dust.noGravity = true;
 
             dust.position += dust.velocity;
             dust.velocity *= 0.92f;
             dust.scale *= 0.98f;
-            dust.alpha += 12;
+            dust.alpha += 15;
 
             if (dust.scale < 0.5f)
             {
