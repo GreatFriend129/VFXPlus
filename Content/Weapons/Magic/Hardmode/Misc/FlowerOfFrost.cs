@@ -22,11 +22,11 @@ using System.Reflection.Metadata;
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
     
-    public class FlowerOfFire : GlobalItem 
+    public class FlowerOfFrost : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.FlowerofFire);
+            return lateInstatiation && (item.type == ItemID.FlowerofFrost);
         }
 
         public override void SetDefaults(Item entity)
@@ -43,13 +43,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         }
 
     }
-    public class FlowerOfFireShotOverride : GlobalProjectile
+    public class FlowerOfFrostShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BallofFire);
+            return lateInstantiation && (entity.type == ProjectileID.BallofFrost);
         }
 
         Vector2 Vec2Scale
@@ -82,7 +82,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             if (timer % 2 == 0)
             {
-                int num4 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 6, projectile.velocity.X * -0.4f, projectile.velocity.Y * -0.4f, 100, default(Color), 1.2f);
+                int num4 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.IceTorch, projectile.velocity.X * -0.4f, projectile.velocity.Y * -0.4f, 100, default(Color), 1.2f);
                 Main.dust[num4].noGravity = true;
                 Main.dust[num4].velocity.X *= 4f;
                 Main.dust[num4].velocity.Y *= 4f;
@@ -91,27 +91,34 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             if (timer % 2 == 0 && timer > 10)
             {
-                Vector2 dustPos = projectile.Center;// + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustPos = projectile.Center;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.35f;
 
 
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
+                Color dustCol = Color.SkyBlue;
                 float dustScale = Main.rand.NextFloat(0.4f, 0.7f) * 0.9f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.7f, Scale: dustScale);
                 smoke.alpha = 2;
             }
 
-            //bounceIntensity should never be < 1
-            float overBounceMultiplier = bounceIntensity;
-            float underBounceMultiplier = 2 * (MathF.Pow(0.5f, bounceIntensity));
+            if (timer % 4 == 0) //4
+            {
+                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<HighResSmoke>(), newColor: Color.LightSkyBlue, Scale: Main.rand.NextFloat(0.25f, 0.5f));
+                Main.dust[d].velocity += projectile.velocity * 0.25f;
+                Main.dust[d].velocity *= 0.45f;
+
+                HighResSmokeBehavior hrsb = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.5f); //0.5
+                hrsb.isPixelated = true;
+                Main.dust[d].customData = hrsb;
+            }
 
             //Based off of coralite mod slime emperor 
-            float firstStretchX = 1.6f;// * overBounceMultiplier;
-            float firstStretchY = 0.65f;// * underBounceMultiplier; //bounce  = 2f -> 0.5   || 4 -> 0.25
+            float firstStretchX = 1.6f;
+            float firstStretchY = 0.65f;
 
-            float secondStretchX = 0.75f;// * underBounceMultiplier;
-            float secondStretchY = 1.3f;// * overBounceMultiplier;
+            float secondStretchX = 0.75f;
+            float secondStretchY = 1.3f;
 
             switch (scaleState)
             {
@@ -146,18 +153,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             timer++;
 
+
             #region vanillaAI
 
-            //if (projectile.type == 258 && projectile.localAI[0] == 0f)
-            //{
-            //    projectile.localAI[0] = 1f;
-            //    SoundEngine.PlaySound(in SoundID.Item20, projectile.position);
-            //}
-            //if (projectile.type == 96 && projectile.localAI[0] == 0f)
-            //{
-            //    projectile.localAI[0] = 1f;
-            //    SoundEngine.PlaySound(in SoundID.Item20, projectile.position);
-            //}
             if (projectile.type == 27)
             {
                 for (int num1054 = 0; num1054 < 5; num1054++)
@@ -207,10 +205,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             {
                 for (int num85 = 0; num85 < 2; num85++)
                 {
-                    int num87 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
-                    Main.dust[num87].noGravity = true;
-                    Main.dust[num87].velocity.X *= 0.3f;
-                    Main.dust[num87].velocity.Y *= 0.3f;
+                    //int num87 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
+                    //Main.dust[num87].noGravity = true;
+                    //Main.dust[num87].velocity.X *= 0.3f;
+                    //Main.dust[num87].velocity.Y *= 0.3f;
                 }
             }
             else
@@ -258,7 +256,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
 
             return false;
-            return base.PreAI(projectile);
         }
 
 
@@ -282,7 +279,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawVertexTrail(false);
                 DrawPixelTrail(projectile);
             });
 
@@ -296,48 +292,37 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.15f * projectile.direction);
 
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
-                    Color.White with { A = 0 } * true_alpha * 0.7f, projectile.rotation, TexOrigin, finalDrawScale * 1.05f, se);
+                    Color.LightSkyBlue with { A = 0 } * true_alpha * 0.7f, projectile.rotation, TexOrigin, finalDrawScale * 1.05f, se);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 } * 0.15f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 0.65f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 } * 0.6f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 0.8f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.LightSkyBlue with { A = 0 } * 0.26f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
 
             return false;
         }
 
         public void DrawPixelTrail(Projectile projectile)
         {
-
             Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
-            //Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Content/VFXTest/SupernovaScatterSots").Value;
-
-            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 finalDrawScale = Vec2Scale * projectile.scale;
-
-            Vector2 starScale = 1.25f * new Vector2(Vec2Scale.X * 1.15f, Vec2Scale.Y * 0.75f) * justBouncedPower * projectile.scale;
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.OrangeRed with { A = 0 } * 0.45f, projectile.rotation, Star.Size() / 2f, starScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 0 } * 0.5f, projectile.rotation, Star.Size() / 2f, starScale * 0.75f, SpriteEffects.None);
 
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
             {
-                for (int i = 0; i < previousRotations.Count - 2; i++)
+                for (int i = 0; i < previousRotations.Count - 1; i++)
                 {
                     float progress = (float)i / previousRotations.Count;
 
                     if (progress != 1)
                     {
-                        Color orangeToUse = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
-
-                        Color col = Color.Lerp(Color.OrangeRed, orangeToUse, Easings.easeInCirc(progress));
+                        Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, Easings.easeInCirc(progress));
 
                         float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
-                        //Main.rand.NextVector2Circular(10f * projectile.scale, 10f)
                         Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
 
                         Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
@@ -357,15 +342,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             }
 
-            //TODO try giving orbs randomshake
-            //TODO try giving orbs sine wave X and Y shit (quash abnd stretch)
-
             //Glorb
             #region drawGlorb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Color orbCol2 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.4f) * 0.375f * true_alpha;
-            Color orbCol3 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.95f) * 0.525f * true_alpha;
+            Color orbCol3 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.4f) * 0.375f * true_alpha;
+            Color orbCol2 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.95f) * 0.525f * true_alpha;
 
             float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.2f;
             float sineScale2 = MathF.Cos((float)Main.timeForVisualEffects * 0.22f + 0.32578f) * 0.15f;
@@ -375,57 +357,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.75f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.75f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
 
 
             #endregion
-        }
-
-        Effect myEffect = null;
-        public void DrawVertexTrail(bool giveUp)
-        {
-            if (giveUp || true)
-                return;
-
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value;
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-            Color StripColor(float progress) => Color.White * (progress * progress * progress);
-            float StripWidth(float progress) => 30f * Easings.easeOutQuad(progress);// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
-
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.08f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            vertexStrip.DrawTrail();
-
-            //Over layer
-            myEffect.Parameters["ColorOne"].SetValue(Color.OrangeRed.ToVector3() * 10f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -441,10 +377,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             bool hitWall = false;
 
-            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.4f, Pitch = -0.15f, PitchVariance = 0.15f, MaxInstances = -1}, projectile.Center);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -1f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.25f };
-            //SoundEngine.PlaySound(style, projectile.Center);
+            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.4f, Pitch = -0.15f, PitchVariance = 0.15f, MaxInstances = -1 }, projectile.Center);
 
 
             #region vanillaCode
@@ -489,7 +422,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             float getSpeed = hitWall ? Math.Abs(projectile.velocity.X) : Math.Abs(projectile.velocity.Y);
             float clampedSpeed = Math.Clamp(getSpeed, 0f, 15f);
-            float adjustMent = MathHelper.Lerp(0.5f, 1.35f, clampedSpeed / 15f) * 1.1f;
+            float adjustMent = MathHelper.Lerp(0.5f, 1.35f, clampedSpeed / 15f) * 1.15f;
             bounceIntensity = adjustMent;
 
             projectile.rotation = projectile.velocity.ToRotation();
@@ -498,7 +431,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             //Impact Dust
             float circlePulseSize = 0.1f;
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity * 2f, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.2f, newColor: Color.OrangeRed);
+            Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity * 2f, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.2f, newColor: Color.DeepSkyBlue);
             CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 6, 0.2f, 0.4f);
             b2.drawLayer = "Dusts";
             d2.customData = b2;
@@ -510,13 +443,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 Vector2 spawnOffset = Main.rand.NextVector2Circular(5f, 5f);
 
                 Dust p = Dust.NewDustPerfect(projectile.Center + spawnOffset + oldVelocity, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.75f, 1.05f),
-                    newColor: Color.Lerp(Color.Orange, Color.OrangeRed, 0.75f), Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
+                    newColor: Color.SkyBlue, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
                 //p.velocity += oldVelocity * Main.rand.NextFloat(0.2f, 0.3f) * 0.5f;
             }
 
 
             return false;
-            return base.OnTileCollide(projectile, oldVelocity);
         }
 
     }

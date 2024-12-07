@@ -16,6 +16,7 @@ using System.Runtime.Intrinsics.Arm;
 using System.Linq;
 using VFXPlus.Content.FeatheredFoe;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
+using Microsoft.Build.Evaluation;
 
 namespace VFXPlus.Content
 {
@@ -46,13 +47,8 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ProjectileID.BallofFire, 0, 0, Main.myPlayer);
-
-            for (int ia = 0; ia < -8; ia++)
-            {
-                int a = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
-                Main.projectile[a].rotation = new Vector2(0f, -1f).RotatedBy((MathHelper.TwoPi / 8f) * ia).ToRotation();
-            }
+            int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
+            Main.projectile[ar].rotation = -MathHelper.PiOver2;
 
             return false;
             int[] orbitValues1 = { 20,  80, 140,

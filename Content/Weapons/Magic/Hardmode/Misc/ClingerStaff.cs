@@ -266,7 +266,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/circle_053").Value;
             Texture2D glow2 = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/muzzle_flash_12").Value;
             Texture2D glow3 = Mod.Assets.Request<Texture2D>("Assets/Flare/star_07").Value;
-            Texture2D glow4 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
 
             float ySinVal = (float)Math.Sin(Main.timeForVisualEffects * 0.22f) * 0.15f;
             float xSinVal = (float)Math.Sin(Main.timeForVisualEffects * 0.22f) * 0.05f;

@@ -201,12 +201,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * 2.5f; //3f
             Dust d = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel, newColor: Color.DodgerBlue);
             //d.scale = 0.15f;
-            CirclePulseBehavior b = new CirclePulseBehavior(0.25f, true, 2, 0.4f, 0.8f);
+            CirclePulseBehavior b = new CirclePulseBehavior(0.25f, true, 1, 0.4f, 0.8f);
             b.drawLayer = "Dusts";
             d.customData = b;
 
             Dust d2 = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel * 1.2f, newColor: Color.DodgerBlue);
-            CirclePulseBehavior b2 = new CirclePulseBehavior(0.25f, true, 2, 0.2f, 0.4f);
+            CirclePulseBehavior b2 = new CirclePulseBehavior(0.25f, true, 1, 0.2f, 0.4f);
             b2.drawLayer = "Dusts";
             d2.customData = b2;
 
