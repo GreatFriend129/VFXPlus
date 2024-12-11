@@ -103,9 +103,9 @@ float4 ComboLaser(VertexShaderOutput input) : COLOR0
     float4 input_color = float4(baseColor, alpha);
     
     float4 col1 = tex2D(samplerTex1, float2(frac(uv.x * tex1reps + (0.75f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col2 = tex2D(samplerTex2, float2(frac(uv.x * tex1reps + (1.0f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col3 = tex2D(samplerTex3, float2(frac(uv.x * tex1reps + (1.25f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col4 = tex2D(samplerTex4, float2(frac(uv.x * tex1reps + (1.5f * uTime)), uv.y)) * float4(1, 1, 1, 0);
+    float4 col2 = tex2D(samplerTex2, float2(frac(uv.x * tex2reps + (1.0f * uTime)), uv.y)) * float4(1, 1, 1, 0);
+    float4 col3 = tex2D(samplerTex3, float2(frac(uv.x * tex3reps + (1.25f * uTime)), uv.y)) * float4(1, 1, 1, 0);
+    float4 col4 = tex2D(samplerTex4, float2(frac(uv.x * tex4reps + (1.5f * uTime)), uv.y)) * float4(1, 1, 1, 0);
     col1 *= Color1 * Color1Mult;
     col2 *= Color2 * Color2Mult;
     col3 *= Color3 * Color3Mult;

@@ -63,7 +63,12 @@ namespace VFXPlus.Content.Dusts
                         dust.scale *= behavior.base_postShrinkPower;
                     }
 
-                    if (dust.scale < 0.03f)
+
+                    if (behavior.base_shouldFadeColor)
+                        dust.alpha = (int)(dust.alpha * behavior.base_colorFadePower);
+
+
+                    if (dust.scale < 0.03f || dust.scale < 0.03)
                     {
                         dust.active = false;
                     }
@@ -116,7 +121,9 @@ namespace VFXPlus.Content.Dusts
 
 		public override bool PreDraw(Dust dust)
 		{
-			Color White = Color.White with { A = 0 } * (dust.alpha / 255f);
+			float opacity = (dust.alpha / 255f);
+
+            Color White = Color.White with { A = 0 } * opacity;
 			Texture2D tex = Texture2D.Value;
 
             if (dust.customData != null)
@@ -125,7 +132,7 @@ namespace VFXPlus.Content.Dusts
 				{
 					Vector2 scale = behavior.Vector2DrawScale * dust.scale;
 
-                    Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 } * opacity, dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
                     
 					if (behavior.DrawWhiteCore)
 						Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 } * 1f, dust.rotation, tex.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0f);
@@ -133,7 +140,7 @@ namespace VFXPlus.Content.Dusts
 			}
             else
             {
-				Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 1f, SpriteEffects.None, 0f);
+				Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 } * opacity, dust.rotation, tex.Size() / 2f, dust.scale * 1f, SpriteEffects.None, 0f);
                 Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 0.65f, SpriteEffects.None, 0f);
             }
             return false;

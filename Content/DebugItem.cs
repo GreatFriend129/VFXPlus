@@ -17,6 +17,8 @@ using System.Linq;
 using VFXPlus.Content.FeatheredFoe;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 using Microsoft.Build.Evaluation;
+using VFXPlus.Common.Utilities;
+using log4net.Core;
 
 namespace VFXPlus.Content
 {
@@ -47,10 +49,62 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
-            Main.projectile[ar].rotation = -MathHelper.PiOver2;
+            for (int i = 20; i < 1 + Main.rand.Next(0, 0); i++) //2 //0,3
+            {
 
+                ParticleOrchestraSettings particleSettings = new()
+                {
+                    PositionInWorld = Main.MouseWorld,
+                    MovementVector = new Vector2(0f, 20f)
+                    
+                };
+                ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings);
+            }
+
+            float randomStart = Main.rand.NextFloat(0f, 1f);
+            for (int j = 0; j < 10; j++)
+            {
+                Color rainbow = Main.hslToRgb((j * 0.1f + randomStart) % 1f, 1f, 0.6f, 0) * 1f;
+
+                float progress = (float)j / 9;
+                int inverse = 9 - j;
+
+                Dust d2 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse>(), velocity * (0.1f + (j * 0.05f)), newColor: rainbow);
+                d2.scale = 0.01f;
+                CirclePulseBehavior b2 = new CirclePulseBehavior(0.35f, true, 1, 0.3f, 0.4f + (j * 0.1f));
+                b2.drawLayer = "Dusts";
+                d2.customData = b2;
+            }
+
+            /*
+            for (int i = 0; i < 22 + Main.rand.Next(0, 2); i++) //4 //2,2
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(10f, 10f);
+
+                Color rainbow = Main.hslToRgb((i * 0.05f + 0.5f) % 1f, 1f, 0.6f, 0) * 1f;
+
+
+
+                Dust p = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<PixelatedLineSpark>(), vel,
+                    newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.7f);
+
+                p.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
+                    1f, 0.5f, shouldFadeColor: false);
+
+                if (i % 1 == 0)
+                {
+                    Dust p2 = Dust.NewDustPerfect(Main.MouseWorld + vel * 4f, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.2f);
+                    p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.05f);
+                }
+
+            }
+            */
             return false;
+
+            //int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
+            //Main.projectile[ar].rotation = -MathHelper.PiOver2;
+
+            // return false;
             int[] orbitValues1 = { 20,  80, 140,
                                   40,  100, 160,
                                   60,  120, 180 };

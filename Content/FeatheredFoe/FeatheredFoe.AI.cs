@@ -52,7 +52,30 @@ namespace VFXPlus.Content.FeatheredFoe
                 BasicMovementVariant3(player.Center + basicAttackPoint, 3f, 540f);
 
 
-                if (timer > 20 && timer < 65 && timer % 8 == 0)
+                if (timer == 30 || timer == 85)
+                {
+                    Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+                    for (int iaa = -3; iaa < 4; iaa++)
+                    {
+                        Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * 10f;
+
+                        float curvePower = iaa * 0.009f;
+
+                        int curveFeather = Projectile.NewProjectile(null, NPC.Center, vel, ModContent.ProjectileType<CurvingFeather>(), 2, 0, Main.myPlayer);
+
+                        if (Main.projectile[curveFeather].ModProjectile is CurvingFeather cf)
+                        {
+                            cf.curveValue = curvePower * 1.25f; //1.5
+                        }
+
+                        Main.projectile[curveFeather].hostile = true;
+                        Main.projectile[curveFeather].friendly = false;
+                        Main.projectile[curveFeather].extraUpdates = 0; //1
+
+                    }
+                }
+
+                if (timer > 20 && timer < 65 && timer % 8 == 0 && false)
                 {
                     Vector2 vel = Main.rand.NextVector2CircularEdge(8f, 8f) * Main.rand.NextFloat();
 

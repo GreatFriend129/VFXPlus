@@ -3,6 +3,11 @@ Items: {
 		DisplayName: Debug Item
 		Tooltip: ""
 	}
+
+	EnergyShield: {
+		DisplayName: Energy Shield
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -21,6 +26,8 @@ Projectiles: {
 	WindBarrier.DisplayName: Wind Barrier
 	SupernovaScatterSots.DisplayName: Supernova Scatter Sots
 	ClingerStaffVFX.DisplayName: Clinger Staff V F X
+	RainbowGunVFX.DisplayName: Rainbow Gun V F X
+	EnergyShieldDash.DisplayName: Energy Shield Dash
 }
 
 Configs: {

@@ -349,9 +349,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             float repValue = dist / 1000f;
 
             myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
-            myEffect.Parameters["tex2reps"].SetValue(3f * repValue);
-            myEffect.Parameters["tex3reps"].SetValue(3f * repValue);
-            myEffect.Parameters["tex4reps"].SetValue(3f * repValue);
+            myEffect.Parameters["tex2reps"].SetValue(2.5f * repValue);
+            myEffect.Parameters["tex3reps"].SetValue(2.5f * repValue);
+            myEffect.Parameters["tex4reps"].SetValue(2.5f * repValue);
 
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.02f * 1f);
             
@@ -398,9 +398,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             float repValue = dist / 1000f;
 
             myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
-            myEffect.Parameters["tex2reps"].SetValue(1f * repValue);
-            myEffect.Parameters["tex3reps"].SetValue(3f * repValue);
-            myEffect.Parameters["tex4reps"].SetValue(3f * repValue);
+            myEffect.Parameters["tex2reps"].SetValue(2.5f * repValue);
+            myEffect.Parameters["tex3reps"].SetValue(2.5f * repValue);
+            myEffect.Parameters["tex4reps"].SetValue(2.5f * repValue);
 
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.03f + startingScroll);
 

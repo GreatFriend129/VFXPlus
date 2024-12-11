@@ -9,6 +9,7 @@ using ReLogic.Content;
 using Terraria.ModLoader;
 using Terraria;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Dusts;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -72,6 +73,32 @@ namespace VFXPlus.Content.FeatheredFoe
                 Projectile.extraUpdates = 20;
             }
 
+            int mod = 10;
+            if (timer % mod == 0)
+            {
+                int maxAdd = Projectile.timeLeft < 300 ? 50 : 100;
+                for (int i = Main.rand.Next(0, 15); i < previousPositions.Count; i += Main.rand.Next(5, maxAdd))
+                {
+                    int randChance = 20;
+                    if (Main.rand.NextBool(randChance))
+                    {
+
+                        float size = Main.rand.NextFloat(0.35f, 0.5f) * 0.5f;
+                        Color col = Color.White;
+                        Vector2 sideOffset = (previousRotations[i] + MathHelper.PiOver2).ToRotationVector2() * (Projectile.timeLeft < 300 ? Main.rand.NextFloat(-5, 5.01f) : Main.rand.NextFloat(-10, 10.1f));
+
+                        float scale = 2f;
+
+                        SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 5f, 0.92f);
+
+                        Dust star = Dust.NewDustPerfect(previousPositions[i] + sideOffset, ModContent.DustType<SmallSmoke>(),
+                        previousRotations[i].ToRotationVector2().RotatedByRandom(0.2f) * Main.rand.NextFloat(4f, 14f) * 0.75f, newColor: col, Scale: scale);
+                        star.customData = ssb;
+
+                    }
+                }
+            }
+
             timer++;
         }
 
@@ -126,11 +153,11 @@ namespace VFXPlus.Content.FeatheredFoe
             myEffect.Parameters["Color3"].SetValue(c3.ToVector4());
             myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
 
-            myEffect.Parameters["Color1Mult"].SetValue(0.5f);
-            myEffect.Parameters["Color2Mult"].SetValue(1f);
-            myEffect.Parameters["Color3Mult"].SetValue(0.5f);
-            myEffect.Parameters["Color4Mult"].SetValue(0.5f);
-            myEffect.Parameters["totalMult"].SetValue(1f);
+            myEffect.Parameters["Color1Mult"].SetValue(0f);
+            myEffect.Parameters["Color2Mult"].SetValue(0.5f); //0.5 ^-vv
+            myEffect.Parameters["Color3Mult"].SetValue(0f);
+            myEffect.Parameters["Color4Mult"].SetValue(0.25f);
+            myEffect.Parameters["totalMult"].SetValue(0.75f);
 
             myEffect.Parameters["tex1reps"].SetValue(4f);
             myEffect.Parameters["tex2reps"].SetValue(4f);
