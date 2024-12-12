@@ -8,6 +8,11 @@ Items: {
 		DisplayName: Energy Shield
 		Tooltip: ""
 	}
+
+	Shocklash: {
+		DisplayName: Shocklash
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -28,6 +33,8 @@ Projectiles: {
 	ClingerStaffVFX.DisplayName: Clinger Staff V F X
 	RainbowGunVFX.DisplayName: Rainbow Gun V F X
 	EnergyShieldDash.DisplayName: Energy Shield Dash
+	ElectricityBolt.DisplayName: Electricity Bolt
+	ShocklashProjectile.DisplayName: Shocklash Projectile
 }
 
 Configs: {

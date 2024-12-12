@@ -39,9 +39,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
 
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.5f, PitchVariance = 0.05f }; 
+            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style, player.Center);
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_176") with { Pitch = 1f, PitchVariance = 0.1f }; 
+
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style2, player.Center);
 
             foreach (Projectile p in Main.projectile)
@@ -224,23 +225,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             }
 
-
-            ParticleOrchestraSettings particleSettings2 = new()
-            {
-                PositionInWorld = projectile.Center,
-                MovementVector = Main.rand.NextVector2CircularEdge(0f, 0f)
-            };
-            //ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings2);
-
             return base.PreKill(projectile, timeLeft);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //if (vfxIndex != -1)
-              //  (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).headCollidePower = 2f;
-
-            return base.OnTileCollide(projectile, oldVelocity);
         }
     }
 
@@ -294,7 +279,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Projectile.friendly = false;
             Projectile.tileCollide = false;
 
-            Projectile.timeLeft = 2400; //Todo make 100% sure this is same as RainbowGunBackShotItself
+            Projectile.timeLeft = 2400;
         }
 
         int timer = 0;
@@ -413,7 +398,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             float sinScale = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.03f) * 0.2f;
 
-
             Vector2 v2Scale = new Vector2(1f * ease1, 0.6f * ease2) * true_width * sinScale;
 
 
@@ -506,8 +490,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
             myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/FlameTrail").Value); //smokeTrail4_512
 
-
-
             myEffect.Parameters["Color1"].SetValue(rainbow.ToVector4());
             myEffect.Parameters["Color2"].SetValue(rainbow.ToVector4());
             myEffect.Parameters["Color3"].SetValue(rainbow.ToVector4());
@@ -517,7 +499,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["Color2Mult"].SetValue(1.55f * 1f);
             myEffect.Parameters["Color3Mult"].SetValue(0.75f * 1f); 
             myEffect.Parameters["Color4Mult"].SetValue(1f * 0.25f);
-            myEffect.Parameters["totalMult"].SetValue(1.05f); //1.05 | 10f looks cool and void-y
+            myEffect.Parameters["totalMult"].SetValue(1.05f); // 10f looks cool and void-y
 
 
             //We want the number of repititions to be relative to the number of points
