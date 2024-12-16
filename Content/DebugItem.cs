@@ -19,6 +19,8 @@ using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 using Microsoft.Build.Evaluation;
 using VFXPlus.Common.Utilities;
 using log4net.Core;
+using System.Threading;
+using Terraria.Utilities;
 
 namespace VFXPlus.Content
 {
@@ -49,32 +51,34 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            for (int i = 20; i < 1 + Main.rand.Next(0, 0); i++) //2 //0,3
+            FastRandom r = new(player.name.GetHashCode());
+
+            float min = 0.4f;
+            float max = 1.2f;
+
+            for (int i = 0; i < 5; i++)
             {
-
-                ParticleOrchestraSettings particleSettings = new()
-                {
-                    PositionInWorld = Main.MouseWorld,
-                    MovementVector = new Vector2(0f, 20f)
-                    
-                };
-                ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings);
+                float val = min + r.NextFloat() * (max - min);
+                //Main.NewText(val);
             }
+            //Main.NewText("-------------------" + player.name.GetHashCode());
 
-            float randomStart = Main.rand.NextFloat(0f, 1f);
-            for (int j = 0; j < 10; j++)
-            {
-                Color rainbow = Main.hslToRgb((j * 0.1f + randomStart) % 1f, 1f, 0.6f, 0) * 1f;
+            //Main.NewText(player.name);
 
-                float progress = (float)j / 9;
-                int inverse = 9 - j;
+            Vector2 posA = Main.MouseWorld + new Vector2(0f, 0f);
+            Vector2 posB = player.Center + new Vector2(0f, 90f);
+            Vector2 posC = player.Center + new Vector2(0f, -90f);
 
-                Dust d2 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse>(), velocity * (0.1f + (j * 0.05f)), newColor: rainbow);
-                d2.scale = 0.01f;
-                CirclePulseBehavior b2 = new CirclePulseBehavior(0.35f, true, 1, 0.3f, 0.4f + (j * 0.1f));
-                b2.drawLayer = "Dusts";
-                d2.customData = b2;
-            }
+            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ModContent.ProjectileType<OrbTests>(), 10, 0, Main.myPlayer);
+            //int br = Projectile.NewProjectile(null, posB, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+            //int cr = Projectile.NewProjectile(null, posC, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+
+
+            //(Main.projectile[ar].ModProjectile as MadisonTornado).startDir = -1;
+            //(Main.projectile[br].ModProjectile as MadisonTornado).startDir = -1;
+            //(Main.projectile[cr].ModProjectile as MadisonTornado).startDir = -1;
+
+            //Main.projectile[ar].ai[1] = 0.65f;
 
             /*
             for (int i = 0; i < 22 + Main.rand.Next(0, 2); i++) //4 //2,2
@@ -101,8 +105,7 @@ namespace VFXPlus.Content
             */
             return false;
 
-            //int ar = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, Main.myPlayer);
-            //Main.projectile[ar].rotation = -MathHelper.PiOver2;
+
 
             // return false;
             int[] orbitValues1 = { 20,  80, 140,

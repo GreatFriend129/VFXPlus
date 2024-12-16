@@ -66,7 +66,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             float timeForPopInAnim = 25;
-            float animProgress = Math.Clamp((timer + 7) / timeForPopInAnim, 0f, 1f);
+            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
 
             projectile.scale = 0.5f + MathHelper.Lerp(0f, 0.5f, Easings.easeInOutBack(animProgress, 1f, 3f));
             drawAlpha = 1f;// Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.08f), 0f, 1f);
@@ -111,7 +111,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Border
             for (int i = 0; i < 4; i++)
             {
-                float dist = 1.25f;
+                float dist = projectile.ai[0] > 0 ? 1.25f : 2.15f;
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
@@ -119,6 +119,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
                     Color.Gold with { A = 0 } * drawAlpha * 1.25f, projectile.rotation, TexOrigin, projectile.scale * 1f, se);
             }
+
 
             //We MUST return true here because otherwise the rays dont ever run PreDraw for some reason
             return true;
@@ -131,9 +132,54 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return false;
         }
 
-        public override bool PreKill(Projectile projectile, int timeLeft)
+        public override void PostDraw(Projectile projectile, Color lightColor)
         {
-            return base.PreKill(projectile, timeLeft);
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("OverPlayers", () =>
+            {
+                DrawOrb(projectile, false);
+            });
+            DrawOrb(projectile, true); 
+        }
+
+        public void DrawOrb(Projectile projectile, bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            //(Actively shooting rays)
+            if (projectile.ai[0] > 0)
+            {
+                //ai[0] becomes 60 once rays are shot and goes to 0 (ai[0]--)
+
+                //Utils.GetLerpValue give the progress between to and from (ie t = 50, from = 0, to = 100 gives 0.5 because 50 is halfway to 100)
+                
+                float progress = Utils.GetLerpValue(20f, 40f, projectile.ai[0], clamped: true);
+                float progress2 = 1f - Utils.GetLerpValue(40f, 60f, projectile.ai[0], clamped: true) * 0.5f;
+
+                //float scale = 1f * Easings.easeOutSine(progress);
+
+
+                //Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
+                Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/flare_12").Value;
+                Vector2 originPoint = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
+
+                Color col1 = Color.LightGoldenrodYellow * 0.75f;
+                Color col2 = Color.Gold * 0.525f;
+                Color col3 = Color.Orange * 0.375f;
+
+                float scale1 = 0.85f;
+                float scale2 = 1.6f;
+                float scale3 = 2.5f;
+
+                float scale = 0.15f * progress * progress2;
+
+                float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+                float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+                Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * progress, (float)Main.timeForVisualEffects * 0.05f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * progress, (float)Main.timeForVisualEffects * 0.02f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * progress, (float)Main.timeForVisualEffects * -0.01f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            }
         }
 
 
@@ -148,8 +194,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return lateInstantiation && entity.type == ProjectileID.MedusaHeadRay;
         }
 
-        float overallAlpha = 1f;
-        float overallWidth = 0.15f;
+        float overallWidth = 0.05f;
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
@@ -160,7 +205,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             projectile.velocity = Vector2.Zero;
             
 
-            overallWidth = Math.Clamp(MathHelper.Lerp(overallWidth, 1.5f, 0.05f), 0f, 1f);
+            overallWidth = Math.Clamp(MathHelper.Lerp(overallWidth, 1.15f, 0.05f), 0f, 1f);
+
+            if (timer > 5 && timer % 4 == 0)
+            {
+                Vector2 startPos = projectile.Center + (storedVelocity * Main.rand.NextFloat(0f, 0.25f));
+                Vector2 posOffset = new Vector2(0f, Main.rand.NextFloat(-10f, 10)).RotatedBy(storedVelocity.ToRotation());
+
+                Vector2 vel = storedVelocity.SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(4, 7);
+
+                Dust d = Dust.NewDustPerfect(startPos + posOffset, ModContent.DustType<LineSpark>(), vel * 2.5f, newColor: Color.Goldenrod * 0.5f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.25f);
+                d.noLight = false;
+                //d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.95f, timeToStartShrink: 0, postShrinkPower: 0.9f, killEarlyTime: 5, XScale: 0.3f, YScale: 0.35f, shouldFadeColor: false);
+
+                d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.83f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 3 + Main.rand.Next(-5, 5), killEarlyTime: 40,
+                    1f, 0.5f, shouldFadeColor: false);
+            }
 
             timer++;
             return base.PreAI(projectile);
@@ -188,7 +248,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             float easedWidth = Easings.easeInOutBack(overallWidth, 0f, 2f);
 
-            Texture2D beam = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLineHalf").Value;
+            Texture2D beam = Mod.Assets.Request<Texture2D>("Assets/Pixel/Medusa_Gray").Value;
 
             Vector2 startPosition = projectile.Center;
             Vector2 goalPosition = startPosition + storedVelocity;
@@ -198,20 +258,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 origin = new Vector2(0f, beam.Height / 2f);
 
             float distance = storedVelocity.Length();
-            float XScale = (distance / (float)beam.Width) * projectile.scale * 1.5f;
+            float XScale = (distance / (float)beam.Width) * projectile.scale * 1.15f; //1.5 for half-flare
             float YScale = easedWidth * projectile.scale;
 
             Vector2 scale = new Vector2(XScale, YScale);
             Vector2 scale2 = new Vector2(XScale, YScale * 0.65f);
             Vector2 scale3 = new Vector2(XScale, YScale * 0.25f);
+            Vector2 scale4 = new Vector2(XScale, YScale * 3f);
 
-            Vector2 scale4 = new Vector2(XScale, YScale * 1.25f);
 
             Main.EntitySpriteDraw(beam, drawPosition, null, Color.Gold with { A = 0 } * 0.15f, rot, origin, scale4, SpriteEffects.None);
 
             Main.EntitySpriteDraw(beam, drawPosition + Main.rand.NextVector2Circular(5f, 5f), null, Color.Orange with { A = 0 } * 0.5f, rot, origin, scale, SpriteEffects.None);
             Main.EntitySpriteDraw(beam, drawPosition + Main.rand.NextVector2Circular(3f, 3f), null, Color.LightGoldenrodYellow with { A = 0 } * 0.75f, rot, origin, scale2, SpriteEffects.None);
-            Main.EntitySpriteDraw(beam, drawPosition, null, Color.White with { A = 0 }, rot, origin, scale3, SpriteEffects.None);
+            Main.EntitySpriteDraw(beam, drawPosition + Main.rand.NextVector2Circular(1.5f, 1.5f), null, Color.White with { A = 0 }, rot, origin, scale3, SpriteEffects.None);
 
         }
     }

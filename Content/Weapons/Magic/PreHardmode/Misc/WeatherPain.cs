@@ -54,7 +54,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-
             int trailCount = 5;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);

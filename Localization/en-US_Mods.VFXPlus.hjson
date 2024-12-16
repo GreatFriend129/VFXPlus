@@ -35,6 +35,8 @@ Projectiles: {
 	EnergyShieldDash.DisplayName: Energy Shield Dash
 	ElectricityBolt.DisplayName: Electricity Bolt
 	ShocklashProjectile.DisplayName: Shocklash Projectile
+	MadisonTornado.DisplayName: Madison Tornado
+	ExplodingExplosionTest.DisplayName: Exploding Explosion Test
 }
 
 Configs: {

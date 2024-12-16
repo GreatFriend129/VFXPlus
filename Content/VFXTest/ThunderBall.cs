@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Terraria.GameContent.Drawing;
 using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
+using Terraria.Utilities;
 
 namespace VFXPlus.Content.VFXTest
 {
@@ -213,10 +214,10 @@ namespace VFXPlus.Content.VFXTest
             float timeA = timer * 0.045f * timeFade;
             float timeB = timer * -0.07f * timeFade;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeA, Tex.Size() / 2, scale * 1.65f, SpriteEffects.None, 0f);
-                //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeB, Tex.Size() / 2, scale * 1.65f + (0.15f * scale), SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeA, Tex.Size() / 2, scale * 1.65f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeB, Tex.Size() / 2, scale * 1.65f + (0.15f * scale), SpriteEffects.None, 0f);
 
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.EffectMatrix);
@@ -255,7 +256,7 @@ namespace VFXPlus.Content.VFXTest
         {
             Projectile.width = 1;
             Projectile.height = 1;
-            Projectile.timeLeft = 200;
+            Projectile.timeLeft = 22200;
             Projectile.penetrate = -1;
             //Projectile.scale = 0.1f;
 
@@ -269,23 +270,22 @@ namespace VFXPlus.Content.VFXTest
         {
             //if (timer > 0)
 
-            Projectile.velocity *= 0.96f;
+            //Projectile.velocity *= 0.96f;
 
-            if (Projectile.velocity.Length() < 1.5f)
-                Projectile.scale *= 0.98f;
+            //if (Projectile.velocity.Length() < 1.5f)
+            //    Projectile.scale *= 0.98f;
 
-            if (Projectile.scale < 0f)
-                Projectile.active = false;
+            //if (Projectile.scale < 0f)
+            //    Projectile.active = false;
 
             timer++;
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Orbs/anotheranotherorb").Value;
-            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/ElectricPopE").Value;
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            float scale = Projectile.scale * 2f;
+            float scale = Projectile.scale * 1.5f;
 
             Color innerCol = Color.White with { A = 0 };
             Color outerCol = Color.DodgerBlue with { A = 0 };
@@ -296,17 +296,104 @@ namespace VFXPlus.Content.VFXTest
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-
-                Main.spriteBatch.Draw(Tex, drawPos, null, outerCol * 0.5f, 0f, origin, scale * 1f, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(Tex, drawPos, null, innerCol * 1f, 0f, origin, scale * 0.2f, SpriteEffects.None, 0f);
-
+                GoddamnMonsoon(0);
+                GoddamnMonsoonCirc(0);
             });
+            GoddamnMonsoonCirc(250);
 
-            //Main.spriteBatch.Draw(Tex, drawPos, null, outerCol, 0f, origin, scale * 1f, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Tex, drawPos, null, innerCol, 0f, origin, scale * 0.4f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, drawPos, null, Color.SkyBlue with { A = 0 } * 0.85f, 0f, origin, scale * 1f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, drawPos, null, Color.LightSkyBlue with { A = 0 } * 0.7f, 0f, origin, scale * 0.6f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, drawPos, null, Color.White * 0.5f, 0f, origin, scale * 0.275f, SpriteEffects.None, 0f);
 
             return false;
         }
 
+
+        public void GoddamnMonsoon(int count = 50)
+        {
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/anotheranotherorb").Value;
+
+            Vector2 drawCenter = Projectile.Center - Main.screenPosition;
+            Vector2 origin = Tex.Size() / 2f;
+
+
+            Color col = Color.White with { A = 0 } * 0.35f;
+
+            float minRange = 50f;
+            float maxRange = 200f;
+            for (int i = 0; i < count; i++)
+            {
+                float progress = (float)i / ((float)count - 1f);
+
+                float dist = Main.rand.NextFloat(minRange, maxRange);
+                float rot = Main.rand.NextFloat(0f, MathHelper.TwoPi);
+
+                Vector2 pos = new Vector2(1f, 0f).RotatedBy(rot) * dist;
+
+                float alpha = 1f * (dist / maxRange);
+
+                Main.spriteBatch.Draw(Tex, drawCenter + pos, null, col, rot, origin, 1f, SpriteEffects.None, 0f);
+            }
+
+        }
+
+        public void GoddamnMonsoonCirc(int count = 50)
+        {
+            //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
+            //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
+            Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/AnotherLineGlow").Value;
+            Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
+
+            FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
+            float speedTime = Main.GlobalTimeWrappedHourly * 0.25f;
+
+            float minRange = 240f; //40f | 240 920 for full screen
+            float maxRange = 420f; //120
+            for (int i = 0; i < count; i++)
+            {
+
+                Texture2D texture;
+                Rectangle frame;
+                Vector2 scale;
+                float rotation = MathHelper.PiOver2;
+                if (r.NextFloat() < 0.3f)
+                {
+                    texture = windTexture;
+                    frame = texture.Bounds;
+                    scale = new Vector2(0.3f, 0.66f) * 0.4f; //0.3 0.66
+                }
+                else
+                {
+                    texture = dustTexture;
+                    frame = texture.Frame(verticalFrames: 3, frameY: r.Next(3));
+                    scale = new(0.5f, 0.5f);
+                    rotation += speedTime * NextFloatFastRandom(r, 0.8f, 1.2f);
+                }
+                Vector2 origin = frame.Size() / 2f;
+                float speed = NextFloatFastRandom(r, 0.8f, 4f);
+                float progress = (speedTime * speed + r.NextFloat()) % 3f;
+
+                float scaleWave = MathF.Sin(progress * MathHelper.Pi);
+                float ringDistance = NextFloatFastRandom(r, minRange, maxRange);
+
+                float randomRot = NextFloatFastRandom(r, 0f, MathHelper.TwoPi) + speedTime * speed;
+
+                Vector2 drawPosition = Projectile.Center + new Vector2(1f, 0f).RotatedBy(randomRot) * ringDistance * scaleWave;
+
+                //Vector2 drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir); //-20 14 | -120
+
+                //float prog = (float)i / (float)count - 1f;
+                //Color col = Main.hslToRgb((prog + timer * 0.005f) % 1f, 1f, 0.7f, 0);
+
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White with { A = 0 }, randomRot + rotation + MathHelper.PiOver2, origin,
+                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
+            }
+        }
+
+        public float NextFloatFastRandom(FastRandom random, float min, float max)
+        {
+            return min + random.NextFloat() * (max - min);
+        }
     }
 }
