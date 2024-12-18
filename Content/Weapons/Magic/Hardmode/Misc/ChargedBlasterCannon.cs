@@ -17,6 +17,8 @@ using System.Threading;
 using ReLogic.Utilities;
 using VFXPlus.Common.Drawing;
 using rail;
+using Terraria.Graphics;
+using System.Runtime.Intrinsics.X86;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -236,8 +238,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                             }
                             if (flag12)
                             {
-                                SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.75f, Pitch = 0f, PitchVariance = .05f, MaxInstances = -1}; 
-                                SoundEngine.PlaySound(style, projectile.Center);
+                                //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.75f, Pitch = 0f, PitchVariance = .05f, MaxInstances = -1}; 
+                                //SoundEngine.PlaySound(style, projectile.Center);
 
                                 Vector2 vector8 = vector;
                                 int num27 = 459;
@@ -250,6 +252,36 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                                 }
                                 float num29 = 0.7f + (float)num13 * 0.3f;
                                 int num30 = ((num29 < 1f) ? projectile.damage : ((int)((float)projectile.damage * 2.5f)));
+
+                                if (num29 < 1f)
+                                {
+                                    ///SoundStyle style23 = new SoundStyle("Terraria/Sounds/Custom/dd2_sky_dragons_fury_shot_0") with { Pitch = 0.35f, PitchVariance = 0.3f, Volume = 0.5f };
+                                    ///SoundEngine.PlaySound(style23, projectile.Center);
+
+                                    SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.5f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1}; 
+                                    SoundEngine.PlaySound(style, projectile.Center);
+
+                                    SoundStyle style4 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.15f, Pitch = .35f, PitchVariance = 0.1f, MaxInstances = -1 }; 
+                                    SoundEngine.PlaySound(style4, projectile.Center);
+
+                                    //SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.15f, Pitch = 0.1f, MaxInstances = -1, PitchVariance = 0.1f };
+                                    //SoundEngine.PlaySound(style32, projectile.Center);
+ 
+                                }
+                                else
+                                {
+                                    SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.35f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1 };
+                                    SoundEngine.PlaySound(style, projectile.Center);
+
+                                    SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.2f, Pitch = 0.25f, MaxInstances = -1, PitchVariance = 0.1f };
+                                    SoundEngine.PlaySound(style32, projectile.Center);
+
+                                    SoundStyle style23 = new SoundStyle("Terraria/Sounds/Custom/dd2_sky_dragons_fury_shot_0") with { Pitch = 0.15f, PitchVariance = 0.4f, Volume = 0.3f };
+                                    SoundEngine.PlaySound(style23, projectile.Center);
+
+                                    SoundStyle stylec = new SoundStyle("Terraria/Sounds/Item_67") with { Pitch = 0f, Volume = 0.55f, PitchVariance = 0.1f, MaxInstances = -1 }; //1f
+                                    SoundEngine.PlaySound(stylec, player.Center);
+                                }
                                 Projectile.NewProjectile(projectile.GetSource_FromThis(), vector8.X, vector8.Y, vector9.X, vector9.Y, num27, num30, projectile.knockBack, projectile.owner, 0f, num29);
                             }
                         }
@@ -305,7 +337,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
@@ -351,7 +383,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (timer == 0 && projectile.ai[1] >= 1)
             {
                 float circlePulseSize = 0.35f;
-                Color inBetweenCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
+                Color inBetweenCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
 
                 Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.4f * projectile.scale, newColor: inBetweenCol * 0.25f);
                 CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize * 1.5f, true, 3, 0.2f, 0.4f);
@@ -392,7 +424,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
 
-            int trailCount = (int)(22f * projectile.scale); //8
+            int trailCount = (int)(25f * projectile.scale); //8
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -502,10 +534,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             Texture2D SoftGlow = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
             Vector2 vec2Scale = new Vector2(1f, 0.85f * overallScale) * projectile.scale * overallScale;
-            Color inBetween = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 1f) * 0.5f;
-            Main.EntitySpriteDraw(SoftGlow, drawPos, null, inBetween with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, SoftGlow.Size() / 2f, vec2Scale * 2.35f, se);
-            Main.EntitySpriteDraw(SoftGlow, drawPos, null, Color.SkyBlue with { A = 0 } * 0.2f * overallAlpha, projectile.rotation, SoftGlow.Size() / 2f, vec2Scale * 1.75f, se);
-
+            Color inBetween = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.2f) * 0.7f;
+            Main.EntitySpriteDraw(SoftGlow, drawPos, null, inBetween with { A = 0 } * 0.25f * overallAlpha, projectile.rotation, SoftGlow.Size() / 2f, vec2Scale * 2.5f, se);
+            Main.EntitySpriteDraw(SoftGlow, drawPos, null, Color.SkyBlue with { A = 0 } * 0.4f * overallAlpha, projectile.rotation, SoftGlow.Size() / 2f, vec2Scale * 1.85f, se);
 
             //Border
             for (int i = 0; i < 4; i++)
@@ -514,7 +545,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     Color.LightSkyBlue with { A = 0 } * 1f * overallAlpha, projectile.rotation, TexOrigin, baseVec2Scale * 1.05f, se);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White * overallAlpha, projectile.rotation, TexOrigin, baseVec2Scale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White * overallAlpha * 0.9f, projectile.rotation, TexOrigin, baseVec2Scale, se);
             return false;
 
         }
@@ -541,7 +572,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     Vector2 sizeSmall = baseVec2Scale * (0.5f + (progress * 0.5f));
                     Vector2 sizeBig = baseVec2Scale * (0.34f + (progress * 0.66f));
 
-                    Color col = Color.Lerp(Color.Black, Color.White, progress) * Easings.easeInSine(progress) * overallAlpha;
+                    Color col = Color.Lerp(Color.Black, Color.LightSkyBlue, progress) * Easings.easeInSine(progress) * overallAlpha;
                     Color col2 = Color.Lerp(Color.White, Color.White, progress) * Easings.easeInSine(progress) * overallAlpha;
 
 
@@ -643,10 +674,52 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            
+            if (timer == 0)
+            {
+                SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.35f, Pitch = 0f, MaxInstances = -1, PitchVariance = 0.1f };
+                SoundEngine.PlaySound(style32, projectile.Center);
+
+                SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/AnnihilatorShot") with { Volume = .1f, Pitch = 0.15f, MaxInstances = -1 };
+                SoundEngine.PlaySound(style, projectile.Center);
+
+                SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Pitch = .75f, PitchVariance = 0.11f, Volume = 0.3f, MaxInstances = -1 };
+                SoundEngine.PlaySound(styla, projectile.Center);
+
+                SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .5f, Pitch = .75f, PitchVariance = .11f, MaxInstances = -1 };
+                SoundEngine.PlaySound(styleb, projectile.Center);
+            }    
+            Vector2 vector148 = projectile.Center + projectile.velocity * (projectile.localAI[1] - 8f);
+
+            //laserWidth = 1f;// Math.Clamp(MathHelper.Lerp(laserWidth, 0.25f, 0.075f), 1f, 4f);
+            laserAlpha = Math.Clamp(MathHelper.Lerp(laserAlpha, 1.5f, 0.1f), 0f, 1f);
+
+
+            float timeForPopInAnim = 32; //32
+            float animProgress = Math.Clamp((timer + 12) / timeForPopInAnim, 0f, 1f);
+
+            laserWidth = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
+
+
+            if (timer % 1 == 0)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    float percent = Main.rand.NextFloat(0f, 1f);
+
+                    Vector2 pos = Vector2.Lerp(projectile.Center, projectile.Center + projectile.velocity * (projectile.localAI[1] - 8f), percent);
+                    Vector2 off = Main.rand.NextVector2Circular(13f, 13f);
+
+                    Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.05f) * Main.rand.NextFloat(2, 7);
+
+
+                    Dust d = Dust.NewDustPerfect(pos + off, ModContent.DustType<LineSpark>(), vel * 2f, newColor: Color.DeepSkyBlue * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
+                    d.noLight = false;
+                    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.93f, postShrinkPower: 0.89f, timeToStartShrink: 8, killEarlyTime: 100, XScale: 0.3f, YScale: 0.25f, shouldFadeColor: false);
+                }
+
+            }
 
             timer++;
-
             return base.PreAI(projectile);
         }
 
@@ -655,48 +728,160 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return true;
-
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-
-            //After-Image
-            if (previousRotations != null && previousPostions != null)
+            //Main.NewText(projectile.ai[1]);
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
+                DrawVertexTrail(projectile, false);
+            });
 
-                    Color col = Color.LightGoldenrodYellow * progress * projectile.Opacity;
-                    // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
+            DrawVertexTrail(projectile, true);
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+            #region endPoints
+            Vector2 startPoint = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
+            Vector2 endPoint = startPoint + projectile.velocity * (projectile.localAI[1] - 8f);
+            float rot = projectile.velocity.ToRotation();
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+            /*
+            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
+            //Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
+            Color inBetweenOrange = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.65f);
 
-                }
+            float starRot = (float)(Main.timeForVisualEffects * 0.05f);
+            float starOuterScale = 1.2f;
+            float starInnerScale = 0.4f;
 
-            }
+            Vector2 v2sB = new Vector2(1f, 0.75f);
+            Vector2 v2s = new Vector2(0.75f, 1f);
+            //Start star
+            //Main.EntitySpriteDraw(glorb, startPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha * 0.5f, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, startPoint - Main.screenPosition, null, inBetweenOrange with { A = 0 } * 1.15f, rot, portal.Size() / 2, v2s * starOuterScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, startPoint - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 }, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
 
-            //Border
-            for (int i = 0; i < 3; i++)
-            {
-                float opacitySquared = projectile.Opacity * projectile.Opacity;
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
-                    Color.Gold with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f, SpriteEffects.None);
-            }
+            //End star
+            //Main.EntitySpriteDraw(glorb, endPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, endPoint - Main.screenPosition, null, inBetweenOrange with { A = 0 } * 1.15f, rot, portal.Size() / 2, v2s * starOuterScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, endPoint - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 }, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
+            */
+            #endregion
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
+            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D bloom = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+
+            float sinScale = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.03f) * 0.2f;
+
+            //Vector2 v2Scale = new Vector2(0.4f, 1f) * sinScale * 0.6f;
+
+            float lerpXVal = MathHelper.Lerp(0.4f, 1f, laserWidth - 1f);
+            float lerpYVal = MathHelper.Lerp(1f, 1.5f, laserWidth - 1f);
+            Vector2 v2Scale = new Vector2(lerpXVal, lerpYVal) * sinScale * 0.6f;
+
+
+            Vector2 drawPosStart = startPoint - Main.screenPosition;
+            Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
+
+            Main.EntitySpriteDraw(portal, drawPosStart, null, Color.Black * 0.3f, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(bloom, drawPosStart, null, col with { A = 0 } * 0.4f, rot, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(2f, 2f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(3f, 3f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+
+            //Destination Star
+            drawPosStart = endPoint - Main.screenPosition;
+            Main.EntitySpriteDraw(portal, drawPosStart, null, Color.Black * 0.3f, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(bloom, drawPosStart, null, col with { A = 0 } * 0.4f, rot, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(2f, 2f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(3f, 3f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+
             return false;
-
         }
+
+        float laserAlpha = 0f;
+        float laserWidth = 2f;
+        Effect myEffect = null;
+        public void DrawVertexTrail(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            #region shaderPrep
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EnergyTex").Value; //EnergyTex 700 | s06sBloom
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
+
+            Vector2 startPoint = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
+            Vector2 endPoint = startPoint + projectile.velocity * (projectile.localAI[1] - 8f);
+
+            Vector2[] pos_arr = { endPoint, startPoint };
+            float[] rot_arr = { projectile.velocity.ToRotation(), projectile.velocity.ToRotation() };
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.05f;
+
+            Color StripColor(float progress) => Color.White * laserAlpha;
+            float StripWidth(float progress) => 20f * laserWidth * sineWidthMult; //25
+            float StripWidth2(float progress) => 25f * laserWidth * sineWidthMult;
+            //^ Doing Easings.easeOutQuad(progress) * Easings.easeInQuad(progress) gives a really nice zigzag patter (or do 1f - EaseIn)
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+            #endregion
+
+            #region Shader
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(timer * 0.03f);
+
+            float dist = (startPoint - endPoint).Length();
+            float repValue = dist / 700f;
+            myEffect.Parameters["reps"].SetValue(repValue);
+
+            //UnderLayer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f * laserAlpha);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            ///vertexStrip.DrawTrail();
+            vertexStrip.DrawTrail();
+
+
+
+            Color inBetween = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.35f);
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["ColorOne"].SetValue(inBetween.ToVector3() * 5f * laserAlpha);
+            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.5f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.DeepSkyBlue.ToVector3() * 10f * laserAlpha);
+            myEffect.Parameters["glowThreshold"].SetValue(0.55f);
+            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            //Over layer
+            //myEffect.Parameters["ColorOne"].SetValue(Color.DeepSkyBlue.ToVector3() * 10f);
+            //myEffect.Parameters["glowThreshold"].SetValue(0.5f);
+            //myEffect.Parameters["glowIntensity"].SetValue(2.5f);
+            //myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStrip.DrawTrail();
+
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            #endregion
+        }
+
     }
 
 }

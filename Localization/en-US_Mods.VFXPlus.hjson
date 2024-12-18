@@ -37,6 +37,8 @@ Projectiles: {
 	ShocklashProjectile.DisplayName: Shocklash Projectile
 	MadisonTornado.DisplayName: Madison Tornado
 	ExplodingExplosionTest.DisplayName: Exploding Explosion Test
+	FFWindOrb.DisplayName: F F Wind Orb
+	ShadowbeamStaffVFX.DisplayName: Shadowbeam Staff V F X
 }
 
 Configs: {

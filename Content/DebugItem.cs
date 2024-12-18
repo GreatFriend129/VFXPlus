@@ -69,7 +69,7 @@ namespace VFXPlus.Content
             Vector2 posB = player.Center + new Vector2(0f, 90f);
             Vector2 posC = player.Center + new Vector2(0f, -90f);
 
-            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ModContent.ProjectileType<OrbTests>(), 10, 0, Main.myPlayer);
+            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ModContent.ProjectileType<FFWindOrb>(), 10, 0, Main.myPlayer);
             //int br = Projectile.NewProjectile(null, posB, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
             //int cr = Projectile.NewProjectile(null, posC, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
 
