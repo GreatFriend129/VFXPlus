@@ -14,6 +14,7 @@ using VFXPlus.Common.Interfaces;
 using System.IO;
 using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
+using VFXPlus.Content.FeatheredFoe;
 
 namespace VFXPlus
 {
@@ -64,6 +65,9 @@ namespace VFXPlus
             Filters.Scene["GlowDustShader"] = new Filter(new ScreenShaderData(screenRef, "ArmorBasic"), EffectPriority.High);
             Filters.Scene["GlowDustShader"].Load();
 
+
+            //Skies
+            SkyManager.Instance["VFXPlus:FeatheredFoe"] = new FFSky();
         }
 
         public static void SetLoadingText(string text)

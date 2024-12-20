@@ -331,10 +331,10 @@ namespace VFXPlus.Content.VFXTest
                 //dust200.customData = Projectile.Center;
             }
 
-            Projectile.velocity = new Vector2(8f, 0f);
+            //Projectile.velocity = new Vector2(8f, 0f);
 
             //Looks cool, but makes the weapon a little messy, maybe use this for shadowflame knife and/or bow?
-            if (timer % 1 == 0)
+            if (timer % 1 == 0 && false)
             {
                 Vector2 posOffset = Main.rand.NextVector2Circular(2f, 2f);
                 Vector2 initVel = Main.rand.NextVector2Circular(1.25f, 1.25f);
@@ -384,13 +384,13 @@ namespace VFXPlus.Content.VFXTest
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
                 //GoddamnMonsoon(50);
-                GoddamnMonsoonCirc(50);
-                UniqueCircularOrbitBehaviorThing(0);
+                GoddamnMonsoonCirc(0); //50
+                UniqueCircularOrbitBehaviorThing(50);
             });
             //UniqueCircularOrbitBehaviorThing(30);
             //GoddamnMonsoonCirc(75);
 
-            return false;
+            //return false;
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 

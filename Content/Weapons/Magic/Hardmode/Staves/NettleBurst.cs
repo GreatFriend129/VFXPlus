@@ -20,19 +20,19 @@ using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 
-namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
+namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
     
-    public class Vilethorn : GlobalItem 
+    public class NettleBurst : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.Vilethorn);
+            return lateInstatiation && (item.type == ItemID.NettleBurst);
         }
 
         public override void SetDefaults(Item entity)
         {
-            entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
@@ -43,13 +43,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         }
 
     }
-    public class VilethornBaseShotOverride : GlobalProjectile
+    public class NettleBurstBaseOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornBase);
+            return lateInstantiation && (entity.type == ProjectileID.NettleBurstLeft || entity.type == ProjectileID.NettleBurstRight);
         }
 
 
@@ -58,13 +58,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
-            {
-                //int vfx = Projectile.NewProjectile(null, projectile.Center, projectile.velocity, ModContent.ProjectileType<VilethornVFX>(), 0, 0);
-                //(Main.projectile[vfx].ModProjectile as VilethornVFX).parent = projectile.whoAmI;
-            }
             
-            if (timer == 8)
+            if (timer == 4)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
                 float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
@@ -74,19 +69,33 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
                 SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
                 SoundEngine.PlaySound(style2, projectile.Center);
-
-                //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_156") with { Volume = 0.15f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                //SoundEngine.PlaySound(style4, projectile.Center);
             }
 
 
-            float timeForPopInAnim = 30;
+            float timeForPopInAnim = 25;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 3f));
+            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2.5f));
 
             if (scale == 1f)
                 alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
+
+            if (timer == -3) //10
+            {
+                for (int i = 0; i < 3 + Main.rand.Next(1, 3); i++)
+                {
+                    Color col = Main.rand.NextBool() ? Color.DeepSkyBlue : Color.DeepPink;
+
+                    Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
+
+                    Vector2 posOffset = Main.rand.NextVector2Circular(5f, 5f);
+
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 2.5f); //3
+
+                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
+                }
+            }
 
             timer++;
             return true;
@@ -106,14 +115,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3.5f, 3.5f), null,
+                        Color.Red with { A = 0 } * 0.2f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
-
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
 
             return false;            
         }
@@ -130,13 +137,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
     }
 
-    public class VilethornTipShotOverride : GlobalProjectile
+    public class NettleBurstTipShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornTip);
+            return lateInstantiation && (entity.type == ProjectileID.NettleBurstEnd);
         }
 
 
@@ -145,13 +152,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
-            {
-                //int vfx = Projectile.NewProjectile(null, projectile.Center, projectile.velocity, ModContent.ProjectileType<VilethornVFX>(), 0, 0);
-                //(Main.projectile[vfx].ModProjectile as VilethornVFX).parent = projectile.whoAmI;
-            }
-
-            if (timer == 8)
+            if (timer == 4)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
                 float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
@@ -164,7 +165,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             }
 
 
-            float timeForPopInAnim = 30;
+            float timeForPopInAnim = 25;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
             scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 4f));
@@ -172,6 +173,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             if (scale == 1f)
                 alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
 
+            if (timer == -3) //10
+            {
+                for (int i = 0; i < 3 + Main.rand.Next(1, 3); i++)
+                {
+                    Color col = Main.rand.NextBool() ? Color.DeepSkyBlue : Color.DeepPink;
+
+                    Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
+
+                    Vector2 posOffset = Main.rand.NextVector2Circular(5f, 5f);
+
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 3f);
+
+                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
+                }
+            }
 
             timer++;
             return base.PreAI(projectile);
@@ -188,14 +205,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    //Vector2 offset = new Vector2(4f, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                    //Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * parentProj.direction);
-                    //float myAlpha = parentProj.Opacity * alpha;
-
                     float myAlpha = projectile.Opacity * alpha;
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                        Color.Red with { A = 0 } * 0.25f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
@@ -216,95 +229,5 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
-    }
-
-
-    //This exists literally just so we can draw it in the behind projectiles layer
-    public class VilethornVFX : ModProjectile
-    {
-        public override string Texture => "Terraria/Images/Projectile_0";
-
-        //Safety Checks
-        public override bool? CanDamage() => false;
-        public override bool? CanCutTiles() => false;
-
-        public override void SetDefaults()
-        {
-            Projectile.width = Projectile.height = 16;
-            Projectile.ignoreWater = true;
-            Projectile.hostile = false;
-            Projectile.friendly = false;
-            Projectile.tileCollide = false;
-
-            Projectile.timeLeft = 2400;
-
-            Projectile.hide = true;
-        }
-
-        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-        {
-            behindProjectiles.Add(index);
-        }
-
-        float alpha = 1f;
-        float scale = 0f;
-
-        public int parent = -1;
-        int timer = 0;
-        public override void AI()
-        {
-            if (Main.projectile[parent].type == ProjectileID.VilethornBase)
-            {
-                float timeForPopInAnim = 30;
-                float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
-
-                scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 3f));
-
-                if (scale == 1f)
-                    alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
-            }
-            else if (Main.projectile[parent].type == ProjectileID.VilethornTip)
-            {
-
-                float timeForPopInAnim = 30;
-                float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
-
-                scale = 0.15f + MathHelper.Lerp(0f, 0.85f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 4f));
-
-                if (scale == 1f)
-                    alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
-            }
-            timer++;
-        }
-
-        Effect myEffect = null;
-        public override bool PreDraw(ref Color lightColor)
-        {
-            if (parent == -1) return false;
-
-            Projectile parentProj = Main.projectile[parent];
-
-
-            Texture2D vanillaTex = TextureAssets.Projectile[parentProj.type].Value;
-            Vector2 drawPos = parentProj.Center - Main.screenPosition;
-            Vector2 vec2Scale = new Vector2(scale * parentProj.scale, parentProj.scale);
-
-
-            for (int i = 0; i < 10; i++)
-            {
-                //Vector2 offset = new Vector2(4f, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                //Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * parentProj.direction);
-                //float myAlpha = parentProj.Opacity * alpha;
-
-                float myAlpha = parentProj.Opacity * alpha;
-
-                Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                    new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, parentProj.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
-            }
-
-            return false;
-        }
-
-       
     }
 }

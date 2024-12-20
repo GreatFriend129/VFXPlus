@@ -51,6 +51,19 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            for (int i = 200; i < 22; i++) //16
+            {
+                Color col1 = Color.LimeGreen;
+
+                float progress = (float)i / 21;
+                Color col = Color.Lerp(Color.Black, col1, progress);
+
+                //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
+                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3f) * 1.65f,
+                    newColor: col with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 12), 0.98f, 0.01f, 1f); //12 28
+            }
+
             FastRandom r = new(player.name.GetHashCode());
 
             float min = 0.4f;
@@ -69,7 +82,7 @@ namespace VFXPlus.Content
             Vector2 posB = player.Center + new Vector2(0f, 90f);
             Vector2 posC = player.Center + new Vector2(0f, -90f);
 
-            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ModContent.ProjectileType<FFWindOrb>(), 10, 0, Main.myPlayer);
+            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ProjectileID.CrystalPulse2, 10, 0, Main.myPlayer);
             //int br = Projectile.NewProjectile(null, posB, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
             //int cr = Projectile.NewProjectile(null, posC, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
 

@@ -39,6 +39,7 @@ Projectiles: {
 	ExplodingExplosionTest.DisplayName: Exploding Explosion Test
 	FFWindOrb.DisplayName: F F Wind Orb
 	ShadowbeamStaffVFX.DisplayName: Shadowbeam Staff V F X
+	VilethornVFX.DisplayName: Vilethorn V F X
 }
 
 Configs: {

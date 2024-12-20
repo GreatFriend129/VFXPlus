@@ -8,6 +8,7 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.Events;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -65,6 +66,11 @@ namespace VFXPlus.Content.FeatheredFoe
         public int substate = 1;
         public override void AI()
         {
+            if (timer == 0)
+            {
+                SkyManager.Instance.Activate("VFXPlus:FeatheredFoe");
+            }
+
             NPC.dontTakeDamage = false;
             NPC.hide = false;
 

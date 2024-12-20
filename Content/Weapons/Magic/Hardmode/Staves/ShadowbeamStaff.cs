@@ -13,10 +13,8 @@ using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
-using System.Threading;
 using Terraria.Graphics;
 using VFXPlus.Common.Drawing;
-using XPT.Core.Audio.MP3Sharp.Decoding.Decoders.LayerIII;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -37,7 +35,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            
             return true;
         }
 
@@ -59,43 +56,57 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             //Create shadowbeam vfx proj
             if (timer == 0)
             {
-                previousHead = projectile.Center;
+                previousHead = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 55; //60
 
                 int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStaffVFX>(), 0, 0, projectile.owner);
                 vfxIndex = p;
-            }
 
-            /*
-            if (this.type == 294)
-            {
-                this.localAI[0] += 1f;
-                if (this.localAI[0] > 9f)
+                float circlePulseSize = 0.6f;
+
+                Color purple = new Color(61, 2, 92);
+                Color darkPurple = new Color(42, 2, 82);
+                Color purple3 = new Color(121, 7, 179);
+
+                Dust d2 = Dust.NewDustPerfect(previousHead, ModContent.DustType<CirclePulse>(), projectile.velocity * -0.01f, newColor: purple3 * 0.3f);
+                CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize * 1.5f, true, 1, 0.25f, 0.25f);
+                b2.drawLayer = "Dusts";
+                d2.customData = b2;
+
+                for (int i = 0; i < 7 + Main.rand.Next(0, 4); i++)
                 {
-                    for (int num379 = 0; num379 < 4; num379++)
-                    {
-                        Vector2 vector105 = base.position;
-                        vector105 -= base.velocity * ((float)num379 * 0.25f);
-                        this.alpha = 255;
-                        int num380 = Dust.NewDust(vector105, 1, 1, 173);
-                        Main.dust[num380].position = vector105;
-                        Main.dust[num380].scale = (float)Main.rand.Next(70, 110) * 0.013f;
-                        Dust dust157 = Main.dust[num380];
-                        Dust dust212 = dust157;
-                        dust212.velocity *= 0.2f;
-                    }
+                    Dust dp = Dust.NewDustPerfect(previousHead, ModContent.DustType<ElectricSparkGlow>(),
+                        projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.45f, 0.45f)) * Main.rand.Next(3, 8) * 1.45f,
+                        newColor: purple * 2f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.85f);
+
+                    ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.98f, FadeVelPower: 0.91f, Pixelize: true, XScale: 0.75f, YScale: 0.75f,
+                        UnderGlowPower: 3f, WhiteLayerPower: 0.25f, DrawWhiteWithAlphaZero: false); //0.91
+
+                    if (i < 8)
+                        esb.randomVelRotatePower = 0.7f;
+                    dp.customData = esb;
                 }
-                return;
+
+
+                for (int i = 0; i < 5 + Main.rand.Next(3); i++)
+                {
+                    Color col = Main.rand.NextBool(2) ? purple3 : darkPurple;
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) * Main.rand.NextFloat(0.5f, 2.75f);
+                    Dust d = Dust.NewDustPerfect(previousHead, ModContent.DustType<RoaParticle>(), vel, newColor: col * 1.5f, Scale: Main.rand.NextFloat(0.5f, 1.2f) * 1f);
+                    d.fadeIn = Main.rand.Next(0, 4);
+                    d.alpha = Main.rand.Next(0, 2);
+                    d.noLight = false;
+
+                    d.velocity += projectile.velocity.SafeNormalize(Vector2.UnitX) * 3.5f;
+                }
+
             }
-            */
 
             timer++;
             return false;
-            return base.PreAI(projectile);
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-
             return false;
         }
 
@@ -106,11 +117,47 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             (Main.projectile[vfxIndex].ModProjectile as ShadowbeamStaffVFX).isAttached = false;
 
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.25f);
+            d1.rotation = projectile.velocity.ToRotation();
+            d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.25f);
+            d2.rotation = projectile.velocity.ToRotation() + MathHelper.PiOver4;
+            d2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
             return true;
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
+
+            for (int i = 0; i < 5; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3.25f, 3.25f) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.Purple * 4f, Scale: Main.rand.NextFloat(0.45f, 0.55f) * 1.15f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.96f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+
+                dust.velocity += projectile.velocity.SafeNormalize(Vector2.UnitX) * 3f;
+            }
+
+            for (int i = 0; i < 7; i++)
+            {
+                Color purple = new Color(61, 2, 92);
+                Color darkPurple = new Color(42, 2, 82); 
+                Color purple3 = new Color(121, 7, 179);
+
+                Color col = Main.rand.NextBool(2) ? purple3 : darkPurple;
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) * Main.rand.NextFloat(0.5f, 2.75f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col * 2f, Scale: Main.rand.NextFloat(0.5f, 1.2f) * 1f);
+                d.fadeIn = Main.rand.Next(0, 4);
+                d.alpha = Main.rand.Next(0, 2);
+                d.noLight = false;
+
+                d.velocity += projectile.velocity.SafeNormalize(Vector2.UnitX) * 4f;
+            }
 
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
@@ -121,6 +168,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             //Add node
             AddNewNode(projectile);
+
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.3f);
+            d1.rotation = 0f + oldVelocity.ToRotation();
+            d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.3f);
+            d2.rotation = MathHelper.PiOver4 + oldVelocity.ToRotation();
+            d2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
@@ -163,6 +218,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Projectile.tileCollide = false;
 
             Projectile.timeLeft = 2400;
+
+            Projectile.hide = true;
+        }
+
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index);
         }
 
         int timer = 0;
@@ -170,21 +232,55 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float true_alpha = 1f;
 
         public bool isAttached = true;
-
         public override void AI()
         {
-
             if (!isAttached && timer > 60)
                 Projectile.active = false;
 
 
-            if (timer % 10 == 0)
+            //Cast Lights and create dust
+            if (nodes.Count > 0)
             {
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    //Dust.NewDustPerfect(nodes[i].head, ModContent.DustType<GlowStrong>(), Velocity: Vector2.Zero, newColor: Color.White);
+                    Vector2 head = nodes[i].head;
+                    Vector2 tail = nodes[i].tail;
+
+
+                    DelegateMethods.v3_1 = Color.Purple.ToVector3() * 1.25f * Projectile.scale * true_width;
+                    Utils.PlotTileLine(head, tail, 10f * true_width, DelegateMethods.CastLight);
+
+                    float dist = (head - tail).Length();
+
+                    float numberOfReps = dist / 75f;
+
+                    if (timer == 6 && true_width > 0.2f)
+                    {
+                        for (int j = 0; j < numberOfReps; j++)
+                        {
+                            float rand = Main.rand.Next();
+
+                            float percent = Main.rand.NextFloat(0f, 0.8f);
+
+                            Vector2 pos = Vector2.Lerp(head, tail, percent);
+                            Vector2 off = Main.rand.NextVector2Circular(14f, 14f);
+
+                            Vector2 vel = nodes[i].rot.ToRotationVector2().RotatedByRandom(0.08f) * Main.rand.NextFloat(2, 10);
+
+                            Dust d = Dust.NewDustPerfect(pos + off, ModContent.DustType<LineSpark>(), vel * 2f, newColor: Color.Purple * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
+                            d.noLight = false;
+                            d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.89f, postShrinkPower: 0.89f, timeToStartShrink: 16, killEarlyTime: 100, XScale: 0.2f, YScale: 0.35f, shouldFadeColor: false);
+                        }
+                    }
+                    
                 }
             }
+
+            if (timer > 6)
+                true_width = Math.Clamp(MathHelper.Lerp(true_width, -0.5f, 0.08f), 0, 1f); 
+
+            if (timer == 100 || true_width <= 0.05f)
+                Projectile.active = false;
 
             timer++;
         }
@@ -193,30 +289,34 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public List<ShadowbeamNode> nodes = new List<ShadowbeamNode>();
         public override bool PreDraw(ref Color lightColor)
         {
-            //return false;
+            if (nodes.Count <= 0) return false;
 
-            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            //{
-            //    for (int i = 0; i < nodes.Count; i++)
-            //    {
-            //        ShadowbeamNode node = nodes[i];
-            //        DrawNodeTrail(node);
-            //    }
-            //});
-
-            for (int i = 0; i < nodes.Count; i++)
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("OverPlayers", () =>
             {
-                ShadowbeamNode node = nodes[i];
-                DrawNodeTrail(node);
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    ShadowbeamNode node = nodes[i];
+                    DrawNodeTrail(node);
+                }
 
-                //Utils.DrawLine(Main.spriteBatch, node.head, node.tail, Color.Purple with { A = 0 }, Color.Purple with { A = 0 }, 5f);
+                Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
 
-                Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-                Texture2D bloom = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+                //Portal at first node
+                Vector2 portalPos = nodes[0].head - Main.screenPosition;
+                float rot = nodes[0].rot + MathHelper.PiOver2;
 
-                Main.EntitySpriteDraw(portal, node.head - Main.screenPosition, null, Color.Purple with { A = 0 } * 2f, node.rot, portal.Size() / 2f, 1f, SpriteEffects.None);
-                Main.EntitySpriteDraw(portal, node.head - Main.screenPosition, null, Color.White with { A = 0 } * 2f, node.rot, portal.Size() / 2f, 0.5f, SpriteEffects.None);
-            }
+                float easedScale = true_width;// Easings.easeInOutCubic(true_width);
+                Vector2 v2Scale = new Vector2(1f * easedScale, 0.5f + (easedScale * 0.5f)) * Projectile.scale * 1.5f;
+
+                Color purple = new Color(61, 2, 92);
+                Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+                Color purple3 = new Color(121, 7, 179);
+
+                Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.Purple with { A = 0 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.15f, SpriteEffects.None);
+                Main.EntitySpriteDraw(portal, portalPos, null, purple3 with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.65f, SpriteEffects.None);
+
+            });
 
             return false;
         }
@@ -228,7 +328,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Color purple3 = new Color(121, 7, 179);
             #region shaderPrep
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_06").Value; //|spark_06
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/s06sBloom").Value; //|spark_06 | Extra_196_Black
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
 
             Vector2[] pos_arr = { node.tail, node.head };
@@ -237,7 +337,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.0f;
 
             Color StripColor(float progress) => Color.White;
-            float StripWidth(float progress) => 60f * true_width * sineWidthMult; //25
+            float StripWidth(float progress) => 30f * true_width * sineWidthMult; //25
             float StripWidth2(float progress) => 90f * true_width * sineWidthMult;
             //^ Doing Easings.easeOutQuad(progress) * Easings.easeInQuad(progress) gives a really nice zigzag patter (or do 1f - EaseIn)
 
@@ -254,16 +354,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
            
             float dist = (node.head - node.tail).Length();
-            float repValue = dist / 100f;
+            float repValue = dist / 700f;
             myEffect.Parameters["reps"].SetValue(repValue);
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.02f);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f); //timer * 0.02
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["reps"].SetValue(1f);
 
             //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(purple.ToVector3() * 4f);
+            myEffect.Parameters["ColorOne"].SetValue(purple.ToVector3() * 3f);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
