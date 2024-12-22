@@ -59,19 +59,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public override bool PreAI(Projectile projectile)
         {
             
-            if (timer == 4)
+            if (timer == 0 && projectile.ai[1] % 1 == 0)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
-                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
+                float pitch2 = -0.3f + (projectile.ai[1] * 0.12f);
 
-                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .035f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; 
+                float soundID = Main.rand.Next(3);
+
+                //Both death_2 and death_0 sound really cool (slot machine vibes)
+                //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_death_2") with { Volume = 1f, Pitch = pitch2, MaxInstances = -1 };
+
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_crystal_cart_impact_" + soundID) with { Volume = 0.8f, Pitch = pitch2, MaxInstances = -1 }; 
                 SoundEngine.PlaySound(style, projectile.Center);
-
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                SoundEngine.PlaySound(style2, projectile.Center);
-
-                //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_156") with { Volume = 0.15f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                //SoundEngine.PlaySound(style4, projectile.Center);
             }
 
 
@@ -94,9 +93,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     Vector2 posOffset = Main.rand.NextVector2Circular(5f, 5f);
 
                     Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 2.5f); //3
-
-                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
+                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 2f); //3
                 }
             }
 
@@ -119,7 +116,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     float myAlpha = projectile.Opacity * alpha;
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3.5f, 3.5f), null,
-                        Color.White with { A = 0 } * 0.25f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                        Color.White with { A = 0 } * 0.3f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
@@ -155,19 +152,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 4)
-            {
-                float pitch = 0.2f + (projectile.ai[1] * 0.12f);
-                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
-
-                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .035f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
-                SoundEngine.PlaySound(style, projectile.Center);
-
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                SoundEngine.PlaySound(style2, projectile.Center);
-            }
-
-
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 

@@ -379,14 +379,17 @@ namespace VFXPlus.Content.VFXTest
 
             //Texture2D Tex3 = ;
 
+            Projectile.scale = 1.2f;
             float ProjScale = Projectile.scale * 1.5f;
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                //GoddamnMonsoon(50);
+                GoddamnMonsoon(50);
                 GoddamnMonsoonCirc(0); //50
-                UniqueCircularOrbitBehaviorThing(50);
+                //UniqueCircularOrbitBehaviorThing(50);
             });
+            return false;
+
             //UniqueCircularOrbitBehaviorThing(30);
             //GoddamnMonsoonCirc(75);
 
@@ -440,7 +443,7 @@ namespace VFXPlus.Content.VFXTest
             FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
             float speedTime = Main.GlobalTimeWrappedHourly * 0.25f;
 
-            float minRange = 20f; //40f | 240 920 for full screen
+            float minRange = 40f; //40f | 240 920 for full screen
             float maxRange = 70f; //120
             for (int i = 0; i < count; i++)
             {
@@ -459,7 +462,7 @@ namespace VFXPlus.Content.VFXTest
                 float randomRot = NextFloatFastRandom(r, 0f, MathHelper.TwoPi) + speedTime * speed;
 
                 Vector2 drawPosition = Projectile.Center + new Vector2(1f, 0f).RotatedBy(randomRot) * ringDistance * scaleWave;
-                drawPosition += Main.rand.NextVector2Circular(5f, 5f);
+                drawPosition += Main.rand.NextVector2Circular(2f, 2f);
 
                 //Vector2 drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir); //-20 14 | -120
 
@@ -469,8 +472,8 @@ namespace VFXPlus.Content.VFXTest
                 Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.Red with { A = 0 }, randomRot + rotation, origin,
                     new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 4f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White with { A = 0 }, randomRot + rotation, origin,
-                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 1.3f, SpriteEffects.None);
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White with { A = 0 } * 0.5f, randomRot + rotation, origin,
+                    new Vector2(scale.X * scaleWave, scale.Y * scaleWave) * 2f, SpriteEffects.None);
             }
         }
 

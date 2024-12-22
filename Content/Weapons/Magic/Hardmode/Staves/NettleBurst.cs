@@ -59,10 +59,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public override bool PreAI(Projectile projectile)
         {
             
-            if (timer == 4)
+            if (timer == 0 && projectile.ai[1] % 2 == 0)
             {
-                float pitch = 0.2f + (projectile.ai[1] * 0.12f);
-                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
+                float pitch = 0.2f + (projectile.ai[1] * 0.14f);
+                float pitch2 = -0.4f + (projectile.ai[1] * 0.14f);
 
                 SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .035f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; 
                 SoundEngine.PlaySound(style, projectile.Center);
@@ -115,8 +115,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3.5f, 3.5f), null,
-                        Color.Red with { A = 0 } * 0.2f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3f, 3f), null,
+                        Color.RosyBrown with { A = 0 } * 0.35f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
