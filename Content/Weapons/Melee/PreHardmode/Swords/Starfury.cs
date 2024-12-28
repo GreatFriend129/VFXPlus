@@ -22,6 +22,8 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
     
     public class Starfury : GlobalItem 
     {
+        public override bool InstancePerEntity => true;
+
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
             return lateInstatiation && (item.type == ItemID.Starfury);
@@ -35,7 +37,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
+            return false;
             return true;
         }
 

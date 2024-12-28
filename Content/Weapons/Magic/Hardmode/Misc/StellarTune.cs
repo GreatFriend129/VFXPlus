@@ -109,7 +109,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 vel = -velDir * velPower;
 
                 Dust line = Dust.NewDustPerfect(projectile.Center + sideOffset, ModContent.DustType<MuraLineBasic>(), vel, 255,
-                    newColor: Color.DeepPink * 0.15f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
+                    newColor: Color.DeepPink * 0.2f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
 
             }
 
@@ -252,21 +252,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             #endregion
 
             //Light Dust
-            //Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.35f);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.2f);
 
-            //softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-                //overallAlpha: 0.1f, DrawWhiteCore: false, 1f, 1f);
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.11f, DrawWhiteCore: false, 1f, 1f);
 
 
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.45f, true, 1, 0.8f, 0.8f);
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.15f, true, 1, 0.8f, 0.8f);
 
-            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.15f);
-            d1.customData = cpb2;
-            d1.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * 0.01f;
+            //Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.25f);
+            //d1.customData = cpb2;
+            //d1.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * 0.01f;
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.15f);
-            d2.customData = cpb2;
-            d2.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * -0.01f;
+            //Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.25f);
+            //d2.customData = cpb2;
+            //d2.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * -0.01f;
 
 
             //Impact
@@ -275,10 +275,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1.5f;
                 Vector2 randomStartOffsetPos = projectile.Center + Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
 
-                Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : Color.DeepPink;
+                Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : Color.HotPink;
 
-                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowFlare>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.45f) * 1.3f);
+                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowFlare>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1.35f);
 
+                dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
             }
 
             if (previousVelRots != null && previousPostions != null)

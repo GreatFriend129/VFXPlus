@@ -141,7 +141,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             //Disco underglow
             for (int i = 0; i < 5; i++)
             {
-                Main.EntitySpriteDraw(whiteFireball, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle, FetchRainbow() with { A = 0 } * fadeInAlpha, projectile.rotation, origin, projectile.scale, se);
+                //Main.EntitySpriteDraw(whiteFireball, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle, FetchRainbow() with { A = 0 } * fadeInAlpha, projectile.rotation, origin, projectile.scale, se);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                float dist = 1.5f;
+                float Adist = MathHelper.Lerp(20f, 1.5f, fadeInAlpha);
+                float Aalpha = Easings.easeInSine(fadeInAlpha);
+
+                Vector2 offset = new Vector2(Adist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+
+                Main.EntitySpriteDraw(whiteFireball, drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction), sourceRectangle,
+                    FetchRainbow() with { A = 0 } * fadeInAlpha * Aalpha, projectile.rotation, origin, projectile.scale, se);
             }
 
             Main.EntitySpriteDraw(fireball, drawPos, sourceRectangle, Color.White * fadeInAlpha, projectile.rotation, origin, projectile.scale, se);

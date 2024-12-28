@@ -21,6 +21,8 @@ using VFXPlus.Common.Utilities;
 using log4net.Core;
 using System.Threading;
 using Terraria.Utilities;
+using VFXPlus.Common;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
 
 namespace VFXPlus.Content
 {
@@ -51,21 +53,9 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int b = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 17f, ProjectileID.WaterBolt, 2, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<FFWindOrb>(), 0, 0, player.whoAmI);
 
-
-            for (int i = 220; i < 22; i++) //16
-            {
-                Color col1 = Color.Lerp(Color.HotPink, Color.DeepPink, 0.35f);
-
-                float progress = (float)i / 21;
-                Color col = Color.Lerp(Color.Black, col1, progress);
-
-                //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
-                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f,
-                    newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 1f); //12 28
-            }
+            return false;
 
             FastRandom r = new(player.name.GetHashCode());
 
@@ -85,12 +75,12 @@ namespace VFXPlus.Content
             Vector2 posB = player.Center + new Vector2(0f, 90f);
             Vector2 posC = player.Center + new Vector2(0f, -90f);
 
-            //int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ProjectileID.NebulaArcanumExplosionShotShard, 10, 0, Main.myPlayer);
+            int ar = Projectile.NewProjectile(null, posA, new Vector2(10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
             //int br = Projectile.NewProjectile(null, posB, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
             //int cr = Projectile.NewProjectile(null, posC, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
 
 
-            //(Main.projectile[ar].ModProjectile as MadisonTornado).startDir = -1;
+            (Main.projectile[ar].ModProjectile as MadisonTornado).startDir = -1;// Main.rand.NextBool() ? 1 : -1;
             //(Main.projectile[br].ModProjectile as MadisonTornado).startDir = -1;
             //(Main.projectile[cr].ModProjectile as MadisonTornado).startDir = -1;
 

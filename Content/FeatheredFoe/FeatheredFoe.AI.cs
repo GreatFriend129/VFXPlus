@@ -20,7 +20,7 @@ namespace VFXPlus.Content.FeatheredFoe
             //Stop
             //Shoot 
             //Repeat
-
+            
             if (substate == 1)
             {
                 if (timer == 0)
@@ -178,6 +178,57 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
         public void CircleDash() { }
+
+
+        Vector2 diveStartPoint;
+        public void Dive()
+        {
+            //Move to point above player, move up then dive down
+            if (substate == 0)
+            {
+                if (timer == 0)
+                    diveStartPoint = new Vector2(Main.rand.NextFloat(-25f, 25f), -300f);
+
+                Vector2 goalPos = player.Center + diveStartPoint;
+
+                if (timer < 150)
+                {
+                    float timeForOffsetShrink = 80;
+                    float offsetProgress = Math.Clamp((float)timer / timeForOffsetShrink, 0f, 1f);
+                    Vector2 goalOffset = Vector2.Lerp(new Vector2(800f, 0f), Vector2.Zero, Easings.easeOutQuad(offsetProgress));
+
+                    Dust.NewDustPerfect(goalPos + goalOffset, DustID.GemSapphire);
+
+                    //BasicMovementVariant1(goalPos + goalOffset, accel: 0.07f, maxSpeed: 25f, minSpeed: 3f);
+                    BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 3.5f);
+
+                }
+                else if (timer >= 150)
+                {
+                    Vector2 initialVel = new Vector2(NPC.velocity.X, -15f);
+                    Vector2 goalVel = new Vector2(0f, 20f);
+                    
+                    float timeForMovement = 40;
+                    float timeProgress = Math.Clamp((float)((timer - 150f) / timeForMovement), 0f, 1f);
+                    NPC.velocity = Vector2.Lerp(initialVel, goalVel, timeProgress);
+
+
+                    if (timer >= 150 + timeForMovement - 8 && timer % 8 == 0)
+                    {
+                        Projectile.NewProjectile(null, NPC.Center, new Vector2(5f, 2f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
+                        Projectile.NewProjectile(null, NPC.Center, new Vector2(-5f, 2f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
+                    }
+                }
+
+                if (timer == 230)
+                {
+                    timer = -1;
+                }
+
+            }
+
+
+        }
 
         #region MovementCode
         //Based off Emode Cryogen

@@ -40,6 +40,12 @@ Projectiles: {
 	FFWindOrb.DisplayName: F F Wind Orb
 	ShadowbeamStaffVFX.DisplayName: Shadowbeam Staff V F X
 	VilethornVFX.DisplayName: Vilethorn V F X
+	LifeDrainVFX.DisplayName: Life Drain V F X
+	TornadoTest.DisplayName: Tornado Test
+	GraydeeTileShockwave.DisplayName: Graydee Tile Shockwave
+	OtherWindOrb.DisplayName: Other Wind Orb
+	LunarExplosionAnim.DisplayName: Lunar Explosion Anim
+	BasicOrbitingFeather.DisplayName: Basic Orbiting Feather
 }
 
 Configs: {

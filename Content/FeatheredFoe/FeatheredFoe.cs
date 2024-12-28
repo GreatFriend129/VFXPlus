@@ -32,6 +32,7 @@ namespace VFXPlus.Content.FeatheredFoe
             CornerTravelShot = 6,
             MeleeTalon = 7,
             CircleDash = 8,
+            Dive = 9,
         }
 
         private FeatheredFoeState CurrentAttack
@@ -63,12 +64,15 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
         public int timer = 0;
-        public int substate = 1;
+        public int substate = 0;
+
+        bool firstFrame = true;
         public override void AI()
         {
-            if (timer == 0)
+            if (firstFrame)
             {
                 SkyManager.Instance.Activate("VFXPlus:FeatheredFoe");
+                firstFrame = false;
             }
 
             NPC.dontTakeDamage = false;
@@ -79,7 +83,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.BasicAttack;
+            CurrentAttack = FeatheredFoeState.Dive;
 
             switch (CurrentAttack)
             {
@@ -103,6 +107,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     break;
                 case FeatheredFoeState.CornerTravelShot:
                     CornerTravelShot();
+                    break;
+                case FeatheredFoeState.Dive:
+                    Dive();
                     break;
                 //case FeatheredFoeState.MeleeTalon:
 
