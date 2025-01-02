@@ -33,6 +33,7 @@ namespace VFXPlus.Content.FeatheredFoe
             MeleeTalon = 7,
             CircleDash = 8,
             Dive = 9,
+            UmbrellaRain
         }
 
         private FeatheredFoeState CurrentAttack
@@ -83,7 +84,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.Dive;
+            CurrentAttack = FeatheredFoeState.UmbrellaRain;
 
             switch (CurrentAttack)
             {

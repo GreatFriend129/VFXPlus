@@ -764,11 +764,10 @@ namespace VFXPlus.Content.FeatheredFoe
         public void GoddamnMonsoonCirc(int count = 50)
         {
             //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
-            //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
             Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value; //PixelSwirl
             Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
-            FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
+            FastRandom r = new("mule".GetHashCode());
             float speedTime = Main.GlobalTimeWrappedHourly * 2f;
 
             float minRange = 40f; //40f | 240 920 for full screen

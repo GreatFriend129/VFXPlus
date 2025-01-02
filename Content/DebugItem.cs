@@ -53,9 +53,25 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<FFWindOrb>(), 0, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 1f, ProjectileID.NebulaArcanumExplosionShotShard, 0, 0, player.whoAmI);
+
+            Main.projectile[b].ai[0] = 90;
 
             return false;
+            for (int i = 220; i < 22; i++)
+            {
+                float prog = (float)i / 22f;
+
+                Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+                Color col = Color.Lerp(Color.YellowGreen, Color.Black, 1f - prog);
+
+                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f, 
+                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 1f); //12 28
+
+                d.velocity += velocity * 0.67f * (prog);
+            }
+
 
             FastRandom r = new(player.name.GetHashCode());
 

@@ -385,8 +385,8 @@ namespace VFXPlus.Content.VFXTest
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                GoddamnMonsoon(50);
-                GoddamnMonsoonCirc(0); //50
+                GoddamnMonsoon(0);
+                GoddamnMonsoonCirc(250); //50
                 //UniqueCircularOrbitBehaviorThing(50);
             });
             return false;
@@ -488,7 +488,7 @@ namespace VFXPlus.Content.VFXTest
             FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
             float speedTime = Main.GlobalTimeWrappedHourly * 2f;
 
-            float minRange = 40f; //40f | 240 920 for full screen
+            float minRange = 40f; //40f | 240 920 for full screen | 140 220
             float maxRange = 120f; //120
             for (int i = 0; i < count; i++)
             {

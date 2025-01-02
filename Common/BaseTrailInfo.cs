@@ -130,7 +130,7 @@ namespace VFXPlus.Common
 
         public virtual Color ColorFunction(float progress)
         {
-            //This only matters if you are using basic effect
+            //This should only matter if you are using basic effect
             return trailColor;
         }
 

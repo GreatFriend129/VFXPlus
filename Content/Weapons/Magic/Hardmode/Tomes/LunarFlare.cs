@@ -13,10 +13,7 @@ using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
-using System.Threading;
-using System.Timers;
 using VFXPlus.Common.Drawing;
-using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes

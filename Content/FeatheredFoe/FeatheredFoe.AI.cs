@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Utils.Cil;
+using rail;
 using ReLogic.Content;
 using System;
 using Terraria;
@@ -111,50 +113,119 @@ namespace VFXPlus.Content.FeatheredFoe
         Vector2 resultingVec = Vector2.Zero;
         public void FiveSpread()
         {
-            if (substate == 1) 
-            {
-                if (timer == 0)
-                {
-                    fiveSpreadGoalVec = Main.rand.NextVector2CircularEdge(400, 400);
-
-                    Vector2 toPlayer = (NPC.Center - player.Center).SafeNormalize(Vector2.UnitX);
-
-
-                    float randAmount = Main.rand.NextFloat(-0.1f, 0.11f);
-                    float rotAmount = ((MathHelper.Pi * 0.85f) + randAmount);// * (Main.rand.NextBool() ? 1f : -1f);
-
-                }
-
-
-                float easingProg = Utils.GetLerpValue(0f, 1f, timer / 170f, true);
-
-                float functedEase = Math.Clamp(Easings.easeInOutHarsh(easingProg * 0.85f), 0f, 1f); 
-
-                Vector2 npcPosFromPlayer = Vector2.Lerp(NPC.Center, player.Center + fiveSpreadGoalVec, functedEase);
-
-                NPC.Center = npcPosFromPlayer;
-                NPC.velocity = Vector2.Zero;
-
-                if (timer == 275)
-                {
-
-                    resultingVec = (NPC.Center - player.Center);
-                    substate++;
-                    timer = -1;
-                }
-            }
-            else if (substate == 2)
-            {
-                //BasicMovementVariant1(player.Center + resultingVec);
-
-                if (timer == 30)
-                {
-                    timer = -1;
-                    substate = 1;
-                }
-
-            }
+            //To hopefully fix a weird NaN case
             
+            if (NPC.Center.HasNaNs())
+            {
+                Main.NewText("NPC.Center has NaNs! | " + Main.timeForVisualEffects);
+                return;
+            }
+
+            if (player.Center.HasNaNs())
+            {
+                Main.NewText("player.Center has NaNs! | " + Main.timeForVisualEffects);
+                return;
+            }
+
+            Vector2 dir = new Vector2((float)Math.Sign(NPC.Center.X - player.Center.X) * 300, -100);
+
+
+            float timeBeforeShot = 30; //30
+            float timeForShot = 120; //60
+
+            if (timer >= timeBeforeShot + timeForShot)
+            {
+                Dust.NewDustPerfect(player.Center + dir, DustID.PortalBolt, newColor: Color.OrangeRed);
+
+                NPC.velocity.X *= 0.95f;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.DirectionTo(player.Center + dir) * (NPC.Distance(player.Center + dir) / 15), 0.2f); //high lerpval gives less overshoot
+            }
+            else if (timer >= timeBeforeShot)
+            {
+                Dust.NewDustPerfect(player.Center + dir, DustID.PortalBolt, newColor: Color.DeepPink);
+
+
+                NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.DirectionTo(player.Center + dir) * (NPC.Distance(player.Center + dir) / 15), 0.2f);
+                NPC.velocity *= 0.92f;
+                //NPC.velocity.X *= 0.92f;
+
+
+                float angleRange = MathHelper.TwoPi * 0.4f; 
+
+
+                if (timer % 5 == 0)
+                {
+                    float progress = (float)(timer - timeBeforeShot) / timeForShot; 
+
+                    float shotAngle = MathHelper.Lerp(-angleRange / 2f, angleRange / 2f, progress);
+
+                    Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+
+                    Projectile proj = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle) * 10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+                    Projectile proj2 = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle + MathHelper.TwoPi * 0.33f) * 10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+                    Projectile proj3 = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle + MathHelper.TwoPi * 0.66f) * 10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+
+                    //Projectile proj = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle) * 10, ModContent.ProjectileType<SpinShotFeather>(), 10, 5);
+                    //(proj.ModProjectile as SpinShotFeather).targetPlayer = player.whoAmI;
+                }
+
+                /*
+                float count = timer % 30;
+                if (count == 0)
+                {
+                }
+                else
+                {
+                    if (count % 5 == 0) //5
+                    {
+                        float vectorRotation = -count + 15; //15 | 3 | 10
+                        Projectile proj = Projectile.NewProjectileDirect(null, NPC.Center, NPC.DirectionTo(player.Center).RotatedBy(MathHelper.ToRadians(vectorRotation * 3)) * 10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+
+                    }
+                }
+                */
+            }
+            else
+            {
+                Dust.NewDustPerfect(player.Center + dir, DustID.PortalBolt, newColor: Color.DeepSkyBlue);
+
+                NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.DirectionTo(player.Center + dir) * (NPC.Distance(player.Center + dir) / 20), 0.6f);
+            }
+
+
+            //if (timer % 220 == 0 && timer > 0)
+                //NPC.Center = player.Center + Main.rand.NextVector2Circular(1600f, 1600f);
+
+            if (timer == 180)
+            {
+                NPC.Center = player.Center + Main.rand.NextVector2CircularEdge(1100f, 1100f);
+                timer = -1;
+            }
+            /*
+            
+            float timeBeforeShot = 30; //30
+            float timeForShot = 120; //60
+            NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.DirectionTo(player.Center + dir) * (NPC.Distance(player.Center + dir) / 15), 0.2f);
+                ///NPC.velocity.X *= 0.92f;
+
+                float angleRange = 40; //40 is good
+
+
+                if (timer % 2 == 0)
+                {
+                    float progress = (float)(timer - timeBeforeShot) / timeForShot; 
+
+                    float shotAngle = MathHelper.Lerp(-angleRange / 2f, angleRange / 2f, progress);
+
+                    Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+
+                    Projectile proj = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle) * 10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+                    Projectile proj2 = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle) * -10, ModContent.ProjectileType<StopAndStartFeather>(), 10, 5);
+
+                    //Projectile proj = Projectile.NewProjectileDirect(null, NPC.Center, toPlayer.RotatedBy(shotAngle) * 10, ModContent.ProjectileType<SpinShotFeather>(), 10, 5);
+                    //(proj.ModProjectile as SpinShotFeather).targetPlayer = player.whoAmI;
+                }
+            */
         }
 
         public void MartletOrbitFeather()
@@ -179,7 +250,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public void CircleDash() { }
 
-
+        int diveStartSide = 0; //Which side FF is on when it starts to move above player
         Vector2 diveStartPoint;
         public void Dive()
         {
@@ -187,40 +258,51 @@ namespace VFXPlus.Content.FeatheredFoe
             if (substate == 0)
             {
                 if (timer == 0)
-                    diveStartPoint = new Vector2(Main.rand.NextFloat(-25f, 25f), -300f);
+                {
+                    diveStartSide = NPC.Center.X > player.Center.X ? 1 : -1;
+                    diveStartPoint = new Vector2(Main.rand.NextFloat(-25f, 25f), Main.rand.Next(-50, 50) + -150f); //-300
+                }
 
                 Vector2 goalPos = player.Center + diveStartPoint;
 
-                if (timer < 150)
+                int timeToStartDive = 85; //90
+                float timeForMovement = 35; //35
+
+                if (timer < timeToStartDive)
                 {
                     float timeForOffsetShrink = 80;
                     float offsetProgress = Math.Clamp((float)timer / timeForOffsetShrink, 0f, 1f);
-                    Vector2 goalOffset = Vector2.Lerp(new Vector2(800f, 0f), Vector2.Zero, Easings.easeOutQuad(offsetProgress));
+                    Vector2 goalOffset = Vector2.Lerp(new Vector2(850f * diveStartSide, 0f), new Vector2(0f + player.velocity.X * 6f, -200f), Easings.easeOutQuad(offsetProgress));
 
                     Dust.NewDustPerfect(goalPos + goalOffset, DustID.GemSapphire);
 
                     //BasicMovementVariant1(goalPos + goalOffset, accel: 0.07f, maxSpeed: 25f, minSpeed: 3f);
-                    BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 3.5f);
+                    BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 4f); //3.5
 
                 }
-                else if (timer >= 150)
+                else if (timer >= timeToStartDive)
                 {
-                    Vector2 initialVel = new Vector2(NPC.velocity.X, -15f);
-                    Vector2 goalVel = new Vector2(0f, 20f);
+                    Vector2 initialVel = new Vector2(NPC.velocity.X, -20f); //20
+                    Vector2 goalVel = new Vector2(NPC.velocity.X * 0.7f, 30f); //23
                     
-                    float timeForMovement = 40;
-                    float timeProgress = Math.Clamp((float)((timer - 150f) / timeForMovement), 0f, 1f);
+                    float timeProgress = Math.Clamp((float)((timer - timeToStartDive) / timeForMovement), 0f, 1f);
                     NPC.velocity = Vector2.Lerp(initialVel, goalVel, timeProgress);
 
 
-                    if (timer >= 150 + timeForMovement - 8 && timer % 8 == 0)
+                    if (timer >= timeToStartDive + timeForMovement - 8 && timer % 5 == 0) //-12 %6 //
                     {
-                        Projectile.NewProjectile(null, NPC.Center, new Vector2(5f, 2f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
-                        Projectile.NewProjectile(null, NPC.Center, new Vector2(-5f, 2f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
+                        int a = Projectile.NewProjectile(null, NPC.Center, new Vector2(5.5f, 0.75f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
+                        int b = Projectile.NewProjectile(null, NPC.Center, new Vector2(-5.5f, 0.75f) * 2f, ModContent.ProjectileType<StopAndStartFeather>(), 1, 1);
+
+                        (Main.projectile[a].ModProjectile as StopAndStartFeather).velShrinkTime = 31;// 35;
+                        (Main.projectile[a].ModProjectile as StopAndStartFeather).velGrowTime = 54;// 60;
+
+                        (Main.projectile[b].ModProjectile as StopAndStartFeather).velShrinkTime = 31;// 35;
+                        (Main.projectile[b].ModProjectile as StopAndStartFeather).velGrowTime = 54;// 60;
                     }
                 }
 
-                if (timer == 230)
+                if (timer == timeToStartDive + timeForMovement + 40)
                 {
                     timer = -1;
                 }
@@ -228,6 +310,11 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
 
+        }
+
+        public void UmbrellaRain()
+        {
+            
         }
 
         #region MovementCode
