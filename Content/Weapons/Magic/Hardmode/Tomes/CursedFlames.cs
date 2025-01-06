@@ -41,14 +41,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             {
                 float prog = (float)i / 22f;
 
-                Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-                Color col = Color.Lerp(Color.YellowGreen, Color.Black, 1f - prog);
+                Color col = Color.Lerp(Color.GreenYellow, Color.Black, 1f - prog);
 
-                Dust d = Dust.NewDustPerfect(position, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3f) * 1.45f,
-                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.95f, 0.01f, 1f); //12 28
+                Dust d = Dust.NewDustPerfect(position, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3f) * 1.35f,
+                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.65f); //GlowPixelAlts looks interesting too
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5 , 0.94f, 0.01f, 0.1f); //12 28
 
-                d.velocity += velocity * 0.67f * (prog);
+                d.velocity += velocity * 0.65f * (prog);
             }
             return true;
         }
@@ -95,7 +94,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             if (timer % 2 == 0)
             {
-                int num4 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.CursedTorch, projectile.velocity.X * -0.4f, projectile.velocity.Y * -0.4f, 100, default(Color), 1.2f);
+                int num4 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.CursedTorch, projectile.velocity.X * -0.4f, projectile.velocity.Y * -0.4f, 100, default, 1.2f);
+                Main.dust[num4].noLight = true;
+
                 Main.dust[num4].noGravity = true;
                 Main.dust[num4].velocity.X *= 4f;
                 Main.dust[num4].velocity.Y *= 4f;
@@ -105,14 +106,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (timer % 2 == 0 && timer > 10)
             {
                 Vector2 dustPos = projectile.Center;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.35f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.3f;
 
 
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.7f) * 0.9f;
+                Color dustCol = Color.GreenYellow;
+                float dustScale = Main.rand.NextFloat(0.4f, 0.7f) * 0.7f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.7f, Scale: dustScale);
                 smoke.alpha = 2;
+            }
+
+            if (timer % 1 == 0) //1
+            {
+                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<MediumSmoke>(), newColor: Color.GreenYellow with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.45f);
+                Main.dust[d].velocity *= 0.45f;
+                Main.dust[d].velocity += projectile.velocity * 0.25f;
+
+                Main.dust[d].rotation = Main.rand.NextFloat(6.28f);
+
+                Main.dust[d].customData = new MediumSmokeBehavior(Main.rand.Next(8, 14) + 5, 0.94f, 0.01f, 0.05f); //12 28
             }
 
             //Based off of coralite mod slime emperor 
@@ -156,7 +168,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             timer++;
 
             #region vanillaAI
-
             //if (projectile.type == 258 && projectile.localAI[0] == 0f)
             //{
             //    projectile.localAI[0] = 1f;
@@ -167,75 +178,80 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             //    projectile.localAI[0] = 1f;
             //    SoundEngine.PlaySound(in SoundID.Item20, projectile.position);
             //}
-            if (projectile.type == 27)
-            {
-                for (int num1054 = 0; num1054 < 5; num1054++)
-                {
-                    float num1065 = projectile.velocity.X / 3f * (float)num1054;
-                    float num3 = projectile.velocity.Y / 3f * (float)num1054;
-                    int num14 = 4;
-                    int num25 = Dust.NewDust(new Vector2(projectile.position.X + (float)num14, projectile.position.Y + (float)num14), projectile.width - num14 * 2, projectile.height - num14 * 2, DustID.DungeonWater, 0f, 0f, 100, default(Color), 1.2f);
-                    Main.dust[num25].noGravity = true;
-                    Dust dust51 = Main.dust[num25];
-                    Dust dust212 = dust51;
-                    dust212.velocity *= 0.1f;
-                    dust51 = Main.dust[num25];
-                    dust212 = dust51;
-                    dust212.velocity += projectile.velocity * 0.1f;
-                    Main.dust[num25].position.X -= num1065;
-                    Main.dust[num25].position.Y -= num3;
-                }
-                if (Main.rand.Next(5) == 0)
-                {
-                    int num36 = 4;
-                    int num47 = Dust.NewDust(new Vector2(projectile.position.X + (float)num36, projectile.position.Y + (float)num36), projectile.width - num36 * 2, projectile.height - num36 * 2, 172, 0f, 0f, 100, default(Color), 0.6f);
-                    Dust dust50 = Main.dust[num47];
-                    Dust dust212 = dust50;
-                    dust212.velocity *= 0.25f;
-                    dust50 = Main.dust[num47];
-                    dust212 = dust50;
-                    dust212.velocity += projectile.velocity * 0.5f;
-                }
-            }
+            //if (projectile.type == 27)
+            //{
+            //    for (int num98 = 0; num98 < 5; num98++)
+            //    {
+            //        float num99 = projectile.velocity.X / 3f * (float)num98;
+            //       float num100 = projectile.velocity.Y / 3f * (float)num98;
+            //        int num101 = 4;
+            //        int num102 = Dust.NewDust(new Vector2(projectile.position.X + (float)num101, projectile.position.Y + (float)num101), projectile.width - num101 * 2, projectile.height - num101 * 2, 172, 0f, 0f, 100, default(Color), 1.2f);
+            //        Main.dust[num102].noGravity = true;
+            //        Dust dust33 = Main.dust[num102];
+            //        Dust dust3 = dust33;
+            //        dust3.velocity *= 0.1f;
+            //        dust33 = Main.dust[num102];
+            //        dust3 = dust33;
+            //       dust3.velocity += projectile.velocity * 0.1f;
+            //        Main.dust[num102].position.X -= num99;
+            //        Main.dust[num102].position.Y -= num100;
+            //    }
+            //    if (Main.rand.Next(5) == 0)
+            //   {
+            //        int num103 = 4;
+            //        int num104 = Dust.NewDust(new Vector2(projectile.position.X + (float)num103, projectile.position.Y + (float)num103), projectile.width - num103 * 2, projectile.height - num103 * 2, 172, 0f, 0f, 100, default(Color), 0.6f);
+            //        Dust dust34 = Main.dust[num104];
+            //        Dust dust3 = dust34;
+            //        dust3.velocity *= 0.25f;
+            //        dust34 = Main.dust[num104];
+            //       dust3 = dust34;
+            //        dust3.velocity += projectile.velocity * 0.5f;
+            //    }
+            //}
+            /*
             else if (projectile.type == 502)
             {
-                float num58 = (float)Main.DiscoR / 255f;
-                float num69 = (float)Main.DiscoG / 255f;
-                float num80 = (float)Main.DiscoB / 255f;
-                num58 = (0.5f + num58) / 2f;
-                num69 = (0.5f + num69) / 2f;
-                num80 = (0.5f + num80) / 2f;
-                Lighting.AddLight(projectile.Center, num58, num69, num80);
+                float num105 = (float)Main.DiscoR / 255f;
+                float num106 = (float)Main.DiscoG / 255f;
+                float num107 = (float)Main.DiscoB / 255f;
+                num105 = (0.5f + num105) / 2f;
+                num106 = (0.5f + num106) / 2f;
+                num107 = (0.5f + num107) / 2f;
+                Lighting.AddLight(projectile.Center, num105, num106, num107);
             }
-            else if (projectile.type == 95 || projectile.type == 96)
+            */
+            if (projectile.type == 95 || projectile.type == 96)
             {
-                int num84 = Dust.NewDust(new Vector2(projectile.position.X + projectile.velocity.X, projectile.position.Y + projectile.velocity.Y), projectile.width, projectile.height, 75, projectile.velocity.X, projectile.velocity.Y, 100, default(Color), 3f * projectile.scale);
-                Main.dust[num84].noGravity = true;
+                //int num108 = Dust.NewDust(new Vector2(projectile.position.X + projectile.velocity.X, projectile.position.Y + projectile.velocity.Y), projectile.width, projectile.height, 75, projectile.velocity.X, projectile.velocity.Y, 100, default(Color), 3f * projectile.scale);
+                //Main.dust[num108].noGravity = true;
             }
+            /*
             else if (projectile.type == 253)
             {
-                for (int num85 = 0; num85 < 2; num85++)
+                for (int num109 = 0; num109 < 2; num109++)
                 {
-                    int num87 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
-                    Main.dust[num87].noGravity = true;
-                    Main.dust[num87].velocity.X *= 0.3f;
-                    Main.dust[num87].velocity.Y *= 0.3f;
+                    int num110 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
+                    Main.dust[num110].noGravity = true;
+                    Main.dust[num110].velocity.X *= 0.3f;
+                    Main.dust[num110].velocity.Y *= 0.3f;
                 }
             }
+            
             else
             {
-                for (int num88 = 221; num88 < 2; num88++)
+                for (int num111 = 0; num111 < 2; num111++)
                 {
-                    int num89 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 6, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
+                    int num112 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 6, projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f, 100, default(Color), 2f);
                     if (projectile.type == 258 && Main.getGoodWorld)
                     {
-                        Main.dust[num89].noLight = true;
+                        Main.dust[num112].noLight = true;
                     }
-                    Main.dust[num89].noGravity = true;
-                    Main.dust[num89].velocity.X *= 0.3f;
-                    Main.dust[num89].velocity.Y *= 0.3f;
+                    Main.dust[num112].noGravity = true;
+                    Main.dust[num112].velocity.X *= 0.3f;
+                    Main.dust[num112].velocity.Y *= 0.3f;
                 }
             }
+            */
             if (projectile.type != 27 && projectile.type != 96 && projectile.type != 258)
             {
                 projectile.ai[1] += 1f;
@@ -244,18 +260,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             {
                 projectile.velocity.Y += 0.2f;
             }
-            if (projectile.type == 502)
-            {
-                projectile.rotation = projectile.velocity.ToRotation() + (float)Math.PI / 2f;
-                if (projectile.velocity.X != 0f)
-                {
-                    projectile.spriteDirection = (projectile.direction = Math.Sign(projectile.velocity.X));
-                }
-            }
-            else
-            {
-                //projectile.rotation += 0.3f * (float)projectile.direction;
-            }
+            //if (projectile.type == 502)
+            //{
+            //    projectile.rotation = projectile.velocity.ToRotation() + (float)Math.PI / 2f;
+            //    if (projectile.velocity.X != 0f)
+            //    {
+            //        projectile.spriteDirection = (projectile.direction = Math.Sign(projectile.velocity.X));
+            //    }
+            //}
+            //else
+            //{
+            ////projectile.rotation += 0.3f * (float)projectile.direction;
+            //}
             if (projectile.velocity.Y > 16f)
             {
                 projectile.velocity.Y = 16f;
@@ -272,7 +288,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         float true_alpha = 0f;
         float bounceIntensity = 1f;
-        float justBouncedPower = 0f;
+        float justBouncedPower = 1f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -303,7 +319,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.15f * projectile.direction);
 
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
-                    Color.White with { A = 0 } * true_alpha * 0.7f, projectile.rotation, TexOrigin, finalDrawScale * 1.05f, se);
+                    CursedGreen with { A = 0 } * true_alpha * 0.8f, projectile.rotation, TexOrigin, finalDrawScale * 1.05f, se);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 } * 0.15f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
@@ -319,27 +335,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
 
-            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            //Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 finalDrawScale = Vec2Scale * projectile.scale;
 
-            Vector2 starScale = 1.25f * new Vector2(Vec2Scale.X * 1.15f, Vec2Scale.Y * 0.75f) * justBouncedPower * projectile.scale;
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.OrangeRed with { A = 0 } * 0.45f, projectile.rotation, Star.Size() / 2f, starScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 0 } * 0.5f, projectile.rotation, Star.Size() / 2f, starScale * 0.75f, SpriteEffects.None);
+            //Vector2 starScale = 1.5f * new Vector2(Vec2Scale.X * 1.15f, Vec2Scale.Y * 0.75f) * justBouncedPower * projectile.scale;
+            //Main.EntitySpriteDraw(Star, drawPos, null, Color.GreenYellow with { A = 0 } * 0.9f, projectile.velocity.ToRotation(), Star.Size() / 2f, starScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 0 } * 1f, projectile.velocity.ToRotation(), Star.Size() / 2f, starScale * 0.75f, SpriteEffects.None);
 
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
             {
-                for (int i = 0; i < previousRotations.Count - 2; i++)
+                for (int i = 0; i < previousRotations.Count; i++)
                 {
                     float progress = (float)i / previousRotations.Count;
 
                     if (progress != 1)
                     {
-                        Color orangeToUse = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
 
-                        Color col = Color.Lerp(Color.GreenYellow, CursedGreen, Easings.easeInCirc(progress));
+                        Color col = Color.Lerp(CursedGreen, Color.GreenYellow, Easings.easeInCirc(progress));
 
                         float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
@@ -347,6 +362,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                         Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
                         Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
+
+                        if (i == previousRotations.Count - 1)
+                            newVec2.X = 0.6f;
 
                         Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
                             previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
@@ -367,8 +385,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             #region drawGlorb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Color orbCol2 = Color.Lerp(CursedGreen, Color.GreenYellow, 0.4f) * 0.375f * true_alpha;
-            Color orbCol3 = Color.Lerp(CursedGreen, Color.GreenYellow, 0.95f) * 0.525f * true_alpha;
+            Color orbCol2 = Color.Lerp(CursedGreen, Color.GreenYellow, 0.25f) * 0.375f * true_alpha;
+            Color orbCol3 = Color.Lerp(CursedGreen, Color.GreenYellow, 0.65f) * 0.525f * true_alpha;
 
             float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.2f;
             float sineScale2 = MathF.Cos((float)Main.timeForVisualEffects * 0.22f + 0.32578f) * 0.15f;
@@ -378,8 +396,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.75f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.75f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.65f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.65f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
 
 
             #endregion
@@ -495,7 +513,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
 
             //Impact Dust
-            float circlePulseSize = 0.1f;
+            float circlePulseSize = 0.11f;
 
             Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity * 2f, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.2f, newColor: CursedGreen);
             CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 6, 0.2f, 0.4f);

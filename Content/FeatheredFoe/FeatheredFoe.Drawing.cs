@@ -40,6 +40,12 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
 
+            #region DrawTriSpiral
+            //
+
+
+            #endregion
+
             return false;
         }
 

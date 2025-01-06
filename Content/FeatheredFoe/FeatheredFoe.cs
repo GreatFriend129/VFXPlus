@@ -25,7 +25,7 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             BasicAttack = 0,
             SwoopFeatherBehind = 1,
-            FiveSpread = 2, 
+            TriSpin = 2, 
             MartletOrbitFeather = 3,
             CircleBurstFeather = 4,
             SwirlFeather = 5,
@@ -84,7 +84,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.UmbrellaRain;
+            CurrentAttack = FeatheredFoeState.TriSpin;
 
             switch (CurrentAttack)
             {
@@ -94,8 +94,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.SwoopFeatherBehind:
                     SwoopFeatherBehind();
                     break;
-                case FeatheredFoeState.FiveSpread:
-                    FiveSpread();
+                case FeatheredFoeState.TriSpin:
+                    TriSpin();
                     break;
                 case FeatheredFoeState.MartletOrbitFeather:
                     MartletOrbitFeather();
@@ -112,12 +112,20 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.Dive:
                     Dive();
                     break;
+                case FeatheredFoeState.UmbrellaRain:
+                    UmbrellaRain();
+                    break;
                 //case FeatheredFoeState.MeleeTalon:
 
             }
 
+            bgPulsePower = Math.Clamp(MathHelper.Lerp(bgPulsePower, -0.25f, 0.04f), 0f, 100f);
+
+
             timer++;
         }
 
+
+        public float bgPulsePower = 0f;
     }
 }

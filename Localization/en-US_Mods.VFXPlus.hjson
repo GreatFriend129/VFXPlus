@@ -47,6 +47,9 @@ Projectiles: {
 	LunarExplosionAnim.DisplayName: Lunar Explosion Anim
 	BasicOrbitingFeather.DisplayName: Basic Orbiting Feather
 	SpinShotFeather.DisplayName: Spin Shot Feather
+	Stormwall.DisplayName: Stormwall
+	WindPulse.DisplayName: Wind Pulse
+	UmbrellaTelegraph.DisplayName: Umbrella Telegraph
 }
 
 Configs: {

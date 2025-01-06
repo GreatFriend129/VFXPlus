@@ -21,8 +21,8 @@ using VFXPlus.Common.Utilities;
 using log4net.Core;
 using System.Threading;
 using Terraria.Utilities;
-using VFXPlus.Common;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
+using VFXPLus.Common;
 
 namespace VFXPlus.Content
 {
@@ -53,9 +53,22 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 1f, ProjectileID.NebulaArcanumExplosionShotShard, 0, 0, player.whoAmI);
+            int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
 
-            Main.projectile[b].ai[0] = 90;
+            /*
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(10f, false, 1, 0.8f, 0.8f);
+
+            Dust d1 = Dust.NewDustPerfect(player.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.SkyBlue * 0.25f);
+            d1.scale = 0.04f;
+            d1.customData = cpb2;
+            d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
+
+            Dust d2 = Dust.NewDustPerfect(player.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.SkyBlue * 0.25f);
+            d2.customData = cpb2;
+            d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+            */
+
+            ///player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 20;
 
             return false;
             for (int i = 220; i < 22; i++)

@@ -15,6 +15,10 @@ namespace VFXPlus.Content.FeatheredFoe
 {
     public class FFSky : CustomSky
     {
+        private float bgPulsePower = 0f;
+        
+        
+        
         private bool isActive = false;
         private float intensity = 0f;
         private int timer = 0;
@@ -58,6 +62,8 @@ namespace VFXPlus.Content.FeatheredFoe
                     FallingFeathers[i].Speed = 6f + (2f * (float)myRand.NextDouble());
                 }
 
+                FallingFeathers[i].Speed *= 2f;
+
                 FallingFeathers[i].Active = true;
             }
 
@@ -84,7 +90,7 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
         public override void Update(GameTime gameTime)
-            {
+        {
             const float increment = 0.01f;
             if (CheckActive())
             {
@@ -93,6 +99,9 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     intensity = MathHelper.Lerp(intensity, 1, 0.2f); //1f;
                 }
+
+                //We cant do this here because it would never go down as we reset the bgPulsePower in CheckActive()
+                //bgPulsePower = Math.Clamp(MathHelper.Lerp(bgPulsePower, -1f, 0.07f), 0f, 100f);
             }
             else
             {
@@ -105,6 +114,7 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
             intensity = Math.Clamp(intensity, 0, 1);
+
 
 
             //Feathers
@@ -132,7 +142,6 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     FallingFeathers[i].Speed = 6f + (2f * (float)myRand.NextDouble());
                 }
-
             }
 
             #endregion
@@ -145,12 +154,15 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             if (maxDepth >= 0 && minDepth < 0)
             {
+
+                Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.85f);
+
                 //Sky
-                //spriteBatch.Draw(_bgTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.DarkGray with { A = 0 } * 0.05f * intensity);
+                spriteBatch.Draw(_bgTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), between with { A = 0 } * 0.1f * bgPulsePower);
             }
 
             //Feathers
-
+            return;
 
             //Main.NewText(spriteBatch.ToString());
             spriteBatch.End();
@@ -204,9 +216,11 @@ namespace VFXPlus.Content.FeatheredFoe
                     {
                         Vector2 origin = _featherTexture.Size() / 2;
                         for (int i = 1; i < 8; i += 2)
-                            spriteBatch.Draw(_featherTexture, position - new Vector2(0, i * FallingFeathers[j].Speed), null, Color.DeepSkyBlue with { A = 0 } * 1f * (0.5f - (0.5f * i / 8)), FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
+                            spriteBatch.Draw(_featherTexture, position - new Vector2(0, i * FallingFeathers[j].Speed), null, Color.SkyBlue with { A = 0 } * 1f * (0.5f - (0.5f * i / 8)), FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
 
-                        spriteBatch.Draw(_featherTexture, position, null, Color.White * 0.75f, FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
+                        spriteBatch.Draw(_featherTexture, position, null, Color.White * 1f, FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
+
+                        spriteBatch.Draw(_featherTexture, position, null, Color.White with { A = 0 } * 0.4f, FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
                     }
                 }
             }
@@ -221,6 +235,11 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 if (Main.npc[i].active && Main.npc[i].type == ModContent.NPCType<FeatheredFoe>())
                 {
+                    if (Main.npc[i].ModNPC is FeatheredFoe ff)
+                    {
+                        bgPulsePower = ff.bgPulsePower;
+                    }
+
                     return true;
                 }
             }
