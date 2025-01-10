@@ -50,6 +50,7 @@ Projectiles: {
 	Stormwall.DisplayName: Stormwall
 	WindPulse.DisplayName: Wind Pulse
 	UmbrellaTelegraph.DisplayName: Umbrella Telegraph
+	WindAnimTest.DisplayName: Wind Anim Test
 }
 
 Configs: {

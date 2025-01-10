@@ -23,6 +23,8 @@ using System.Threading;
 using Terraria.Utilities;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
 using VFXPLus.Common;
+using Terraria.Utilities.Terraria.Utilities;
+
 
 namespace VFXPlus.Content
 {
@@ -54,6 +56,64 @@ namespace VFXPlus.Content
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+
+            Main.projectile[b].scale = 7f;
+
+            (Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 60;
+            (Main.projectile[b].ModProjectile as WindPulse).intensity = 0.8f;
+
+            //(Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 50;
+
+            //(Main.projectile[b].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
+
+            float rot = MathHelper.Pi;
+            for (int i = 220; i < 85; i++)
+            {
+                int Ydir = rot.ToRotationVector2().X > 0 ? 1 : -1;
+
+
+                Vector2 windDustSpawnPosition = Main.MouseWorld + (new Vector2(1f * -650f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloatDirection() * 900f) * 1f).RotatedBy(rot);
+                Vector2 windDustVelocity = new Vector2(1f, Ydir * 0.15f).RotatedBy(rot) * Main.rand.NextFloat(0.1f, 1.8f) * 45f;
+
+                float dustScale = Main.rand.NextFloat(1f, 2f);
+
+                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: dustScale); //dust176
+                wind.noGravity = true;
+                //WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.91f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, 1f, 1f, true);
+                //wlb.randomVelRotatePower = 0.05f;
+                //wind.customData = wlb;
+
+                //SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 3f, 0.95f, false);
+                //wind.customData = ssb;
+
+
+            }
+
+
+            int number_of_feathers = 6;
+            for (int a1 = 2220; a1 < number_of_feathers; a1++)
+            {
+                float prog = (float)a1 / (float)number_of_feathers;
+
+                int feather = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(13f, 0f).RotatedBy(MathHelper.TwoPi * prog), ModContent.ProjectileType<CurvingFeather>(), 1, 1);
+                (Main.projectile[feather].ModProjectile as CurvingFeather).curveValue = -0.1f;
+
+            }
+
+            for (int i = 220; i < 5; i++) //4 //2,2
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(6f, 6f);
+
+
+
+                Dust p = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<WindLine>(), vel + -velocity * 2f,
+                    newColor: Color.DeepSkyBlue, Scale: 1f);
+
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, 1f, 1f, true);
+                wlb.randomVelRotatePower = 0.2f;
+
+                p.customData = wlb;
+            }
 
             /*
             CirclePulseBehavior cpb2 = new CirclePulseBehavior(10f, false, 1, 0.8f, 0.8f);

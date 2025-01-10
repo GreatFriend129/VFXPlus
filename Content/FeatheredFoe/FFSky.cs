@@ -155,7 +155,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (maxDepth >= 0 && minDepth < 0)
             {
 
-                Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.85f);
+                Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 1f);
 
                 //Sky
                 spriteBatch.Draw(_bgTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), between with { A = 0 } * 0.1f * bgPulsePower);

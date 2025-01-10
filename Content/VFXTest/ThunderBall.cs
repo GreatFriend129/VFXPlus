@@ -620,7 +620,7 @@ namespace VFXPlus.Content.VFXTest
         }
     }
 
-    public class ExplodingExplosionTest : ModProjectile
+    public class WindAnimTest : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
@@ -628,7 +628,7 @@ namespace VFXPlus.Content.VFXTest
 
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Projectile.type] = 7;
+            Main.projFrames[Projectile.type] = 30;
         }
         public override void SetDefaults()
         {
@@ -645,30 +645,13 @@ namespace VFXPlus.Content.VFXTest
 
         public override void AI()
         {
-            if (timer == 1)
-                Projectile.rotation = Main.rand.NextFloat(6.28f);
 
-            if (timer > 50)
+            Projectile.frameCounter++;
+            if (Projectile.frameCounter >= 1)
             {
-                if (timer == 51)
-                    pulseVal = 1f;
-
-                Projectile.frameCounter++;
-                if (Projectile.frameCounter >= 3)
-                {
-                    if (Projectile.frame == 6)
-                    {
-                        timer = 0;
-                        scale = 0;
-                    }
-
-                    Projectile.frameCounter = 0;
-                    Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
-                }
-                scale = Math.Clamp(MathHelper.Lerp(scale, 2f, 0.08f), 0f, 1.5f);
+                Projectile.frameCounter = 0;
+                Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
             }
-
-            pulseVal *= 0.8f;
 
             timer++;
         }
@@ -679,26 +662,23 @@ namespace VFXPlus.Content.VFXTest
         float scale = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/GrayscaleVanillaExplode").Value;
-            Texture2D ExploB = Mod.Assets.Request<Texture2D>("Assets/Anim/VanillaExplodeWhiteGlow").Value;
-            Texture2D ExploC = Mod.Assets.Request<Texture2D>("Assets/Anim/VanillaExplodeWhite").Value;
-            Texture2D ExploD = Mod.Assets.Request<Texture2D>("Assets/Anim/BlueFlareDarkGlowPMA").Value;
-            //Texture2D ExploD = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion").Value;
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Anim/Smoke30Frames").Value;
 
-            int frameHeight = ExploD.Height / Main.projFrames[Projectile.type];
-            int startY = frameHeight * Projectile.frame;
 
-            Rectangle sourceRectangle = new Rectangle(0, startY, ExploA.Width, frameHeight);
+            int reverseFrame = (30 - Projectile.frame) - 1;
+
+            int frameHeight = Smoke.Height / Main.projFrames[Projectile.type];
+            int startY = frameHeight * reverseFrame;
+
+            Rectangle sourceRectangle = new Rectangle(0, startY, Smoke.Width, frameHeight);
             Vector2 origin = sourceRectangle.Size() / 2f;
 
+            Projectile.scale = 0.5f;
 
 
-            Main.spriteBatch.Draw(ExploB, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Blue with { A = 0 } * (2f * pulseVal), Projectile.rotation, origin, 1.5f * (1f - pulseVal) * scale * Projectile.scale, 0, 0f);
 
-
-            Main.spriteBatch.Draw(ExploD, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Black * 0.4f, Projectile.rotation, origin, scale * Projectile.scale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ExploD, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 }, Projectile.rotation, origin, scale * Projectile.scale, SpriteEffects.None, 0f);
-
+            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, Color.DeepSkyBlue with { A = 0 }, Projectile.rotation, origin, 1f * scale * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
+            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 }, Projectile.rotation, origin, 0.6f * scale * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
 
             return false;
         }
@@ -952,7 +932,7 @@ namespace VFXPlus.Content.VFXTest
             Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
             FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
-            float speedTime = Main.GlobalTimeWrappedHourly * 2f;
+            float speedTime = Main.GlobalTimeWrappedHourly * 0.1f;
 
             float minRange = 40f; //40f | 240 920 for full screen
             float maxRange = 220f; //120

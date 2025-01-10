@@ -565,8 +565,8 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
         float animProgress = 0;
-        float alpha = 0f;
-        float scale = 0f;
+        float overallAlpha = 0f;
+        float overallScale = 0f;
 
         int timer = 0;
         public int advancer = 0;
@@ -611,9 +611,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
             Projectile.rotation -= 0.25f;
 
-            Projectile.velocity = new Vector2(0f, 0f);
-
-
             if (timer % 1 == 0)
             {
                 float scale = 1.4f;
@@ -627,6 +624,11 @@ namespace VFXPlus.Content.FeatheredFoe
                 Dust star = Dust.NewDustPerfect(Projectile.Center + random, ModContent.DustType<SmallSmoke>(), vel, newColor: Color.White, Scale: scale);
                 star.customData = ssb;
             }
+
+            float timeForPopInAnim = 37; //37
+            float animProgress = Math.Clamp((timer + 13) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 2.25f)) * 1f;
 
             timer++;
         }
@@ -678,22 +680,12 @@ namespace VFXPlus.Content.FeatheredFoe
                 Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
                 Color col = Color.Lerp(between * 1f, Color.LightSkyBlue, Easings.easeOutSine(prog));
 
-                //Color col = Color.Lerp(Color.DeepSkyBlue * 0.5f, Color.LightSkyBlue * 1f, prog);
 
-                float alpha = prog;// Easings.easeOutSine(prog);
-
+                float alpha = prog;
                 float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
-
-                //
-                //if (i < 1)
-                //Main.EntitySpriteDraw(Swirl, drawPos, null, Color.Black * alpha, newRot, origin, scale * 1f, SpriteEffects.FlipHorizontally);
-
                 float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
 
                 Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f, SpriteEffects.FlipHorizontally);
-
-
-
 
                 //8
                 if (i >= 8)

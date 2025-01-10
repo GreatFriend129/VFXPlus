@@ -203,7 +203,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.width = Projectile.height = 16;
             Projectile.ignoreWater = true;
             Projectile.hostile = false;
-            Projectile.friendly = true;
+            Projectile.friendly = false;
 
             Projectile.tileCollide = false;
             Projectile.timeLeft = 224400; //180
@@ -211,49 +211,132 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
 
-        
+        public bool shouldFadeOut = false;
+        public int targetPlayer = -1;
+
         int timer = 0;
-        float overallWidth = 1f;
         float overallAlpha = 1f;
         float initialProg = 0f;
-
         public override void AI()
         {
+            //Do a big burst of wind particles on startup
+            if (timer == 0)
+            {
+                int dustPerSide = 55 * 2;
+
+                //The problem is that if the dust spawns far enough off-screen it just disappears
+                int dir = 1;
+                for (int i = 0; i < dustPerSide; i++)
+                {
+                    Vector2 windDustSpawnPosition = Projectile.Center + (new Vector2(-650f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloatDirection() * 900f) * 1f);
+                    Vector2 windDustVelocity = new Vector2(1f, dir * 0.15f) * dir * Main.rand.NextFloat(0.1f, 1.8f) * 45f;
+
+                    Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(1f, 2f));
+                    wind.noGravity = true;
+                }
+                dir = -1;
+                for (int i = 0; i < dustPerSide; i++)
+                {
+                    Vector2 windDustSpawnPosition = Projectile.Center + (new Vector2((-650f + Main.rand.NextFloat(-400f, 0f)) * dir, Main.rand.NextFloatDirection() * 900f) * 1f);
+                    Vector2 windDustVelocity = new Vector2(1f, dir * 0.15f) * dir * Main.rand.NextFloat(0.1f, 1.8f) * 45f;
+
+                    Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(1f, 2f));
+                    wind.noGravity = true;
+                }
+
+                //Sound
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Zombie_67") with { Volume = .1f, Pitch = 0.2f, MaxInstances = -1 }; 
+                SoundEngine.PlaySound(style, Projectile.Center);
+
+                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_0") with { Volume = 0.1f, Pitch = -0.15f, MaxInstances = -1 }; 
+                SoundEngine.PlaySound(style2, Projectile.Center);
+            }
+
+            #region Position Handling
+
+            if (targetPlayer == -1)
+                targetPlayer = Main.myPlayer;
+
+            //This makes it so that the player can only be at most 350 away from the Projectile vertically
+            float distToPlayer = Main.player[targetPlayer].Center.Y - Projectile.Center.Y;
+            if (distToPlayer > 0)
+            {
+                float val = distToPlayer - 350f;
+
+                if (val > 0)
+                    Projectile.Center = new Vector2(Projectile.Center.X, Projectile.Center.Y + val);
+
+            }
+            else
+            {
+                float val = distToPlayer + 350f;
+
+                if (val < 0)
+                    Projectile.Center = new Vector2(Projectile.Center.X, Projectile.Center.Y + val);
+            }
+            #endregion
+
 
             int timeForInitialAnim = 30;
-
             float initProg = Math.Clamp((float)timer / (float)timeForInitialAnim, 0f, 1f);
-
             initialProg = initProg;
 
+            //Dust that comes closer and closer as the telegraph shortens
+            if (timer < timeForInitialAnim / 2f)
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    int side = Main.rand.NextBool() ? 1 : -1;
+
+                    float spawnY = Main.rand.NextFloat(-500f, 500f);
+                    float spawnX = -200 + -1000f * (1f - Easings.easeOutQuart(initProg));
+
+                    Vector2 spawnPos = Projectile.Center + new Vector2(spawnX * side, spawnY);
+
+                    Vector2 velocity = new Vector2(5 + (20f * (1f - initProg)), 0f) * side;
+
+                    Dust p = Dust.NewDustPerfect(spawnPos, ModContent.DustType<WindLine>(), velocity * 1f, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.25f, 0.5f));
+
+                    WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, 1f, 1f, true);
+                    wlb.randomVelRotatePower = 0.2f;
+
+                    p.customData = wlb;
+                }
+            }
+
+            //Fade out started by FF NPC
+            if (shouldFadeOut)
+            {
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.08f), 0f, 1f);
+
+                if (overallAlpha == 0f)
+                    Projectile.active = false;
+            }
 
             timer++;
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            //ignore the fact this is in a separate function
-            DrawWalls(false);
-            return false;
-        }
-
-        public void DrawWalls(bool giveUp = false)
-        {
-            if (giveUp)
-                return;
-
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
             Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_06").Value; //TextureLaser goes kinda crazy, and smokeTrail4_512 and spark_06
             Texture2D glowThick = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //TextureLaser goes kinda crazy, and smokeTrail4_512 and spark_06
 
-
-            int leftX = (int)MathHelper.Lerp(-1000, -100, Easings.easeOutQuart(initialProg));// -100;
-            int rightX = (int)MathHelper.Lerp(1000, 100, Easings.easeOutQuart(initialProg));//100;
+            float safeZoneWidth = 95f;
 
 
-            int wallWidth = (int)MathHelper.Lerp(2300f, 120f, Easings.easeOutSine(initialProg));//120;
-            int wallHeight = 2000;
+            int leftX = (int)MathHelper.Lerp(-1000, -safeZoneWidth, Easings.easeOutQuart(initialProg));// -100;
+            int rightX = (int)MathHelper.Lerp(1000, safeZoneWidth, Easings.easeOutQuart(initialProg));//100;
+
+
+            float colorIntensity = (0.75f + (MathF.Sin((float)Main.timeForVisualEffects * 0.2f) * 0.15f)) * Easings.easeInQuad(initialProg) * overallAlpha;
+            int sineHeightAddition = (int)(Math.Sin(Main.timeForVisualEffects * 0.05f) * 30f);
+            int sineWidthAddition = (int)(Math.Sin(Main.timeForVisualEffects * 0.08f) * 20f);
+
+
+            int wallWidth = (int)MathHelper.Lerp(2300f, 120f, Easings.easeOutSine(initialProg)) + sineWidthAddition;
+            int wallHeight = 2000 + sineHeightAddition;
             Rectangle glowFrame = new Rectangle(0, 0, glow.Width, glow.Height / 2);
             Rectangle glowThickFrame = new Rectangle(0, 0, glowThick.Width, glowThick.Height / 2);
 
@@ -261,26 +344,124 @@ namespace VFXPlus.Content.FeatheredFoe
             //Left Wall---------------------------------------
             Rectangle glowTarget = new Rectangle((int)drawPos.X + leftX - wallWidth, (int)drawPos.Y, wallHeight, wallWidth);
 
-            Main.spriteBatch.Draw(glowThick, glowTarget, glowThickFrame, Color.DeepSkyBlue with { A = 0 } * 0.25f, MathHelper.PiOver2, glowThick.Size() / 2f, SpriteEffects.FlipVertically, 0);
-            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.DeepSkyBlue with { A = 0 } * 2f, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.FlipVertically, 0);
+            Main.spriteBatch.Draw(glowThick, glowTarget, glowThickFrame, Color.DeepSkyBlue with { A = 0 } * 0.25f * colorIntensity, MathHelper.PiOver2, glowThick.Size() / 2f, SpriteEffects.FlipVertically, 0);
+            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.DeepSkyBlue with { A = 0 } * 2f * colorIntensity, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.FlipVertically, 0);
 
             //White
             glowTarget = new Rectangle((int)drawPos.X + leftX - (wallWidth / 3) - 2, (int)drawPos.Y, wallHeight, wallWidth / 3);
-            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.White with { A = 0 } * 2f, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.FlipVertically, 0);
+            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.White with { A = 0 } * 2f * colorIntensity, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.FlipVertically, 0);
 
 
             //Right Wall--------------------------------------------------
             glowTarget = new Rectangle((int)drawPos.X + rightX, (int)drawPos.Y, wallHeight, wallWidth);
 
-            Main.spriteBatch.Draw(glowThick, glowTarget, glowThickFrame, Color.DeepSkyBlue with { A = 0 } * 0.25f, MathHelper.PiOver2, glowThick.Size() / 2f, SpriteEffects.None, 0);
-            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.DodgerBlue with { A = 0 } * 1.5f, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.None, 0);
+            Main.spriteBatch.Draw(glowThick, glowTarget, glowThickFrame, Color.DeepSkyBlue with { A = 0 } * 0.25f * colorIntensity, MathHelper.PiOver2, glowThick.Size() / 2f, SpriteEffects.None, 0);
+            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.DodgerBlue with { A = 0 } * 1.5f * colorIntensity, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.None, 0);
 
             //White
             glowTarget = new Rectangle((int)drawPos.X + rightX + 2, (int)drawPos.Y, wallHeight, wallWidth / 3);
-            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.White with { A = 0 } * 2f, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.None, 0);
+            Main.spriteBatch.Draw(glow, glowTarget, glowFrame, Color.White with { A = 0 } * 2f * colorIntensity, MathHelper.PiOver2, glow.Size() / 2f, SpriteEffects.None, 0);
+
+            return false;
+        }
+
+    }
+
+    public class Stormwall : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = false;
+            Projectile.timeLeft = 224400;
+        }
 
 
 
+        int timer = 0;
+        float overallWidth = 1f;
+        float overallAlpha = 0f;
+
+        public bool shouldFade = false;
+        public int targetPlayer = -1;
+        public override void AI()
+        {
+            if (targetPlayer == -1)
+                targetPlayer = Main.myPlayer;
+
+            Projectile.Center = new Vector2(Projectile.Center.X, Main.player[targetPlayer].Center.Y - (Main.screenHeight / 2f));
+
+            //Projectile.Center = new Vector2(Main.player[targetPlayer].Center.X, Main.player[targetPlayer].Center.Y - (Main.screenHeight / 2f));
+
+            //This makes it so that the player can only be at most 500 away from the Projectile
+            float distToPlayer = Main.player[targetPlayer].Center.X - Projectile.Center.X;
+            if (distToPlayer > 0)
+            {
+                float val = distToPlayer - 500f;
+
+                if (val > 0)
+                    Projectile.Center = new Vector2(Projectile.Center.X + val, Projectile.Center.Y);
+                
+            }
+            else
+            {
+                float val = distToPlayer + 500f;
+
+                if (val < 0)
+                    Projectile.Center = new Vector2(Projectile.Center.X + val, Projectile.Center.Y);
+            }
+
+            if (shouldFade)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.05f), 0f, 1f);
+            else
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.03f), 0f, 1f);
+
+            if (shouldFade = overallAlpha == 0f)
+                Projectile.active = false;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D cloud = Mod.Assets.Request<Texture2D>("Assets/smoketrailsmudge").Value;  //smokeTrailsmudge
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            float sineA = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.03f) * 0.2f;
+            float sineB = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.11f) * 0.11f;
+            float sineC = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.05f;
+            float sineD = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.08f) * 0.08f;
+
+
+
+            Vector2 vec2Scale1 = new Vector2(8f * sineC, 0.7f * sineA).RotatedBy(Projectile.rotation) * Projectile.scale;
+            Vector2 vec2Scale2 = new Vector2(8f * sineD, 0.7f * sineB).RotatedBy(Projectile.rotation) * Projectile.scale;
+
+            Vector2 drawOffset = new Vector2(200f * sineD, 0f);
+
+            Main.spriteBatch.Draw(cloud, drawPos + drawOffset, null, Color.SkyBlue with { A = 0 } * 0.5f * overallAlpha, Projectile.rotation, cloud.Size() / 2f, vec2Scale1, SpriteEffects.None, 0);
+            Main.spriteBatch.Draw(cloud, drawPos, null, Color.SkyBlue with { A = 0 } * 0.5f * overallAlpha, Projectile.rotation, cloud.Size() / 2f, vec2Scale2, SpriteEffects.FlipVertically, 0);
+
+            Vector2 coreScale1 = new Vector2(vec2Scale1.X, vec2Scale1.Y * 0.4f);
+            Vector2 coreScale2 = new Vector2(vec2Scale2.X, vec2Scale2.Y * 0.4f);
+
+            Main.spriteBatch.Draw(cloud, drawPos + drawOffset, null, Color.White with { A = 0 } * 0.5f * overallAlpha, Projectile.rotation, cloud.Size() / 2f, coreScale1, SpriteEffects.None, 0);
+            Main.spriteBatch.Draw(cloud, drawPos, null, Color.White with { A = 0 } * 0.5f * overallAlpha, Projectile.rotation, cloud.Size() / 2f, coreScale2, SpriteEffects.FlipVertically, 0);
+
+
+            return false;
         }
 
     }
@@ -289,7 +470,6 @@ namespace VFXPlus.Content.FeatheredFoe
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
-        public float intensity = 1f;
 
         public override void SetStaticDefaults()
         {
@@ -314,7 +494,8 @@ namespace VFXPlus.Content.FeatheredFoe
         public float scale = 0.25f;
         float alpha = 1;
 
-
+        public float intensity = 1f;
+        public int timeForPulse = 40;
         public override void AI()
         {
             Projectile.velocity *= 0.95f;
@@ -324,15 +505,15 @@ namespace VFXPlus.Content.FeatheredFoe
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
             }
 
-            if (timer <= 40)
+            if (timer <= timeForPulse) //40
             {
-                scale = MathHelper.Lerp(0f, 1f, Easings.easeOutQuint(timer / 40f));
+                scale = MathHelper.Lerp(0f, 1f, Easings.easeOutQuint((float)timer / (float)timeForPulse));
             }
 
             if (timer >= 0)
             {
 
-                if (timer >= 6)
+                if (timer >= (timeForPulse * 0.15f)) //6
                     alpha -= 0.065f;
             }
 
@@ -354,8 +535,6 @@ namespace VFXPlus.Content.FeatheredFoe
                 DrawShit(false);
             });
 
-            DrawShit(true);
-
             return false;
         }
 
@@ -373,7 +552,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Texture2D Flare = Mod.Assets.Request<Texture2D>(toAsset).Value;
 
             float rot = ((float)Main.timeForVisualEffects * 0.12f * Projectile.ai[0]) + Projectile.rotation;
-            float scale2 = scale * 0.25f;
+            float scale2 = scale * 0.35f;
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/BoFIrisAlt", AssetRequestMode.ImmediateLoad).Value;
@@ -388,7 +567,7 @@ namespace VFXPlus.Content.FeatheredFoe
             myEffect.Parameters["distortStrength"].SetValue(0.06f);
             myEffect.Parameters["xOffset"].SetValue(0.0f);
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.01f);
-            myEffect.Parameters["colorIntensity"].SetValue(alpha * 1f * intensity);
+            myEffect.Parameters["colorIntensity"].SetValue(alpha * 0.15f * intensity);
 
 
             Main.spriteBatch.End();
