@@ -7,6 +7,7 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 using VFXPlus.Common;
@@ -350,31 +351,249 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        Vector2 storedShakeCenter; 
+        Tuple<int, int> pastDirections = new Tuple<int, int>(0, 0); //Holds the past two directions of the attack (-1 or 1)
+        Vector2 umbrellaCenterPoint = Vector2.Zero;
         Projectile umbrellaStormwallInstance = null; 
         Projectile umbrellaTelegraphProj = null;
         public void UmbrellaRain()
         {
             //TODO: Cull feathers and dust that will spawn very far offscreen
+            //---------------------------------------------------------------
 
+            float dashAwayDistance = 400f;
+            float safeZoneWidth = 95f; //Dont change unless you also change Telegraph proj
 
-            //Spawn the telegraph border and stormwall
-            if (substate == 0 && attackReps == 0)
+            //Choose point and spawn setup projectiles
+            if (timer == 0)
             {
-                int stormwallID = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<Stormwall>(), 0, 0);
-                (Main.projectile[stormwallID].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
-                umbrellaStormwallInstance = Main.projectile[stormwallID];
+                int randomDirection = (Main.rand.NextBool() ? 1 : -1);
 
-                int telegraphID = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<UmbrellaTelegraph>(), 0, 0);
+                //If we have gone the same direction twice in a row, go the other direction
+                if (pastDirections.Item1 == pastDirections.Item2 && pastDirections.Item1 == -1)
+                    randomDirection = 1;
+                else if (pastDirections.Item1 == pastDirections.Item2 && pastDirections.Item1 == 1)
+                    randomDirection = -1;
+
+                //Update the past directions list
+                pastDirections = new Tuple<int, int>(randomDirection, pastDirections.Item1);
+
+
+                //Choose the new point
+                Vector2 newPoint = new Vector2(dashAwayDistance * randomDirection, -230f);
+
+                //If this is the first repetition, have the point be right above player instead, and spawn in the stormwall projectile (clouds at top of screen)
+                if (attackReps == 0)
+                {
+                    newPoint.X *= 0;
+
+                    int stormwallID = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<Stormwall>(), 0, 0);
+                    (Main.projectile[stormwallID].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
+                    umbrellaStormwallInstance = Main.projectile[stormwallID];
+                }
+
+                umbrellaCenterPoint = new Vector2(NPC.Center.X, player.Center.Y) + newPoint;
+
+                //Spawn the telegraph projectile
+                int telegraphID = Projectile.NewProjectile(null, umbrellaCenterPoint, Vector2.Zero, ModContent.ProjectileType<UmbrellaTelegraph>(), 0, 0);
                 (Main.projectile[telegraphID].ModProjectile as UmbrellaTelegraph).targetPlayer = player.whoAmI;
                 umbrellaTelegraphProj = Main.projectile[telegraphID];
 
-                substate = 1;
             }
 
 
-            float safeZoneWidth = 95f; //Dont change
+            int timeBeforeRain = 80; //70
+            int timeOfRain = 50; //50
+            int timeAfterRain = 25; //100
 
+            //Have NPC move to the center point
+            if (timer < timeBeforeRain)
+            {
+                float prog = Math.Clamp((float)timer / (float)(timeBeforeRain / 1.35f), 0f, 1f);
+
+                float xOvershoot = 100f * Easings.easeInSine(1f - prog) * pastDirections.Item1;
+                float yOvershoot = -100f * Easings.easeInSine(1f - prog);
+
+                float xLerp = MathHelper.Lerp(NPC.Center.X, umbrellaCenterPoint.X + xOvershoot, Easings.easeInQuad(prog));
+                float yLerp = MathHelper.Lerp(NPC.Center.Y, player.Center.Y - 250f + yOvershoot, 0.06f + (-0.04f * prog));
+
+                NPC.Center = new Vector2(xLerp, yLerp);
+            }
+            else if (timer >= timeBeforeRain)
+            {
+                //Sound and VFX shit
+                if (timer == timeBeforeRain)
+                {
+                    bgPulsePower = 2.5f;
+
+                    windOverlayOpacityGoal = 1f;
+                    windOverlayRotation = MathHelper.PiOver2;
+
+                    float overallVolume = 0.4f;
+
+                    //Sound
+                    SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.5f * overallVolume, Pitch = .7f, PitchVariance = 0.05f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(styleA, NPC.Center);
+
+                    SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.15f * overallVolume, Pitch = .4f, PitchVariance = .1f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(styleC, NPC.Center);
+
+                    SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 1f * overallVolume, Pitch = .6f, PitchVariance = 0.05f, MaxInstances = 1 };
+                    SoundEngine.PlaySound(styleD, NPC.Center);
+
+                    int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                    (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 60;
+                    (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.8f;
+                    Main.projectile[pulse].scale = 9f;
+
+                    randomShakePower = 2f;
+
+                    //NPC.Center = umbrellaCenterPoint;
+                }
+
+                float yLerp = MathHelper.Lerp(NPC.Center.Y, player.Center.Y - 250, 0.005f);
+
+                NPC.Center = new Vector2(umbrellaCenterPoint.X, yLerp);
+
+                //Continually shake screen for a while
+                if (timer < timeBeforeRain + (timeOfRain / 1.5f))
+                    player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
+
+
+                //Spawning feathers and dust
+                if (timer < timeBeforeRain + timeOfRain)
+                {
+                    //Push the player downward if they are above FF
+                    if (player.Center.Y < NPC.Center.Y)
+                    {
+                        if (player.velocity.Y < 0)
+                            player.velocity.Y *= -1;
+
+                        player.velocity.Y += 0.75f;
+                    }
+
+                    int smokePerFrame = 10 * 2;
+                    int windDustPerFrame = 5 * 2;
+                    int windLinePerFrame = 1 * 2;
+                    int feathersPerBurst = 5 * 2;
+
+                    float burstWidth = 1000f * 2f;
+
+                    //Feathers
+                    if (timer % 6 == 0)
+                    {
+                        for (int i = 0; i < feathersPerBurst; i++)
+                        {
+                            float prog = (float)i / (float)feathersPerBurst;
+
+                            float x = MathHelper.Lerp(-burstWidth, -safeZoneWidth, prog);
+
+                            Vector2 spawnPosL = new Vector2(x + Main.rand.NextFloat(-135f, 135f), -400f + Main.rand.NextFloat(-50f, 50f));
+                            Vector2 spawnPosR = new Vector2((-1f * x) + Main.rand.NextFloat(-135f, 135f), -400f + Main.rand.NextFloat(-50f, 50f));
+
+                            //Left Side
+                            int pl = Projectile.NewProjectile(null, NPC.Center + spawnPosL, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
+                            (Main.projectile[pl].ModProjectile as StraightFeather).accelTime = 0;
+                            (Main.projectile[pl].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
+                            Main.projectile[pl].extraUpdates = 3;
+
+                            //Right Side
+                            int pr = Projectile.NewProjectile(null, NPC.Center + spawnPosR, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
+                            (Main.projectile[pr].ModProjectile as StraightFeather).accelTime = 0;
+                            (Main.projectile[pr].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
+                            Main.projectile[pr].extraUpdates = 3;
+                        }
+                    }
+
+                    //Spawn 2 feathers on the edge of the border every 14 frames
+                    if (timer % 14 == 0)
+                    {
+                        //Dont spawn them exactly on the border size (95f) because the feathers have a wide hitbox
+                        Vector2 spawnPosL = NPC.Center + new Vector2(safeZoneWidth + 15f, -400f + Main.rand.NextFloat(-25f, 25f));
+                        Vector2 spawnPosR = NPC.Center + new Vector2(-safeZoneWidth - 15f, -400f + Main.rand.NextFloat(-25f, 25f));
+
+                        int p1 = Projectile.NewProjectile(null, spawnPosL, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
+                        (Main.projectile[p1].ModProjectile as StraightFeather).accelTime = 0;
+                        (Main.projectile[p1].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
+                        Main.projectile[p1].extraUpdates = 3;
+
+                        int p2 = Projectile.NewProjectile(null, spawnPosR, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
+                        (Main.projectile[p2].ModProjectile as StraightFeather).accelTime = 0;
+                        (Main.projectile[p2].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
+                        Main.projectile[p2].extraUpdates = 3;
+                    }
+
+
+                    #region Rain Particles
+                    //Smoke Dust
+                    for (int i = 0; i < smokePerFrame; i++)
+                    {
+                        float rot = MathHelper.PiOver2;
+                        int side = Main.rand.NextBool() ? 1 : -1;
+
+                        Vector2 smokeDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
+                        Vector2 smokeDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(8f, 12f) * 1.5f;
+
+                        Dust smoke = Dust.NewDustPerfect(smokeDustSpawnPosition, ModContent.DustType<SmallSmoke>(), smokeDustVelocity,
+                            newColor: Color.LightSkyBlue * 1f, Scale: Main.rand.NextFloat(7f, 9f));
+
+                        SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 0.45f, ScaleFadePower: 0.97f, false);
+                        smoke.customData = ssb;
+                    }
+
+                    //Wind Dust
+                    for (int i2 = 0; i2 < windDustPerFrame; i2++)
+                    {
+                        float rot = MathHelper.PiOver2;
+                        int side = Main.rand.NextBool() ? 1 : -1;
+
+                        Vector2 windDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
+                        Vector2 windDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(0.95f, 2.5f) * 45f;
+
+                        float dustScale = Main.rand.NextFloat(1.25f, 2f);
+                        Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.SkyBlue with { A = 0 } * 1f, Scale: dustScale); //dust176
+                        wind.noGravity = true;
+                        wind.rotation = Main.rand.NextFloat(6.28f);
+                    }
+
+                    //Wind Line
+                    for (int i3 = 0; i3 < windLinePerFrame; i3++)
+                    {
+                        float rot = MathHelper.PiOver2;
+                        int side = Main.rand.NextBool() ? 1 : -1;
+
+
+                        Vector2 windDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
+                        Vector2 windDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(0.95f, 3f) * 45f;
+
+                        Dust p = Dust.NewDustPerfect(windDustSpawnPosition, ModContent.DustType<WindLine>(), windDustVelocity * 1f, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.4f, 0.55f));
+
+                        p.customData = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, 4f, 2f, false);
+                    }
+                    #endregion
+                }
+                else
+                {
+                    if (timer == timeBeforeRain + timeOfRain)
+                    {
+                        if (umbrellaTelegraphProj.active)
+                            (umbrellaTelegraphProj.ModProjectile as UmbrellaTelegraph).shouldFadeOut = true;
+                    }
+
+                    windOverlayOpacityGoal = 0f;
+                    windOverlayOpacity *= 0.9f;
+                }
+
+                if (timer == timeBeforeRain + timeOfRain + timeAfterRain)
+                {
+                    //umbrellaStormwallInstance.active = false;
+
+                    attackReps++;
+                    timer = -1;
+                }
+            }
+
+
+            /*
             if (timer >= 70)
             {
                 //Sound effect and pulse shtuff
@@ -434,7 +653,6 @@ namespace VFXPlus.Content.FeatheredFoe
                     //Feathers
                     if (timer % 6 == 0)
                     {
-                        //Left burst
                         for (int i = 0; i < feathersPerBurst; i++)
                         {
                             float prog = (float)i / (float)feathersPerBurst;
@@ -456,24 +674,6 @@ namespace VFXPlus.Content.FeatheredFoe
                             (Main.projectile[pr].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
                             Main.projectile[pr].extraUpdates = 3;
                         }
-
-                        //Right Burst
-                        /*
-                        for (int i = 220; i < feathersPerBurst; i++)
-                        {
-                            float prog = (float)i / (float)feathersPerBurst;
-
-                            float x = MathHelper.Lerp(safeZoneWidth, burstWidth, prog);
-
-                            Vector2 spawnPos = new Vector2(x + Main.rand.NextFloat(-135f, 135f), -400f + Main.rand.NextFloat(-50f, 50f));
-
-                            int p = Projectile.NewProjectile(null, NPC.Center + spawnPos, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                            (Main.projectile[p].ModProjectile as StraightFeather).accelTime = 0;
-                            (Main.projectile[p].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
-
-                            Main.projectile[p].extraUpdates = 3;
-                        }
-                        */
                     }
 
 
@@ -560,31 +760,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 NPC.Center = NPC.Center + (Main.rand.NextVector2CircularEdge(0.5f, 0.5f) * player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower);
 
-
-                if (timer % 20 == 0 && false)
-                {
-                    for (int i = 0; i < 20; i++)
-                    {
-                        Vector2 spawnPos = new Vector2(70 + (45 * i), -500 + (i * 20));
-
-                        int p = Projectile.NewProjectile(null, NPC.Center + spawnPos, new Vector2(0f, 27f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                        (Main.projectile[p].ModProjectile as StraightFeather).accelTime = 0;
-
-                        Dust smoke = Dust.NewDustPerfect(NPC.Center + spawnPos, ModContent.DustType<HighResSmoke>(), new Vector2(0f, 5f), newColor: Color.SkyBlue);
-                    }
-
-                    for (int i = 0; i < 20; i++)
-                    {
-                        Vector2 spawnPos = new Vector2(-70 + (-45 * i), -500 + (i * 20));
-
-                        int p = Projectile.NewProjectile(null, NPC.Center + spawnPos, new Vector2(0f, 27f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                        (Main.projectile[p].ModProjectile as StraightFeather).accelTime = 0;
-
-                        Dust smoke = Dust.NewDustPerfect(NPC.Center + spawnPos, ModContent.DustType<HighResSmoke>(), new Vector2(0f, 15f), newColor: Color.SkyBlue);
-                    }
-                }
-
-
                 if (timer == 210)
                 {
                     substate = 0;
@@ -595,7 +770,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     timer = -1;
                 }
             }
-
+            */
 
         }
 

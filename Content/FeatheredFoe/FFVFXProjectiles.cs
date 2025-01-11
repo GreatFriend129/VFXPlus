@@ -245,11 +245,15 @@ namespace VFXPlus.Content.FeatheredFoe
                 }
 
                 //Sound
-                SoundStyle style = new SoundStyle("Terraria/Sounds/Zombie_67") with { Volume = .1f, Pitch = 0.2f, MaxInstances = -1 }; 
-                SoundEngine.PlaySound(style, Projectile.Center);
+                //SoundStyle style = new SoundStyle("Terraria/Sounds/Zombie_67") with { Volume = 0.05f, Pitch = 0.2f, MaxInstances = -1 }; 
+                //SoundEngine.PlaySound(style, Projectile.Center);
 
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_0") with { Volume = 0.1f, Pitch = -0.15f, MaxInstances = -1 }; 
-                SoundEngine.PlaySound(style2, Projectile.Center);
+                //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_0") with { Volume = 0.05f, Pitch = -0.15f, MaxInstances = -1 }; 
+                //SoundEngine.PlaySound(style2, Projectile.Center);
+
+                //SoundStyle style3 = new SoundStyle("AerovelenceMod/Sounds/Effects/AnnihilatorCharge") with { Volume = 0.15f, Pitch = 1f, MaxInstances = -1 };
+                //SoundEngine.PlaySound(style3, Projectile.Center);
+
             }
 
             #region Position Handling
@@ -284,7 +288,7 @@ namespace VFXPlus.Content.FeatheredFoe
             //Dust that comes closer and closer as the telegraph shortens
             if (timer < timeForInitialAnim / 2f)
             {
-                for (int i = 0; i < 5; ++i)
+                for (int i = 0; i < 10; ++i) //5
                 {
                     int side = Main.rand.NextBool() ? 1 : -1;
 

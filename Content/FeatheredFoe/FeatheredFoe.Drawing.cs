@@ -23,6 +23,7 @@ namespace VFXPlus.Content.FeatheredFoe
         Texture2D BorderTexture => (Texture2D)ModContent.Request<Texture2D>(AssetDirectory + "FeatheredFoeBorder");
 
 
+        public float randomShakePower = 0f;
         public float overallAlpha = 1f;
         public float overallScale = 1f;
 
@@ -33,7 +34,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (windOverlayOpacity > 0.05f)
                 DrawScrollOverlay();
 
-            Vector2 drawPos = NPC.Center - Main.screenPosition;
+            Vector2 drawPos = NPC.Center - Main.screenPosition + (Main.rand.NextVector2Circular(7f, 7f) * randomShakePower);
             Vector2 origin = NPCTexture.Size() / 2;
 
             Main.EntitySpriteDraw(NPCTexture, drawPos, null, drawColor * overallAlpha, NPC.rotation, origin, NPC.scale * overallScale, SpriteEffects.None);

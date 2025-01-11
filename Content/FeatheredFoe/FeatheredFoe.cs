@@ -85,7 +85,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.UmbrellaRain;
+            CurrentAttack = FeatheredFoeState.Dive;
 
             switch (CurrentAttack)
             {
@@ -122,6 +122,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             windOverlayOpacity = MathHelper.Lerp(windOverlayOpacity, windOverlayOpacityGoal, 0.05f);
             bgPulsePower = Math.Clamp(MathHelper.Lerp(bgPulsePower, -0.25f, 0.04f), 0f, 100f);
+            randomShakePower = Math.Clamp(MathHelper.Lerp(randomShakePower, -0.35f, 0.05f), 0f, 100f);
 
             if (doPassiveWindParticles)
                 PassiveWindParticles();
