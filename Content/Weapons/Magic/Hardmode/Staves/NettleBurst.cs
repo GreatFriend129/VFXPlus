@@ -73,27 +73,41 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
 
             float timeForPopInAnim = 25;
-            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
+            float animProgress = Math.Clamp((timer + 7) / timeForPopInAnim, 0f, 1f); //15 60
 
             scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2.5f));
 
             if (scale == 1f)
                 alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
 
-            if (timer == -3) //10
+            if (timer == 7) //10
             {
+                for (int num78 = 220; num78 < 4; num78++)
+                {
+                    int num79 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.WoodFurniture, projectile.velocity.X * 0.025f, projectile.velocity.Y * 0.025f, 150, Color.LightPink, 1.3f);
+                    Main.dust[num79].noGravity = true;
+                    Dust dust23 = Main.dust[num79];
+                    Dust dust3 = dust23;
+                    dust3.velocity *= 0.5f;
+                }
+
                 for (int i = 0; i < 3 + Main.rand.Next(1, 3); i++)
                 {
-                    Color col = Main.rand.NextBool() ? Color.DeepSkyBlue : Color.DeepPink;
+                    Color col = Color.Brown * 2f;
 
-                    Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
+                    Vector2 vel = Main.rand.NextVector2Circular(4f, 4f);
 
                     Vector2 posOffset = Main.rand.NextVector2Circular(5f, 5f);
 
-                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 2.5f); //3
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, DustID.WoodFurniture, vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: Color.LightPink, Scale: Main.rand.NextFloat(1f, 1.3f)); //3
 
-                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
+                    p.alpha = 200;
+
+                    p.noGravity = true;
+                    Dust dust23 = p;
+                    Dust dust3 = dust23;
+                    dust3.velocity *= 0.5f;
                 }
             }
 
@@ -102,21 +116,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
+        {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Vector2 drawPos = projectile.Center - Main.screenPosition;// + new Vector2(3f, 2f).RotatedBy(projectile.rotation);
 
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3f, 3f), null,
-                        Color.RosyBrown with { A = 0 } * 0.35f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
+                    float dist = 1.5f;
+
+                    Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                    Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.15f * projectile.direction);
+
+                    Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, null,
+                        Color.Red with { A = 0 } * 0.75f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             });
 
@@ -165,28 +184,24 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            float timeForPopInAnim = 25;
+            float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 4f));
+            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2.5f));
 
             if (scale == 1f)
                 alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
 
-            if (timer == -3) //10
+            if (timer == 3 && false) //10
             {
                 for (int i = 0; i < 3 + Main.rand.Next(1, 3); i++)
                 {
-                    Color col = Main.rand.NextBool() ? Color.DeepSkyBlue : Color.DeepPink;
-
                     Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
 
                     Vector2 posOffset = Main.rand.NextVector2Circular(5f, 5f);
 
-                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                        newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 3f);
-
-                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, DustID.Dirt, vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: Color.Red * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 2f); //3
                 }
             }
 
@@ -222,11 +237,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             //return false;
             return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
     }
