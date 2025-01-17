@@ -17,6 +17,8 @@ using Microsoft.Build.Evaluation;
 using static tModPorter.ProgressUpdate;
 using VFXPlus.Content.Dusts;
 using System.Collections.Generic;
+using VFXPLus.Common;
+using Terraria.Graphics;
 
 namespace VFXPlus.Content.VFXTest
 {
@@ -42,7 +44,7 @@ namespace VFXPlus.Content.VFXTest
         int timer = 0;
         public override void AI()
         {
-            Projectile.scale = 0.75f;
+            Projectile.scale = 1.5f;
 
             ballScale = 1 - ((float)Math.Sin((float)timer * 0.03f) * 0.12f);
             ballBright = (float)Math.Sin((float)timer * 0.02f);
@@ -70,53 +72,44 @@ namespace VFXPlus.Content.VFXTest
             //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             //{
 
-            newDraw();
-            
-            /*
+            //newDraw();
+
+
             Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
-            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
+            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
 
                 //ElectricRadialEffect
-            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/BoFIrisAlt", AssetRequestMode.ImmediateLoad).Value;
+            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/foam_mask_bloom_noblack").Value); //foam_mask_bloom
+            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/foam_mask_bloom").Value); //foam_mask_bloom
             myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/ThunderGrad").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
             myEffect.Parameters["flowSpeed"].SetValue(0.3f);
-            myEffect.Parameters["vignetteSize"].SetValue(0.2f); //0.2
-            myEffect.Parameters["vignetteBlend"].SetValue(1f); //1f
             myEffect.Parameters["distortStrength"].SetValue(0.1f); //0.1
-            myEffect.Parameters["xOffset"].SetValue(0.0f);
             myEffect.Parameters["uTime"].SetValue(timer * 0.015f);
-            myEffect.Parameters["squashValue"].SetValue(0.0f);
             myEffect.Parameters["colorIntensity"].SetValue(1.0f);
 
 
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            ///Main.spriteBatch.End();
+            ///Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
             Color col = Color.DeepSkyBlue;
-            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.spriteBatch.Draw(Lightning, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation, Lightning.Size() / 2, 0.4f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Lightning, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation, Lightning.Size() / 2, 0.4f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Lightning, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation * -1f, Lightning.Size() / 2, 0.4f * Projectile.scale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-            //Need to restart twice for some reason
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             //}, drawAdditive: true);
-            */
+            
             return false;
         }
 
@@ -150,12 +143,13 @@ namespace VFXPlus.Content.VFXTest
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             //Need to restart twice for some reason
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            //Main.spriteBatch.End();
+            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            //Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
     }
 
@@ -219,13 +213,14 @@ namespace VFXPlus.Content.VFXTest
             float timeA = timer * 0.045f * timeFade;
             float timeB = timer * -0.07f * timeFade;
 
+            //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeA, Tex.Size() / 2, scale * 1.65f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeB, Tex.Size() / 2, scale * 1.65f + (0.15f * scale), SpriteEffects.None, 0f);
+
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeA, Tex.Size() / 2, scale * 1.65f, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Black * opacity * 0.35f, timeB, Tex.Size() / 2, scale * 1.65f + (0.15f * scale), SpriteEffects.None, 0f);
-
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.EffectMatrix);
+                
+                //Main.spriteBatch.End();
+                //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.EffectMatrix);
 
                 Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), new Color(255, 130, 30) * opacity, timeA, Tex.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
                 Main.spriteBatch.Draw(Tex, Projectile.Center - Main.screenPosition, Tex.Frame(1, 1, 0, 0), Color.Red * opacity, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
@@ -240,8 +235,8 @@ namespace VFXPlus.Content.VFXTest
                 Main.spriteBatch.Draw(Tex2, Projectile.Center - Main.screenPosition, Tex2.Frame(1, 1, 0, 0), Color.OrangeRed * opacity * 1f, timeB, Tex.Size() / 2, scale * 1.5f + (0.15f * scale), SpriteEffects.None, 0f);
 
 
-                Main.spriteBatch.End();
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+                //Main.spriteBatch.End();
+                //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             });
             return false;
         }
@@ -986,6 +981,355 @@ namespace VFXPlus.Content.VFXTest
             return min + random.NextFloat() * (max - min);
         }
 
+    }
+
+    public class FireBar : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float alpha = 0f;
+        float scale = 0f;
+
+        int timer = 0;
+
+        BaseTrailInfo trail1 = new BaseTrailInfo();
+        public override void AI()
+        {
+            //Trail1 Info Dump
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value;
+            trail1.trailPointLimit = 265;
+            trail1.trailWidth = 60;
+            trail1.trailMaxLength = 265;
+            trail1.timesToDraw = 1;
+            trail1.shouldSmooth = false;
+            trail1.pinch = false;
+
+            trail1.pinchAmount = 0.5f;
+
+            trail1.trailTime = (float)timer * 0.05f;
+            trail1.trailColor = Color.OrangeRed;
+
+            trail1.trailRot = Projectile.velocity.ToRotation();
+            trail1.trailPos = Projectile.Center + Projectile.velocity;
+            trail1.TrailLogic();
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                DrawTrail(true);
+            });
+
+            DrawTrail(false);
+
+            return false;
+        }
+
+        public void DrawTrail(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            trail1.trailColor = Color.OrangeRed;
+            trail1.trailWidth = 60;
+            trail1.TrailDrawing(Main.spriteBatch);
+            trail1.TrailDrawing(Main.spriteBatch);
+
+
+            trail1.trailColor = Color.LightGoldenrodYellow;
+            trail1.trailWidth = 28;
+            trail1.TrailDrawing(Main.spriteBatch);
+        }
+
+    }
+
+    public class BurdenOfFleshBeam : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+            Projectile.extraUpdates = 10;
+        }
+
+        float startAngle = 0f;
+        float endAngle = 0f;
+        int timer = 0;
+        float width = 1f;
+
+        float intensity = 0f;
+        float zProg = 0f;
+
+        float justStartIntensity = 1f;
+
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public List<float> previousRotations = new List<float>();
+
+        Vector2 origin;
+        Vector2[] positions;
+        float[] rotations;
+
+        public override void AI()
+        {
+            Player owner = Main.player[Projectile.owner];
+
+            int state = 0;
+
+
+            if (timer < 120 * 10) state = 1;
+            else if (timer < 240 * 10) state = 2;
+            else state = 3;
+
+
+            if (state == 1)
+            {
+                float progress = Utils.GetLerpValue(0f, 1f, (float)timer / (100f * 10f), false);
+                intensity = Easings.easeOutQuint(progress);
+
+                if (timer == 0)
+                {
+                    origin = Projectile.Center;
+                    Projectile.rotation = Projectile.velocity.ToRotation();
+                }
+
+                Projectile.velocity = Vector2.Zero;
+
+            }
+            else if (state == 2)
+            {
+                float adjustedTime = timer - (120f * 10f);
+                float zProgress = Math.Clamp(MathHelper.Lerp(0f, 1f, adjustedTime / (100f * 10f)), 0f, 1f);
+                zProg = Easings.easeOutQuad(zProgress);
+
+                origin = Vector2.Lerp(Projectile.Center, Projectile.Center + Projectile.rotation.ToRotationVector2() * 140, zProg);
+
+            }
+            else if (state == 3)
+            {
+                if (timer == 240 * 10)
+                {
+                    previousPositions = new List<Vector2>();
+                    previousRotations = new List<float>();
+                    Projectile.Center = origin;
+
+                    Projectile.velocity = Projectile.rotation.ToRotationVector2() * 20f;
+
+                    Projectile.timeLeft = 3400;
+                    justStartIntensity = 2f;
+
+
+                    for (int i = 0; i < 100; i++)
+                    {
+                        Color col = Main.rand.NextBool() ? Color.OrangeRed : Color.Orange;
+                        Vector2 vel = Projectile.rotation.ToRotationVector2().RotatedByRandom(1.5f) * Main.rand.NextFloat(1f, 15f);
+                        Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(1.5f, 3f));
+                        d.fadeIn = Main.rand.Next(0, 4);
+                        d.alpha = Main.rand.Next(0, 2);
+                    }
+
+                    SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/SireFire") with { Pitch = 0.8f, PitchVariance = .12f, MaxInstances = -1, Volume = 0.55f };
+                    SoundEngine.PlaySound(style, Projectile.Center);
+
+                    SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Fire/FireBomb") with { Volume = .6f, Pitch = 0.35f, PitchVariance = .28f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(style2, Projectile.Center);
+
+                    SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = .15f, Pitch = .19f, PitchVariance = 0.15f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(style3, Projectile.Center);
+
+
+                    Main.player[Main.myPlayer].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 60f;
+
+                }
+
+                if (timer < 250 * 10)
+                {
+                    previousPositions.Add(Projectile.Center);
+                    previousRotations.Add(Projectile.velocity.ToRotation());
+
+                    //Projectile.velocity = Projectile.velocity.RotatedBy(0.01f);
+
+                    positions = previousPositions.ToArray();
+                    rotations = previousRotations.ToArray();
+                }
+                else
+                    Projectile.velocity = Vector2.Zero;
+
+                if (timer % 3 == 0)
+                {
+                    for (int i = 0; i < 1; i++)
+                    {
+                        float randomDustPercent = Main.rand.NextFloat(0f, 1f);
+                        Vector2 dustPercentPoint = (origin - Projectile.Center) * randomDustPercent;
+                        Vector2 dustVel = Projectile.rotation.ToRotationVector2() * Main.rand.NextFloat(4.5f, 6.1f) * 4f;
+                        //new Color(255,155,190)
+                        Dust d = Dust.NewDustPerfect(Projectile.Center + dustPercentPoint + Main.rand.NextVector2Circular(85f, 85f), ModContent.DustType<MuraLineBasic>(), dustVel, 100, Color.OrangeRed, Main.rand.NextFloat(0.45f, 0.65f) * 0.5f);
+                        d.fadeIn = 1;
+
+                    }
+                }
+            }
+
+            justStartIntensity = Math.Clamp(MathHelper.Lerp(justStartIntensity, 0.8f, 0.01f), 1f, 10f);
+
+            timer++;
+        }
+
+        Effect myEffect = null;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            //ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            //{
+            //});
+
+            Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/EasyLightray").Value;
+            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Flare/Simple Lens Flare_11").Value;
+            Texture2D star2 = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_16").Value;
+
+            Texture2D sigil = Mod.Assets.Request<Texture2D>("Assets/Orbs/whiteFireEyeA").Value;
+
+            Vector2 newScale = new Vector2(2f, 1.5f) * 1f;
+
+            bool drawLaser = (timer > 240 * 10f + 1f);
+            float preLaserBoost = drawLaser ? 1f : 3f;
+            float burstScale = 1f + (justStartIntensity * 0.2f);
+
+            myEffect = null;
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertex", AssetRequestMode.ImmediateLoad).Value;
+
+            if (drawLaser)
+            {
+                VertexStrip strip = new VertexStrip();
+                strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
+
+                //Main.spriteBatch.Draw(glow, Projectile.Center - Main.screenPosition - new Vector2(0f, 0f), null, Color.Black * 0.35f, Projectile.rotation, glow.Size() / 2, newScale, SpriteEffects.None, 0f);
+                ShaderParams();
+
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+                //Main.spriteBatch.Draw(glow, Projectile.Center - Main.screenPosition - new Vector2(0f, 0f), null, Color.White, Projectile.rotation, glow.Size() / 2, newScale, SpriteEffects.None, 0f);
+
+                strip.DrawTrail();
+                strip.DrawTrail();
+            }
+
+
+            #region sigil
+            Effect myEffect2 = ModContent.Request<Effect>("VFXPlus/Effects/Radial/Sigil", AssetRequestMode.ImmediateLoad).Value;
+            myEffect2.Parameters["rotation"].SetValue((float)Main.timeForVisualEffects * 0.05f);
+            myEffect2.Parameters["inputColor"].SetValue(new Color(255, 140, 10).ToVector3());
+            myEffect2.Parameters["intensity"].SetValue(3.5f * intensity * MathF.Pow(justStartIntensity, 3) * preLaserBoost);
+            myEffect2.Parameters["fadeStrength"].SetValue(0.5f);
+            myEffect2.Parameters["glowThreshold"].SetValue(0.8f - (0.2f * (justStartIntensity - 1f)));
+
+            float sin1 = MathF.Sin((float)Main.timeForVisualEffects * 0.04f);
+            float sin2 = MathF.Cos((float)Main.timeForVisualEffects * 0.06f);
+            float sin3 = -MathF.Cos(((float)Main.timeForVisualEffects * 0.05f) / 2f) + 1f;
+
+            Vector2 sigilScale1 = new Vector2(MathHelper.Lerp(1.2f, 0.2f, zProg), 1.2f) * burstScale;
+            Vector2 sigilScale2 = sigilScale1 * (1.75f + (0.25f * sin1)) * burstScale;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect2, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.spriteBatch.Draw(sigil, origin - Main.screenPosition, null, Color.Orange, Projectile.rotation, sigil.Size() / 2, sigilScale1, 0, 0f);
+            Main.spriteBatch.Draw(sigil, origin - Main.screenPosition, null, Color.Orange, Projectile.rotation, sigil.Size() / 2, sigilScale1, 0, 0f);
+
+            if (drawLaser)
+                Main.spriteBatch.Draw(star, origin - Main.screenPosition + Projectile.rotation.ToRotationVector2() * (20f * sin3 * zProg), null, Color.Orange, Projectile.rotation, star.Size() / 2, sigilScale2, 0, 0f);
+
+            if (drawLaser)
+                Main.spriteBatch.Draw(star2, origin - Main.screenPosition, null, Color.Orange, Projectile.rotation, star2.Size() / 2, sigilScale1 * 1f, 0, 0f);
+
+            #endregion
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+
+            return false;
+        }
+
+        public void ShaderParams()
+        {
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+
+            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value); //ThinLineGlowClear
+            myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
+            myEffect.Parameters["satPower"].SetValue(1f);
+
+            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/TextureLaser").Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value);
+
+            Color c1 = new Color(255, 96, 40, 255);
+            Color c2 = new Color(240, 79, 40, 255);
+            Color c3 = new Color(255, 173, 40, 255);
+            Color c4 = new Color(255, 149, 40, 255);
+
+            myEffect.Parameters["Color1"].SetValue(c1.ToVector4());
+            myEffect.Parameters["Color2"].SetValue(c2.ToVector4());
+            myEffect.Parameters["Color3"].SetValue(c3.ToVector4());
+            myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
+
+            myEffect.Parameters["Color1Mult"].SetValue(1.25f);
+            myEffect.Parameters["Color2Mult"].SetValue(1.5f);
+            myEffect.Parameters["Color3Mult"].SetValue(1.15f);
+            myEffect.Parameters["Color4Mult"].SetValue(1.5f);
+            myEffect.Parameters["totalMult"].SetValue(1f * justStartIntensity);
+
+            myEffect.Parameters["tex1reps"].SetValue(0.15f);
+            myEffect.Parameters["tex2reps"].SetValue(0.15f);
+            myEffect.Parameters["tex3reps"].SetValue(0.15f);
+            myEffect.Parameters["tex4reps"].SetValue(0.15f);
+
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.006f); //0.005
+        }
+
+        public Color StripColor(float progress)
+        {
+            Color color = Color.White * 0f;
+            color.A = 0;
+            return color;
+        }
+        public float StripWidth(float progress)
+        {
+            float size = 1f;//Utils.GetLerpValue(3400f, 2800f, Projectile.timeLeft, true) * Utils.GetLerpValue(0f, 200f, Projectile.timeLeft, true);
+            float start = (float)Math.Cbrt(Utils.GetLerpValue(0f, 0.5f, progress, true));// Math.Clamp(1f * (float)Math.Pow(progress, 0.5f), 0f, 1f);
+            float cap = (float)Math.Cbrt(Utils.GetLerpValue(1f, 0.95f, progress, true));
+            return 330f * Easings.easeOutCirc(1f - (justStartIntensity - 1f));
+
+        }
     }
 
 }

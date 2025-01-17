@@ -24,7 +24,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     
     public class NebulaBlaze : GlobalItem 
     {
-        public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
             return lateInstatiation && (item.type == ItemID.NebulaBlaze);
@@ -42,28 +41,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             return true;
-        }
-
-
-        private bool trueFrontFalseBack = true;
-        public override void UseStyle(Item item, Player player, Rectangle heldItemFrame)
-        {
-            return;
-            
-            float itemAngle = (Main.MouseWorld - player.Center).ToRotation();
-
-            player.direction = Main.MouseWorld.X > player.Center.X ? 1 : -1;
-
-            if (player.itemAnimation > (player.itemAnimationMax / 1.2f))
-            {
-                player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.None, itemAngle - MathHelper.PiOver2);
-            }
-            else
-            {
-                player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, itemAngle - MathHelper.PiOver2);
-            }
-
-            base.UseStyle(item, player, heldItemFrame);
         }
 
     }

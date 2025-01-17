@@ -55,13 +55,12 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //int b = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
-
+            int bA = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, player.whoAmI);
 
             //(Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 50;
 
             //(Main.projectile[b].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
-
+            return false;
 
             int number_of_feathers = 6;
             for (int a1 = 2220; a1 < number_of_feathers; a1++)
@@ -73,7 +72,7 @@ namespace VFXPlus.Content
 
             }
 
-            for (int i = 0; i < 5; i++) //4 //2,2
+            for (int i = 220; i < 5; i++) //4 //2,2
             {
                 Vector2 vel = Main.rand.NextVector2Circular(6f, 6f);
 
@@ -102,50 +101,17 @@ namespace VFXPlus.Content
             d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
             */
 
-            ///player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 20;
-
-            return false;
-            for (int i = 220; i < 22; i++)
-            {
-                float prog = (float)i / 22f;
-
-                Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-                Color col = Color.Lerp(Color.YellowGreen, Color.Black, 1f - prog);
-
-                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f, 
-                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 1f); //12 28
-
-                d.velocity += velocity * 0.67f * (prog);
-            }
-
-
-            FastRandom r = new(player.name.GetHashCode());
-
-            float min = 0.4f;
-            float max = 1.2f;
-
-            for (int i = 0; i < 5; i++)
-            {
-                float val = min + r.NextFloat() * (max - min);
-                //Main.NewText(val);
-            }
-            //Main.NewText("-------------------" + player.name.GetHashCode());
-
-            //Main.NewText(player.name);
-
-            Vector2 posA = Main.MouseWorld + new Vector2(0f, 0f);
+            Vector2 posA = player.Center + new Vector2(0f, 0f);
             Vector2 posB = player.Center + new Vector2(0f, 90f);
             Vector2 posC = player.Center + new Vector2(0f, -90f);
 
-            int ar = Projectile.NewProjectile(null, posA, new Vector2(10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-            //int br = Projectile.NewProjectile(null, posB, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-            //int cr = Projectile.NewProjectile(null, posC, new Vector2(-10f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-
+            int ar = Projectile.NewProjectile(null, posA, new Vector2(0f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+            int br = Projectile.NewProjectile(null, posB, new Vector2(0f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+            int cr = Projectile.NewProjectile(null, posC, new Vector2(0f, 0f), ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
 
             (Main.projectile[ar].ModProjectile as MadisonTornado).startDir = -1;// Main.rand.NextBool() ? 1 : -1;
-            //(Main.projectile[br].ModProjectile as MadisonTornado).startDir = -1;
-            //(Main.projectile[cr].ModProjectile as MadisonTornado).startDir = -1;
+            (Main.projectile[br].ModProjectile as MadisonTornado).startDir = -1;
+            (Main.projectile[cr].ModProjectile as MadisonTornado).startDir = -1;
 
 
             /*

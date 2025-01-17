@@ -51,6 +51,9 @@ Projectiles: {
 	WindPulse.DisplayName: Wind Pulse
 	UmbrellaTelegraph.DisplayName: Umbrella Telegraph
 	WindAnimTest.DisplayName: Wind Anim Test
+	FireBar.DisplayName: Fire Bar
+	InfernoForkVFX.DisplayName: Inferno Fork V F X
+	BurdenOfFleshBeam.DisplayName: Burden Of Flesh Beam
 }
 
 Configs: {

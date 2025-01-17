@@ -85,7 +85,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.Dive;
+            CurrentAttack = FeatheredFoeState.CornerTravelShot;
 
             switch (CurrentAttack)
             {

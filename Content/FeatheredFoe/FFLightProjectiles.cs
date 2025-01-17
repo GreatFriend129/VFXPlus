@@ -922,11 +922,11 @@ namespace VFXPlus.Content.FeatheredFoe
                     advancer++;
                 }
             }
-            //Dash to cursor
+            //Dash to target
             else if (advancer == 1)
             {
                 float prog = Math.Clamp(timer / 20f, 0f, 1f);
-                dashVal = MathHelper.Lerp(0f, 21f, Easings.easeOutQuad(prog));//Math.Clamp(MathHelper.Lerp(dashVal, 20f, 0.1f), 0f, 19f);
+                dashVal = MathHelper.Lerp(0f, 26f, Easings.easeOutQuad(prog));//easeoutCubic
 
                 Projectile.velocity = Projectile.rotation.ToRotationVector2() * dashVal;
             }
@@ -946,6 +946,19 @@ namespace VFXPlus.Content.FeatheredFoe
                 previousPostions.RemoveAt(0);
 
             pulseIntensity = Math.Clamp(MathHelper.Lerp(pulseIntensity, -0.25f, 0.03f), 0f, 2f);
+
+            //Dust
+            if (timer % 2 == 0 && Main.rand.NextBool(3))
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - Projectile.velocity * 0.25f;
+
+
+                float dustScale = Main.rand.NextFloat(0.25f, 0.35f) * 1.5f;
+
+                Dust smoke = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowFlare>(), dustVel, newColor: Color.DodgerBlue, Scale: dustScale);
+                smoke.alpha = 2;
+
+            }
 
             timer++;
         }
@@ -971,14 +984,16 @@ namespace VFXPlus.Content.FeatheredFoe
 
                     float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
 
+                    Color betweenBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
 
-                    Color col = Color.Lerp(Color.Blue, Color.DeepSkyBlue, progress) * progress;
+                    Color col = Color.Lerp(Color.DodgerBlue, betweenBlue, progress) * progress;
 
                     float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
                     Main.EntitySpriteDraw(FeatherGray, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f,
                             previousRotations[i], FeatherGray.Size() / 2f, size2, SpriteEffects.None);
 
                     Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
+
                     if (advancer != 0)
                         Main.EntitySpriteDraw(FeatherWhite, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f,
                             previousRotations[i], FeatherGray.Size() / 2f, vec2Scale, SpriteEffects.None);
@@ -992,11 +1007,11 @@ namespace VFXPlus.Content.FeatheredFoe
             if (advancer == 0)
                 Main.EntitySpriteDraw(Twirl, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * twirlAlpha * 1.5f, Projectile.rotation, Twirl.Size() / 2f, Projectile.scale * 0.65f, SpriteEffects.None);
 
-            Color outerCol = Color.Lerp(Color.DeepSkyBlue * 0.5f, Color.SkyBlue with { A = 0 } * 0.8f, pulseIntensity);
+            Color outerCol = Color.Lerp(Color.DeepSkyBlue with { A = 0 } * 0.5f, Color.SkyBlue with { A = 0 } * 0.8f, pulseIntensity);
             float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity);
             for (int i = 0; i < 3; i++)
             {
-                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), null, outerCol, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * 1.05f * scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), null, outerCol, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * 1.05f * scale, SpriteEffects.None);
             }
 
             Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor, Projectile.rotation, Feather.Size() / 2f, Projectile.scale, SpriteEffects.None);

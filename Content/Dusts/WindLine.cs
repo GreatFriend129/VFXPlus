@@ -120,7 +120,8 @@ namespace VFXPlus.Content.Dusts
 
                 Main.spriteBatch.Draw(Tex, drawPos, null, col with { A = 0 } * 0.9f, dust.rotation, origin, scale, SpriteEffects.None, 0f);
 
-                Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 }, dust.rotation, origin, scale * 0.5f, SpriteEffects.None, 0f);
+                if (wlb.drawWhiteCore)
+                    Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 }, dust.rotation, origin, scale * 0.5f, SpriteEffects.None, 0f);
             }
         }
     }

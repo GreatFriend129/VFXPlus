@@ -27,7 +27,7 @@ namespace VFXPlus.Content.FeatheredFoe
             //Shoot 
             //Repeat
             
-            if (substate == 1)
+            if (substate == 0)
             {
                 if (timer == 0)
                 {
@@ -46,7 +46,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     substate++;
                 }
             }
-            else if (substate == 2)
+            else if (substate == 1)
             {
                 //NPC.velocity = Vector2.Zero;
 
@@ -55,7 +55,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 //BasicMovementVariant2(player.Center + basicAttackPoint); A bit static to reach dest, but very quick
 
 
-                BasicMovementVariant3(player.Center + basicAttackPoint, 3f, 540f);
+                BasicMovementVariant3(player.Center + basicAttackPoint, 3f, 270f);
 
 
                 if (timer == 30 || timer == 85)
@@ -63,7 +63,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
                     for (int iaa = -3; iaa < 4; iaa++)
                     {
-                        Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * 10f;
+                        Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * 0.5f;
 
                         float curvePower = iaa * 0.009f;
 
@@ -75,24 +75,8 @@ namespace VFXPlus.Content.FeatheredFoe
                         }
 
                         Main.projectile[curveFeather].hostile = true;
-                        Main.projectile[curveFeather].friendly = false;
-                        Main.projectile[curveFeather].extraUpdates = 0; //1
+                        Main.projectile[curveFeather].extraUpdates = 2; //1
 
-                    }
-                }
-
-                if (timer > 20 && timer < 65 && timer % 8 == 0 && false)
-                {
-                    Vector2 vel = Main.rand.NextVector2CircularEdge(8f, 8f) * Main.rand.NextFloat();
-
-                    int feather = Projectile.NewProjectile(null, NPC.Center, vel, ModContent.ProjectileType<OrbitingFeather>(), 2, 0, Main.myPlayer);
-
-                    if (Main.projectile[feather].ModProjectile is OrbitingFeather of)
-                    {
-                        of.timeToOrbit = 0;
-                        of.orbitVector = vel;
-                        of.orbitVal = 300;
-                        of.rotSpeed = 0;
                     }
                 }
 
@@ -269,6 +253,61 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public void CornerTravelShot()
         {
+            //Have him choose whether to go left or right based on ur x vel and whether he goes up or down based on y vel
+
+
+            float incrementAmount = MathHelper.ToRadians(360f / 4f);
+
+            //Start at top left of star
+            Vector2 startPoint = new Vector2(0f, -350f).RotatedBy(MathHelper.ToRadians(0));
+
+            Vector2 goal = player.Center + startPoint.RotatedBy(incrementAmount * substate * 1f);
+
+            BasicMovementVariant3(goal, 8f, 570f);
+
+            if (timer > 20 && timer < 70 && timer % 6 == 0)
+            {
+                Vector2 vel = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.25f) * 15f;//25 // Main.rand.NextVector2CircularEdge(8f, 8f);// + player.velocity;
+
+                Projectile spinShot = Projectile.NewProjectileDirect(null, NPC.Center, vel, ModContent.ProjectileType<SpinShotFeather>(), 10, 5);
+
+                (spinShot.ModProjectile as SpinShotFeather).targetPlayer = player.whoAmI;
+
+                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_66") with { Pitch = .60f, MaxInstances = 1, Volume = 0.5f, PitchVariance = 0.2f };
+                SoundEngine.PlaySound(style2, NPC.Center);
+
+                for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++)
+                {
+                    Vector2 randomStart = Main.rand.NextVector2Circular(2f, 2f) * 1f;
+                    Dust dust = Dust.NewDustPerfect(NPC.Center, ModContent.DustType<GlowPixelCross>(), vel * 0.5f + randomStart, newColor: new Color(40, 125, 255), Scale: Main.rand.NextFloat(0.35f, 0.65f));
+                    //dust.velocity += Projectile.velocity * 0.25f;
+
+                    dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                        rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: false);
+                }
+            }
+
+            if (timer == 100)
+            {
+                substate++;
+                timer = -1;
+            }
+
+            if (NPC.velocity.Length() > 12f)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(6f, 6f);
+
+                Color innerCol = Color.Lerp(Color.LightSkyBlue, Color.Tan, 0.5f);
+
+
+                Dust p = Dust.NewDustPerfect(NPC.Center + Main.rand.NextVector2Circular(50f, 50f), ModContent.DustType<WindLine>(), vel + NPC.velocity * 0.5f,
+                    newColor: Color.SkyBlue, Scale: 0.75f);
+
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 0.9f, 0.35f, true);
+                //wlb.randomVelRotatePower = 0.2f;
+                wlb.drawWhiteCore = false;
+                p.customData = wlb;
+            }
 
         }
 

@@ -228,9 +228,8 @@ namespace VFXPlus.Common
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            //We have to do this twice for some godforsaken reason
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            //We have to do this for some godforsaken reason or else the blend state leaks through or something
+            sb.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             Texture2D DebugTest = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight");
 
