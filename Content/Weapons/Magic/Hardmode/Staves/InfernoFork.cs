@@ -219,7 +219,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 return;
 
 
-            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/impact_2fade2").Value;
+            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
 
 
             float drawScale = 1f * Projectile.scale * overallScale;

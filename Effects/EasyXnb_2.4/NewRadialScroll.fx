@@ -1,4 +1,6 @@
-﻿sampler2D uImage0 : register(s0);
+﻿// Shader based off of: https://nekotoarts.github.io/blog/Polar-Water-Breakdown
+
+sampler2D uImage0 : register(s0);
 
 float uTime : register(c0);
 
@@ -42,6 +44,7 @@ sampler2D distortTex = sampler_state
     AddressV = wrap; //
 };
 
+//GLSLs mod function is different than HLSL's fmod function
 float2 glslmod(float2 ab, float y)
 {
     float xA = ab.x - y * floor(ab.x / y);
@@ -55,24 +58,39 @@ float2 polar_coordinates(float2 uv, float2 center, float zoom, float repeat)
 {
     float2 dir = uv - center;
     float radius = length(dir) * 2.0;
-    float angle = atan2(dir.y, dir.x) / TAU; //atan --> atan2
-    return glslmod(float2(radius * zoom, angle * repeat), 1.0); //Problem?
+    float angle = atan2(dir.y, dir.x) / TAU; //atan --> atan2 
+    return glslmod(float2(radius * zoom, angle * repeat), 1.0);
     //return mod(float2(radius * zoom, angle * repeat), 1.0);
 }
 
 float4 main(float4 screenspace : TEXCOORD0) : COLOR0
 {
-    float4 baseCol = tex2D(uImage0, screenspace.xy);
-    
-    
+    //Our normal cartesian coordinates
     float2 baseUV = screenspace.xy;
+
+    //Starting color of texture shader is being applied to
+    float4 baseCol = tex2D(uImage0, baseUV);
     
-    //Get the polar coordinates of the UV
+    
+    //I feel like this distortion is a bit uneven. Something to improve someday.
+    //Distort our starting UVs using the noise texture
+    float distortAmount = tex2D(distortTex, baseUV + float2(uTime * 0.1, 0)).r;
+    baseUV += distortAmount * distortStrength;
+    baseUV -= distortStrength / 2.0;
+    
+    
+    //Convert the distorted UVs into polar coordinates (r, theta)
     float2 polarUV = polar_coordinates(baseUV, float2(0.5, 0.5), 1.0, 1.0);
     polarUV.x -= uTime * flowSpeed;
     
+    
+    //Get the color of the caustic texture at the polar coords (All input textures should be grayscale)
     float caus = tex2D(causticTex, polarUV).r;
 
+    //Color the caustic texture using the gradient
+    //float3 causColor = tex2D(gradientTex, float2(caus, caus)).rgb;
+    
+    
     float4 toReturn = float4(float3(caus, caus, caus), baseCol.a);
     return toReturn;
 }
