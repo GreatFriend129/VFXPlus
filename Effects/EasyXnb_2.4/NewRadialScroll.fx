@@ -1,15 +1,15 @@
 ﻿// Shader based off of: https://nekotoarts.github.io/blog/Polar-Water-Breakdown
+const float TAU = 6.283185;
 
 sampler2D uImage0 : register(s0);
-
 float uTime : register(c0);
 
 float flowSpeed = 0.7;
 float distortStrength = 0.05;
-
 float colorIntensity = 1.0;
 
-const float TAU = 6.283185;
+float vignetteSize = 0.2;
+float vignetteBlend = 1.0;
 
 texture causticTexture;
 sampler2D causticTex = sampler_state
@@ -29,8 +29,8 @@ sampler2D gradientTex = sampler_state
     magfilter = LINEAR;
     minfilter = LINEAR;
     mipfilter = LINEAR;
-    //AddressU = wrap;
-    //AddressV = wrap;
+    AddressU = wrap;
+    AddressV = wrap;
 };
 
 texture distortTexture;
@@ -74,7 +74,7 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
     
     //I feel like this distortion is a bit uneven. Something to improve someday.
     //Distort our starting UVs using the noise texture
-    float distortAmount = tex2D(distortTex, baseUV + float2(uTime * 0.1, 0)).r;
+    float distortAmount = tex2D(distortTex, screenspace.xy + uTime * 0.1).r;
     baseUV += distortAmount * distortStrength;
     baseUV -= distortStrength / 2.0;
     
@@ -87,11 +87,21 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
     //Get the color of the caustic texture at the polar coords (All input textures should be grayscale)
     float caus = tex2D(causticTex, polarUV).r;
 
+    //Vignette
+    float cd = distance(screenspace.xy, float2(0.5, 0.5));
+    float vign = 1.0 - smoothstep(vignetteSize, vignetteSize + vignetteBlend, cd);
+    
     //Color the caustic texture using the gradient
-    //float3 causColor = tex2D(gradientTex, float2(caus, caus)).rgb;
+    //float grad_uv = caus * vign;
+    //float3 color = tex2D(gradientTex, float2(grad_uv, grad_uv)).rgb;
     
+    float gradUV = caus * vign;
+    float4 causColor = tex2D(gradientTex, float2(0.005 + (gradUV * 0.99), 0.0));
     
-    float4 toReturn = float4(float3(caus, caus, caus), baseCol.a);
+    //float gradUV = (0.05 + (caus * 0.99)) * vign;
+    //float4 causColor = tex2D(gradientTex, float2(gradUV, 0.0));
+    
+    float4 toReturn = float4(causColor.rgb * colorIntensity, baseCol.a);
     return toReturn;
 }
 

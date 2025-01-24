@@ -44,7 +44,7 @@ namespace VFXPlus.Content.VFXTest
         int timer = 0;
         public override void AI()
         {
-            Projectile.scale = 1.5f;
+            Projectile.scale = 1f;
 
             ballScale = 1 - ((float)Math.Sin((float)timer * 0.03f) * 0.12f);
             ballBright = (float)Math.Sin((float)timer * 0.02f);
@@ -55,6 +55,17 @@ namespace VFXPlus.Content.VFXTest
             //Projectile.velocity.Y += 0.05f;
             Projectile.velocity *= 0.92f;
 
+
+            if (timer % 70 == 0 && false)
+            {
+                Projectile.NewProjectile(null, Projectile.Center, Main.rand.NextVector2CircularEdge(2f, 2f), ProjectileID.RainbowRodBullet, 0, 0, Main.myPlayer);
+                Projectile.NewProjectile(null, Projectile.Center, Main.rand.NextVector2CircularEdge(2f, 2f), ProjectileID.RainbowRodBullet, 0, 0, Main.myPlayer);
+
+                Projectile.NewProjectile(null, Projectile.Center, Main.rand.NextVector2CircularEdge(2f, 2f), ProjectileID.RainbowRodBullet, 0, 0, Main.myPlayer);
+
+            }
+
+
             timer++;
         }
 
@@ -63,20 +74,11 @@ namespace VFXPlus.Content.VFXTest
         Vector2 drawScale = Vector2.Zero;
         public override bool PreDraw(ref Color lightColor)
         {
-            //THE SHADER IS FUCKED UP WHENEVER IT HAS TO DRAW BLACK
-            //WHETHER IT IS FROM THE TEXTURE OR VIGNETTE
-            //float vignetteSize = (float)Math.Abs(Math.Sin(Main.timeForVisualEffects * 0.01f));
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            //Utils.DrawBorderString(Main.spriteBatch, "" + vignetteSize, Projectile.Center - Main.screenPosition + new Vector2(0f, -100f), Color.White);
-
-            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            //{
-
-            //newDraw();
-
-
+            //NEW VERSION
             Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
-            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
+            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
 
                 //ElectricRadialEffect
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
@@ -84,32 +86,73 @@ namespace VFXPlus.Content.VFXTest
             myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/foam_mask_bloom").Value); //foam_mask_bloom
             myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/ThunderGrad").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
-            myEffect.Parameters["flowSpeed"].SetValue(0.3f);
+            myEffect.Parameters["flowSpeed"].SetValue(1f);
             myEffect.Parameters["distortStrength"].SetValue(0.1f); //0.1
             myEffect.Parameters["uTime"].SetValue(timer * 0.015f);
-            myEffect.Parameters["colorIntensity"].SetValue(1.0f);
+
+            myEffect.Parameters["vignetteSize"].SetValue(0.2f);
+            myEffect.Parameters["vignetteBlend"].SetValue(1f);
+            //myEffect.Parameters["colorIntensity"].SetValue(1.5f);
 
 
-            ///Main.spriteBatch.End();
-            ///Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            //Main.spriteBatch.Draw(Ball, drawPos, null, new Color(0, 0, 0, 0), Projectile.rotation, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
             Color col = Color.DeepSkyBlue;
-            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, drawPos, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
-            //Main.spriteBatch.Draw(Lightning, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation, Lightning.Size() / 2, 0.4f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Lightning, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation * -1f, Lightning.Size() / 2, 0.4f * Projectile.scale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
+           // Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation, Lightning.Size() / 2, 0.4f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * -1f, Lightning.Size() / 2, 0.4f * Projectile.scale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
-            //}, drawAdditive: true);
-            
+            //OLD VERSION ----------------------------
+            /*
+            myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/BoFIrisAlt", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/foam_mask_bloom_noblack").Value);
+            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/ThunderGrad").Value);
+            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
+
+            myEffect.Parameters["flowSpeed"].SetValue(0.3f);
+            myEffect.Parameters["vignetteSize"].SetValue(0.2f);
+            myEffect.Parameters["vignetteBlend"].SetValue(1f);
+            myEffect.Parameters["distortStrength"].SetValue(0.1f);
+            myEffect.Parameters["xOffset"].SetValue(0.0f);
+            myEffect.Parameters["uTime"].SetValue(timer * 0.015f);
+
+            drawPos += new Vector2(500f, 0f);
+
+            Main.spriteBatch.Draw(Ball, drawPos, null, new Color(0, 0, 0, 0), Projectile.rotation, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.spriteBatch.Draw(Ball, drawPos, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation, Lightning.Size() / 2, 0.4f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * -1f, Lightning.Size() / 2, 0.4f * Projectile.scale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            */
             return false;
         }
 

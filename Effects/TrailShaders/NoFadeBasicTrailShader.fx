@@ -8,6 +8,8 @@ matrix WorldViewProjection;
 float4 uShaderSpecificData;
 float fadeAmount = 0.0;
 
+float reps = 1.0;
+
 struct VertexShaderInput
 {
     float2 TextureCoordinates : TEXCOORD0;
@@ -43,7 +45,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 White(VertexShaderOutput input) : COLOR0
 {
-    float x = (input.TextureCoordinates.x + progress) % 1;
+    float x = ((input.TextureCoordinates.x * reps) + progress) % 1;
     float2 noisecoords = float2(x, input.TextureCoordinates.y);
     float brightness = tex2D(tent, noisecoords).r;
     float4 color = ColorOne;

@@ -1,29 +1,44 @@
-﻿matrix WorldViewProjection;
-sampler uImage0 : register(s0);
+﻿sampler uImage0 : register(s0);
+matrix WorldViewProjection;
 
-float4 Color1;
-float4 Color2;
-float4 Color3;
-float4 Color4;
-float Color1Mult;
-float Color2Mult;
-float Color3Mult;
-float Color4Mult;
 float totalMult;
 
+float gradientReps;
 float tex1reps;
 float tex2reps;
 float tex3reps;
 float tex4reps;
 
+float tex1Mult;
+float tex2Mult;
+float tex3Mult;
+float tex4Mult;
+
+float grad1Speed;
+float grad2Speed;
+float grad3Speed;
+float grad4Speed;
+
 float satPower;
 float3 baseColor;
+
 float uTime;
 
 texture onTex;
 sampler2D samplerOnTex = sampler_state
 {
     texture = <onTex>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    AddressU = wrap;
+    AddressV = wrap;
+};
+
+texture gradientTex;
+sampler2D samplerGradientTex = sampler_state
+{
+    texture = <gradientTex>;
     magfilter = LINEAR;
     minfilter = LINEAR;
     mipfilter = LINEAR;
@@ -97,26 +112,30 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 ComboLaser(VertexShaderOutput input) : COLOR0
 {
-    float2 uv = input.TextureCoordinates;
-    float alpha = tex2D(samplerOnTex, float2(uv.x + (1.0f * uTime), uv.y)).a;
+    //Gradient Colors
+    float2 UV = input.TextureCoordinates.xy;    
+    float4 gradColor1 = tex2D(samplerGradientTex, float2(UV.x * gradientReps + (uTime * grad1Speed), UV.y));
+    float4 gradColor2 = tex2D(samplerGradientTex, float2(UV.x * gradientReps + (uTime * grad2Speed), UV.y));
+    float4 gradColor3 = tex2D(samplerGradientTex, float2(UV.x * gradientReps + (uTime * grad3Speed), UV.y));
+    float4 gradColor4 = tex2D(samplerGradientTex, float2(UV.x * gradientReps + (uTime * grad4Speed), UV.y));
+    
+    //
+    float alpha = tex2D(samplerOnTex, float2(UV.x + (1.0f * uTime), UV.y)).a;
     float4 input_color = float4(baseColor, alpha);
     
-    float4 col1 = tex2D(samplerTex1, float2(frac(uv.x * tex1reps + (0.75f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col2 = tex2D(samplerTex2, float2(frac(uv.x * tex2reps + (1.0f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col3 = tex2D(samplerTex3, float2(frac(uv.x * tex3reps + (1.25f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col4 = tex2D(samplerTex4, float2(frac(uv.x * tex4reps + (1.5f * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    col1 *= Color1 * Color1Mult;
-    col2 *= Color2 * Color2Mult;
-    col3 *= Color3 * Color3Mult;
-    col4 *= Color4 * Color4Mult;
+    float4 col1 = tex2D(samplerTex1, float2(frac(UV.x * tex1reps + (0.75f * uTime)), UV.y)) * float4(1, 1, 1, 0);
+    float4 col2 = tex2D(samplerTex2, float2(frac(UV.x * tex2reps + (1.0f * uTime)), UV.y)) * float4(1, 1, 1, 0);
+    float4 col3 = tex2D(samplerTex3, float2(frac(UV.x * tex3reps + (1.25f * uTime)), UV.y)) * float4(1, 1, 1, 0);
+    float4 col4 = tex2D(samplerTex4, float2(frac(UV.x * tex4reps + (1.5f * uTime)), UV.y)) * float4(1, 1, 1, 0);
+    col1 *= gradColor1 * tex1Mult;
+    col2 *= gradColor2 * tex2Mult;
+    col3 *= gradColor3 * tex3Mult;
+    col4 *= gradColor4 * tex4Mult;
 	
     float4 combined1 = length(col1 + col2 + col3 + col4) * float4(input_color.rgb * 0.3f, satPower) * input_color.a;
-    float4 combined2 = (combined1 * totalMult) + (pow(col1 + col2 + col3 + col4, float4(2, 2, 2, 2))); //2,2,2,2
+    float4 combined2 = (combined1 * totalMult) + (pow(col1 + col2 + col3 + col4, float4(2, 2, 2, 2)));
     
-    float fadeIn = uv.x < 0.25f ? (4.0f * uv.x) : 1.0f;
-    float fadeOut = uv.x > 0.75f ? (1.0f - uv.x) * 4.0f : 1.0f;
-
-    return combined2 * fadeIn * fadeOut;
+    return combined2;
 
 }
 

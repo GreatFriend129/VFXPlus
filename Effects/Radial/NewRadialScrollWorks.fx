@@ -71,8 +71,10 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
     //Starting color of texture shader is being applied to
     float4 baseCol = tex2D(uImage0, baseUV);
     
+    
+    //I feel like this distortion is a bit uneven. Something to improve someday.
     //Distort our starting UVs using the noise texture
-    float distortAmount = tex2D(distortTex, screenspace.xy + uTime * 0.1).r;
+    float distortAmount = tex2D(distortTex, baseUV + float2(uTime * 0.1, 0)).r;
     baseUV += distortAmount * distortStrength;
     baseUV -= distortStrength / 2.0;
     
@@ -81,18 +83,12 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
     float2 polarUV = polar_coordinates(baseUV, float2(0.5, 0.5), 1.0, 1.0);
     polarUV.x -= uTime * flowSpeed;
     
-    //Get the color of the caustic texture at the polar coords (All input textures should be grayscale so rgb are all equal)
+    
+    //Get the color of the caustic texture at the polar coords (All input textures should be grayscale)
     float caus = tex2D(causticTex, polarUV).r;
 
-    //Vignette
-    float cd = distance(screenspace.xy, float2(0.5, 0.5));
-    float vign = 1.0 - smoothstep(vignetteSize, vignetteSize + vignetteBlend, cd);
-    
     //Color the caustic texture using the gradient
-    float gradUV = caus * vign;
-    float4 causColor = tex2D(gradientTex, float2(0.005 + (gradUV * 0.99), 0.0));
-    //Above we do '0.005 * gradUV * 0.99' instead of just 'gradUV' because otherwise the shader has this weird issue that I think has to do with the texture wrapping
-    //Either when it should be drawing the rightmost color it would draw the leftmost or vice-versa idk it was really strange but this fixed it.
+    float4 causColor = tex2D(gradientTex, float2(0.005 + (caus * 0.99), 0.0));
     
     float4 toReturn = float4(causColor.rgb * colorIntensity, baseCol.a);
     return toReturn;

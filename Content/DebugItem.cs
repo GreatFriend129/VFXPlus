@@ -55,11 +55,33 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int bA = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, player.whoAmI);
+            int bA = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<RainbowSigilTest>(), 0, 0, player.whoAmI);
 
             //(Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 50;
 
             //(Main.projectile[b].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
+
+            for (int i = 2220; i < 22 + Main.rand.Next(0, 2); i++) //4 //2,2
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(2f, 2f) * 9f;
+
+                Color rainbow = Main.hslToRgb((i * 0.05f + 0.5f) % 1f, 1f, 0.4f, 0) * 1f;
+
+
+
+                Dust p = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<PixelatedLineSpark>(), vel,
+                    newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1f);
+
+                p.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
+                    1f, 0.5f, shouldFadeColor: false);
+
+                if (i % 1 == 0)
+                {
+                    Dust p2 = Dust.NewDustPerfect(Main.MouseWorld + vel * 4f, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.4f);
+                    p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.05f);
+                }
+
+            }
             return false;
 
             int number_of_feathers = 6;

@@ -14,6 +14,9 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
+using Terraria.Graphics;
+using VFXPlus.Common.Drawing;
+using Terraria.Utilities.Terraria.Utilities;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -63,22 +66,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return lateInstantiation && (entity.type == ProjectileID.PineNeedleFriendly);
         }
 
-        float fadeInScale = 0f;
+        int vfxProjIndex = -1;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 12;
-            previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
-
-            if (previousRotations.Count > trailCount)
-                previousRotations.RemoveAt(0);
-
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
-
-            float fadeInProg = Math.Clamp(timer / 20f, 0f, 1f);
-            fadeInScale = Easings.easeOutCubic(fadeInProg);
+            if (timer == 0)
+            {
+                int a = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RazorpineVFX>(), 0, 0, projectile.owner);
+                vfxProjIndex = a;
+            }
 
             if (timer % 10 == 0 && Main.rand.NextBool())
             {
@@ -95,72 +91,60 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return base.PreAI(projectile);
         }
 
-
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        public override void PostAI(Projectile projectile)
         {
-            //return true;
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            if (vfxProjIndex == -1)
+                return;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;// + drawPosOffset;
-            Vector2 TexOrigin = vanillaTex.Size() / 2f;
+            Projectile myVFX = Main.projectile[vfxProjIndex];
 
-            Vector2 vec2Scale = new Vector2(fadeInScale, 1f) * projectile.scale;
+            myVFX.Center = projectile.Center;
+            myVFX.rotation = projectile.rotation;
+            myVFX.scale = projectile.scale;
+            myVFX.alpha = projectile.alpha;
 
-            //After-Image
-            if (previousRotations != null && previousPostions != null)
+            if (myVFX.ModProjectile is RazorpineVFX rvfx)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                int trailCount = 12;
+                rvfx.previousRotations.Add(projectile.rotation);
+                rvfx.previousPositions.Add(projectile.Center);
 
-                    Vector2 vec2Scale2 = new Vector2(progress, 1f) * projectile.scale;
+                if (rvfx.previousRotations.Count > trailCount)
+                    rvfx.previousRotations.RemoveAt(0);
 
-
-                    Color col = Color.Lerp(Color.White * 0f, Color.White * 1f, progress) * progress * projectile.Opacity;
-                    Color colw = Color.White * Easings.easeInCirc(progress);
-
-                    float size2 = 1f * progress * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw * 0.75f,
-                            previousRotations[i], TexOrigin, vec2Scale2, SpriteEffects.None);
-
-
-                }
-
+                if (rvfx.previousPositions.Count > trailCount)
+                    rvfx.previousPositions.RemoveAt(0);
             }
-
-            //Border
-            for (int i = 0; i < -4; i++)
-            {
-                Vector2 offset = new Vector2(3f, 0f).RotatedBy(MathHelper.PiOver2 * i);
-
-                Main.EntitySpriteDraw(vanillaTex, drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.03f * projectile.direction), null,
-                    Color.DarkGreen with { A = 0 } * 1f, projectile.rotation, TexOrigin, vec2Scale, SpriteEffects.None);
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                float opacitySquared = projectile.Opacity * projectile.Opacity;
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null, 
-                    Color.DarkGreen with { A = 0 } * 1.5f * opacitySquared, projectile.rotation, TexOrigin, vec2Scale * 1.05f, SpriteEffects.None);
-            }
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, vec2Scale, SpriteEffects.None);
-            return false;
 
         }
 
+
+        public override bool PreDraw(Projectile projectile, ref Color lightColor) => false;
+        
+
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
+            if (vfxProjIndex != -1)
+            {
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).isAttached = false;
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).stuckInPower = 1f;
+
+                Main.projectile[vfxProjIndex].Center += projectile.velocity;
+            }
+
             return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
+            if (vfxProjIndex != -1)
+            {
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).stuckInNPC = true;
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).npcWeAreStuckIn = target.whoAmI;
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).relativePosition = projectile.Center - target.Center;
+            }
+
+
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
@@ -174,4 +158,139 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
     }
 
+    //We want the vfx to extend past the lifetime of the projectile, so we duct tape a new projectile to the razorpine shot that handles vfx
+    public class RazorpineVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        //Safety Checks
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.tileCollide = false;
+
+            Projectile.timeLeft = 2400;
+        }
+
+        public bool isAttached = true;
+
+        public bool stuckInNPC = false;
+        public int npcWeAreStuckIn = -1;
+        public Vector2 relativePosition = Vector2.Zero;
+
+
+
+        public float stuckInPower = 0f;
+        int stuckInTimer = 0;
+
+        float fadeInScale = 0f;
+        int timer = 0;
+        public override void AI()
+        {
+            float fadeInProg = Math.Clamp(timer / 15f, 0f, 1f);
+            fadeInScale = Easings.easeOutCubic(fadeInProg);
+
+            ///float timeForPopInAnim = 22;
+            ///float animProgress = Math.Clamp((timer + 8) / timeForPopInAnim, 0f, 1f);
+            ///fadeInScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 3f));
+
+
+            stuckInPower = MathHelper.Clamp(stuckInPower - 0.04f, 0f, 1f);
+            //stuckInPower = Math.Clamp(MathHelper.Lerp(stuckInPower, -0.5f, 0.05f), 0f, 1f);
+
+            if (!isAttached && stuckInPower <= 0.15f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.09f), 0f, 1f);
+
+            if (overallAlpha == 0f)
+                Projectile.active = false;
+
+            if (!isAttached)
+            {
+                if (previousPositions.Count > 0)
+                    previousPositions.RemoveAt(0);
+                if (previousRotations.Count > 0)
+                    previousRotations.RemoveAt(0);
+
+                overallScale = 0.8f + (Easings.easeInSine(stuckInPower) * 0.4f);
+
+                overallAlpha = Math.Clamp(overallAlpha, 0f, 0.8f);
+            }
+
+            if (stuckInNPC)
+            {
+                if (Main.npc[npcWeAreStuckIn].active == true)
+                {
+                    Projectile.Center = Main.npc[npcWeAreStuckIn].Center + relativePosition;
+                }
+                else
+                {
+                    Projectile.active = false;
+                }
+            }
+
+
+            if (!isAttached)
+                stuckInTimer++;
+            timer++;
+        }
+
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public List<float> previousRotations = new List<float>();
+        public override bool PreDraw(ref Color lightColor)
+        {            
+            Texture2D vanillaTex = TextureAssets.Projectile[ProjectileID.PineNeedleFriendly].Value;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;// + Main.rand.NextVector2Circular(3f, 3f) * stuckInPower;
+            Vector2 TexOrigin = vanillaTex.Size() / 2f;
+
+            Vector2 vec2Scale = new Vector2(0.25f + (fadeInScale * 0.75f * overallAlpha), 1f) * Projectile.scale * overallScale;
+
+            //After-Image
+            if (previousRotations != null && previousPositions != null)
+            {
+                for (int i = 0; i < previousRotations.Count; i++)
+                {
+                    float progress = (float)i / previousRotations.Count;
+
+                    Vector2 vec2Scale2 = new Vector2(progress, 1f) * Projectile.scale;
+
+                    Color colw = Color.DarkGreen * Easings.easeOutSine(progress) * overallAlpha;
+
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw with { A = 0 } * 0.75f,
+                            previousRotations[i], TexOrigin, vec2Scale2 * overallScale, SpriteEffects.None);
+                }
+
+            }
+
+            float rotBonus = MathF.Cos(stuckInPower * MathHelper.TwoPi * 4f) * 0.4f * Easings.easeInSine(stuckInPower);
+
+            //float rotBonus = Main.rand.NextFloat(-0.75f, 0.75f) * stuckInPower;// Easings.easeInCubic(stuckInPower);
+
+            int layers = isAttached ? 6 : 5;
+            for (int i = 0; i < layers; i++)
+            {
+                Color toUse = Color.Lerp(Color.Green, Color.Green, stuckInPower);
+
+                float opacitySquared = Projectile.Opacity * Projectile.Opacity;
+                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), null,
+                    toUse with { A = 0 } * 1f * opacitySquared * overallAlpha, Projectile.rotation + rotBonus, TexOrigin, vec2Scale * 1.1f, SpriteEffects.None);
+            }
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * Projectile.Opacity * overallAlpha * 1f, Projectile.rotation + rotBonus, TexOrigin, vec2Scale, SpriteEffects.None);
+
+            return false;
+        }
+
+    }
 }
