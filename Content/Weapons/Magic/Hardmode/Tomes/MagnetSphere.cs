@@ -351,7 +351,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                     //Offset the position vertically by a random amount (rotated by direction)
                     float verticalOffset = Main.rand.NextFloat(-30f, 30f);
-                    float horizontalOffset = Main.rand.NextFloat(-10f, 10f);
+                    float horizontalOffset = Main.rand.NextFloat(-15f, 15f); //-10 10
 
                     newMidPointBasePosition += new Vector2(horizontalOffset, verticalOffset).RotatedBy(direction);
 

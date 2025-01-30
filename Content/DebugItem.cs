@@ -55,7 +55,7 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int bA = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<RainbowSigilTest>(), 0, 0, player.whoAmI);
+            int bA = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * -9f, ProjectileID.VortexBeaterRocket, 10, 0, player.whoAmI);
 
             //(Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 50;
 

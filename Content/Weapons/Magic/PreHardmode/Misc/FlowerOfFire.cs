@@ -325,7 +325,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             //After-Image
             if (previousRotations != null && previousPostions != null)
             {
-                for (int i = 0; i < previousRotations.Count - 2; i++)
+                for (int i = 0; i < previousRotations.Count - 1; i++)
                 {
                     float progress = (float)i / previousRotations.Count;
 

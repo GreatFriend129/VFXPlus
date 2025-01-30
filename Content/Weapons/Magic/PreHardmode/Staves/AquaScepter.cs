@@ -221,7 +221,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             foreach (Vector2 pos in previousPostions)
             {
                 i++;
-                if (i % 4 == 0 && i > previousPostions.Count * 0.4f)
+                if (i % 3 == 0 && i > previousPostions.Count * 0.4f)
                 {
                     int a = Dust.NewDust(pos, 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.DodgerBlue, Scale: 0.4f);
                     Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);

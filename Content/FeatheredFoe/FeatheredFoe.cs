@@ -85,7 +85,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.CornerTravelShot;
+            CurrentAttack = FeatheredFoeState.UmbrellaRain;
 
             switch (CurrentAttack)
             {
