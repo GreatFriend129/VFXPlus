@@ -55,11 +55,72 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int bA = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * -9f, ProjectileID.VortexBeaterRocket, 10, 0, player.whoAmI);
+            //int bA = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * -9f, ProjectileID.VortexBeaterRocket, 10, 0, player.whoAmI);
+
+            int num35 = Main.rand.Next(4, 8);
+            for (int num36 = 0; num36 < num35; num36++)
+            {
+                int num37 = Dust.NewDust(Main.MouseWorld, 0, 0, 229, 0f, 0f, 100, default(Color), 0.8f);
+                Main.dust[num37].velocity *= 1.6f;
+                Main.dust[num37].velocity.Y -= 1f;
+                Main.dust[num37].velocity += velocity;
+                Main.dust[num37].noGravity = true;
+            }
+
+
+            Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
+
+            Vector2 pos = player.Center + new Vector2(0f, 100f);
+            //Impact
+            for (int i = 0; i < 6 + Main.rand.Next(0, 4); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
+                Dust dust = Dust.NewDustPerfect(pos, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.OrangeRed, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 13, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+            }
+
+            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
+            {
+                if (i > 4)
+                {
+                    Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+                    Dust sm = Dust.NewDustPerfect(pos, ModContent.DustType<HighResSmoke>(), smvel, newColor: Color.OrangeRed * 1f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
+                    sm.customData = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f,
+                        overallAlpha: 0.5f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
+                }
+
+                Color col = Main.rand.NextBool() ? between : Color.OrangeRed;
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 5f);
+                Dust d = Dust.NewDustPerfect(pos, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.75f, 1.25f) * 0.8f);
+                d.fadeIn = Main.rand.Next(0, 4);
+                d.alpha = Main.rand.Next(0, 2);
+                d.noLight = false;
+            }
+
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(pos, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed, Scale: 0.2f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
+
+
+            for (int i22 = 220; i22 < 3 + Main.rand.Next(0, 4); i22++) //2 //0,3
+            {
+                Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<PixelatedLineSpark>(),
+                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(6, 19),
+                    newColor: Color.MediumAquamarine, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
+
+                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
+                    1f, 0.5f); //80
+
+            }
+
 
             //(Main.projectile[b].ModProjectile as WindPulse).timeForPulse = 50;
 
-            //(Main.projectile[b].ModProjectile as Stormwall).targetPlayer = player.whoAmI;
 
             for (int i = 2220; i < 22 + Main.rand.Next(0, 2); i++) //4 //2,2
             {

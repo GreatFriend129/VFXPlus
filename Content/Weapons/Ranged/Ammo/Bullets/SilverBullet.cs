@@ -17,18 +17,19 @@ using Terraria.Graphics.Shaders;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Interfaces;
+using Terraria.GameContent.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 {
 
-    public class MusketBallProjOverride : GlobalProjectile, IDrawAdditive
+    public class SilverBulletProjOverride : GlobalProjectile, IDrawAdditive
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Bullet);
+            return lateInstantiation && (entity.type == ProjectileID.SilverBullet);
         }
 
         float randomTrailSpeed = 1f;
@@ -42,11 +43,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //Without this, bullets can often feel very weird when fired at the same (shotguns)
             if (timer == 0)
             {
-                projectile.light = 0f;
-
                 randomTimeOffset = Main.rand.NextFloat(0f, 10f);
                 trailRandomLengthOffset = Main.rand.Next(0, 35);
                 randomTrailSpeed = Main.rand.NextFloat(0.85f, 1.15f);
+
+                projectile.light = 0f;
             }
 
             //Trail1 Info Dump
@@ -56,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = new Color(255, 111, 20) * totalAlpha;
+            trail1.trailColor = Color.Gray * totalAlpha; //255 111 20
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
@@ -81,11 +82,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
-                //Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: new Color(255, 120, 40), Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.5f);
-                //d.alpha = 2;
-                //d.velocity += -projectile.velocity.RotatedByRandom(0.1f) * 0.55f;
-                //d.velocity *= 0.35f;
-
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Color.Silver, Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.5f);
+                d.alpha = 2;
+                d.velocity += -projectile.velocity.RotatedByRandom(0.1f) * 0.55f;
+                d.velocity *= 0.35f;
             }
 
             //Quickly fade in
@@ -93,15 +93,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 4) / timeForPopInAnim, 0f, 1f);
-
             totalScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
 
-            Lighting.AddLight(projectile.Center, new Color(255, 111, 20).ToVector3() * 0.6f);
+            Lighting.AddLight(projectile.Center, Color.Silver.ToVector3() * 0.5f);
 
             proj = projectile;
             timer++;
-
-            projectile.rotation = projectile.velocity.ToRotation();
             return base.PreAI(projectile);
         }
 
@@ -126,15 +123,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             //Vanilla has 1.2 scale for bullets, so normalize this to 1f
             float adjustedScale = projectile.scale * (5f / 6f);
-            Vector2 drawScale = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
 
             Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
-            Main.EntitySpriteDraw(spike, drawPos, null, Color.OrangeRed with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, Color.DarkGray with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
             Vector2 orbScale = new Vector2(1f, 0.3f * totalScale) * 0.7f * adjustedScale;
-            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, new Color(255, 90, 10) with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
-            //trail1.TrailDrawing(Main.spriteBatch);
+            Color darkerGray = new Color(100, 100, 100);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, darkerGray with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
             return false;
         }
@@ -156,7 +152,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             float adjustedScale = proj.scale * (5f / 6f);
             Vector2 drawScale = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
 
-            sb.Draw(spike, drawPos, null, Color.OrangeRed * 2f * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
+            Color darkerGray = new Color(65, 65, 65); //100x3
+
+            sb.Draw(spike, drawPos, null, darkerGray * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
             sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.5f, SpriteEffects.None, 0f);
 
             trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
@@ -170,7 +168,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             for (int i = 0; i < 3 + Main.rand.Next(0, 2); i++)
             {
                 Vector2 dustVel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-1f, 1f)) * Main.rand.NextFloat(1f, 3f);
-                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: new Color(255, 90, 10), Scale: Main.rand.NextFloat(0.2f, 0.4f) * 1.5f);
+                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: Color.Silver, Scale: Main.rand.NextFloat(0.2f, 0.4f) * 1.5f);
+
+                //new Color(255, 90, 10)
 
                 p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
                         rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);
@@ -186,15 +186,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                     Vector2 pos = trail1.trailPositions[i];
                     Vector2 vel = Main.rand.NextVector2Circular(1f, 1f);
 
-
-                    Dust d = Dust.NewDustPerfect(pos, ModContent.DustType<GlowPixelAlts>(), vel, newColor: new Color(255, 120, 40), Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.4f);
+                    //new Color(255, 120, 40)
+                    Dust d = Dust.NewDustPerfect(pos, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Color.Silver, Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.4f);
                     d.alpha = 2;
                     d.velocity += -projectile.velocity.RotatedByRandom(0.1f) * 0.35f;
                     d.velocity *= 0.35f;
                 }
             }
 
+            Color starCol = Color.Silver * 0.5f;
+            DustBehaviorUtil.StarDustDrawInfo sdic = new DustBehaviorUtil.StarDustDrawInfo(true, false, false, true, false, 1f);
 
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: starCol, Scale: 1f);
+            d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.88f, shouldFadeColor: true, sdci: sdic);
             return false;
         }
 

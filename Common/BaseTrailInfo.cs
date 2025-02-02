@@ -167,15 +167,24 @@ namespace VFXPlus.Common
                 trailCurrentLength = CalculateLength();
             }
         }
-        public void TrailDrawing(SpriteBatch sb)
+        public void TrailDrawing(SpriteBatch sb, bool doAdditiveReset = true)
         {
-            sb.End();
-            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, customEffect, Main.GameViewMatrix.TransformationMatrix);
+            if (doAdditiveReset)
+            {
+                //sb.End();
+                //sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointWrap, default, RasterizerState.CullNone, default, Main.GameViewMatrix.TransformationMatrix);
+
+            }
 
             if (gradient)
                 customEffect = VFXPlus.TrailShaderGradient;
             else
                 customEffect = VFXPlus.BasicTrailShader;
+
+            //TODO: do i need to put reps param or no idr
 
             customEffect.Parameters["TrailTexture"].SetValue(trailTexture);
             customEffect.Parameters["ColorOne"].SetValue(trailColor.ToVector4());
@@ -199,7 +208,6 @@ namespace VFXPlus.Common
                 customEffect.Parameters["scrollColor"].SetValue(shouldScrollColor);
             }
 
-            //customEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
             customEffect.CurrentTechnique.Passes["MainPS"].Apply();
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -225,12 +233,18 @@ namespace VFXPlus.Common
                 }
             }
 
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            if (doAdditiveReset)
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            //We have to do this for some godforsaken reason or else the blend state leaks through or something
-            sb.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+                //We have to do this for some godforsaken reason or else the blend state leaks through or something
+                sb.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            }
 
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+            /*
             Texture2D DebugTest = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight");
 
             for (int i = 0; i < trailPositions.Count; i++)
@@ -240,8 +254,7 @@ namespace VFXPlus.Common
 
                 //Main.spriteBatch.Draw(DebugTest, pos - Main.screenPosition, null, Color.White with { A = 0 }, rot, DebugTest.Size() / 2f, 0.2f, SpriteEffects.None, 0f);
             }
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            */
 
         }
     }

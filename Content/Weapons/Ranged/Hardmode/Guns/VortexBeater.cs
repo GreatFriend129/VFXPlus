@@ -16,32 +16,11 @@ using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
 using Terraria.Graphics;
+using Terraria.Physics;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 {
-    
-    public class VortexBeater : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.VortexBeater);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item4 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-            return true;
-        }
-
-    }
     public class VortexBeaterHeldProjOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
@@ -50,15 +29,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             return lateInstantiation && (entity.type == ProjectileID.VortexBeater);
         }
 
-
-
-
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
 
             //Changes:
             //Lower sound volume dear god
+            //Dust out of muzzle
             #region vanillaAI
             Player player = Main.player[projectile.owner];
             float num = (float)Math.PI / 2f;
@@ -174,7 +151,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
                                 Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(0.5f, 1.75f);
                                 int dir = projectile.velocity.X > 0 ? 1 : -1;
-                                Vector2 posOffset = new Vector2(51f, -6f * dir).RotatedBy(projectile.velocity.ToRotation());
+                                Vector2 posOffset = new Vector2(51f, -5f * dir).RotatedBy(projectile.velocity.ToRotation());
 
                                 
                                 Dust d = Dust.NewDustPerfect(vector18, 229, vel, newColor: Color.Aqua * 1f, Scale: Main.rand.NextFloat(0.5f, 1f) * 0.6f);
@@ -240,6 +217,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         }
 
 
+        Effect myEffect = null;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -257,7 +235,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             for (int i = 0; i < 3; i++)
             {
                 Vector2 offPos = drawPos + new Vector2(0f, 0f) + Main.rand.NextVector2Circular(3f, 3f);
-                Main.EntitySpriteDraw(GlowMask, offPos, sourceRectangle, Color.White with { A = 0 } * 0.1f, projectile.rotation, TexOrigin, 1f, se);
+                Main.EntitySpriteDraw(GlowMask, offPos, sourceRectangle, Color.White with { A = 0 } * 0.25f, projectile.rotation, TexOrigin, 1f, se);
             }
 
 
@@ -301,23 +279,21 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 previousPostions.RemoveAt(0);
 
 
-            if (timer == 0 && false)
+            if (timer % 5 == 0 && timer > 20)
             {
-                float circlePulseSize = 0.1f;
+                Vector2 vel = Main.rand.NextVector2Circular(1.5f, 1.5f);
 
-                Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.65f, newColor: Color.Aquamarine);
-                CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 5, 0.2f, 0.4f);
-                b2.drawLayer = "Dusts";
-                d2.customData = b2;
-                d2.scale = circlePulseSize * 0.25f;
+                Dust dp = Dust.NewDustPerfect(projectile.Center + new Vector2(0f, 0f), ModContent.DustType<GlowPixelAlts>(), vel, newColor: Color.MediumAquamarine, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 0.45f);
+                dp.velocity += -projectile.velocity.RotatedByRandom(0.1f) * 1f;
+                dp.alpha = 2;
             }
 
-            if (timer % 6 == 0)
+            if (timer % 12 == 0 && timer != 0)
             {
-                float circlePulseSize = 0.03f;
+                float circlePulseSize = 0.05f;
 
                 Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.25f, newColor: Color.Aquamarine);
-                CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 6, 0.15f, 0.3f);
+                CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 3, 0.2f, 0.35f);
                 b2.drawLayer = "Dusts";
                 d2.customData = b2;
                 d2.scale = circlePulseSize * 0.75f;
@@ -425,13 +401,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             #endregion
 
+
+            totalAlpha = Math.Clamp(MathHelper.Lerp(totalAlpha, 1.15f, 0.05f), 0f, 1f);
+            totalScale = Math.Clamp(MathHelper.Lerp(totalScale, 1.35f, 0.03f), 0f, 1f);
+
+            Lighting.AddLight(projectile.Center, Color.Aquamarine.ToVector3() * 0.65f);
+
             timer++;
             return false;
         }
 
 
-        float totalAlpha = 1f;
-        float totalScale = 1f;
+        float totalAlpha = 0f;
+        float totalScale = 0f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -444,22 +426,23 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects se = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            float drawScale = 1f * projectile.scale * totalScale;
-
-
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            {
-                DrawVertexTrail(true);
-            });
-
-            DrawVertexTrail(false);
+            Vector2 drawScale = new Vector2(totalScale, 1f) * projectile.scale;// * totalScale;
 
             //Bloomball
             Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-            Vector2 ballScale = new Vector2(0.85f, 1f) * drawScale;
-            Main.EntitySpriteDraw(Ball, drawPos, null, Color.Aquamarine with { A = 0 } * totalAlpha * 0.3f, projectile.rotation, Ball.Size() / 2f, ballScale * 0.5f, se);
-            //Main.EntitySpriteDraw(Ball, drawPos, null, Color.Aquamarine with { A = 0 } * totalAlpha * 0.3f, projectile.rotation, Ball.Size() / 2f, ballScale * 0.35f, se);
-            Main.EntitySpriteDraw(Ball, drawPos, null, Color.Aquamarine with { A = 0 } * totalAlpha * 0.75f, projectile.rotation, Ball.Size() / 2f, ballScale * 0.3f, se);
+            Vector2 ballScale = new Vector2(0.85f * totalScale * projectile.scale, 1f) * drawScale;
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                DrawVertexTrail(false);
+
+
+                Main.EntitySpriteDraw(Ball, drawPos, null, Color.Aquamarine with { A = 0 } * totalAlpha * 0.2f, projectile.rotation, Ball.Size() / 2f, ballScale * 0.5f, se);
+                Main.EntitySpriteDraw(Ball, drawPos, null, Color.Aquamarine with { A = 0 } * totalAlpha * 0.5f, projectile.rotation, Ball.Size() / 2f, ballScale * 0.3f, se);
+            });
+
+            DrawVertexTrail(true);
+
 
 
             //Border
@@ -489,8 +472,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             if (giveUp || false)
                 return;
 
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/FlameTrail").Value; //ThinGlowLine
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value; //ThinGlowLine
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Trail5Loop").Value; //ThinGlowLine
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //ThinGlowLine
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
@@ -501,9 +484,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.15f;
 
-            Color StripColor(float progress) => Color.White * Easings.easeOutQuad(progress);
-            float StripWidth(float progress) => 18f * sineWidthMult * Easings.easeInSine(progress);
-            float StripWidth2(float progress) => 75f * sineWidthMult * Easings.easeInSine(progress); // Math.Clamp(80f * Easings.easeInSine(progress), 3f, 100f);
+            Color StripColor(float progress) => Color.White * Easings.easeInSine(progress);
+            float StripWidth(float progress) => Math.Clamp(120f * sineWidthMult * totalScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f;
+            float StripWidth2(float progress) => Math.Clamp(75f * sineWidthMult * totalScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f; 
 
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -520,10 +503,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2f);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2.5f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
-            //vertexStrip2.DrawTrail();
 
             //Over layer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
@@ -531,7 +513,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             myEffect.Parameters["glowThreshold"].SetValue(0.8f);
             myEffect.Parameters["glowIntensity"].SetValue(1.27f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            //vertexStrip.DrawTrail();
+            vertexStrip.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
@@ -573,11 +555,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             projectile.Damage();
             #endregion
 
+            #region SoftGlow + Circle
             Dust softGlow = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aqua * 0.75f, Scale: 0.25f);
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
                 overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
 
-            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aqua * 1.25f, Scale: 0.1f);
+            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aqua * 1.25f, Scale: 0.15f);
             softGlow2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
                 overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
 
@@ -591,6 +574,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Aquamarine * 0.5f);
             d2.customData = cpb2;
             d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+            #endregion
 
             for (int i = 0; i < 16; i++)
             {
@@ -601,7 +585,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 Color colA = Color.Lerp(new Color(0, 240, 145), Color.Aqua, 0.85f);
                 Color colB = new Color(0, 240, 145);
 
-                Color col = Color.Lerp(colA with { A = 0 } * 1f * Main.rand.NextFloat(0.25f, 1f), Color.Black * 0.5f, proggg);
+                Color col = Color.Lerp(colA with { A = 0 } * 1f * Main.rand.NextFloat(0.5f, 1f), Color.Black * 0.75f, 1f - prog);
 
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 2f) * 2.5f,
                     newColor: col * prog, Scale: Main.rand.NextFloat(0.9f, 1.3f) * 1f);
@@ -609,13 +593,34 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             }
 
+            for (int i = 0; i < 12 + Main.rand.Next(0, 4); i++)
+            {
+                
+                float velMult = Main.rand.NextFloat(3f, 7f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
+                
+                if (Main.rand.NextBool())
+                {
+                    Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), randomStart, Alpha: 0, newColor: Color.Aqua, Scale: Main.rand.NextFloat(0.35f, 0.65f));
+                    dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 1f);
+                }
+                else
+                {
+                    Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart * 0.5f, newColor: Color.Aquamarine, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.65f);
+
+                    dust.noLight = false;
+                    dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                        rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+                }
+
+            }
+
             return false;
-            return base.PreKill(projectile, timeLeft);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
-            
+            Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
