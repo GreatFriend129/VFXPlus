@@ -292,7 +292,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.tileCollide = false;
 
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 500;
+            Projectile.timeLeft = 11500;
 
         }
 
@@ -416,7 +416,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override bool PreDraw(ref Color lightColor)
         {
-            DrawWindVortex(-1, Color.White * 0.33f);
+            DrawWindVortex(-1, Color.DeepSkyBlue * 0.33f);
 
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FFTornado").Value;
 
@@ -454,7 +454,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Main.EntitySpriteDraw(Tex, drawPos, sourceRectangle, lightColor, Projectile.rotation, TexOrigin, Projectile.scale * scale, se);
 
 
-            DrawWindVortex(1, Color.White * 0.7f);
+            DrawWindVortex(1, Color.SkyBlue * 0.7f);
             return false;
         }
 
@@ -471,7 +471,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Main.NewText(Main.player[Projectile.owner].name.GetHashCode());
 
-            for (int i = 0; i < 60; i++) //60
+            for (int i = 0; i < 160; i++) //60
             {
 
                 Texture2D texture;
@@ -482,13 +482,13 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     texture = windTexture;
                     frame = texture.Bounds;
-                    scale = new(0.3f, 0.66f); //0.3 0.66
+                    scale = new(0.15f, 0.33f); //0.3 0.66
                 }
                 else
                 {
                     texture = dustTexture;
                     frame = texture.Frame(verticalFrames: 3, frameY: r.Next(3));
-                    scale = new(1f, 1f);
+                    scale = new(0.5f, 0.5f);
                     rotation += speedTime * NextFloatF(r, 0.8f, 1.2f);
                 }
                 var origin = frame.Size() / 2f;
@@ -497,24 +497,23 @@ namespace VFXPlus.Content.FeatheredFoe
                 float progress = (speedTime * speed + r.NextFloat()) % 3f;
 
                 float scaleWave = MathF.Sin(progress * MathHelper.Pi);
-                float waveDistance = NextFloatF(r, 40f, 120f); //40 120 overall distance of the ring
+                float waveDistance = NextFloatF(r, 20f, 120f); //40 120 overall distance of the ring
 
-                //float yWave = Helper.Wave(Main.GlobalTimeWrappedHourly * 2f, 0.5f, 1.5f);
                 float time = speedTime * 2f;
-                float min = 0.5f;
-                float max = 1.5f;
+                float min = 0.95f; //Controls how much the ring sways 
+                float max = 0.95f; //^
 
                 float yWave = min + ((float)Math.Sin(time) + 1f) / 2f * (max - min);
 
                 float yOffset = scaleWave * waveDistance * 0.3f * yWave; //0.3
                 float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
-                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir); //-20 14 | -120
+                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -120f, 140f) + yOffset * yDir); //Vertical distance of the ring
 
                 Main.spriteBatch.Draw(
                     texture,
                     (drawPosition - Main.screenPosition).Floor(),
                     frame,
-                    color,
+                    color with { A = 0 },
                     rotation - xWave / 3f * yWave * yDir,
                     origin,
                     new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f,
@@ -591,7 +590,7 @@ namespace VFXPlus.Content.FeatheredFoe
                         bof.ParentProj = Projectile.whoAmI;
                         bof.orbitSpeed = 0.04f;
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
-                        bof.orbitDistance = 210f;
+                        bof.orbitDistance = 270f; //210
                         bof.orbitDir = 1;
                     }
                 }

@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.LeafBlower);
+            return lateInstatiation && (item.type == ItemID.LeafBlower) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LeafBlowerToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -57,19 +57,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     1f, 0.5f); //80
 
             }
-
-            /*
-            for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++) //2 //0,3
-            {
-                Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<LineSpark>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * Main.rand.Next(5, 20), //7, 18
-                    newColor: Color.Purple, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
-
-                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    1f, 0.5f); //80
-            }
-            */
-
             return true;
         }
 
@@ -80,7 +67,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Leaf);
+            return lateInstantiation && (entity.type == ProjectileID.Leaf) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LeafBlowerToggle;
         }
 
         int timer = 0;
@@ -185,22 +172,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SoundEngine.PlaySound(style2, projectile.Center);
 
             return false;
-            //return base.PreKill(projectile, timeLeft);
         }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
 }

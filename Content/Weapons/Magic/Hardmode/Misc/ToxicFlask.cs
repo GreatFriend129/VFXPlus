@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.ToxicFlask);
+            return lateInstatiation && (item.type == ItemID.ToxicFlask) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ToxicFlaskToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -34,12 +34,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_1") with { Volume = 1f, Pitch = -1f, PitchVariance = .33f, };
-            //SoundEngine.PlaySound(style, player.Center);
-
             SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_javelin_throwers_attack_2") with { Volume = 0.4f, Pitch = 0.8f, PitchVariance = 0.2f }; 
             SoundEngine.PlaySound(style, player.Center);
-
 
             return true;
         }
@@ -51,7 +47,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ToxicFlask);
+            return lateInstantiation && (entity.type == ProjectileID.ToxicFlask) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ToxicFlaskToggle;
         }
 
         int timer = 0;
@@ -76,14 +72,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
-            //projectile.velocity *= 0.9f;
-
 
             float timeForPopInAnim = 30;
             float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
 
             drawScale = 0.34f + MathHelper.Lerp(0f, 0.66f, Easings.easeInOutBack(animProgress, 1f, 3f));
-            drawAlpha = 1f;// Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.08f), 0f, 1f);
             starPower = Math.Clamp(MathHelper.Lerp(starPower, 1.25f, 0.04f), 0f, 1f);
 
             timer++;
@@ -92,7 +85,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         }
 
         float starPower = 0f;
-        float drawAlpha = 0f;
         float drawScale = 0f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
@@ -112,7 +104,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     float progress = (float)i / previousRotations.Count;
                     float size = projectile.scale * drawScale;
 
-                    Color col = Color.Aquamarine * progress * projectile.Opacity * drawAlpha;
+                    Color col = Color.Aquamarine * progress * projectile.Opacity;
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
@@ -132,16 +124,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
-                    Color.Aqua with { A = 0 } * drawAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.05f * drawScale, SpriteEffects.None);
+                    Color.Aqua with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale * 1.05f * drawScale, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity * drawAlpha, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
 
             if (starPower == 1f)
                 return false;
 
             //Star
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D star = CommonTextures.RainbowRod.Value;
 
 
             float dir = projectile.velocity.X > 0 ? 1 : -1;
@@ -177,7 +169,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 p.alpha = 2;
             }
 
-            //return false;
             return base.PreKill(projectile, timeLeft);
         }
 
@@ -190,7 +181,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ToxicCloud || entity.type == ProjectileID.ToxicCloud2 || entity.type == ProjectileID.ToxicCloud3);
+            return lateInstantiation && (entity.type == ProjectileID.ToxicCloud || entity.type == ProjectileID.ToxicCloud2 || entity.type == ProjectileID.ToxicCloud3) 
+                && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ToxicFlaskToggle;
         }
 
         int timer = 0;
@@ -209,11 +201,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, -300f);
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity * 0.08f, projectile.rotation, TexOrigin, projectile.scale * 3f, SpriteEffects.None);
+
             //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
+
             return true;
 
         }

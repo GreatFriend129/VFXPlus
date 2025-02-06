@@ -38,18 +38,20 @@ namespace VFXPlus.Content.Dusts
 			{
                 dust.scale *= mlb.sizeChangeSpeed;
                 dust.velocity *= mlb.velFadeSpeed;
+				if (!mlb.NoAlphaZero)
+					dust.color.A = 0;
             }
 			else
 			{
                 dust.velocity *= 0.95f;
                 dust.scale *= 0.98f;
+                dust.color.A = 0;
             }
-            dust.color.A = 0;
 
             //dust.scale = MathHelper.Clamp(MathHelper.Lerp(dust.scale, 1f, 0.025f), 0f, 0.5f);
 
 
-			if (dust.alpha > 15)
+            if (dust.alpha > 15)
 			{
 				dust.fadeIn = Math.Clamp(MathHelper.Lerp(dust.fadeIn, -0.5f, 0.05f), 0, 1);
 			}
@@ -66,12 +68,16 @@ namespace VFXPlus.Content.Dusts
 		public override bool PreDraw(Dust dust)
 		{
 			Vector2 vec2scale = new Vector2(1f, 1f) * dust.scale;
+            float whiteI = 1f;
 
-			if (dust.customData is MuraLineBehavior mlb)
-				vec2scale = mlb.XYscale * dust.scale;
+            if (dust.customData is MuraLineBehavior mlb)
+            {
+                vec2scale = mlb.XYscale * dust.scale;
+                whiteI = mlb.whiteIntensity;
+            }
 
-			Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, dust.color * dust.fadeIn, dust.rotation, new Vector2(60f, 60f), vec2scale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, Color.White with { A = 0 } * dust.fadeIn, dust.rotation, new Vector2(60, 60f), vec2scale * 0.5f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, dust.color * dust.fadeIn, dust.rotation, new Vector2(60f, 60f), vec2scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, Color.White with { A = 0 } * dust.fadeIn * whiteI, dust.rotation, new Vector2(60, 60f), vec2scale * 0.5f, SpriteEffects.None, 0f);
             return false;
 		}
 	}
@@ -80,20 +86,24 @@ namespace VFXPlus.Content.Dusts
 	{
 		public Vector2 XYscale;
 
-		public float velFadeSpeed = 0.95f;
+		public float velFadeSpeed = 0.97f;
 
-		public float sizeChangeSpeed = 0.98f;
+		public float sizeChangeSpeed = 1f;
 
+		public float whiteIntensity = 1f;
+
+		public bool NoAlphaZero = false;
 		public MuraLineBehavior(Vector2 xyscale)
 		{
 			XYscale = xyscale;
 		}
 
-        public MuraLineBehavior(Vector2 xyscale, float VelFadeSpeed = 0.95f, float SizeChangeSpeed = 0.98f)
+        public MuraLineBehavior(Vector2 xyscale, float VelFadeSpeed = 0.97f, float SizeChangeSpeed = 1f, float WhiteIntensity = 1f)
         {
             XYscale = xyscale;
             velFadeSpeed = VelFadeSpeed;
             sizeChangeSpeed = SizeChangeSpeed;
+			whiteIntensity = WhiteIntensity;
         }
 
     }
@@ -104,16 +114,13 @@ namespace VFXPlus.Content.Dusts
 
 		public override void OnSpawn(Dust dust)
 		{
-			dust.customData = false;
+			//dust.customData = false;
 			dust.noGravity = true;
 			dust.fadeIn = 1f;
 			dust.frame = new Rectangle(0, 0, 38, 14);
 		}
 
-		public override Color? GetAlpha(Dust dust, Color lightColor) 
-		{
-			return dust.color;
-		}
+		public override Color? GetAlpha(Dust dust, Color lightColor) { return dust.color; }
 
 		public override bool Update(Dust dust)
 		{
@@ -121,8 +128,16 @@ namespace VFXPlus.Content.Dusts
 			dust.rotation = dust.velocity.ToRotation();
 			dust.position += dust.velocity;
 
-			dust.velocity *= 0.97f;
-
+            if (dust.customData is MuraLineBehavior mlb)
+            {
+                dust.velocity *= mlb.velFadeSpeed;
+                dust.scale *= mlb.sizeChangeSpeed;
+            }
+            else
+            {
+                dust.velocity *= 0.97f;
+                dust.scale *= 1f;
+            }
 
 			dust.color.A = 0;
 
@@ -143,8 +158,18 @@ namespace VFXPlus.Content.Dusts
 
 		public override bool PreDraw(Dust dust)
 		{
-			Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, dust.color * dust.fadeIn, dust.rotation, new Vector2(60f, 60f), dust.scale, SpriteEffects.None, 0f);
-			Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, Color.White with { A = 0 } * dust.fadeIn, dust.rotation, new Vector2(60, 60f), dust.scale * 0.5f, SpriteEffects.None, 0f);
+            Vector2 vec2scale = new Vector2(1f, 1f) * dust.scale;
+            float whiteI = 1f;
+
+            if (dust.customData is MuraLineBehavior mlb)
+			{
+                vec2scale = mlb.XYscale * dust.scale;
+				whiteI = mlb.whiteIntensity;
+            }
+
+
+            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, dust.color * dust.fadeIn, dust.rotation, new Vector2(60f, 60f), vec2scale, SpriteEffects.None, 0f);
+			Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, null, Color.White with { A = 0 } * dust.fadeIn * whiteI, dust.rotation, new Vector2(60, 60f), vec2scale * 0.5f, SpriteEffects.None, 0f);
 
 			return false;
 		}

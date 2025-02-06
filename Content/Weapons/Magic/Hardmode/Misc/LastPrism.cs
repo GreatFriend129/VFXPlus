@@ -206,7 +206,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 {
                     Vector2 pos = projectile.Center - Main.screenPosition + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
 
-                    float opac = 0.06f;
+                    float opac = 0.04f;
 
                     Vector2 blackOrigin = new Vector2(black.Width / 2, 0);
                     Vector2 blackScale = new Vector2(5f, 5f) * 1f;
@@ -275,15 +275,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             vertexStrip1.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
 
 
-
             #region Params
             if (laserEffect == null)
                 laserEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
 
             laserEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
+            GetCombinedLaserInfo();
+            String GradLocation = "VFXPlus/Assets/Gradients/";
+
             laserEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value); //ThinLineGlowClear
-            laserEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
+            laserEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>(GradLocation + lpci.textureLocation).Value);
             laserEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
             laserEffect.Parameters["satPower"].SetValue(0.8f - (combinedLaserStartBoostPower * 0.8f)); //0.9f
 
@@ -292,10 +294,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             laserEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
             laserEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value);
 
-            laserEffect.Parameters["grad1Speed"].SetValue(2f / 3f);
-            laserEffect.Parameters["grad2Speed"].SetValue(2f / 3f);
-            laserEffect.Parameters["grad3Speed"].SetValue(3.1f / 3f);
-            laserEffect.Parameters["grad4Speed"].SetValue(2.3f / 3f);
+            laserEffect.Parameters["grad1Speed"].SetValue(lpci.grad1Speed);
+            laserEffect.Parameters["grad2Speed"].SetValue(lpci.grad2Speed);
+            laserEffect.Parameters["grad3Speed"].SetValue(lpci.grad3Speed);
+            laserEffect.Parameters["grad4Speed"].SetValue(lpci.grad4Speed);
 
             laserEffect.Parameters["tex1Mult"].SetValue(1.25f);
             laserEffect.Parameters["tex2Mult"].SetValue(1.5f);
@@ -314,15 +316,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             laserEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.018f); //0.006
             #endregion
 
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.EffectMatrix);
             laserEffect.CurrentTechnique.Passes["MainPS"].Apply();
-
             vertexStrip1.DrawTrail();
-
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            //Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
@@ -332,7 +327,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Texture2D star2 = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_16").Value;
             Texture2D sigil = Mod.Assets.Request<Texture2D>("Assets/Orbs/whiteFireEyeA").Value;
             Texture2D orbGlow = Mod.Assets.Request<Texture2D>("Assets/Orbs/circle_05").Value;
-
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RainbowSigil", AssetRequestMode.ImmediateLoad).Value;
@@ -384,6 +378,48 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //^ Reset with EffectMatrix because otherwise the wind lines draw fucked up for some reason
         }
 
+
+        LastPrismColorInfo lpci = null;
+        public void GetCombinedLaserInfo()
+        {
+            String configOption = ModContent.GetInstance<MiscCustomization>().LastPrismPrideColor;
+
+            if (configOption == "None")
+                lpci = new LastPrismColorInfo("RainbowGrad1", 2f / 3f, 2f / 3f, 3.1f / 3f, 2.3f / 3f);
+            else if (configOption == "Lesbian")
+                lpci = new LastPrismColorInfo("Pride/LesbianGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Bisexual")
+                lpci = new LastPrismColorInfo("Pride/BisexualGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Trans")
+                lpci = new LastPrismColorInfo("Pride/TransGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Non-Binary") //Fucked loop
+                lpci = new LastPrismColorInfo("Pride/NBGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Asexual") //Fucked Black
+                lpci = new LastPrismColorInfo("Pride/AceGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Aromantic") //Fuvcked Black
+                lpci = new LastPrismColorInfo("Pride/AroGrad", 1f, 1f, 1f, 1f);
+            else if (configOption == "Aroace")
+                lpci = new LastPrismColorInfo("Pride/AroaceGrad", 1f, 1f, 1f, 1f);
+        }
+    }
+
+    public class LastPrismColorInfo
+    {
+        public String textureLocation = "";
+
+        public float grad1Speed = 2f / 3f;
+        public float grad2Speed = 2f / 3f;
+        public float grad3Speed = 3.1f / 3f;
+        public float grad4Speed = 2.3f / 3f;
+
+        public LastPrismColorInfo(String TexLocation, float Grad1Speed = 1f, float Grad2Speed = 1f, float Grad3Speed = 1f, float Grad4Speed = 1f)  
+        { 
+            textureLocation = TexLocation;
+            grad1Speed = Grad1Speed;
+            grad2Speed = Grad2Speed;
+            grad3Speed = Grad3Speed;
+            grad4Speed = Grad4Speed;
+        }
     }
 
     public class LastPrismLaserOverride : GlobalProjectile

@@ -5,14 +5,13 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using Terraria.DataStructures;
 using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
-using System.Runtime.InteropServices;
+using static Terraria.ModLoader.ModContent;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
@@ -22,7 +21,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.WandofFrosting);
+            return lateInstatiation && (item.type == ItemID.WandofFrosting) && GetInstance<VFXPlusToggles>().MagicToggle.WandOfFrostingToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -47,7 +46,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.WandOfFrostingFrost);
+            return lateInstantiation && (entity.type == ProjectileID.WandOfFrostingFrost) && GetInstance<VFXPlusToggles>().MagicToggle.WandOfFrostingToggle;
         }
 
         int timer = 0;
@@ -76,92 +75,65 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             }
 
+            //Smoke dust
             if (timer % 4 == 0)
             {
                 int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<HighResSmoke>(), newColor: Color.LightSkyBlue * fadeInPower, Scale: Main.rand.NextFloat(0.25f, 0.5f));
                 Main.dust[d].velocity += projectile.velocity * 0.25f;
                 Main.dust[d].velocity *= 0.45f;
-                Main.dust[d].customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.5f);
+                Main.dust[d].customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.55f);
             }
 
             float timeForSpinIn = Math.Clamp(timer / 28f, 0f, 1f);
             spinInPower = Easings.easeOutCirc(timeForSpinIn);
 
-
+            //Fade in over 15 ticks
             if (timer < 47)
             {
                 float timeForFadeIn = Math.Clamp(timer / 15f, 0f, 1f);
                 fadeInPower = Easings.easeOutCirc(timeForFadeIn);
             }
+            //Fade out over 8 ticks
             else
             {
                 float timeForFadeIn = Math.Clamp((timer - 47f) / 8f, 0f, 1f);
                 fadeInPower = Easings.easeOutCirc(1f - timeForFadeIn);
             }
 
-
             timer++;
             return true;
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            //Utils.DrawBorderString(Main.spriteBatch, "" + projectile.velocity.Y, projectile.Center - Main.screenPosition + new Vector2(0f, -75), Color.White);
-            
-            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-            Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
+        {            
+            Texture2D Tex = CommonTextures.RainbowRod.Value;
+            Texture2D Orb = CommonTextures.PartiGlowPMA.Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 posOffset = Main.rand.NextVector2Circular(2f, 2f);
 
             float spinInBonusRot = MathHelper.Lerp(12f * projectile.direction, 0f, spinInPower);
-            
-
             float drawRot = projectile.velocity.ToRotation() - spinInBonusRot;
-
 
             Vector2 TexOrigin = Tex.Size() / 2f;
             Vector2 vec2scale = new Vector2(0.45f, 0.45f) * projectile.scale * 1.35f * fadeInPower;
 
+            Color blueToUse = Color.SkyBlue;
+            Color blueToUse2 = Color.DeepSkyBlue;
 
-            Color blueToUse = Color.SkyBlue;//Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
-            Color blueToUse2 = Color.DeepSkyBlue;//Color.Lerp(Color.Orange, Color.OrangeRed, 0.75f);
-            Color orangeToUse3 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.85f);
-
+            //Black Under Layer
+            Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, Color.Black * 0.25f, drawRot, TexOrigin, vec2scale * 0.6f, SpriteEffects.None, 0f);
 
             //Orb
-            //Main.spriteBatch.Draw(Orb, drawPos, null, Color.Orange with { A = 0 } * 0.15f, 0f, Orb.Size() / 2f, 0.65f * fadeInPower, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Orb, drawPos + posOffset, null, blueToUse2 with { A = 0 } * 0.2f, drawRot, Orb.Size() / 2f, vec2scale * 1.15f, SpriteEffects.None, 0f);
 
-
-            Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, Color.Black * 0.5f, drawRot, TexOrigin, vec2scale * 0.7f, SpriteEffects.None, 0f);
-
-
+            //Main layer
             Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, blueToUse with { A = 0 } * fadeInPower, drawRot, TexOrigin, vec2scale * 0.7f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(1.25f, 1.25f), null, blueToUse2 with { A = 0 } * fadeInPower, drawRot, TexOrigin, vec2scale * 0.45f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.75f, 0.75f), null, Color.White with { A = 0 } * fadeInPower, drawRot, TexOrigin, vec2scale * 0.25f, SpriteEffects.None, 0f);
 
             return false;
-
         }
-
-        public override void OnKill(Projectile projectile, int timeLeft)
-        {
-            base.OnKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
 
     }
 

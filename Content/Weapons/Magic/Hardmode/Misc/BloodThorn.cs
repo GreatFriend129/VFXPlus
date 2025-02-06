@@ -24,12 +24,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.SharpTears);
+            return lateInstatiation && (item.type == ItemID.SharpTears) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BloodThornToggle;
         }
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
@@ -55,11 +54,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SharpTears);
+            return lateInstantiation && (entity.type == ProjectileID.SharpTears) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BloodThornToggle;
         }
 
         public override bool PreAI(Projectile projectile)
         {
+
+            Lighting.AddLight(projectile.Center, Color.Red.ToVector3() * 1.25f);
+
             return base.PreAI(projectile);
         }
 
@@ -76,14 +78,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Border
             for (int i = 0; i < 4; i++)
             {
-                float dist = 3f; //3f
+                float dist = 2f + (MathF.Sin((float)Main.timeForVisualEffects * 0.11f) * 0.5f); //3f
+
+                float colorProg = i * 0.25f;
+                Color col = Color.Lerp(Color.Red, Color.Crimson, colorProg);
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.2f * projectile.direction);
 
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle, 
-                    Color.Crimson with { A = 0 } * 0.4f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
+                    col with { A = 0 } * 0.7f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
             }
 
             //Main.EntitySpriteDraw(vanillaTex, drawPos + new Vector2(0f, 0f), sourceRectangle, Color.Black * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);

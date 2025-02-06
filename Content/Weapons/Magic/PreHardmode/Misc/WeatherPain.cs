@@ -18,39 +18,17 @@ using System.Threading;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
-    
-    public class WeatherPain : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.WeatherPain);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-            return true;
-        }
-
-    }
     public class WeatherPainShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.WeatherPainShot);
+            return lateInstantiation && (entity.type == ProjectileID.WeatherPainShot) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.WeatherPain;
         }
 
 
-        float scale = 0;
-        float alpha = 0;
+        float overallScale = 0f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -65,14 +43,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 previousPostions.RemoveAt(0);
 
             float timeForPopInAnim = 30;
-            float animProgress = Math.Clamp((timer + 5) / timeForPopInAnim, 0f, 1f); //Easings.easeOutCubic(Math.Clamp(timer / timeForPopInAnim, 0f, 1f));
+            float animProgress = Math.Clamp((timer + 5) / timeForPopInAnim, 0f, 1f);
 
-
-            scale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress));
-
-
-            //So apparently the tornado already leans with velocity lmao
-            //projectile.rotation = 0f + projectile.velocity.X * 0.1f;
+            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress));
 
             timer++;
             return base.PreAI(projectile);
@@ -98,7 +71,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                     
                     Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue * 0.1f, progress) * progress * projectile.Opacity;
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale * scale;
+                    float size2 = (1f + (progress * 0.25f)) * projectile.scale * overallScale;
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
@@ -111,36 +84,17 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             //Border
             for (int i = 0; i < 4; i++)
             {
+                float sineMult = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.11f) * 0.033f;
+
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.SkyBlue with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * scale, SpriteEffects.None);
+                    Color.SkyBlue with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale * sineMult, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * overallScale, SpriteEffects.None);
             return false;
 
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-
-            //return false;
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
 }

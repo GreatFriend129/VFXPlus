@@ -22,34 +22,13 @@ using System.Reflection.Metadata;
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
     
-    public class FlowerOfFire : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.FlowerofFire);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-
-            return true;
-        }
-
-    }
     public class FlowerOfFireShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BallofFire);
+            return lateInstantiation && (entity.type == ProjectileID.BallofFire) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.FlowerOfFireToggle;
         }
 
         Vector2 Vec2Scale
@@ -102,16 +81,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 smoke.alpha = 2;
             }
 
-            //bounceIntensity should never be < 1
-            float overBounceMultiplier = bounceIntensity;
-            float underBounceMultiplier = 2 * (MathF.Pow(0.5f, bounceIntensity));
 
-            //Based off of coralite mod slime emperor 
-            float firstStretchX = 1.6f;// * overBounceMultiplier;
-            float firstStretchY = 0.65f;// * underBounceMultiplier; //bounce  = 2f -> 0.5   || 4 -> 0.25
+            //Squash and stretch based off of coralite mod slime emperor 
+            float firstStretchX = 1.6f;
+            float firstStretchY = 0.65f;
 
-            float secondStretchX = 0.75f;// * underBounceMultiplier;
-            float secondStretchY = 1.3f;// * overBounceMultiplier;
+            float secondStretchX = 0.75f;
+            float secondStretchY = 1.3f;
 
             switch (scaleState)
             {
@@ -258,7 +234,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
 
             return false;
-            return base.PreAI(projectile);
         }
 
 
@@ -282,7 +257,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawVertexTrail(false);
                 DrawPixelTrail(projectile);
             });
 
@@ -309,18 +283,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public void DrawPixelTrail(Projectile projectile)
         {
+            Texture2D AfterImage = CommonTextures.Flare.Value;
 
-            Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
-            //Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Content/VFXTest/SupernovaScatterSots").Value;
-
-            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 finalDrawScale = Vec2Scale * projectile.scale;
-
-            Vector2 starScale = 1.25f * new Vector2(Vec2Scale.X * 1.15f, Vec2Scale.Y * 0.75f) * justBouncedPower * projectile.scale;
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.OrangeRed with { A = 0 } * 0.45f, projectile.rotation, Star.Size() / 2f, starScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 0 } * 0.5f, projectile.rotation, Star.Size() / 2f, starScale * 0.75f, SpriteEffects.None);
-
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -337,7 +303,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
                         float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
-                        //Main.rand.NextVector2Circular(10f * projectile.scale, 10f)
                         Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
 
                         Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
@@ -362,7 +327,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             //Glorb
             #region drawGlorb
-            Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D Glow = CommonTextures.feather_circle128PMA.Value;
 
             Color orbCol2 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.4f) * 0.375f * true_alpha;
             Color orbCol3 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.95f) * 0.525f * true_alpha;
@@ -382,52 +347,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             #endregion
         }
 
-        Effect myEffect = null;
-        public void DrawVertexTrail(bool giveUp)
-        {
-            if (giveUp || true)
-                return;
-
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value;
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-            Color StripColor(float progress) => Color.White * (progress * progress * progress);
-            float StripWidth(float progress) => 30f * Easings.easeOutQuad(progress);// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
-
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.08f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            vertexStrip.DrawTrail();
-
-            //Over layer
-            myEffect.Parameters["ColorOne"].SetValue(Color.OrangeRed.ToVector3() * 10f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-        }
-
+        //TODO better kill effect
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             return base.PreKill(projectile, timeLeft);
@@ -442,10 +362,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             bool hitWall = false;
 
             SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.4f, Pitch = -0.15f, PitchVariance = 0.15f, MaxInstances = -1}, projectile.Center);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -1f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.25f };
-            //SoundEngine.PlaySound(style, projectile.Center);
-
 
             #region vanillaCode
             //SoundEngine.PlaySound(in SoundID.Item10, projectile.position);
@@ -511,12 +427,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
                 Dust p = Dust.NewDustPerfect(projectile.Center + spawnOffset + oldVelocity, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.75f, 1.05f),
                     newColor: Color.Lerp(Color.Orange, Color.OrangeRed, 0.75f), Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
-                //p.velocity += oldVelocity * Main.rand.NextFloat(0.2f, 0.3f) * 0.5f;
             }
 
 
             return false;
-            return base.OnTileCollide(projectile, oldVelocity);
         }
 
     }

@@ -18,36 +18,13 @@ using System.Threading;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class MagicDagger : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.MagicDagger);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-
-
-            return true;
-        }
-
-    }
     public class MagicDaggerShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.MagicDagger);
+            return lateInstantiation && (entity.type == ProjectileID.MagicDagger) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MagicDaggerToggle;
         }
 
         int timer = 0;
@@ -73,46 +50,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 p.velocity += projectile.velocity * 0.2f;
             }
 
-            /*
-            if (timer % 4 == 0 && Main.rand.NextBool() && false)
-            {
-                Dust grass = Dust.NewDustPerfect(projectile.Center, DustID.JungleGrass, Main.rand.NextVector2Circular(2, 2), 0, Scale: 0.9f);
-                grass.velocity += projectile.velocity;
-                grass.noGravity = true;
-                grass.alpha = 50;
-            }
-            */
 
             timer++;
 
             return base.PreAI(projectile);
-
-            #region vanillaAI (but without dust)
-
-            projectile.rotation += (Math.Abs(projectile.velocity.X) + Math.Abs(projectile.velocity.Y)) * 0.03f * (float)projectile.direction;
-
-            projectile.ai[0] += 1f;
-            if (projectile.ai[0] >= 30f)
-            {
-                projectile.velocity.Y += 0.4f;
-                projectile.velocity.X *= 0.97f;
-            }
-            else
-            {
-                projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) + 1.57f;
-            }
-
-            if (projectile.velocity.Y > 16f)
-            {
-                projectile.velocity.Y = 16f;
-            }
-
-            #endregion
-
-            return false;
-
         }
-
 
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
@@ -130,16 +72,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
                     float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
 
                     Color col = Color.LightGoldenrodYellow * progress * projectile.Opacity;
-                    // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
 
                     float size2 = (1f + (progress * 0.25f)) * projectile.scale;
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
                             previousRotations[i], TexOrigin, size2, SpriteEffects.None);
 
                 }
@@ -179,7 +119,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SoundEngine.PlaySound(tile_hit, projectile.Center);
 
             return false;
-            //return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)

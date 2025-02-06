@@ -13,6 +13,11 @@ Items: {
 		DisplayName: Shocklash
 		Tooltip: ""
 	}
+
+	SkippzTest: {
+		DisplayName: Skippz Test
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -59,6 +64,11 @@ Projectiles: {
 	JuttedLightning.DisplayName: Jutted Lightning
 	MagnetSphereLightningVFX.DisplayName: Magnet Sphere Lightning V F X
 	RainbowSigilTest.DisplayName: Rainbow Sigil Test
+	ArrowTest.DisplayName: Arrow Test
+	MusketTest.DisplayName: Musket Test
+	ShotgunTest.DisplayName: Shotgun Test
+	MusketTest2.DisplayName: Musket Test2
+	MinisharkTest.DisplayName: Minishark Test
 }
 
 Configs: {
@@ -72,6 +82,397 @@ Configs: {
 
 		CyvercryAIOverride: {
 			Label: Cyvercry A I Override
+			Tooltip: ""
+		}
+	}
+
+	VFXPlusConfig: {
+		DisplayName: V F X Plus Config
+
+		ScreenshakeIntensity: {
+			Label: Screenshake Intensity
+			Tooltip: ""
+		}
+
+		CyvercryAIOverride: {
+			Label: Cyvercry A I Override
+			Tooltip: ""
+		}
+	}
+
+	VFXPlusConfigToggles.DisplayName: VFX+ Config Toggles
+
+	VFXPlusToggles: {
+		DisplayName: VFX+ Toggles
+
+		MagicToggle: {
+			Label: "[i:3457] Magic Weapons [i:3457]"
+			Tooltip: ""
+		}
+	}
+
+	MagicToggles: {
+		Tooltip: ""
+
+		Headers: {
+			Wands: Wands
+			MagicGuns: Magic Guns
+			Tomes: Tomes
+			Misc: Misc
+			Staves: Staves
+		}
+
+		WandOfSparkingToggle: {
+			Label: "[i:3069] Wand Of Sparking"
+			Tooltip: ""
+		}
+
+		WandOfFrostingToggle: {
+			Label: "[i:5147] Wand Of Frosting"
+			Tooltip: ""
+		}
+
+		AmethystStaffToggle: {
+			Label: "[i:739] Amethyst Staff"
+			Tooltip: ""
+		}
+
+		TopazStaffToggle: {
+			Label: "[i:740] Topaz Staff"
+			Tooltip: ""
+		}
+
+		SapphireStaffToggle: {
+			Label: "[i:741] Sapphire Staff"
+			Tooltip: ""
+		}
+
+		EmeraldStaffToggle: {
+			Label: "[i:742] Emerald Staff"
+			Tooltip: ""
+		}
+
+		RubyStaffToggle: {
+			Label: "[i:743] Ruby Staff"
+			Tooltip: ""
+		}
+
+		AmberStaffToggle: {
+			Label: "[i:3377] Amber Staff"
+			Tooltip: ""
+		}
+
+		DiamondStaffToggle: {
+			Label: "[i:744] Diamond Staff"
+			Tooltip: ""
+		}
+
+		ThunderZapperToggle: {
+			Label: "[i:4062] Thunder Zapper"
+			Tooltip: ""
+		}
+
+		VilethornToggle: {
+			Label: "[i:64] Vilethorn"
+			Tooltip: ""
+		}
+
+		AquaScepter: {
+			Label: "[i:157] Aqua Scepter"
+			Tooltip: ""
+		}
+
+		WeatherPain: {
+			Label: "[i:5118] Weather Pain"
+			Tooltip: ""
+		}
+
+		SkyFractureToggle: {
+			Label: "[i:3787] Sky Fracture"
+			Tooltip: ""
+		}
+
+		CrystalSerpentToggle: {
+			Label: "[i:3209] Crystal Serpent"
+			Tooltip: ""
+		}
+
+		FrostStaffToggle: {
+			Label: "[i:726] Frost Staff"
+			Tooltip: ""
+		}
+
+		PoisonStaffToggle: {
+			Label: "[i:1308] Poison Staff"
+			Tooltip: ""
+		}
+
+		MeteorStaffToggle: {
+			Label: "[i:2750] Meteor Staff"
+			Tooltip: ""
+		}
+
+		CrystalVileShardToggle: {
+			Label: "[i:3051] Crystal Vile Shard"
+			Tooltip: ""
+		}
+
+		ClingerStaffToggle: {
+			Label: "[i:3014] Clinger Staff"
+			Tooltip: ""
+		}
+
+		LifeDrainToggle: {
+			Label: "[i:3006] Life Drain"
+			Tooltip: ""
+		}
+
+		UnholyTridentToggle: {
+			Label: "[i:683] Unholy Trident"
+			Tooltip: ""
+		}
+
+		TomeOfInfiniteWisdomToggle: {
+			Label: "[i:3852] Tome Of Infinite Wisdom"
+			Tooltip: ""
+		}
+
+		NettleBurstToggle: {
+			Label: "[i:788] Nettle Burst"
+			Tooltip: ""
+		}
+
+		VenomStaffToggle: {
+			Label: "[i:2188] Venom Staff"
+			Tooltip: ""
+		}
+
+		SpecterStaffToggle: {
+			Label: "[i:1446] Specter Staff"
+			Tooltip: ""
+		}
+
+		ShadowbeamStaffToggle: {
+			Label: "[i:1444] Shadowbeam Staff"
+			Tooltip: ""
+		}
+
+		InfernoForkToggle: {
+			Label: "[i:1445] Inferno Fork"
+			Tooltip: ""
+		}
+
+		BatScepterToggle: {
+			Label: "[i:1801] Bat Scepter"
+			Tooltip: ""
+		}
+
+		BlizzardStaffToggle: {
+			Label: "[i:1931] Blizzard Staff"
+			Tooltip: ""
+		}
+
+		RazorpineToggle: {
+			Label: "[i:1930] Razorpine"
+			Tooltip: ""
+		}
+
+		StaffOfEarthToggle: {
+			Label: "[i:1296] Staff Of Earth"
+			Tooltip: ""
+		}
+
+		SpaceGunToggle: {
+			Label: "[i:127] Space Gun"
+			Tooltip: ""
+		}
+
+		ZapinatorToggle: {
+			Label: "[i:4347][i:4348] Zapinators"
+			Tooltip: ""
+		}
+
+		BeeGun: {
+			Label: "[i:1121] Bee Gun"
+			Tooltip: Only impacts the VFX of the gun itself, not all bees
+		}
+
+		LaserRifleToggle: {
+			Label: "[i:514] Laser Rifle"
+			Tooltip: ""
+		}
+
+		WaspGunToggle: {
+			Label: "[i:1155]  Wasp Gun"
+			Tooltip: ""
+		}
+
+		LeafBlowerToggle: {
+			Label: "[i:1178] Leaf Blower"
+			Tooltip: ""
+		}
+
+		RainbowGunToggle: {
+			Label: "[i:1260] Rainbow Gun"
+			Tooltip: ""
+		}
+
+		HeatRayToggle: {
+			Label: "[i:1295] Heat Ray"
+			Tooltip: ""
+		}
+
+		LaserMachinegunToggle: {
+			Label: "[i:2795] Laser Machinegun"
+			Tooltip: ""
+		}
+
+		ChargedBlasterCannonToggle: {
+			Label: "[i:2882] Charged Blaster Cannon"
+			Tooltip: ""
+		}
+
+		BubbleGunToggle: {
+			Label: "[i:2623] Bubble Gun"
+			Tooltip: ""
+		}
+
+		WaterboltToggle: {
+			Label: "[i:165] Water Bolt"
+			Tooltip: ""
+		}
+
+		BookOfSkullsToggle: {
+			Label: "[i:1313] Book Of Skulls"
+			Tooltip: ""
+		}
+
+		DemonScytheToggle: {
+			Label: "[i:272] Demon Scythe"
+			Tooltip: ""
+		}
+
+		CrystalStormToggle: {
+			Label: "[i:518] Crystal Storm"
+			Tooltip: ""
+		}
+
+		CursedFlamesToggle: {
+			Label: "[i:519] Cursed Flames"
+			Tooltip: ""
+		}
+
+		GoldenShowerToggle: {
+			Label: "[i:1336] Golden Shower"
+			Tooltip: ""
+		}
+
+		MagnetSphereToggle: {
+			Label: "[i:1266] Magnet Sphere"
+			Tooltip: ""
+		}
+
+		RazorbladeTyphoonToggle: {
+			Label: "[i:2622] Razorblade Typhoon"
+			Tooltip: ""
+		}
+
+		LunarFlareToggle: {
+			Label: "[i:3570] Lunar Flare"
+			Tooltip: ""
+		}
+
+		CrimsonRodToggle: {
+			Label: "[i:1256] Crimson Rod"
+			Tooltip: ""
+		}
+
+		NimbusRodToggle: {
+			Label: "[i:1244] Nimbus Rod"
+			Tooltip: ""
+		}
+
+		FlowerOfFireToggle: {
+			Label: "[i:112] Flower Of Fire"
+			Tooltip: ""
+		}
+
+		FlowerOfFrostToggle: {
+			Label: "[i:1264] Flower Of Frost"
+			Tooltip: ""
+		}
+
+		ShadowflameHexDollToggle: {
+			Label: "[i:3053] Shadowflame Hex Doll"
+			Tooltip: ""
+		}
+
+		MagicDaggerToggle: {
+			Label: "[i:517] Magic Dagger"
+			Tooltip: ""
+		}
+
+		MedusaHeadToggle: {
+			Label: "[i:3269] Medusa Head"
+			Tooltip: ""
+		}
+
+		IceRodToggle: {
+			Label: "[i:496] Ice Rod"
+			Tooltip: ""
+		}
+
+		SpiritFlameToggle: {
+			Label: "[i:3779] Spirit Flame"
+			Tooltip: ""
+		}
+
+		BloodThornToggle: {
+			Label: "[i:4270] Blood Thorn"
+			Tooltip: ""
+		}
+
+		MagicHarpToggle: {
+			Label: "[i:494] Magical Harp"
+			Tooltip: ""
+		}
+
+		ToxicFlaskToggle: {
+			Label: "[i:3105] Toxic Flask"
+			Tooltip: ""
+		}
+
+		StellarTuneToggle: {
+			Label: "[i:4715] Stellar Tune"
+			Tooltip: ""
+		}
+
+		NebulaArcanumToggle: {
+			Label: "[i:3476] Nebula Arcanum"
+			Tooltip: ""
+		}
+
+		NebulaBlazeToggleToggle: {
+			Label: "[i:3542] Nebula Blaze"
+			Tooltip: ""
+		}
+
+		LastPrismToggle: {
+			Label: "[i:3541] Last Prism"
+			Tooltip: ""
+		}
+
+		BeeGunToggle: {
+			Label: Bee Gun Toggle
+			Tooltip: ""
+		}
+	}
+
+	MiscCustomization: {
+		DisplayName: Misc Customization
+
+		LastPrismPrideColor: {
+			Label: Last Prism Pride Color
 			Tooltip: ""
 		}
 	}

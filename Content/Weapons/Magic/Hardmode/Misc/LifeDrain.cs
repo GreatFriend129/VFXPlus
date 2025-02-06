@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.SoulDrain);
+            return lateInstatiation && (item.type == ItemID.SoulDrain) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LifeDrainToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -35,7 +35,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
 
-            for (int i = 220; i < 22; i++) //16
+            for (int i = 0; i < 22; i++) //16
             {
                 float progress = (float)i / 21;
                 Color col = Color.Lerp(Color.Black, Color.Red, progress);
@@ -59,7 +59,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SoulDrain);
+            return lateInstantiation && (entity.type == ProjectileID.SoulDrain) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LifeDrainToggle;
         }
 
         int timer = 0;
@@ -142,29 +142,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 }
             }
 
-            /*
-            if (timer == 0)
-            {
-                //Smoke Explosion
-                for (int i = 0; i < 30; i++)
-                {
-                    float progress = (float)i / 30f;
-                    Vector2 smvel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(3f, 18f * (1f - progress));
-
-                    Dust sm = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<PixelatedLineSpark>(), smvel, newColor: Color.DeepSkyBlue * 1f, Scale: Main.rand.NextFloat(0.65f, 1f));
-                    sm.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.91f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 8 + Main.rand.Next(-5, 5), killEarlyTime: 40,
-    1f, 0.5f, shouldFadeColor: false);
-                }
-            }
-            */
             if (drawScale < 1f)
                 drawScale = Math.Clamp(MathHelper.Lerp(drawScale, 3f, 0.04f), 0.15f, 2f);
 
-            //float timeForPopInAnim = 30;
-            //float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
-            //drawScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0, 2.5f)); //2.5
-
-            if (drawScale >= 1f) //0.8f
+            if (drawScale >= 1f)
                 drawAlpha = Math.Clamp(MathHelper.Lerp(drawAlpha, -0.5f, 0.09f), 0f, 1f);
 
             if (drawAlpha == 0f)

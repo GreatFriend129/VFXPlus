@@ -28,7 +28,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.ChargedBlasterCannon);
+            return lateInstatiation && (item.type == ItemID.ChargedBlasterCannon) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ChargedBlasterCannonToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -39,9 +39,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
-
-
             return true;
         }
 
@@ -53,7 +50,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterCannon);
+            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterCannon) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ChargedBlasterCannonToggle;
         }
 
         int timer = 0;
@@ -318,14 +315,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             #endregion
 
-
-
-
-
-
-
             return false;
-            return base.PreAI(projectile);
         }
 
 
@@ -373,7 +363,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterOrb);
+            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterOrb) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ChargedBlasterCannonToggle;
         }
 
         int timer = 0;
@@ -450,7 +440,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             float timeForPopInAnim = 35;
             float animProgress = Math.Clamp((timer + 8) / timeForPopInAnim, 0f, 1f);
-            //overallScale = MathHelper.Lerp(0f, 1f, Easings.easeOutCubic(animProgress));
             overallScale = 0.15f + MathHelper.Lerp(0f, 0.85f, Easings.easeInOutBack(animProgress, 0f, 2f));
 
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.05f), 0f, 1f);
@@ -642,7 +631,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             return false;
-            return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
@@ -668,7 +656,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterLaser);
+            return lateInstantiation && (entity.type == ProjectileID.ChargedBlasterLaser) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ChargedBlasterCannonToggle;
         }
 
         int timer = 0;
@@ -688,15 +676,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 SoundStyle styleb = new SoundStyle("AerovelenceMod/Sounds/Effects/Item125Trim") with { Volume = .5f, Pitch = .75f, PitchVariance = .11f, MaxInstances = -1 };
                 SoundEngine.PlaySound(styleb, projectile.Center);
             }    
-            Vector2 vector148 = projectile.Center + projectile.velocity * (projectile.localAI[1] - 8f);
 
-            //laserWidth = 1f;// Math.Clamp(MathHelper.Lerp(laserWidth, 0.25f, 0.075f), 1f, 4f);
             laserAlpha = Math.Clamp(MathHelper.Lerp(laserAlpha, 1.5f, 0.1f), 0f, 1f);
 
-
-            float timeForPopInAnim = 32; //32
+            float timeForPopInAnim = 32;
             float animProgress = Math.Clamp((timer + 12) / timeForPopInAnim, 0f, 1f);
-
             laserWidth = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
 
 
@@ -728,7 +712,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            //Main.NewText(projectile.ai[1]);
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
                 DrawVertexTrail(projectile, false);
@@ -741,38 +724,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 endPoint = startPoint + projectile.velocity * (projectile.localAI[1] - 8f);
             float rot = projectile.velocity.ToRotation();
 
-            /*
-            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-            Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-
-            //Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
-            Color inBetweenOrange = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.65f);
-
-            float starRot = (float)(Main.timeForVisualEffects * 0.05f);
-            float starOuterScale = 1.2f;
-            float starInnerScale = 0.4f;
-
-            Vector2 v2sB = new Vector2(1f, 0.75f);
-            Vector2 v2s = new Vector2(0.75f, 1f);
-            //Start star
-            //Main.EntitySpriteDraw(glorb, startPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha * 0.5f, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, startPoint - Main.screenPosition, null, inBetweenOrange with { A = 0 } * 1.15f, rot, portal.Size() / 2, v2s * starOuterScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, startPoint - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 }, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
-
-            //End star
-            //Main.EntitySpriteDraw(glorb, endPos - Main.screenPosition, null, inBetweenOrange with { A = 0 } * true_alpha, rot, glorb.Size() / 2, 0.75f * true_width, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, endPoint - Main.screenPosition, null, inBetweenOrange with { A = 0 } * 1.15f, rot, portal.Size() / 2, v2s * starOuterScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, endPoint - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 }, rot, portal.Size() / 2, starInnerScale, SpriteEffects.None);
-            */
-            #endregion
-
-            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-            Texture2D bloom = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D portal = CommonTextures.RainbowRod.Value;
+            Texture2D bloom = CommonTextures.feather_circle128PMA.Value;
 
             float sinScale = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.03f) * 0.2f;
-
-            //Vector2 v2Scale = new Vector2(0.4f, 1f) * sinScale * 0.6f;
-
             float lerpXVal = MathHelper.Lerp(0.4f, 1f, laserWidth - 1f);
             float lerpYVal = MathHelper.Lerp(1f, 1.5f, laserWidth - 1f);
             Vector2 v2Scale = new Vector2(lerpXVal, lerpYVal) * sinScale * 0.6f;
@@ -781,6 +736,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 drawPosStart = startPoint - Main.screenPosition;
             Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
 
+            //Source Star
             Main.EntitySpriteDraw(portal, drawPosStart, null, Color.Black * 0.3f, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
 
             Main.EntitySpriteDraw(bloom, drawPosStart, null, col with { A = 0 } * 0.4f, rot, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
@@ -798,7 +754,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(2f, 2f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(3f, 3f), null, col with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * laserAlpha, rot, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
-
+            #endregion
             return false;
         }
 
@@ -814,8 +770,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EnergyTex").Value; //EnergyTex 700 | s06sBloom
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
+            Texture2D trailTexture = CommonTextures.EnergyTex.Value; //EnergyTex 700 | s06sBloom
+            Texture2D trailTexture2 = CommonTextures.ThinGlowLine.Value;
 
             Vector2 startPoint = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
             Vector2 endPoint = startPoint + projectile.velocity * (projectile.localAI[1] - 8f);
@@ -827,7 +783,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             Color StripColor(float progress) => Color.White * laserAlpha;
             float StripWidth(float progress) => 20f * laserWidth * sineWidthMult; //25
-            float StripWidth2(float progress) => 25f * laserWidth * sineWidthMult;
             //^ Doing Easings.easeOutQuad(progress) * Easings.easeInQuad(progress) gives a really nice zigzag patter (or do 1f - EaseIn)
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -849,9 +804,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            ///vertexStrip.DrawTrail();
             vertexStrip.DrawTrail();
-
 
 
             Color inBetween = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.35f);
@@ -869,14 +822,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             myEffect.Parameters["glowIntensity"].SetValue(2.5f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
-
-            //Over layer
-            //myEffect.Parameters["ColorOne"].SetValue(Color.DeepSkyBlue.ToVector3() * 10f);
-            //myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-            //myEffect.Parameters["glowIntensity"].SetValue(2.5f);
-            //myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            //vertexStrip.DrawTrail();
-
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
             #endregion

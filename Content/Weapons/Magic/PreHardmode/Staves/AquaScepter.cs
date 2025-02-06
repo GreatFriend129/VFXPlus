@@ -22,10 +22,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     
     public class AquaScepter : GlobalItem 
     {
-        //I think we need this?
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.AquaScepter);
+            return lateInstatiation && (item.type == ItemID.AquaScepter) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.AquaScepter;
         }
 
         public override void SetDefaults(Item entity)
@@ -51,10 +50,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<GlowFlare>(),
                     velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(5, 16),
                     newColor: col, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.5f);
-
-                //dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    //1f, 0.5f); //80
-
             }
 
             return true;
@@ -65,10 +60,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     {
         public override bool InstancePerEntity => true;
 
-
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.WaterStream);
+            return lateInstantiation && (entity.type == ProjectileID.WaterStream) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.AquaScepter;
         }
 
         int timer = 0;
@@ -77,7 +71,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             if (timer == 0)
                 projectile.ai[2] = projectile.scale;
 
-            int trailCount = 60; ///60
+            int trailCount = 60;
             previousRotations.Add(projectile.velocity.ToRotation());
             previousPostions.Add(projectile.Center);
 
@@ -86,20 +80,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
-
-            bool addInBetween = false;
-            if (addInBetween)
-            {
-                previousRotations.Add(projectile.velocity.ToRotation());
-                previousPostions.Add(projectile.Center + projectile.velocity * 0.5f);
-
-                if (previousRotations.Count > trailCount)
-                    previousRotations.RemoveAt(0);
-
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
-            }
-
 
             if (timer % 2 == 0 && timer > 3 && Main.rand.NextBool(2))
             {
@@ -150,16 +130,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Lighting.AddLight(projectile.Center, Color.DodgerBlue.ToVector3() * 0.75f);
 
             return false;
-            return base.PreAI(projectile);
         }
 
-        float fadeInAlpha = 0f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            //Utils.DrawBorderString(Main.spriteBatch, "" + projectile.scale, projectile.Center - Main.screenPosition, Color.White);
-            
+        {            
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
                 Draw(projectile);
@@ -170,7 +146,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public void Draw(Projectile projectile)
         {
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = CommonTextures.Flare.Value;
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -185,8 +161,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
                     float startScale = projectile.ai[2] + sineScale;
 
-                    //Color col = Color.DodgerBlue;
-                    Color col = Color.Lerp(Color.DodgerBlue, Color.MediumBlue, 1f - progress);
+                    Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f);
+                    Color col = Color.Lerp(between, Color.MediumBlue, 1f - progress);
 
                     float easedFadeValue = progress * progress;
 
@@ -195,8 +171,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                     Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
 
                     //Black
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.4f * easedFadeValue,
-                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * easedFadeValue,
+                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
                     //Main
                     Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.75f * easedFadeValue,
@@ -227,40 +203,15 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                     Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
                     Main.dust[a].velocity *= ((i * 0.06f));
                     Main.dust[a].velocity += projectile.velocity * 0.5f;
-
-
-                    //int a = GlowDustHelper.DrawGlowDust(pos, 0, 0, ModContent.DustType<GlowCircleFlare>(), Color.DodgerBlue, 0.4f, 0.4f, 2.5f, dustShader);
-                    //Main.dust[a].fadeIn = 1;
-                    //Main.dust[a].velocity *= ((i * 0.03f));
                 }
             }
 
-            //CHANGE BACK TO 0.2 Vol
+            //CHANGE BACK TO 0.2 Vol????
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.08f, Pitch = .5f, PitchVariance = 0.5f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
-
-            //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.25f, Pitch = .5f, PitchVariance = 0.2f, MaxInstances = 1 }; 
-            //SoundEngine.PlaySound(style, projectile.Center);
-
-
             return base.PreKill(projectile, timeLeft);
         }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_crystal_impact_" + soundVariant1) with { Volume = 0.45f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1, };
-            //SoundEngine.PlaySound(style, projectile.Center);
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-           
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
 }

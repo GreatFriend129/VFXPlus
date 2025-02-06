@@ -1,0 +1,136 @@
+Items: {
+	DebugItem: {
+		DisplayName: Debug Item
+		Tooltip: ""
+	}
+
+	EnergyShield: {
+		DisplayName: Energy Shield
+		Tooltip: ""
+	}
+
+	Shocklash: {
+		DisplayName: Shocklash
+		Tooltip: ""
+	}
+}
+
+Projectiles: {
+	MusketHeldProj.DisplayName: Musket Held Proj
+	ShadowflameTendrilVFX.DisplayName: Shadowflame Tendril V F X
+	HeatRayVFX.DisplayName: Heat Ray V F X
+	ThunderBall.DisplayName: Thunder Ball
+	SolsearBombExplosion.DisplayName: Solsear Bomb Explosion
+	OrbTests.DisplayName: Orb Tests
+	GoozmaPrismStudy.DisplayName: Goozma Prism Study
+	CurvingFeather.DisplayName: Curving Feather
+	OrbitingFeather.DisplayName: Orbiting Feather
+	StopAndStartFeather.DisplayName: Stop And Start Feather
+	StraightFeather.DisplayName: Straight Feather
+	TalonSlash.DisplayName: Talon Slash
+	WindBarrier.DisplayName: Wind Barrier
+	SupernovaScatterSots.DisplayName: Supernova Scatter Sots
+	ClingerStaffVFX.DisplayName: Clinger Staff V F X
+	RainbowGunVFX.DisplayName: Rainbow Gun V F X
+	EnergyShieldDash.DisplayName: Energy Shield Dash
+	ElectricityBolt.DisplayName: Electricity Bolt
+	ShocklashProjectile.DisplayName: Shocklash Projectile
+	MadisonTornado.DisplayName: Madison Tornado
+	ExplodingExplosionTest.DisplayName: Exploding Explosion Test
+	FFWindOrb.DisplayName: F F Wind Orb
+	ShadowbeamStaffVFX.DisplayName: Shadowbeam Staff V F X
+	VilethornVFX.DisplayName: Vilethorn V F X
+	LifeDrainVFX.DisplayName: Life Drain V F X
+	TornadoTest.DisplayName: Tornado Test
+	GraydeeTileShockwave.DisplayName: Graydee Tile Shockwave
+	OtherWindOrb.DisplayName: Other Wind Orb
+	LunarExplosionAnim.DisplayName: Lunar Explosion Anim
+	BasicOrbitingFeather.DisplayName: Basic Orbiting Feather
+	SpinShotFeather.DisplayName: Spin Shot Feather
+	Stormwall.DisplayName: Stormwall
+	WindPulse.DisplayName: Wind Pulse
+	UmbrellaTelegraph.DisplayName: Umbrella Telegraph
+	WindAnimTest.DisplayName: Wind Anim Test
+	FireBar.DisplayName: Fire Bar
+	InfernoForkVFX.DisplayName: Inferno Fork V F X
+	BurdenOfFleshBeam.DisplayName: Burden Of Flesh Beam
+	RazorpineVFX.DisplayName: Razorpine V F X
+	LightningTest.DisplayName: Lightning Test
+	JuttedLightning.DisplayName: Jutted Lightning
+	MagnetSphereLightningVFX.DisplayName: Magnet Sphere Lightning V F X
+	RainbowSigilTest.DisplayName: Rainbow Sigil Test
+}
+
+Configs: {
+	VFXPlusClientConfig: {
+		DisplayName: V F X Plus Client Config
+
+		ScreenshakeIntensity: {
+			Label: Screenshake Intensity
+			Tooltip: ""
+		}
+
+		CyvercryAIOverride: {
+			Label: Cyvercry A I Override
+			Tooltip: ""
+		}
+	}
+
+	VFXPlusConfig: {
+		DisplayName: V F X Plus Config
+
+		ScreenshakeIntensity: {
+			Label: Screenshake Intensity
+			Tooltip: ""
+		}
+
+		CyvercryAIOverride: {
+			Label: Cyvercry A I Override
+			Tooltip: ""
+		}
+	}
+
+	VFXPlusConfigToggles.DisplayName: VFXPlus Config Toggles
+
+	VFXPlusToggles: {
+		DisplayName: VFXPlus Toggles
+
+		MagicToggle: {
+			Label: Magic Weapons
+			Tooltip: ""
+		}
+	}
+
+	MagicToggles: {
+		Tooltip: ""
+
+		Headers: {
+			Wands: Wands
+			MagicGuns: Magic Guns
+			Tomes: Tomes
+			Misc: Misc
+		}
+
+		WandOfSparkingToggle: {
+			Label: Wand Of Sparking
+			Tooltip: ""
+		}
+
+		SpaceGunToggle: {
+			Label: Space Gun
+			Tooltip: ""
+		}
+
+		WaterboltToggle: {
+			Label: Waterbolt Toggle
+			Tooltip: ""
+		}
+
+		ShadowflameHexDollToggle: {
+			Label: Shadowflame Hex Doll Toggle
+			Tooltip: ""
+		}
+	}
+}
+
+NPCs.FeatheredFoe.DisplayName: Feathered Foe

@@ -21,7 +21,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
     
     public class SapphireStaff : GlobalItem 
     {
-
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
             return lateInstatiation && (item.type == ItemID.SapphireStaff);
@@ -36,9 +35,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_109") with { Pitch = .85f, PitchVariance = 0.15f, Volume = 0.85f };
-            //SoundEngine.PlaySound(style, player.Center);
-
             SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = 0.8f, Pitch = .25f, PitchVariance = 0.05f };
             SoundEngine.PlaySound(style4, player.Center);
 
@@ -48,7 +44,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_20") with { Volume = 0.65f, Pitch = .45f, PitchVariance = 0.1f};
             SoundEngine.PlaySound(style2, player.Center);
 
-            
             return true;
         }
 
@@ -180,17 +175,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             return false;
         }
 
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
-            //SoundEngine.PlaySound(style, projectile.Center);
 
             return base.OnTileCollide(projectile, oldVelocity);
         }

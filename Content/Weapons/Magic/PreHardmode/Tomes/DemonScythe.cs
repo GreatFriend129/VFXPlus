@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.DemonScythe);
+            return lateInstatiation && (item.type == ItemID.DemonScythe) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.DemonScytheToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -53,7 +53,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.DemonScythe);
+            return lateInstantiation && (entity.type == ProjectileID.DemonScythe) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.DemonScytheToggle;
         }
 
         int timer = 0;
@@ -111,10 +111,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            //Utils.DrawBorderString(Main.spriteBatch, "" + projectile.aiStyle, projectile.Center + new Vector2(0f, -100) - Main.screenPosition, Color.White);
-
-            Texture2D pixelSwirl = Mod.Assets.Request<Texture2D>("Assets/Pixel/PixelSwirl").Value;
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D pixelSwirl = CommonTextures.PixelSwirl.Value;
+            Texture2D star = CommonTextures.RainbowRod.Value;
 
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -124,19 +122,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
 
-            Color newPurple = new Color(61, 2, 92); //new Color(121, 7, 179);
+            Color newPurple = new Color(61, 2, 92);
             Color darkPurple = new Color(42, 2, 82);
 
 
             //Pixel Swirl
-            Main.EntitySpriteDraw(pixelSwirl, drawPos, null, darkPurple with { A = 0 } * fadeInAlpha * 1.25f, projectile.rotation, pixelSwirl.Size() / 2f, projectile.scale * 0.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(pixelSwirl, drawPos, null, darkPurple with { A = 0 } * fadeInAlpha * 1.5f, projectile.rotation, pixelSwirl.Size() / 2f, projectile.scale * 0.75f, SpriteEffects.None);
 
             //Main tex
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
 
 
             //Star
-            Vector2 starPos = drawPos;// + new Vector2(0f * projectile.scale, 15f).RotatedBy(projectile.rotation);
+            Vector2 starPos = drawPos;
 
             float starScale = MathHelper.Lerp(1.5f, 0f, Easings.easeOutQuad(fadeInAlpha)) * projectile.scale;
 
@@ -146,14 +144,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             //Border
             for (int i = 0; i < 4; i++)
             {
-                float dist = MathHelper.Lerp(60f, 5f, fadeInAlpha);
+                float dist = MathHelper.Lerp(60f, 4f, fadeInAlpha);
                 float scale = MathHelper.Lerp(2.2f, 1.1f, Easings.easeInBack(fadeInAlpha)); //2.25
-                float alpha = Easings.easeInSine(fadeInAlpha);
+                float alpha = Easings.easeInCubic(fadeInAlpha);
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
 
                 Main.EntitySpriteDraw(vanillaTex, drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.03f * projectile.direction), sourceRectangle,
-                    newPurple with { A = 0 } * alpha * 1f, projectile.rotation, TexOrigin, projectile.scale * scale, SpriteEffects.None);
+                    newPurple with { A = 0 } * alpha * 1.25f, projectile.rotation, TexOrigin, projectile.scale * scale, SpriteEffects.None);
             }
 
 
@@ -163,7 +161,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-
             SoundStyle style = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = .25f, Pitch = -.32f, PitchVariance = .15f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
@@ -176,17 +173,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             for (int i = 0; i < 30 + Main.rand.Next(1, 7); i++)
             {
-
                 int a = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.Shadowflame, Alpha: 100, Scale: projectile.scale);
 
                 Main.dust[a].velocity += projectile.velocity * 0.25f;
-
                 Main.dust[a].noGravity = true;
-
             }
 
             return false;
-            return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)

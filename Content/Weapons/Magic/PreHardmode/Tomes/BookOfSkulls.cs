@@ -26,7 +26,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.BookofSkulls);
+            return lateInstatiation && (item.type == ItemID.BookofSkulls) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BookOfSkullsToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -56,7 +56,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BookOfSkullsSkull);
+            return lateInstantiation && (entity.type == ProjectileID.BookOfSkullsSkull) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BookOfSkullsToggle;
         }
 
 
@@ -74,6 +74,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
+            //Add a second position to the trail
             previousRotations.Add(projectile.velocity.ToRotation());
             previousPostions.Add(projectile.Center + projectile.velocity * 0.5f);
 
@@ -83,15 +84,16 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
+            //FadeIn
             float progress = Math.Clamp((timer + 5) / 40f, 0f, 1f); //timer / 50
             fadeInAlpha = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 0f));
             scaleFadeIn = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 2f));
 
+            //Trailing Fire Dust
             if (timer % 2 == 0 && timer > 10)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity;
-
 
                 Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
                 float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 1.25f;
@@ -197,7 +199,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             #endregion
 
             timer++;
-
             return false;
         }
 
@@ -222,7 +223,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             SpriteEffects se = projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
             //Orb
-            Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D Glow = CommonTextures.feather_circle128PMA.Value;
 
             Color orbCol1 = Color.Yellow * 0.75f;
             Color orbCol2 = Color.Orange * 0.525f;
@@ -252,7 +253,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 1f, projectile.velocity.ToRotation(), TexOrigin, projectile.scale * scaleFadeIn, se);
 
-
             return false;
         }
 
@@ -262,7 +262,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             if (giveUp)
                 return;
 
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
+            Texture2D trailTexture = CommonTextures.Extra_196_Black.Value;
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
@@ -283,12 +283,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             myEffect.Parameters["progress"].SetValue(timer * 0.08f);
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
 
-
             myEffect.Parameters["glowThreshold"].SetValue(0.4f);
             myEffect.Parameters["glowIntensity"].SetValue(2.5f);
             myEffect.Parameters["reps"].SetValue(1f);
 
-            //UnderLayer
+            //Black UnderLayer
             myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);

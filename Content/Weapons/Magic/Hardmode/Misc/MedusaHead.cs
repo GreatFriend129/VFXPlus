@@ -21,34 +21,13 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class MedusaHead : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.MedusaHead);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-            return true;
-        }
-
-    }
     public class MedusaHeadHeldProjOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.MedusaHead);
+            return lateInstantiation && (entity.type == ProjectileID.MedusaHead) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MedusaHeadToggle;
         }
 
         int timer = 0;
@@ -66,10 +45,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             float timeForPopInAnim = 25;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
+            float animProgress = Math.Clamp((timer + 12) / timeForPopInAnim, 0f, 1f);
 
             projectile.scale = 0.5f + MathHelper.Lerp(0f, 0.5f, Easings.easeInOutBack(animProgress, 1f, 3f));
-            drawAlpha = 1f;// Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.08f), 0f, 1f);
+            drawAlpha = 1f;
 
             timer++;
 
@@ -83,7 +62,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
@@ -123,13 +102,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             //We MUST return true here because otherwise the rays dont ever run PreDraw for some reason
             return true;
-
-            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity * drawAlpha, projectile.rotation, TexOrigin, projectile.scale * drawScale, se);
-
-            //if (projectile.ai[0] > 0)
-                //Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(5f, 5f), sourceRectangle, Color.Gold with { A = 0 } * 0.5f * projectile.Opacity * drawAlpha, projectile.rotation, TexOrigin, projectile.scale * drawScale, se);
-
-            return false;
         }
 
         public override void PostDraw(Projectile projectile, Color lightColor)
@@ -150,18 +122,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (projectile.ai[0] > 0)
             {
                 //ai[0] becomes 60 once rays are shot and goes to 0 (ai[0]--)
-
                 //Utils.GetLerpValue give the progress between to and from (ie t = 50, from = 0, to = 100 gives 0.5 because 50 is halfway to 100)
                 
                 float progress = Utils.GetLerpValue(20f, 40f, projectile.ai[0], clamped: true);
                 float progress2 = 1f - Utils.GetLerpValue(40f, 60f, projectile.ai[0], clamped: true) * 0.5f;
 
-                //float scale = 1f * Easings.easeOutSine(progress);
 
-
-                //Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
-                Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/flare_12").Value;
-                Vector2 originPoint = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
+                Texture2D orb = CommonTextures.flare_12.Value;
+                Vector2 originPoint = projectile.Center - Main.screenPosition + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
 
                 Color col1 = Color.LightGoldenrodYellow * 0.75f;
                 Color col2 = Color.Gold * 0.525f;
@@ -191,7 +159,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.MedusaHeadRay;
+            return lateInstantiation && entity.type == ProjectileID.MedusaHeadRay && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MedusaHeadToggle;
         }
 
         float overallWidth = 0.05f;
@@ -216,7 +184,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 Dust d = Dust.NewDustPerfect(startPos + posOffset, ModContent.DustType<LineSpark>(), vel * 2.5f, newColor: Color.Goldenrod * 0.5f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.25f);
                 d.noLight = false;
-                //d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.95f, timeToStartShrink: 0, postShrinkPower: 0.9f, killEarlyTime: 5, XScale: 0.3f, YScale: 0.35f, shouldFadeColor: false);
 
                 d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.83f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 3 + Main.rand.Next(-5, 5), killEarlyTime: 40,
                     1f, 0.5f, shouldFadeColor: false);
@@ -236,7 +203,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 DrawRay(projectile, false);
             });
-            DrawRay(projectile, true);
 
             return false;
         }
@@ -248,9 +214,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             float easedWidth = Easings.easeInOutBack(overallWidth, 0f, 2f);
 
-            Texture2D beam = Mod.Assets.Request<Texture2D>("Assets/Pixel/Medusa_Gray").Value;
+            Texture2D beam = CommonTextures.Medusa_Gray.Value;
 
-            Vector2 startPosition = projectile.Center;
+            Vector2 startPosition = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
             Vector2 goalPosition = startPosition + storedVelocity;
             Vector2 drawPosition = startPosition - Main.screenPosition;
 

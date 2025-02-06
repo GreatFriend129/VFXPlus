@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.BeeGun);
+            return lateInstatiation && (item.type == ItemID.BeeGun) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BeeGunToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -60,25 +60,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
             }
 
-            bool vanillaSound = false;
-            if (vanillaSound)
-            {
-                SoundEngine.PlaySound(SoundID.Item11, player.Center);
-            }
-            else
-            {
-                SoundEngine.PlaySound(SoundID.Item11, player.Center);
+            SoundEngine.PlaySound(SoundID.Item11, player.Center);
 
-                //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_11") with { Volume = 0.75f, Pitch = 0f, PitchVariance = .15f, MaxInstances = -1 };
-                //SoundEngine.PlaySound(style2, player.Center);
-
-                SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.15f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
-                SoundEngine.PlaySound(style, player.Center);
-
-                //SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/JuniorShot") with { Volume = 0.2f, Pitch = 0f, PitchVariance = .2f, MaxInstances = -1 }; 
-                //SoundEngine.PlaySound(style3, player.Center);
-            }
-
+            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.15f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
 
             return true;
         }

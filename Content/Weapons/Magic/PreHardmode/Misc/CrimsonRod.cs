@@ -24,7 +24,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.CrimsonRod);
+            return lateInstatiation && (item.type == ItemID.CrimsonRod) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrimsonRodToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -48,7 +48,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BloodCloudMoving);
+            return lateInstantiation && (entity.type == ProjectileID.BloodCloudMoving) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrimsonRodToggle;
         }
 
         int timer = 0;
@@ -77,7 +77,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             {
                 Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
 
-                Color col = Color.Crimson * 0.4f;//Color.Lerp(Color.Blue, Color.DodgerBlue, 0.85f) * 0.4f;
+                Color col = Color.Crimson * 0.4f;
 
                 Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<ElectricSparkBasic>(), dustVel, newColor: col with { A = 0 }, Scale: Main.rand.NextFloat(0.4f, 0.6f) * 1f);
                 da.velocity -= projectile.velocity.RotatedByRandom(0.25f) * 0.25f;
@@ -104,6 +104,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
+            Color moreCrimson = new Color(250, 90, 125);
+
             //After-Image
             if (previousRotations != null && previousPostions != null)
             {
@@ -111,7 +113,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 {
                     float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Red, Color.Crimson, progress) * progress * projectile.Opacity;
+                    Color col = Color.Lerp(Color.Red, moreCrimson, progress) * progress * projectile.Opacity;
 
                     float size2 = 0.5f + (progress * 0.5f) * projectile.scale * drawScale;
 
@@ -129,7 +131,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             {
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.Crimson with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * drawScale, SpriteEffects.None);
+                    moreCrimson with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * drawScale, SpriteEffects.None);
             }
 
             //Main
@@ -146,7 +148,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BloodCloudRaining);
+            return lateInstantiation && (entity.type == ProjectileID.BloodCloudRaining) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrimsonRodToggle;
         }
 
         float inFadePower = 0f;
@@ -177,7 +179,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
                 ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.94f, FadeVelPower: 0.93f, Pixelize: true, XScale: 1f, YScale: 0.5f, WhiteLayerPower: 0f, UnderGlowPower: 1f);
                 esb.randomVelRotatePower = 0.1f;
-                //Main.dust[da].customData = esb;
             }
 
             //Initial burst 
@@ -194,12 +195,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             //Orb Bloom
-            Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
+            Texture2D glorb = CommonTextures.PartiGlowPMA.Value; //ParitGlow
 
             Main.EntitySpriteDraw(glorb, projectile.Center - Main.screenPosition, null, Color.Crimson with { A = 0 } * projectile.Opacity * 0.25f, 
                 projectile.rotation, glorb.Size() / 2f, new Vector2(1.15f, 0.5f) * projectile.scale * 2f, SpriteEffects.None);
-
-
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -210,7 +209,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Vector2 vec2Scale = new Vector2(easeVal, 1f + (0.35f * (1f - easeVal))) * projectile.scale;
 
 
-            Color thisCol = new Color(255, 60, 35);// Color.Lerp(Color.Red, Color.Crimson, 0.85f);
+            Color moreCrimson = new Color(240, 70, 105);
+
+            Color thisCol = new Color(255, 60, 35);
 
             for (int i = 0; i < 4; i++)
             {
@@ -226,7 +227,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
-                    thisCol with { A = 0 } * 0.45f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * sinScale * vec2Scale, SpriteEffects.None);
+                    moreCrimson with { A = 0 } * 0.45f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * sinScale * vec2Scale, SpriteEffects.None);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, vec2Scale, SpriteEffects.None);
@@ -243,7 +244,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BloodRain);
+            return lateInstantiation && (entity.type == ProjectileID.BloodRain) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrimsonRodToggle;
         }
 
         public override bool PreAI(Projectile projectile)
@@ -264,10 +265,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
             float rot = projectile.rotation + MathHelper.PiOver2;
-            Color col = Color.Red;
+            Color col = Color.Crimson;
             Vector2 vec2Scale = new Vector2(1.15f, 0.6f) * projectile.scale * 0.4f * sineScale;
             
-            Main.EntitySpriteDraw(line, drawPos, null, Color.Black * projectile.Opacity * 0.3f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.Black * projectile.Opacity * 0.2f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
 
             Main.EntitySpriteDraw(line, drawPos, null, col with { A = 0 } * projectile.Opacity * 0.75f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
 
@@ -296,7 +297,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             }
 
             return false;
-            //return base.PreKill(projectile, timeLeft);
         }
 
     }

@@ -13,7 +13,6 @@ using Terraria.ID;
 using Terraria.GameContent;
 using Terraria.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
-using static tModPorter.ProgressUpdate;
 using rail;
 using VFXPlus.Common.Drawing;
 using Terraria.Audio;
@@ -22,34 +21,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
 
     //Todo explain why I use a seperate proj for this wep
-    public class ClingerStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.ClingerStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/hero_super_dash_burst") with { Volume = 0.2f, Pitch = -.25f, PitchVariance = .2f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(style, position);
-            return true;
-        }
-
-    }
     public class ClingerStaffShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ClingerStaff);
+            return lateInstantiation && (entity.type == ProjectileID.ClingerStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ClingerStaffToggle;
         }
 
         int vfx_child_index = 0;
@@ -116,6 +94,29 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
+        #region Loading
+        public static Asset<Texture2D> circle_053 = null;
+        public static Asset<Texture2D> muzzle_flash_12 = null;
+        public static Asset<Texture2D> star_07 = null;
+        public static Asset<Texture2D> circle_053Black = null;
+
+        public override void Load()
+        {
+            circle_053 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053");
+            muzzle_flash_12 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/muzzle_flash_12");
+            star_07 = ModContent.Request<Texture2D>("VFXPlus/Assets/Flare/star_07");
+            circle_053Black = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053Black");
+        }
+
+        public override void Unload()
+        {
+            circle_053 = null;
+            muzzle_flash_12 = null;
+            star_07 = null;
+            circle_053Black = null;
+        }
+        #endregion
+
         public override void SetStaticDefaults()
         {
             ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 700;
@@ -133,8 +134,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Projectile.friendly = false;
             Projectile.tileCollide = false;
 
-            //TODO make absolute sure this is longer than clinger staff time left
-            Projectile.timeLeft = 24400; 
+            Projectile.timeLeft = 25000; 
         }
 
         int timer = 0;
@@ -212,6 +212,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             }
 
+            if (timer % 1 == 0 && !shouldStopDust)
+            {
+                Vector2 vel = new Vector2(0f, Main.rand.NextFloat(-5f, -26f));
+
+                Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<MediumSmoke>(), vel,
+                    newColor: Color.GreenYellow with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.35f) * 1.35f);
+
+                d.rotation = Main.rand.NextFloat(6.28f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(8, 14) + 5, 0.94f, 0.01f, 0.075f); //12 28
+            }
+
+
             //Lighting
             DelegateMethods.v3_1 = Color.GreenYellow.ToVector3() * 1.25f * Projectile.scale * true_width;
             Utils.PlotTileLine(Projectile.Center, Projectile.Center + new Vector2(0f, -210f * Projectile.scale), 10f * true_width, DelegateMethods.CastLight);
@@ -222,12 +234,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            //return false;
-            //Draw Black UnderLayer
-            Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/circle_053").Value;
-            Texture2D glow2 = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/muzzle_flash_12").Value;
-            Texture2D glow3 = Mod.Assets.Request<Texture2D>("Assets/Flare/star_07").Value;
-            Texture2D glow4 = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/circle_053Black").Value;
+            Texture2D glow1 = circle_053.Value;
+            Texture2D glow2 = muzzle_flash_12.Value;
+            Texture2D glow3 = star_07.Value;
+            Texture2D glow4 = circle_053Black.Value;
 
             Vector2 newScale = new Vector2(1.5f, 1f * true_width) * 0.5f; //sword
             newScale *= 0.55f;
@@ -236,11 +246,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 newScale3 = new Vector2(1.5f, 0.35f * true_width) * 0.5f; //sword
             newScale3 *= 0.55f;
 
-            Vector2 origin1 = new Vector2(0f, glow.Height / 2f);
+            Vector2 origin1 = new Vector2(0f, glow1.Height / 2f);
 
             //Black Base
-            Main.spriteBatch.Draw(glow, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale3, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(glow, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale2, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale3, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale2, SpriteEffects.None, 0f);
 
             //Bloom
             Color newGreen = new Color(100, 255, 34) * true_width;
@@ -253,8 +263,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 DrawFire(false);
             });
-            // v^v Using a seperate method so I can easily change between pixelating and not pixelating     
-            //DrawFire(true);
+            //Using a seperate method so I can easily change between pixelating and not pixelating     
+            //DrawFire(false);
             return false;
         }
 
@@ -263,9 +273,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (quitInstantly)
                 return;
 
-            Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/circle_053").Value;
-            Texture2D glow2 = Mod.Assets.Request<Texture2D>("Assets/MuzzleFlashes/muzzle_flash_12").Value;
-            Texture2D glow3 = Mod.Assets.Request<Texture2D>("Assets/Flare/star_07").Value;
+            Texture2D glow = circle_053.Value;
+            Texture2D glow2 = muzzle_flash_12.Value;
+            Texture2D glow3 = star_07.Value;
 
             float ySinVal = (float)Math.Sin(Main.timeForVisualEffects * 0.22f) * 0.15f;
             float xSinVal = (float)Math.Sin(Main.timeForVisualEffects * 0.22f) * 0.05f;
@@ -303,7 +313,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.spriteBatch.Draw(glow3, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(1f, 1f) + off, null, Color.White, Projectile.rotation + MathHelper.PiOver2, glow3.Size() / 2, newScale3, SpriteEffects.FlipVertically, 0f);
             Main.spriteBatch.Draw(glow3, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(1f, 1f) + off, null, Color.White, Projectile.rotation - MathHelper.PiOver2, glow3.Size() / 2, newScale3, SpriteEffects.FlipVertically, 0f);
 
-
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
@@ -311,10 +320,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public void ShaderParams()
         {
-            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
-            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/FlamesTextureButBlack").Value);
-            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/FlameTrail").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
+            myEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.Extra_196_Black.Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.FlamesTextureButBlack.Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(CommonTextures.FlameTrail.Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(CommonTextures.ThinGlowLine.Value);
             
             Color newGreen = new Color(100, 255, 34);
 

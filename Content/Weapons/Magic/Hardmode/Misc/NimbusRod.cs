@@ -19,33 +19,13 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class NimbusRod : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.NimbusRod);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class NimbusRodMovingOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.RainCloudMoving);
+            return lateInstantiation && (entity.type == ProjectileID.RainCloudMoving) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NimbusRodToggle;
         }
 
         int timer = 0;
@@ -116,7 +96,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                     Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
                             previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
                 }
 
             }
@@ -143,7 +122,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.RainCloudRaining);
+            return lateInstantiation && (entity.type == ProjectileID.RainCloudRaining) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NimbusRodToggle;
         }
 
         float inFadePower = 0f;
@@ -174,7 +153,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.94f, FadeVelPower: 0.93f, Pixelize: true, XScale: 1f, YScale: 0.5f, WhiteLayerPower: 0f, UnderGlowPower: 1f);
                 esb.randomVelRotatePower = 0.1f;
-                //Main.dust[da].customData = esb;
             }
 
             //Initial burst 
@@ -240,7 +218,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.RainFriendly);
+            return lateInstantiation && (entity.type == ProjectileID.RainFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NimbusRodToggle;
         }
 
         public override bool PreAI(Projectile projectile)
@@ -261,7 +239,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
             float rot = projectile.rotation + MathHelper.PiOver2;
-            Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, 0.8f);
+            Color col = Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f);
             Vector2 vec2Scale = new Vector2(1.15f, 0.6f) * projectile.scale * 0.4f * sineScale;
             
             Main.EntitySpriteDraw(line, drawPos, null, Color.Black * projectile.Opacity * 0.3f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
@@ -270,7 +248,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 
             Vector2 offset = new Vector2(0f, 10f * projectile.scale);
             Vector2 randomOffset = Main.rand.NextVector2Circular(1.5f, 1.5f);
-            Main.EntitySpriteDraw(line, drawPos + offset + randomOffset, null, Color.DeepSkyBlue with { A = 0 } * projectile.Opacity * 0.7f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 0.8f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos + offset + randomOffset, null, Color.DeepSkyBlue with { A = 0 } * projectile.Opacity * 0.4f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 0.8f, SpriteEffects.None);
 
             return false;
 
@@ -289,7 +267,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             return false;
-            //return base.PreKill(projectile, timeLeft);
         }
 
     }

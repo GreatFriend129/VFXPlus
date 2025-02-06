@@ -23,13 +23,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && ((item.type == ItemID.ZapinatorGray) || (item.type == ItemID.ZapinatorOrange));
+            return lateInstatiation && ((item.type == ItemID.ZapinatorGray) || (item.type == ItemID.ZapinatorOrange)) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ZapinatorToggle;
         }
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-
             entity.scale = 1f;
             base.SetDefaults(entity); 
         }
@@ -41,13 +39,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = .12f, Pitch = .1f, PitchVariance = .15f, MaxInstances = 1 };
-            //SoundEngine.PlaySound(style, player.Center);
-
-            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_1") with { Pitch = .85f, PitchVariance = .2f, Volume = 0.25f };
-            //SoundEngine.PlaySound(style2, player.Center);
-
-
             //Dust
             for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
             {
@@ -59,10 +50,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                     newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.4f, 0.65f) * 0.3f);
 
                 dp.alpha = 10;
-
-                //dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    //0.95f, 0.5f); //80
-
             }
 
             return true;
@@ -74,7 +61,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ZapinatorLaser);
+            return lateInstantiation && (entity.type == ProjectileID.ZapinatorLaser) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ZapinatorToggle;
         }
 
         int timer = 0;
@@ -89,14 +76,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                 Main.dust[a].velocity *= 0.75f;
                 Main.dust[a].velocity += projectile.velocity * 0.35f;
             }
+
+            float timeForPopInAnim = 60;
+            float animProgress = Math.Clamp((timer + 20) / timeForPopInAnim, 0f, 1f);
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 2.5f)) * 1f;
+
             timer++;
             return true;
         }
 
+        float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            
-            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D Tex = CommonTextures.Flare.Value;
             Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -30);
@@ -105,20 +97,23 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             Vector2 TexOrigin = Tex.Size() / 2f;
             Vector2 Tex2Origin = Tex2.Size() / 2f;
 
-            float opacity = projectile.Opacity;//Easings.easeInCirc(projectile.Opacity);
+            float opacity = 1f;
 
             Color color1 = Color.DodgerBlue with { A = 0 } * opacity;
             Color color2 = Color.White with { A = 0 } * opacity;
             Color color3 = Color.DeepSkyBlue with { A = 0 } * opacity;
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.Black * 0.7f, drawRot, TexOrigin, new Vector2(2.1f, 0.4f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale * 0.9f, SpriteEffects.None, 0f);
 
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.35f, drawRot, Tex2Origin, projectile.scale * 0.25f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, projectile.scale * 0.15f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.9f, drawRot, Tex2Origin, projectile.scale * 0.1f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex, drawPos, null, Color.Black * 0.7f, drawRot, TexOrigin, new Vector2(2.1f, 0.4f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale * 0.9f, SpriteEffects.None, 0f);
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.9f, drawRot, TexOrigin, new Vector2(2.1f, 0.4f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale, SpriteEffects.None, 0f);
+            Vector2 lineScale = new Vector2(projectile.scale, projectile.scale) * overallScale;
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, lineScale * 0.15f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.9f, drawRot, Tex2Origin, lineScale * 0.1f, SpriteEffects.None, 0f);
 
+            Vector2 InnerLineScale = new Vector2(2.1f, 0.4f * Easings.easeInCirc(projectile.Opacity)) * projectile.scale;
+            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.9f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 } * 0.7f, drawRot, TexOrigin, InnerLineScale * 0.4f, SpriteEffects.None, 0f);
 
             return false;
 
@@ -128,14 +123,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         {
             for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++)
             {
-                //Dust p = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<GlowPixelCross>(),
-                    //projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-2f, 2f)) * Main.rand.NextFloat(0.65f, 2.5f),
-                    //newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.3f, 0.5f));
-
                 Dust p2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<GlowPixel>(),
                     projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-3f, 3f)) * Main.rand.NextFloat(0.1f, 1.75f),
                     newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.65f, 1f));
-
             }
 
             base.OnKill(projectile, timeLeft);
@@ -156,9 +146,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
                 dp.velocity *= 0.5f;
                 dp.alpha = 20;
-
-                //dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 5 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    //1f, 0.4f); 
             }
 
             base.OnHitNPC(projectile, target, hit, damageDone);

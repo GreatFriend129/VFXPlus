@@ -26,7 +26,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.NebulaBlaze);
+            return lateInstatiation && (item.type == ItemID.NebulaBlaze) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NebulaBlazeToggleToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -37,9 +37,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
-
-
             return true;
         }
 
@@ -50,7 +47,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.NebulaBlaze1);
+            return lateInstantiation && (entity.type == ProjectileID.NebulaBlaze1) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NebulaBlazeToggleToggle;
         }
 
         BaseTrailInfo trail1 = new BaseTrailInfo();
@@ -290,8 +287,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail2.gradientTime = (float)Main.timeForVisualEffects * 0.02f;
             trail2.trailTime = (float)Main.timeForVisualEffects * 0.03f;
 
-            trail1.TrailDrawing(Main.spriteBatch);
-            trail2.TrailDrawing(Main.spriteBatch);
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                trail1.TrailDrawing(Main.spriteBatch);
+                trail2.TrailDrawing(Main.spriteBatch);
+            });
+
+
 
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -532,7 +534,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.NebulaBlaze2);
+            return lateInstantiation && (entity.type == ProjectileID.NebulaBlaze2) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NebulaBlazeToggleToggle;
         }
 
         BaseTrailInfo trail1 = new BaseTrailInfo();

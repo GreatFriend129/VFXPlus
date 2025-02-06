@@ -18,13 +18,12 @@ using Terraria.ObjectData;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
-{
-    
+{ 
     public class IceRod : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.IceRod);
+            return lateInstatiation && (item.type == ItemID.IceRod) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.IceRodToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -41,14 +40,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_20") with { Volume = 0.3f, Pitch = .45f, PitchVariance = 0.15f, MaxInstances = 1 };
             SoundEngine.PlaySound(style2, player.Center);
 
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_8") with { Volume = 0.6f, PitchVariance = 0.2f, Pitch = .55f, MaxInstances = 1, };
-            //SoundEngine.PlaySound(style, player.Center);
-
-
-            //SoundStyle stylees = new SoundStyle("Terraria/Sounds/Item_117") with { Volume = 0.25f, Pitch = .8f, PitchVariance = .25f, MaxInstances = 1 };
-            //SoundEngine.PlaySound(stylees, player.Center);
-
             return true;
         }
 
@@ -59,7 +50,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.IceBlock);
+            return lateInstantiation && (entity.type == ProjectileID.IceBlock) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.IceRodToggle;
         }
 
         int timer = 0;

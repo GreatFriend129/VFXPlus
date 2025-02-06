@@ -18,29 +18,6 @@ using System.Threading;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class MagicalHarp : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.MagicalHarp);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-
-
-            return true;
-        }
-
-    }
     public class MagicalHarpShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
@@ -51,14 +28,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             bool b = entity.type == ProjectileID.EighthNote;
             bool c = entity.type == ProjectileID.TiedEighthNote;
 
-            return lateInstantiation && (a || b || c);
+            return lateInstantiation && (a || b || c) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MagicHarpToggle;
         }
 
         float fadeInAlpha = 0f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 25; //22
+            int trailCount = 25;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -69,30 +46,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 previousPostions.RemoveAt(0);
 
             if (timer % 5 == 0 && Main.rand.NextBool())
-            {
-                
+            {   
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(),
                     projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * Main.rand.NextFloat(2f, 4f),
-                    newColor: Color.Purple, Scale: Main.rand.NextFloat(0.2f, 0.25f));
+                    newColor: Color.MediumPurple, Scale: Main.rand.NextFloat(0.2f, 0.25f));
 
                 p.velocity -= projectile.velocity * 0.5f;
             }
 
-            float progress = Math.Clamp((timer + 10) / 50f, 0f, 1f);
+            float progress = Math.Clamp((timer + 9) / 45f, 0f, 1f);
             fadeInAlpha = MathHelper.Lerp(0f, 1f, progress);
 
-            /*
-            if (timer % 4 == 0 && Main.rand.NextBool() && false)
-            {
-                Dust grass = Dust.NewDustPerfect(projectile.Center, DustID.JungleGrass, Main.rand.NextVector2Circular(2, 2), 0, Scale: 0.9f);
-                grass.velocity += projectile.velocity;
-                grass.noGravity = true;
-                grass.alpha = 50;
-            }
-            */
-
             timer++;
-
             return base.PreAI(projectile);
         }
 
@@ -147,31 +112,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             return true;
-            
-            for (int i = 0; i < 9 + Main.rand.Next(1, 6); i++)
-            {
-                Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
-
-                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                    newColor: Color.Gold * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
-            }
-
-            int soundVariant1 = Main.rand.Next(3);
-            int soundVariant2 = Main.rand.Next(3);
-
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_crystal_impact_" + soundVariant1) with { Volume = 0.2f, Pitch = .05f, PitchVariance = .25f, MaxInstances = -1, }; 
-            SoundEngine.PlaySound(style, projectile.Center);
-
-            SoundStyle tile_hit = new SoundStyle("Terraria/Sounds/Dig_" + soundVariant2) with { Volume = 1f, Pitch = 0f, PitchVariance = 0f, MaxInstances = -1 }; 
-            SoundEngine.PlaySound(tile_hit, projectile.Center);
-
-            return false;
-            //return base.PreKill(projectile, timeLeft);
         }
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
 

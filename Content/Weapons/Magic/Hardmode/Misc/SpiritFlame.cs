@@ -18,36 +18,13 @@ using System.Threading;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class SpiritFlame : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.SpiritFlame);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-
-
-            return true;
-        }
-
-    }
     public class SpiritFlameShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SpiritFlame);
+            return lateInstantiation && (entity.type == ProjectileID.SpiritFlame) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.SpiritFlameToggle;
         }
 
         int timer = 0;
@@ -119,12 +96,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            //Utils.DrawBorderString(Main.spriteBatch, "" + inFadePower, projectile.Center + new Vector2(0f, -50) - Main.screenPosition, Color.White);
-
             Color purp = new Color(121, 7, 179) * inFadePower;
             Color purp2 = new Color(61, 2, 92);
 
-            Texture2D SoftGlow = Mod.Assets.Request<Texture2D>("Assets/Orbs/SoftGlow64").Value;
+            Texture2D SoftGlow = CommonTextures.SoftGlow64.Value;
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
 
@@ -135,7 +110,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             float easeVal = Easings.easeInOutBack(inFadePower, 0f, 10f);
-            //Vector2 vec2Scale = new Vector2(easeVal, (easeVal * 0.25f) + 0.75f);
             Vector2 vec2Scale = new Vector2(easeVal, 1f);
 
             //After-Image
@@ -184,11 +158,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             #region CerobaImpact
             Color littleLessPurple = new Color(121, 7, 179);
 
-            Color newPurple = new Color(61, 2, 92); //new Color(121, 7, 179);
+            Color newPurple = new Color(61, 2, 92);
             Color darkPurple = new Color(42, 2, 82);
 
-            Color purp1 = newPurple; //deep pink
-            Color purp2 = Color.Purple; // hot pink
+            Color purp1 = newPurple;
+            Color purp2 = Color.Purple;
 
             //Impact
             for (int i = 0; i < 6 + Main.rand.Next(0, 4); i++)
@@ -255,21 +229,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             return false;
         }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-
-            //base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
 }
