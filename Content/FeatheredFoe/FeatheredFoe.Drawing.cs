@@ -13,6 +13,7 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Utilities;
 using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 
 namespace VFXPlus.Content.FeatheredFoe
@@ -34,6 +35,8 @@ namespace VFXPlus.Content.FeatheredFoe
             if (windOverlayOpacity > 0.05f)
                 DrawScrollOverlay();
 
+            DrawWindDrill(-1, Color.DeepSkyBlue * 0.33f);
+
             Vector2 drawPos = NPC.Center - Main.screenPosition + (Main.rand.NextVector2Circular(7f, 7f) * randomShakePower);
             Vector2 origin = NPCTexture.Size() / 2;
 
@@ -48,7 +51,8 @@ namespace VFXPlus.Content.FeatheredFoe
             //Utils.DrawBorderString(Main.spriteBatch, "" + windOverlayOpacity, drawPos, Color.Black);
 
             DrawTriStar();
-            
+
+            DrawWindDrill(1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f) * 1f); //0.7f
 
             return false;
         }
@@ -129,5 +133,84 @@ namespace VFXPlus.Content.FeatheredFoe
             }
         }
 
+
+        public bool drawDrill = false;
+        public void DrawWindDrill(int yDir, Color color)
+        {
+            if (!drawDrill)
+                return;
+
+            FastRandom r = new("mule".GetHashCode());
+
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.25f;
+
+            var windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
+            var dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
+
+            float ringMinLength = 135f; //20f
+            float ringMaxLength = 5f; //115 //10
+
+            for (int i = 0; i < 80; i++) //160
+            {
+                Texture2D texture;
+                Rectangle frame;
+                Vector2 scale;
+                float rotation = MathHelper.PiOver2;
+                if (r.NextFloat() < 0.1f)
+                {
+                    texture = windTexture;
+                    frame = texture.Bounds;
+                    scale = new(0.15f, 0.33f); //0.3 0.66
+                }
+                else
+                {
+                    texture = dustTexture;
+                    frame = texture.Frame(verticalFrames: 3, frameY: r.Next(3));
+                    scale = new(0.5f, 0.5f);
+                    rotation += speedTime * NextFloatF(r, 0.8f, 1.2f);
+                }
+                var origin = frame.Size() / 2f;
+                float speed = NextFloatF(r, 0.8f, 4f);
+
+                float progress = (speedTime * speed + r.NextFloat()) % 3f;
+
+                float scaleWave = MathF.Sin(progress * MathHelper.Pi);
+                float waveDistance = NextFloatF(r, ringMinLength, ringMaxLength) + 10f; //40 120 overall distance of the ring
+
+                float time = speedTime * 2f;
+                float min = 1f; //Controls how much the ring sways 
+                float max = 1f; //^
+
+                float yWave = min + ((float)Math.Sin(time) + 1f) / 2f * (max - min);
+
+                float yOffset = scaleWave * waveDistance * 0.15f * yWave; //0.3 --> How wide is the gap of the ring ()
+                float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
+                var drawPosition = NPC.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -140f, 40f) + yOffset * yDir) + new Vector2(0f, 60f); //Vertical distance of the ring
+
+                //Makes the rings closer to tip smaller
+                float ringDistProg = 1f - Utils.GetLerpValue(ringMinLength, ringMaxLength, waveDistance, true);
+                float adjustedScale = 0.9f + (0.45f * ringDistProg);
+
+                Main.spriteBatch.Draw(texture, (drawPosition - Main.screenPosition).Floor(), frame, Color.Black * 0.25f, rotation - xWave / 3f * yWave * yDir, origin, 
+                    new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 3.25f, SpriteEffects.None, 0f);
+
+                Main.spriteBatch.Draw(
+                    texture,
+                    (drawPosition - Main.screenPosition).Floor(),
+                    frame,
+                    color with { A = 0 },
+                    rotation - xWave / 3f * yWave * yDir,
+                    origin,
+                    new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 3.25f,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
+        }
+
+        public float NextFloatF(FastRandom random, float min, float max)
+        {
+            return min + random.NextFloat() * (max - min);
+        }
     }
 }

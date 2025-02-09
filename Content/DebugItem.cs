@@ -57,74 +57,8 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //int bA2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<TornadoTest>(), 10, 0, player.whoAmI);
+            int bA2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * -10f, ProjectileID.FlamingArrow, 10, 0, player.whoAmI);
 
-            int bA2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<MusketTest>(), 10, 0, player.whoAmI);
-
-            int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(45f, -2f * dir).RotatedBy(velocity.ToRotation());
-
-            //Vector2 muzzlePos = position + velocity.SafeNormalize(Vector2.UnitX) * 50f;
-            for (int i = 0; i < 7; i++) //16
-            {
-                Color col1 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
-
-                float progress = (float)i / 6;
-                Color col = Color.Lerp(Color.Brown * 0.5f, col1 with { A = 0 }, progress);
-
-                Dust d = Dust.NewDustPerfect(muzzlePos, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.85f) * 1f,
-                    newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.25f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.75f); //12 28
-
-                d.rotation = Main.rand.NextFloat(6.28f);
-
-                d.velocity += velocity.SafeNormalize(Vector2.UnitX) * 0.5f;
-            }
-
-            //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(muzzlePos, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed, Scale: 0.1f);
-
-            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-                overallAlpha: 0.1f, DrawWhiteCore: true, 1f, 1f);
-
-            SoundStyle style1 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Pitch = .9f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.35f };
-            SoundEngine.PlaySound(style1, position);
-
-            SoundStyle style2 = SoundID.Item110 with { Volume = 0.35f, PitchVariance = 0.15f, Pitch = 0.25f };
-            SoundEngine.PlaySound(style2, position);
-
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .4f, Pitch = 1f, PitchVariance = 0.1f };
-            SoundEngine.PlaySound(style, position);
-
-
-            for (int i = 220; i < 1 + Main.rand.Next(2); i++)
-            {
-                Vector2 v = Main.rand.NextVector2CircularEdge(1f, 1f) * 1f;
-                Color col = Main.rand.NextBool() ? Color.OrangeRed : Color.Orange;
-                Dust sa = Dust.NewDustPerfect(muzzlePos, DustID.PortalBoltTrail, v * Main.rand.NextFloat(2f, 5f), 0,
-                    col, Main.rand.NextFloat(0.4f, 0.7f) * 1.25f);
-
-                sa.velocity += velocity.SafeNormalize(Vector2.UnitX) * 1f;
-
-                if (sa.velocity.Y > 0)
-                    sa.velocity.Y *= -1;
-            }
-
-            for (int i = 0; i < 2 + Main.rand.Next(0, 2); i++)
-            {
-                Color col1 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.25f);
-
-
-                Vector2 randomStart = Main.rand.NextVector2Circular(1.5f, 1.5f) * 1f;
-                Dust dust = Dust.NewDustPerfect(muzzlePos, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: col1, Scale: Main.rand.NextFloat(0.25f, 0.5f) * 1.5f);
-                dust.noLight = false;
-                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 0, postSlowPower: 0.89f,
-                    velToBeginShrink: 10f, fadePower: 0.9f, shouldFadeColor: false);
-
-                dust.velocity += velocity.SafeNormalize(Vector2.UnitX) * 2f;
-
-
-            }
 
             //
             for (int i = 220; i < 13 + Main.rand.Next(0, 6); i++) //2 //0,3

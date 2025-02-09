@@ -178,7 +178,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     justShotTristarPower = 1f;
                 }
 
-                windOverlayOpacityGoal = 0.4f;
+                windOverlayOpacityGoal = 0.1f;
                 windOverlayRotation = (player.Center - NPC.Center).ToRotation();
 
                 doPassiveWindParticles = true;
@@ -335,9 +335,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     float timeForOffsetShrink = 80;
                     float offsetProgress = Math.Clamp((float)timer / timeForOffsetShrink, 0f, 1f);
-                    Vector2 goalOffset = Vector2.Lerp(new Vector2(1050f * diveStartSide, 0f), new Vector2(0f + player.velocity.X * 6f, -200f), Easings.easeOutQuad(offsetProgress));
+                    Vector2 goalOffset = Vector2.Lerp(new Vector2(1050f * diveStartSide, 0f), new Vector2(0f + player.velocity.X * 18f, -200f), Easings.easeOutQuad(offsetProgress)); //vel * 6f
 
-                    //BasicMovementVariant1(goalPos + goalOffset, accel: 0.07f, maxSpeed: 25f, minSpeed: 3f);
                     BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 4f); //3.5
 
                 }
@@ -347,7 +346,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     Vector2 goalVel = new Vector2(NPC.velocity.X * 0.7f, 30f); //23
                     
                     float timeProgress = Math.Clamp((float)((timer - timeToStartDive) / timeForMovement), 0f, 1f);
-                    NPC.velocity = Vector2.Lerp(initialVel, goalVel, Easings.easeInOutQuad(timeProgress));// Easings.easeInOutSine(timeProgress));
+                    NPC.velocity = Vector2.Lerp(initialVel, goalVel, Easings.easeInOutSine(timeProgress));// inoutquad
 
                     bool shouldShootFeahters = NPC.velocity.Y > 7; 
 
@@ -378,10 +377,38 @@ namespace VFXPlus.Content.FeatheredFoe
                             p.customData = wlb;
                         }
                     }
+
+                    if (shouldShootFeahters && Main.rand.NextBool(2))
+                    {
+                        Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
+
+                        Dust p = Dust.NewDustPerfect(NPC.Center + Main.rand.NextVector2Circular(50f, 50f), ModContent.DustType<WindLine>(), vel + NPC.velocity * 0.75f,
+                            newColor: Color.DeepSkyBlue, Scale: 0.65f);
+
+                        WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.96f, TimeToStartShrink: 15, ShrinkYScalePower: 0.8f, 1f, 0.4f, true);
+                        p.customData = wlb;
+                    }
+
+                    if (shouldShootFeahters)
+                    {
+                        windOverlayOpacityGoal = 0.5f;
+                        windOverlayRotation = MathHelper.PiOver2;
+                    }
+
+                    bool shouldStartDrill = NPC.velocity.Y > 14;
+                    if (shouldStartDrill)
+                        drawDrill = true;
+
+                    doPassiveWindParticles = true;
+                    passiveWindParticleDirection = MathHelper.PiOver2;
                 }
 
                 if (timer == timeToStartDive + timeForMovement + 35)
                 {
+                    drawDrill = false;
+
+                    doPassiveWindParticles = false;
+                    windOverlayOpacityGoal = 0f;
                     timer = -1;
                 }
 

@@ -61,7 +61,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             Color between = Color.Lerp(Color.ForestGreen, Color.LawnGreen, 0.65f);
 
             Color trailCol = Color.Lerp(Color.ForestGreen, Color.LawnGreen, 0.45f);
-            trail1.trailColor = trailCol * totalAlpha * 0.75f;
+            Color newTrailCol = Color.Lerp(Color.White, trailCol, 0.85f);
+            trail1.trailColor = newTrailCol * totalAlpha * 0.75f; //0.75f
             trail1.timesToDraw = 2;
 
 

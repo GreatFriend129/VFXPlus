@@ -1756,6 +1756,47 @@
             <param name="mod">The mod to calculate bestiary completeness (null for Terraria)</param>
             <returns>A float ranging from 0 to 1 representing the completeness of the bestiary or returns -1 if the mod has no entries</returns>
         </member>
+        <member name="T:Terraria.GameContent.Bestiary.BestiaryEntryUnlockState">
+            <inheritdoc cref="F:Terraria.GameContent.Bestiary.BestiaryUICollectionInfo.UnlockState"/>
+        </member>
+        <member name="F:Terraria.GameContent.Bestiary.BestiaryUICollectionInfo.UnlockState">
+            <summary>
+            Indicates the extent to how unlocked this bestiary entry is. Use this to determine how detailed of information to provide in a <see cref="T:Terraria.GameContent.Bestiary.IBestiaryInfoElement"/>. The <see href="https://terraria.wiki.gg/wiki/Bestiary">Bestiary page on the wiki</see> has more information.
+            </summary>
+        </member>
+        <member name="T:Terraria.GameContent.Bestiary.IBestiaryInfoElement">
+            <summary>
+            Provides a bestiary UI element to show to the user in the bestiary.
+            </summary>
+        </member>
+        <member name="M:Terraria.GameContent.Bestiary.IBestiaryInfoElement.ProvideUIElement(Terraria.GameContent.Bestiary.BestiaryUICollectionInfo)">
+            <summary>
+            Use to create the UIElement for this bestiary entry. Called when the bestiary entry is clicked in-game. Use <see cref="F:Terraria.GameContent.Bestiary.BestiaryUICollectionInfo.UnlockState"/> to dynamically populate the UI according to how fully unlocked this particular bestiary entry is. Return null if no UIElement should be provided, which is usually the case for NPC never encountered.
+            <code>
+            if (info.UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0)
+            	return null;
+            	
+            // other code creating and returning a UIElement showing info
+            </code>
+            </summary>
+        </member>
+        <member name="P:Terraria.GameContent.Bestiary.IBestiaryPrioritizedElement.OrderPriority">
+            <summary>
+            Higher priority values are shown before (higher up) other elements in the same Bestiary info category (<see cref="T:Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage.BestiaryInfoCategory"/>). Defaults to 0.
+            <para/> Use <see cref="P:Terraria.GameContent.Bestiary.ICategorizedBestiaryInfoElement.ElementCategory"/> to dictate which category this element belongs to.
+            </summary>
+        </member>
+        <member name="T:Terraria.GameContent.Bestiary.ICategorizedBestiaryInfoElement">
+            <summary>
+            Allows categorizing Bestiary UI Elements into existing categories. <see cref="T:Terraria.GameContent.Bestiary.IBestiaryInfoElement"/> that are not vanilla Types without this interface will be placed at the bottom in the <see cref="F:Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage.BestiaryInfoCategory.Misc"/> category.
+            </summary>
+        </member>
+        <member name="P:Terraria.GameContent.Bestiary.ICategorizedBestiaryInfoElement.ElementCategory">
+            <summary>
+            The category to place this element inside of, which corresponds to the order of the bestiary elements.
+            <para/> Use <see cref="P:Terraria.GameContent.Bestiary.IBestiaryPrioritizedElement.OrderPriority"/> to dictate a relative ordering within a category.
+            </summary>
+        </member>
         <member name="F:Terraria.GameContent.ChildSafety.SafeGore">
             <summary>
             If <see langword="false"/> for a given gore type (<see cref="F:Terraria.Gore.type"/>), then that gore will turn into a puff of smoke when Blood and Gore is disabled.
@@ -2174,6 +2215,9 @@
             </code>
             <para/> See <see href="https://github.com/tModLoader/tModLoader/wiki/Assets#preload-textures">the Asset wiki page</see> for more information.
             </summary>
+        </member>
+        <member name="M:Terraria.GameContent.TownNPCProfiles.GetHeadIndexSafe(Terraria.NPC)">
+            <summary> Retrieves the head index of this town NPC, accounting for shimmer and other variants. Returns -1 if no head index found. (See also <see cref="F:Terraria.GameContent.TextureAssets.NpcHead"/>, <see cref="T:Terraria.ModLoader.AutoloadHead"/>, <see cref="M:Terraria.ModLoader.Mod.AddNPCHeadTexture(System.Int32,System.String)"/>) </summary>
         </member>
         <member name="M:Terraria.GameContent.UI.BigProgressBar.BigProgressBarHelper.DrawHealthText(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.Vector2,System.Single,System.Single)">
             <summary>
@@ -3609,8 +3653,9 @@
         </member>
         <member name="F:Terraria.ID.ItemID.Sets.KillsToBanner">
             <summary>
-            Determines the number of NPC kills required to obtain the given item type (<see cref="F:Terraria.Item.type"/>).
-            <br/> Defaults to <c><see cref="F:Terraria.ID.ItemID.Sets.DefaultKillsForBannerNeeded"/></c>.
+            Determines the number of NPC of the corresponding BannerID that are required to be killed to obtain the given banner item type (<see cref="F:Terraria.Item.type"/>). 
+            <br/> Defaults to <c><see cref="F:Terraria.ID.ItemID.Sets.DefaultKillsForBannerNeeded"/> (50)</c>.
+            <para/> This is also used to determine how many kills are needed to fully unlock the Bestiary entry for each NPC type using the corresponding BannerID, although Bestiary kill counts are tracked individually for each NPC type instead of sharing a kill count with all other NPC types using the same BannerID as they do for banner dropping purposes.
             </summary>
         </member>
         <member name="F:Terraria.ID.ItemID.Sets.CanFishInLava">
@@ -6898,6 +6943,12 @@
             <br/> Defaults to <see langword="false"/>.
             </summary>
         </member>
+        <member name="F:Terraria.ID.TileID.Sets.CritterCageLidStyle">
+            <summary>
+            Draws the lid of a critter cage (<see cref="F:Terraria.GameContent.TextureAssets.CageTop"/>). If following a vanilla cage tile sprite as a template, this should be set to a correct value to allow the cage to draw correctly when stacked. <br/> 0: 6x3 Grey <br/> 1: 6x3 Gold <br/> 2: 6x3 Blue (Gem Critters) <br/> 3: 3x2 Grey <br/> 4: 3x2 Gold.
+            <para/> Defaults to -1.
+            </summary>
+        </member>
         <member name="F:Terraria.ID.TileID.Sets.DoesntPlaceWithTileReplacement">
             <summary>
             Indicates that this tile can't replace another tile via the block swap feature.
@@ -6945,6 +6996,9 @@
             If true, this tile will render as if it were affected by wind and player interaction and is anchored below. Some examples include <see cref="F:Terraria.ID.TileID.Saplings"/>, <see cref="F:Terraria.ID.TileID.Plants"/>, and <see cref="F:Terraria.ID.TileID.BloomingHerbs"/>. 
             <para/> This only applies to 1x1 tiles and should not be applied to multitiles, although some 1x2 tiles do happen to use it. Use <see cref="F:Terraria.ID.TileID.Sets.MultiTileSway"/> instead for multitiles.
             </summary>
+        </member>
+        <member name="F:Terraria.ID.TileID.Sets.DrawFlipMode">
+            <summary> <strong>Unused.</strong> </summary>
         </member>
         <member name="F:Terraria.ID.TileID.Sets.HasOutlines">
             <summary>
@@ -7931,7 +7985,8 @@
         </member>
         <member name="M:Terraria.Item.BannerToNPC(System.Int32)">
             <summary>
-            Converts a banner ID into the equivalent NPC type (<see cref="F:Terraria.NPC.type"/>).
+            Converts a BannerID into the equivalent NPC type (<see cref="F:Terraria.NPC.type"/>). Used to determine a single NPC type from a BannerID for display purposes.
+            Note that modded BannerIDs are the same number as their NPC type, and those BannerIDs might not actually be used.
             </summary>
             <param name="i">The banner ID to convert.</param>
             <returns>The NPC type associated with the given banner ID, or <see cref="F:Terraria.ID.NPCID.None"/> for an invalid banner ID.</returns>
@@ -9647,8 +9702,10 @@
         </member>
         <member name="T:Terraria.ModLoader.AutoloadAttribute">
             <summary>
-            Allows for types to be autoloaded and unloaded.
-            True to always autoload, false to never autoload, null to use mod default.
+            Allows for customizing if the annotated Type should be automatically loaded.
+            <para/> True to always autoload, which is the default behavior, or false to prevent autoloading this Type.
+            <para/> It is also possible to dictate if autoloading should conditionally only happen on a client or a server by setting <see cref="P:Terraria.ModLoader.AutoloadAttribute.Side"/> to <see cref="F:Terraria.ModLoader.ModSide.Client"/> or <see cref="F:Terraria.ModLoader.ModSide.Server"/>. One use of this is to prevent graphics related classes from loading on the server.
+            <para/> Note that content with a non-default constructor or marked as abstract will automatically not be autoloaded, so this attribute is not needed for those.
             </summary>
         </member>
         <member name="T:Terraria.ModLoader.AutoloadEquip">
@@ -10183,6 +10240,15 @@
             <summary>
             Container object for <see cref="T:Terraria.ModLoader.ILoadable"/> instances added for a <see cref="T:Terraria.ModLoader.Mod"/>
             </summary>
+        </member>
+        <member name="M:Terraria.ModLoader.Core.AssemblyManager.GetLoadableTypes(System.Reflection.Assembly)">
+            <summary>
+            Gets all <see cref="T:System.Type"/>s loadable from the given <see cref="T:System.Reflection.Assembly"/>.
+            <para/> For a non-mod Assembly, will simply return <see cref="M:System.Reflection.Assembly.GetTypes"/>.
+            <para/> When used on a modded Assembly (using <see cref="P:Terraria.ModLoader.Mod.Code"/>), this will return all the Types that are able to be loaded. This will specifically exclude Types that inherit from other mods using <see cref="T:Terraria.ModLoader.ExtendsFromModAttribute"/>. Failure to use this method as a replacement for <see cref="M:System.Reflection.Assembly.GetTypes"/> to query the Types from other mods (for the purposes of autoloading content, for example) will result in exceptions.
+            </summary>
+            <param name="assembly"></param>
+            <returns></returns>
         </member>
         <member name="M:Terraria.ModLoader.Core.GlobalHookList`1.Create(System.Linq.Expressions.Expression{System.Func{`0,System.Delegate}})">
             <summary>
@@ -12408,9 +12474,7 @@
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.AltFunctionUse(Terraria.Item,Terraria.Player)">
-            <summary>
-            Allows you to make an item usable by right-clicking. Returns false by default. When the item is used by right-clicking, player.altFunctionUse will be set to 2.
-            </summary>
+            <inheritdoc cref="M:Terraria.ModLoader.ModItem.AltFunctionUse(Terraria.Player)"/>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.UpdateInventory(Terraria.Item,Terraria.Player)">
             <summary>
@@ -13929,13 +13993,7 @@
             <param name="noItem">If true, the corresponding item won't drop</param>
         </member>
         <member name="M:Terraria.ModLoader.GlobalTile.NearbyEffects(System.Int32,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Allows you to make things happen when the tile is within a certain range of the player (around the same range water fountains and music boxes work). The closer parameter is whether or not the tile is within the range at which things like campfires and banners work.
-            </summary>
-            <param name="i">The x position in tile coordinates.</param>
-            <param name="j">The y position in tile coordinates.</param>
-            <param name="type">The tile type</param>
-            <param name="closer"></param>
+            <inheritdoc cref="M:Terraria.ModLoader.ModTile.NearbyEffects(System.Int32,System.Int32,System.Boolean)"/>
         </member>
         <member name="M:Terraria.ModLoader.GlobalTile.IsTileDangerous(System.Int32,System.Int32,System.Int32,Terraria.Player)">
             <summary>
@@ -15454,6 +15512,12 @@
             Allows you to modify the transparency of all background styles that exist. The style parameter is the current style that is being used.
             </summary>
         </member>
+        <member name="T:Terraria.ModLoader.ModBannerTile">
+            <summary>
+            Extension to <seealso cref="T:Terraria.ModLoader.ModTile"/> that streamlines the process of creating an enemy banner tile. Behaves the same as <see cref="F:Terraria.ID.TileID.Banners"/> except it does not set StyleWrapLimit to 111.
+            <para/> Handles applying banner buffs for <see cref="T:Terraria.ModLoader.ModNPC"/> automatically provided <see cref="P:Terraria.ModLoader.ModNPC.Banner"/> and <see cref="P:Terraria.ModLoader.ModNPC.BannerItem"/> are properly assigned and a <see cref="T:Terraria.ModLoader.ModItem"/> to place each banner placement style exists.
+            </summary>
+        </member>
         <member name="T:Terraria.ModLoader.ModBiome">
             <summary>
             This class represents a biome added by a mod. It exists to centralize various biome related hooks, handling a lot of biome boilerplate, such as netcode.
@@ -15551,7 +15615,8 @@
             </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModBlockType.DustType">
-            <summary> The default type of dust made when this tile/wall is hit. Defaults to 0. </summary>
+            <summary> The default type of dust made when this tile/wall is hit.
+            <para/> Defaults to 0, which is <see cref="F:Terraria.ID.DustID.Dirt"/>. To prevent spawning any hit dust, set this to -1 instead. </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModBlockType.VanillaFallbackOnModDeletion">
             <summary> The vanilla ID of what should replace the instance when a user unloads and subsequently deletes data from your mod in their save file. Defaults to 0. </summary>
@@ -16876,7 +16941,8 @@
         </member>
         <member name="M:Terraria.ModLoader.ModItem.AltFunctionUse(Terraria.Player)">
             <summary>
-            Allows you to make this item usable by right-clicking. Returns false by default. When this item is used by right-clicking, player.altFunctionUse will be set to 2.
+            Allows you to make this item usable by right-clicking. When this item is used by right-clicking, <see cref="F:Terraria.Player.altFunctionUse"/> will be set to 2. Check the value of altFunctionUse in <see cref="M:Terraria.ModLoader.ModItem.UseItem(Terraria.Player)"/> to apply right-click specific logic. For auto-reusing through right clicking, see also <see cref="F:Terraria.ID.ItemID.Sets.ItemsThatAllowRepeatedRightClick"/>.
+            <para/> Returns false by default.
             </summary>
             <param name="player">The player.</param>
             <returns></returns>
@@ -17694,10 +17760,24 @@
             <summary> The vertical offset used for drawing this NPC. Defaults to 0. </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModNPC.Banner">
-            <summary> The type of NPC that this NPC will be considered as when determining banner drops and banner bonuses. By default this will be 0, which means this NPC is not associated with any banner. To give your NPC its own banner, set this field to the NPC's type. </summary>
+            <summary> The type of NPC that this NPC will be considered as when determining banner drops and banner bonuses. Also known as the BannerID. By default this will be 0, which means this NPC is not associated with any banner. To give your NPC its own banner, set this field to the NPC's type and also set <see cref="P:Terraria.ModLoader.ModNPC.BannerItem"/>:
+            <code>
+            Banner = Type;
+            BannerItem = ModContent.ItemType&lt;ExampleWormHeadBanner&gt;();
+            </code>
+            <para/> For NPC with multiple parts, such as worms, be sure to set this to the same value for each ModNPC. Typically the head NPC type is used as the common Banner value. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/ExampleWorm.cs">ExampleWorm.cs</see> is an example of this:
+            <code>
+            // In ExampleWormBody.SetDefaults:
+            Banner = ModContent.NPCType&lt;ExampleWormHead&gt;();</code>
+            <para/> For NPC that are variants of each other, it is also useful to share a Banner value so that each variant counts towards the same banner kill count rather than each having their own banner drop. <see href="https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/NPCs/PartyZombie.cs">PartyZombie.cs</see> does this and shares the vanilla Zombie banner. By doing this it is affected by the Zombie banner and counts towards dropping it as well.
+            <para/> To retrieve and use a vanilla banner value, use the <see cref="M:Terraria.Item.NPCtoBanner(System.Int32)"/> method:
+            <code>Banner = Item.NPCtoBanner(NPCID.Zombie);</code>
+            </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModNPC.BannerItem">
-            <summary> The type of the item this NPC drops for every 50 times it is defeated. For any ModNPC whose banner field is set to the type of this NPC, that ModNPC will drop this banner. </summary>
+            <summary> The item type this NPC drops after some number of it is defeated. The exact number can be customized by using <see cref="F:Terraria.ID.ItemID.Sets.KillsToBanner"/> and defaults to 50. For any ModNPC whose <see cref="P:Terraria.ModLoader.ModNPC.Banner"/> field is set to the type of this NPC, that ModNPC will drop this banner. Must be set along with <see cref="P:Terraria.ModLoader.ModNPC.Banner"/>.
+            <para/> If querying the banner item drop for a specific NPC that you know has an assigned banner, you'll need to use the following for accurate results since BannerItem isn't necessarily assigned for npc sharing a banner: <c>Item.BannerToItem(Item.NPCtoBanner(npc.BannerID()));</c>
+            </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModNPC.SpawnModBiomes">
             <summary> The ModBiome Types associated with this NPC spawning, if applicable. Used in Bestiary.<para/>Vanilla biomes are added to the bestiary via <see cref="M:Terraria.ModLoader.ModNPC.SetBestiary(Terraria.GameContent.Bestiary.BestiaryDatabase,Terraria.GameContent.Bestiary.BestiaryEntry)"/> directly.</summary>
@@ -19262,7 +19342,7 @@
         </member>
         <member name="M:Terraria.ModLoader.ModPlayer.DrawEffects(Terraria.DataStructures.PlayerDrawSet,System.Single@,System.Single@,System.Single@,System.Single@,System.Boolean@)">
             <summary>
-            Allows you to create special effects when this player is drawn, such as creating dust, modifying the color the player is drawn in, etc. The fullBright parameter makes it so that the drawn player ignores the modified color and lighting. Note that the fullBright parameter only works if r, g, b, and/or a is not equal to 1. Make sure to add the indexes of any dusts you create to drawInfo.DustCache, and the indexes of any gore you create to drawInfo.GoreCache. <br/>
+            Allows you to create special effects when this player is drawn, such as creating dust, modifying the color the player is drawn in, etc. The fullBright parameter makes it so that the drawn player ignores the modified color and lighting. Make sure to add the indexes of any dusts you create to drawInfo.DustCache, and the indexes of any gore you create to drawInfo.GoreCache. <br/>
             This will be called multiple times a frame if a player afterimage is being drawn. Check <code>if(drawinfo.shadow == 0f)</code> to do some logic only when drawing the original player image. For example, spawning dust only for the original player image is commonly the desired behavior.
             </summary>
             <param name="drawInfo"></param>
@@ -20821,7 +20901,11 @@
         </member>
         <member name="M:Terraria.ModLoader.ModTile.NearbyEffects(System.Int32,System.Int32,System.Boolean)">
             <summary>
-            Allows you to make things happen when this tile is within a certain range of the player (around the same range water fountains and music boxes work). The closer parameter is whether or not the tile is within the range at which aesthetics like monoliths and music boxes and clocks work. It is false for campfires and heart lanterns.
+            Allows you to make things happen when this tile is within a certain range of the player, such as how banners, campfire, and monoliths work.
+            <para/> This method will be called on tiles within 2 specific ranges, once for calculating visual effects and another time for calculating gameplay effects:
+            <para/> When calculating <b>visual effects</b>, the <paramref name="closer"/> parameter will be <see langword="true"/>. The visual effect range depend on the game window resolution, zoom level, and lighting mode, so it will not be reliable for gameplay effects but rather it adjusts to the players view of the game world. This is suitable for monoliths, water fountains, and music boxes.
+            <para/> When calculating <b>gameplay effects</b>, the <paramref name="closer"/> parameter will be <see langword="false"/>. The gameplay effect range will always be a 169x124 tile rectangle centered on the player. This is suitable for tiles that give buffs like the sunflower, banners, heart lantern, and campfire.
+            <para/> Make sure to check <paramref name="closer"/> when using this method to ensure the effects of this tile are applying to the intended range.
             </summary>
             <param name="i">The x position in tile coordinates.</param>
             <param name="j">The y position in tile coordinates.</param>
@@ -21644,6 +21728,11 @@
             </summary>
             <param name="type">The type of the npc</param>
             <returns>The ModNPC instance in the <see cref="F:Terraria.ModLoader.NPCLoader.npcs"/> array, null if not found.</returns>
+        </member>
+        <member name="M:Terraria.ModLoader.NPCLoader.BannerItemToNPC(System.Int32)">
+            <summary>
+            Returns the type of a ModNPC corresponding to the provided banner item type. Note that this is equivalent to the banner type as well, since ModNPC type and banner type are the same. Returns -1 if not found.
+            </summary>
         </member>
         <member name="T:Terraria.ModLoader.NPCLoot">
             <summary> This readonly struct is a simple shortcut to <see cref="T:Terraria.GameContent.ItemDropRules.ItemDropDatabase"/>'s methods. </summary>
@@ -22521,6 +22610,12 @@
             <b>Range: </b>In this particular overload, <paramref name="tileX"/> and <paramref name="tileY"/> denote a single tile to sync. If sending multiple tiles use the other overloads instead.
             </summary>
         </member>
+        <member name="F:Terraria.NPC.killCount">
+            <summary>
+            Indexed by BannerIDs, counts how many kills a specific enemy (or group of enemies with a shared BannerID) has in this world. Kill counts are stored on the world and are synced in multiplayer. Used by the <see cref="F:Terraria.ID.ItemID.TallyCounter"/> and for dropping banners. See also <see cref="F:Terraria.ID.ItemID.Sets.KillsToBanner"/>.
+            <para/> Note that Bestiary kill counts are tracked separately and per each NPC type instead of sharing a kill count with all other NPC types using the same BannerID.
+            </summary>
+        </member>
         <member name="F:Terraria.NPC.SpawnedFromStatue">
             <summary>
             Indicates that this NPC was spawned by a statue. Mainly affects item drops.
@@ -23048,6 +23143,9 @@
             <summary>
             Use to check if a mechanism is allowed to spawn an NPC of the provided type at the provided world coordinates. Checks nearby area to see if the <see href="https://terraria.wiki.gg/wiki/Statues#Spawn_limits">Spawn Limits</see> have been reached.
             </summary>
+        </member>
+        <member name="M:Terraria.NPC.TypeToDefaultHeadIndex(System.Int32)">
+            <summary> Retrieves the default head index of the town NPC type. To account for shimmer and other variants use <see cref="M:Terraria.GameContent.TownNPCProfiles.GetHeadIndexSafe(Terraria.NPC)"/> instead. Returns -1 if no head index found. </summary>
         </member>
         <member name="M:Terraria.NPC.HealEffect(System.Int32,System.Boolean)">
             <summary>
@@ -23791,6 +23889,7 @@
         <member name="P:Terraria.ObjectData.TileObjectData.DrawYOffset">
             <summary>
             Offsets the drawing of this tile in the Y direction. Can be used to draw a tile at a location other than the default. One example is how <see cref="F:Terraria.ID.TileID.Switches"/> appear slightly embedded into the tile they are anchored to. Another example is how the alternate placement of banners for  platforms shifts the drawing up.
+            <para/> For modded tiles this affects both the placement preview and placed tiles.
             <para/> Read <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Tile#non-16-or-18-values">this section on the wiki</see> for a visual explanation of this.
             <para/> Defaults to 0.
             </summary>
@@ -23834,7 +23933,8 @@
         <member name="P:Terraria.ObjectData.TileObjectData.Style">
             <summary>
             Used by alternate placements to offset the calculated placement style.
-            <para/> Equal to the value passed into <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>. 
+            <para/> Equal to the value passed into <see cref="M:Terraria.ObjectData.TileObjectData.addAlternate(System.Int32)"/>.
+            <para/> If using <see cref="M:Terraria.ObjectData.TileObjectData.GetTileData(Terraria.Tile)"/> note that this is <b>NOT the tile style or placement style</b> of that Tile. Use <see cref="M:Terraria.ObjectData.TileObjectData.GetTileInfo(Terraria.Tile,System.Int32@,System.Int32@)"/> or <see cref="M:Terraria.ObjectData.TileObjectData.GetTileStyle(Terraria.Tile)"/> instead to query those.
             <para/> Defaults to 0.
             </summary>
         </member>
@@ -24544,6 +24644,11 @@
         </member>
         <member name="F:Terraria.Player.hostile">
             <summary> If true, the player has PvP enabled </summary>
+        </member>
+        <member name="F:Terraria.Player.lastCreatureHit">
+            <summary>
+            The BannerID of the last npc damaged by this player. Used by the <see cref="F:Terraria.ID.ItemID.TallyCounter"/> to display the name of the last attacked enemy. When attacking an enemy without an assigned banner, the value will be 0 and "Kill count unavailable" will be shown.
+            </summary>
         </member>
         <member name="F:Terraria.Player.jumpSpeedBoost">
             <summary>
@@ -25769,10 +25874,10 @@
         </member>
         <member name="F:Terraria.Projectile.alpha">
             <summary>
-            How transparent to draw this projectile. 0 to 255. 255 is completely transparent.
-            <br/> <see href="https://github.com/tModLoader/tModLoader/blob/1.4.4/ExampleMod/Content/Projectiles/ExampleBullet.cs">ExampleBullet</see> sets this to 255, and the projectile aiStyle of <see cref="F:Terraria.ID.ProjAIStyleID.Arrow"/> automatically decreases alpha each tick, letting the projectile fade in quickly after being spawned. Useful for projectiles that look odd when initially spawned on the weapon because of texture overlap.
-            <br/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Projectile#fade-inout">Basic Projectile Guide</see> teaches more about projectile fade in and out.
-            <br/> Defaults to 0.
+            How transparent to draw this projectile. Ranges from 0 to 255. 0 is fully opaque and 255 is completely transparent. (<see cref="P:Terraria.Projectile.Opacity"/> also controls alpha and might be easier to work with in some situations.)
+            <para/> Can be adjusted to dynamically fade in or out a projectile. One example usage is for projectiles that look odd when initially spawned on the weapon because of texture overlap. <see href="https://github.com/tModLoader/tModLoader/blob/1.4.4/ExampleMod/Content/Projectiles/ExampleBullet.cs">ExampleBullet.SetDefaults</see> sets this to 255, and the projectile aiStyle of <see cref="F:Terraria.ID.ProjAIStyleID.Arrow"/> automatically decreases alpha each tick, causing the projectile to fade in quickly after being spawned.
+            <para/> The <see href="https://github.com/tModLoader/tModLoader/wiki/Basic-Projectile#fade-inout">Basic Projectile Guide</see> teaches more about projectile fade in and out.
+            <para/> Defaults to 0.
             </summary>
         </member>
         <member name="F:Terraria.Projectile.sentry">
@@ -26419,6 +26524,16 @@
             <param name="result">What item will be given when the craft has been completed</param>
             <param name="amount">The stack -> how many result items given when the recipe is crafted. (eg. 1 wood -> 4 wood platform)</param>
             <exception cref="T:Terraria.ModLoader.Exceptions.RecipeException">A Recipe can only be created inside recipe related methods</exception>
+        </member>
+        <member name="F:Terraria.SceneMetrics.NPCBannerBuff">
+            <summary>
+            Indexed by BannerIDs, indicates which enemies are currently subject to the banner damage bonus. Set to true in conjunction with <see cref="F:Terraria.SceneMetrics.NPCBannerBuff"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.SceneMetrics.hasBanner">
+            <summary>
+            Indicates that the player is in range of a buff providing Banner tile and should receive the <see cref="F:Terraria.ID.BuffID.MonsterBanner"/> buff. Set to true in conjunction with <see cref="F:Terraria.SceneMetrics.NPCBannerBuff"/>.
+            </summary>
         </member>
         <member name="M:Terraria.Sign.KillSign(System.Int32,System.Int32)">
             <summary>
@@ -27734,6 +27849,12 @@ itemFoundData.CopyTo(itemsFound, 0);
             <param name="chestTileType"></param>
             <returns></returns>
         </member>
+        <member name="M:Terraria.WorldGen.GrowMoreVines(System.Int32,System.Int32)">
+            <summary>
+            Checks if vines are allowed to grow immediately below the location provided. This method only checks that the count of existing vine tiles (<see cref="F:Terraria.ID.TileID.Sets.IsVine"/>) in a nearby area does not exceed the maximum allowed amount. Returns true if more vines in the area would be allowed.
+            <para/> Specifically, this method checks that the number of vine tiles in a 9x17 area around the given coordinate does not exceed 60.
+            </summary>
+        </member>
         <member name="M:Terraria.WorldGen.PlaceSmallPile(System.Int32,System.Int32,System.Int32,System.Int32,System.UInt16)">
             <summary>
             Places <see cref="F:Terraria.ID.TileID.SmallPiles"/> tiles. This tile is special and doesn't follow the normal style rules and won't place with PlaceTile. i and j are the coordinates. X and Y are the count and row indexes of the specific tile in the texture file. Indexes count from left to right and start at 0. So for example the Sapphire Stash would have Y=1 (second row) and X=21 (22nd 2x1 tile).
@@ -27823,6 +27944,11 @@ itemFoundData.CopyTo(itemsFound, 0);
             <param name="fail">Prevents the tile from being destroyed, but still plays a hit sound</param>
             <param name="effectOnly">Prevents the tile from being destroyed but still spawns hit dust and prevents the hit sound.</param>
             <param name="noItem">Prevents the item from dropping. Only relevant for 1x1 tiles.</param>
+        </member>
+        <member name="M:Terraria.WorldGen.nearbyChlorophyte(System.Int32,System.Int32)">
+            <summary>
+            Returns true if there are 3 or more Chlorophyte or ChlorophyteBrick tiles within a 11x11 area around the provided coordinate. Sometimes returns true if there are less than 3 but more than 0 of them. Used to implement Chlorophyte tiles  restricting the spread of the evil biomes nearby (<see href="https://terraria.wiki.gg/wiki/Biome_spread#Notes">Biome Spread wiki page</see>).
+            </summary>
         </member>
         <member name="M:Terraria.WorldGen.TileRunner(System.Int32,System.Int32,System.Double,System.Int32,System.Int32,System.Boolean,System.Double,System.Double,System.Boolean,System.Boolean,System.Int32)">
             <summary>

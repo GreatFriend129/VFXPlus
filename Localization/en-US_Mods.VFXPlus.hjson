@@ -69,6 +69,10 @@ Projectiles: {
 	ShotgunTest.DisplayName: Shotgun Test
 	MusketTest2.DisplayName: Musket Test2
 	MinisharkTest.DisplayName: Minishark Test
+	MinisharkTestSkylight.DisplayName: Minishark Test Skylight
+	BasicGunProjLong.DisplayName: Basic Gun Proj Long
+	BasicGunProjMiddle.DisplayName: Basic Gun Proj Middle
+	ShotgunProj.DisplayName: Shotgun Proj
 }
 
 Configs: {

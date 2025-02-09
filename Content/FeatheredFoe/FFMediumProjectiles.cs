@@ -471,7 +471,12 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Main.NewText(Main.player[Projectile.owner].name.GetHashCode());
 
-            for (int i = 0; i < 160; i++) //60
+            float ringMinLength = 115f; //20f
+            float ringMaxLength = 20f; //115
+
+
+            //160
+            for (int i = 0; i < 80; i++) //60
             {
 
                 Texture2D texture;
@@ -493,11 +498,11 @@ namespace VFXPlus.Content.FeatheredFoe
                 }
                 var origin = frame.Size() / 2f;
                 float speed = NextFloatF(r, 0.8f, 4f);
-                //float progress = (speedTime * speed + NextFloatF(r, 0f, 1f)) % 3f;
+
                 float progress = (speedTime * speed + r.NextFloat()) % 3f;
 
                 float scaleWave = MathF.Sin(progress * MathHelper.Pi);
-                float waveDistance = NextFloatF(r, 20f, 120f); //40 120 overall distance of the ring
+                float waveDistance = NextFloatF(r, ringMinLength, ringMaxLength); //40 120 overall distance of the ring
 
                 float time = speedTime * 2f;
                 float min = 0.95f; //Controls how much the ring sways 
@@ -507,7 +512,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 float yOffset = scaleWave * waveDistance * 0.3f * yWave; //0.3
                 float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
-                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -120f, 140f) + yOffset * yDir); //Vertical distance of the ring
+                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -120f, 40f) + yOffset * yDir); //Vertical distance of the ring
+
+                //Makes the rings closer to tip smaller
+                float ringDistProg = 1f - Utils.GetLerpValue(ringMinLength, ringMaxLength, waveDistance, true);
+                float adjustedScale = 1f + (0.35f * ringDistProg);
 
                 Main.spriteBatch.Draw(
                     texture,
@@ -516,7 +525,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     color with { A = 0 },
                     rotation - xWave / 3f * yWave * yDir,
                     origin,
-                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f,
+                    new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 3f,
                     SpriteEffects.None,
                     0f
                 );
@@ -659,7 +668,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float cosOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.077f) * 0.1f;
 
             float startScale = sinOff;
-            float endScale = 7.47f * cosOff;
+            float endScale = 7f * cosOff;
 
             float scale = 1f;
 
@@ -762,7 +771,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float speedTime = Main.GlobalTimeWrappedHourly * 2f;
 
             float minRange = 40f; //40f | 240 920 for full screen
-            float maxRange = 220f; //120
+            float maxRange = 300f; //120
             for (int i = 0; i < count; i++)
             {
 

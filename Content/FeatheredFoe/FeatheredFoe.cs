@@ -85,7 +85,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.UmbrellaRain;
+            CurrentAttack = FeatheredFoeState.Dive;
 
             switch (CurrentAttack)
             {

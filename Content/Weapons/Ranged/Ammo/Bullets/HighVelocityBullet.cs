@@ -51,13 +51,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
-            trail1.trailPointLimit = 300 + trailRandomLengthOffset;
+            trail1.trailPointLimit = 500 + trailRandomLengthOffset;
             trail1.trailWidth = (int)(20 * totalAlpha);
-            trail1.trailMaxLength = 300 + trailRandomLengthOffset; //120
+            trail1.trailMaxLength = 500 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
 
-            Color trailCol = Color.Gold;
+            Color trailCol = Color.Lerp(Color.Gold, Color.Orange, 0.35f);
             trail1.trailColor = trailCol * totalAlpha * 0.7f;
             trail1.timesToDraw = 2;
 
@@ -121,6 +121,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
             Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
 
+            Color between = Color.Lerp(Color.Gold, Color.Orange, 0.35f);
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -50);
             float drawRot = projectile.velocity.ToRotation();
@@ -129,11 +130,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //Vanilla has 1.2 scale for bullets, so normalize this to 1f
             float adjustedScale = projectile.scale * (5f / 6f);
 
-            Color outSpikeColor = Color.Gold;
+            Color outSpikeColor = between;
             Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f * 3.5f * totalAlpha, adjustedScale * 1.5f * totalScale) * 0.5f;
             Main.EntitySpriteDraw(spike, drawPos, null, outSpikeColor with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
-            Color orbColor = Color.Gold;
+            Color orbColor = between;
             Vector2 orbScale = new Vector2(1f * 3.5f * totalAlpha, 0.3f * totalScale) * 0.7f * adjustedScale;
             Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbColor with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
@@ -157,10 +158,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             float adjustedScale = proj.scale * (5f / 6f);
             Vector2 drawScale = new Vector2(adjustedScale * 3.5f * 2f * totalAlpha, adjustedScale * totalScale) * 0.5f;
 
-            Color spikeColor = Color.Yellow;
+            Color spikeColor = Color.Gold;
 
             sb.Draw(spike, drawPos, null, spikeColor * 2f * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
-            sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.65f, SpriteEffects.None, 0f);
+            sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.6f, SpriteEffects.None, 0f);
 
             trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
         }

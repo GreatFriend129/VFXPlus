@@ -15,18 +15,49 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 {
     public class FlamingArrowOverride : GlobalProjectile
     {
+        /*
+        //IL EDIT
+        public override void Load()
+        {
+            IL_Projectile.Update += RemoveFlamingArrowDust;
+        }
+
+        // So for some reason a lot of arrows have their dust run in the Update function instead of AI
+        // This IL Edit is designed to remove that dust
+        private static void RemoveFlamingArrowDust(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            if (!c.TryGotoNext(MoveType.After, i => i.MatchLdcI4(2)))
+            {
+                VFXPlus.Instance.Logger.Warn("RemoveFlamingArrowDust Edit failed!!!!");
+                return;
+            }
+
+            //Effectively appends '&& false' to the if statement, making it never run 
+            c.Emit(OpCodes.Ldc_I4_0);
+            c.Emit(OpCodes.And);
+
+        }
+        */
+
+
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
             return lateInstantiation && (entity.type == ProjectileID.FireArrow);
         }
+
+
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
@@ -59,7 +90,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             //So apparently flaming arrow dust is HARD CODED into the Update() function for some reason
 
-            return base.PreAI(projectile);
+            return false;// base.PreAI(projectile);
         }
 
         float overallAlpha = 1f;
