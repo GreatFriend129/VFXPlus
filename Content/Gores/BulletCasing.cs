@@ -36,6 +36,21 @@ namespace AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun
             gore.frameCounter++;
             return base.Update(gore);
         }
+
+    }
+
+    public class PurpleCasing : BulletCasing
+    {
+        public override string Texture => "VFXPlus/Content/Gores/PurpleCasing";
+    }
+
+    public class AquaCasing : BulletCasing
+    {
+        public override string Texture => "VFXPlus/Content/Gores/AquaCasing";
+    }
+    public class GreenCasing : BulletCasing
+    {
+        public override string Texture => "VFXPlus/Content/Gores/GreenCasing";
     }
 }
 

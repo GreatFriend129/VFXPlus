@@ -94,7 +94,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             }
 
             //Bullet Casing
-            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<AquaCasing>());
 
             return true;
         }

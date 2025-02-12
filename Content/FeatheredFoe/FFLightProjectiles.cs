@@ -180,12 +180,12 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override bool PreDraw(ref Color lightColor)
         {
-            if (timer <= 0 && advancer == 0) return false;
+            if (timer <= 0) return false;
             Texture2D Feather = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
             Texture2D FeatherGray = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FeatherGray").Value;
             Texture2D FeatherWhite = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FeatherWhite").Value;
 
-            Texture2D Twirl = Mod.Assets.Request<Texture2D>("Assets/Pixel/PixelSwirl").Value;
+            Vector2 vec2MainScale = new Vector2(1f, 0.25f + (alpha * 0.75f)) * Projectile.scale;
 
             #region after image
             if (previousRotations != null && previousPostions != null)
@@ -196,14 +196,16 @@ namespace VFXPlus.Content.FeatheredFoe
 
                     float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
 
+                    Color betweenBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
 
-                    Color col = Color.Lerp(Color.Blue, Color.DeepSkyBlue, progress) * progress;
+                    Color col = Color.Lerp(Color.DodgerBlue, betweenBlue, progress) * progress;
 
                     float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
                     Main.EntitySpriteDraw(FeatherGray, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f * alpha,
                             previousRotations[i], FeatherGray.Size() / 2f, size2, SpriteEffects.None);
 
-                    Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
+                    Vector2 vec2Scale = new Vector2(1.25f, 0.25f) * size;
+
                     if (advancer != 1)
                         Main.EntitySpriteDraw(FeatherWhite, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * alpha,
                             previousRotations[i], FeatherGray.Size() / 2f, vec2Scale, SpriteEffects.None);
@@ -212,21 +214,16 @@ namespace VFXPlus.Content.FeatheredFoe
             }
             #endregion
 
-            float twirlAlpha = 1f - Easings.easeOutCirc((float)(timer / 40f));
-
-            if (advancer == 1)
-                Main.EntitySpriteDraw(Twirl, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * twirlAlpha * 1.5f, Projectile.rotation, Twirl.Size() / 2f, Projectile.scale * 0.65f, SpriteEffects.None);
-
-            Color outerCol = Color.Lerp(Color.DeepSkyBlue * 0.5f, Color.SkyBlue with { A = 0 } * 0.8f, pulseIntensity);
+            Color outerCol = Color.Lerp(Color.DeepSkyBlue with { A = 0 } * 0.5f, Color.SkyBlue with { A = 0 } * 0.8f, pulseIntensity);
             float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
-                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), null, outerCol * alpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * 1.05f * scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), null, outerCol * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * 1.05f * scale, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor * alpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor * Easings.easeOutCirc(alpha), Projectile.rotation, Feather.Size() / 2f, vec2MainScale, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.4f * alpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.4f * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * 1f, SpriteEffects.None);
 
 
             return false;
@@ -768,6 +765,12 @@ namespace VFXPlus.Content.FeatheredFoe
         float drawScale = 0f;
         public override void AI()
         {
+            if (ParentProj == -1)
+            {
+                Main.NewText("Nope!");
+                Projectile.active = false;
+                return;
+            }
             Projectile parentProj = Main.projectile[ParentProj];
 
             Projectile.velocity = Vector2.Zero;

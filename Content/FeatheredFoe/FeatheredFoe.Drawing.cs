@@ -35,7 +35,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (windOverlayOpacity > 0.05f)
                 DrawScrollOverlay();
 
-            DrawWindDrill(-1, Color.DeepSkyBlue * 0.33f);
+            DrawWindDrill(-1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f) * 0.45f); //33
 
             Vector2 drawPos = NPC.Center - Main.screenPosition + (Main.rand.NextVector2Circular(7f, 7f) * randomShakePower);
             Vector2 origin = NPCTexture.Size() / 2;
@@ -52,7 +52,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             DrawTriStar();
 
-            DrawWindDrill(1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f) * 1f); //0.7f
+            DrawWindDrill(1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f) * 1.25f); //0.7f
 
             return false;
         }
@@ -134,6 +134,7 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
 
+        public float drillAlpha = 0f;
         public bool drawDrill = false;
         public void DrawWindDrill(int yDir, Color color)
         {
@@ -147,8 +148,8 @@ namespace VFXPlus.Content.FeatheredFoe
             var windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
             var dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
-            float ringMinLength = 135f; //20f
-            float ringMaxLength = 5f; //115 //10
+            float ringMinLength = 145f; //20f 135
+            float ringMaxLength = 2f; //115 //5
 
             for (int i = 0; i < 80; i++) //160
             {
@@ -185,7 +186,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 float yOffset = scaleWave * waveDistance * 0.15f * yWave; //0.3 --> How wide is the gap of the ring ()
                 float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
-                var drawPosition = NPC.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -140f, 40f) + yOffset * yDir) + new Vector2(0f, 60f); //Vertical distance of the ring
+                var drawPosition = NPC.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -160f, 40f) + yOffset * yDir) + new Vector2(0f, 60f); //Vertical distance of the ring
 
                 //Makes the rings closer to tip smaller
                 float ringDistProg = 1f - Utils.GetLerpValue(ringMinLength, ringMaxLength, waveDistance, true);
@@ -198,7 +199,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     texture,
                     (drawPosition - Main.screenPosition).Floor(),
                     frame,
-                    color with { A = 0 },
+                    color with { A = 0 } * drillAlpha * 4f,
                     rotation - xWave / 3f * yWave * yDir,
                     origin,
                     new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 3.25f,

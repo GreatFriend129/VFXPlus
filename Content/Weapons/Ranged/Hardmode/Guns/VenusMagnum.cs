@@ -96,7 +96,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             }
 
             //Bullet Casing
-            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<GreenCasing>());
 
             //Sound
             //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };

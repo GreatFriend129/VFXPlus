@@ -64,7 +64,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             float EU = 1f + projectile.extraUpdates;
 
             float fadeInTime = Math.Clamp((timer + 5f * EU) / 15f * EU, 0f, 1f);
-            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
             timer++;
             return base.PreAI(projectile);

@@ -73,6 +73,8 @@ Projectiles: {
 	BasicGunProjLong.DisplayName: Basic Gun Proj Long
 	BasicGunProjMiddle.DisplayName: Basic Gun Proj Middle
 	ShotgunProj.DisplayName: Shotgun Proj
+	LineBarrier.DisplayName: Line Barrier
+	BasicBowProjLong.DisplayName: Basic Bow Proj Long
 }
 
 Configs: {

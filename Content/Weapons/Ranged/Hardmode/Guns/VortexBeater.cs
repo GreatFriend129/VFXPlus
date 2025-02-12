@@ -29,6 +29,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             return lateInstantiation && (entity.type == ProjectileID.VortexBeater);
         }
 
+        float GunDirection = 0f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -148,30 +149,21 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
                             for (int i = 0; i < 2; i++)
                             {
-
                                 Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(0.5f, 1.75f);
                                 int dir = projectile.velocity.X > 0 ? 1 : -1;
                                 Vector2 posOffset = new Vector2(51f, -5f * dir).RotatedBy(projectile.velocity.ToRotation());
 
                                 
-                                Dust d = Dust.NewDustPerfect(vector18, 229, vel, newColor: Color.Aqua * 1f, Scale: Main.rand.NextFloat(0.5f, 1f) * 0.6f);
+                                Dust d = Dust.NewDustPerfect(vector18, 229, vel, newColor: Color.Aqua * 1f, Scale: Main.rand.NextFloat(0.5f, 1f) * 0.65f);
                                 d.noGravity = true;
 
                                 d.position += posOffset;
-                                d.velocity += spinningpoint8.SafeNormalize(Vector2.UnitX) * 3f;
-                                
-                                
-                                /*
-                                Dust p = Dust.NewDustPerfect(vector18, ModContent.DustType<GlowPixelCross>(), vel, newColor: Color.Aqua, Scale: Main.rand.NextFloat(0.2f, 0.4f) * 1f);
-                                p.position += posOffset;
-                                p.velocity += spinningpoint8.SafeNormalize(Vector2.UnitX) * 4f;
-
-                                p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
-                                        rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 40f, fadePower: 0.88f, shouldFadeColor: false);
-                                */
-
+                                d.velocity += spinningpoint8.SafeNormalize(Vector2.UnitX) * 6f;                    
                             }
 
+                            GunDirection = projectile.velocity.ToRotation();
+                            muzzleFlashNum = Main.rand.Next(1, 4);
+                            muzzleFlashAlpha = 1f;
                         }
                         if (num50 == 0)
                         {
@@ -194,6 +186,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                         projectile.Kill();
                     }
                 }
+                else muzzleFlashAlpha = Math.Clamp(MathHelper.Lerp(muzzleFlashAlpha, -0.5f, 0.14f), 0f, 1f);
+
             }
 
             projectile.position = player.RotatedRelativePoint(player.MountedCenter, reverseRotation: false, addGfxOffY: false) - projectile.Size / 2f;
@@ -212,25 +206,46 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             #endregion
 
+
             timer++;
             return false;
         }
 
-
+        int muzzleFlashNum = 0;
+        float muzzleFlashAlpha = 0f;
         Effect myEffect = null;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            Player owner = Main.player[projectile.owner];
+            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-            SpriteEffects se = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            SpriteEffects se = owner.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             Texture2D GlowMask = TextureAssets.GlowMask[192].Value;
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos + new Vector2(0f, 0f), sourceRectangle, lightColor, projectile.rotation, TexOrigin, 1f, se);
+            String path = "Assets/MuzzleFlashes/Sprite/MiddleMuzzleFlash" + muzzleFlashNum;
 
+            Texture2D MuzzleFlash = Mod.Assets.Request<Texture2D>(path + "Blue").Value;
+            Texture2D MuzzleFlashGlow = Mod.Assets.Request<Texture2D>(path + "Glow").Value;
+
+            Vector2 muzzleFlashPos = drawPos + new Vector2(42f, -5f * owner.direction).RotatedBy(projectile.velocity.ToRotation()); //33 -3
+            Vector2 muzzleFlashOrigin = new Vector2(MuzzleFlash.Width / 2f, MuzzleFlash.Height / 2f);
+
+            float easedMuzzleFlashAlpha = Easings.easeOutSine(muzzleFlashAlpha);
+            float muzzleFlashScale = projectile.scale * 2f * Easings.easeOutSine(muzzleFlashAlpha);
+
+            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.Aquamarine with { A = 0 } * easedMuzzleFlashAlpha * 0.75f, 
+                projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, se, 0f);
+            Main.spriteBatch.Draw(MuzzleFlash, muzzleFlashPos, null, Color.White * easedMuzzleFlashAlpha, projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, se, 0f);
+            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos, null, Color.SkyBlue with { A = 0 } * muzzleFlashAlpha, projectile.rotation, muzzleFlashOrigin, 3f * (1f - muzzleFlashAlpha), se, 0f);
+
+
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos + new Vector2(0f, 0f), sourceRectangle, lightColor, projectile.rotation, TexOrigin, 1f, se);
 
             for (int i = 0; i < 3; i++)
             {
@@ -486,7 +501,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             Color StripColor(float progress) => Color.White * Easings.easeInSine(progress);
             float StripWidth(float progress) => Math.Clamp(120f * sineWidthMult * totalScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f;
-            float StripWidth2(float progress) => Math.Clamp(75f * sineWidthMult * totalScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f; 
+            float StripWidth2(float progress) => Math.Clamp(75f * sineWidthMult * totalScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f; //75
 
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -511,7 +526,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
             myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2f);
             myEffect.Parameters["glowThreshold"].SetValue(0.8f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.27f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
@@ -558,11 +573,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             #region SoftGlow + Circle
             Dust softGlow = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aqua * 0.75f, Scale: 0.25f);
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
-                overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
 
             Dust softGlow2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aqua * 1.25f, Scale: 0.15f);
             softGlow2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
-                overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
 
             CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.3f, true, 1, 0.8f, 0.8f);
 
@@ -593,7 +608,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             }
 
-            for (int i = 0; i < 12 + Main.rand.Next(0, 4); i++)
+            for (int i = 0; i < 15 + Main.rand.Next(0, 4); i++)
             {
                 
                 float velMult = Main.rand.NextFloat(3f, 7f);

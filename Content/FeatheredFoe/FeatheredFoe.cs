@@ -127,6 +127,11 @@ namespace VFXPlus.Content.FeatheredFoe
             if (doPassiveWindParticles)
                 PassiveWindParticles();
 
+            if (drawDrill)
+                drillAlpha = Math.Clamp(MathHelper.Lerp(drillAlpha, 1.35f, 0.04f), 0f, 1f);
+            else
+                drillAlpha = Math.Clamp(MathHelper.Lerp(drillAlpha, -1f, 0.09f), 0f, 1f);
+
             timer++;
         }
 

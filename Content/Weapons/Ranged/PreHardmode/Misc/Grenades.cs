@@ -1,0 +1,204 @@
+using System;
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.Audio;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using Terraria.DataStructures;
+using System.Linq;
+using VFXPlus.Common;
+using VFXPlus.Content.Dusts;
+using ReLogic.Content;
+using VFXPlus.Common.Utilities;
+using Terraria.GameContent;
+using System.Threading;
+using VFXPlus.Common.Drawing;
+using rail;
+using VFXPlus.Content.Projectiles;
+
+
+namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
+{
+    public class Grenade : GlobalItem
+    {
+        public override bool InstancePerEntity => true;
+        public override bool AppliesToEntity(Item item, bool lateInstatiation)
+        {
+            return lateInstatiation && (item.type == ItemID.Grenade || item.type == ItemID.StickyGrenade || item.type == ItemID.BouncyGrenade);
+        }
+
+        public override void SetDefaults(Item entity)
+        {
+            entity.useStyle = ItemUseStyleID.Swing;
+            entity.noUseGraphic = true;
+            base.SetDefaults(entity);
+        }
+    }
+
+    public class GrenadeProjOverride : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.Grenade || entity.type == ProjectileID.StickyGrenade || entity.type == ProjectileID.BouncyGrenade);
+        }
+
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {            
+            int trailCount = 17; 
+            previousRotations.Add(projectile.rotation);
+            previousPostions.Add(projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPostions.Count > trailCount)
+                previousPostions.RemoveAt(0);
+
+            float fadeInTime = Math.Clamp((timer + 9f) / 25f, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
+
+            timer++;
+            return base.PreAI(projectile);
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 0f;
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPostions = new List<Vector2>();
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
+            Vector2 TexOrigin = vanillaTex.Size() / 2f;
+            SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            //After-Image
+            if (previousRotations != null && previousPostions != null)
+            {
+                for (int i = 0; i < previousRotations.Count; i++)
+                {
+                    float progress = (float)i / previousRotations.Count;
+
+                    //Start End
+                    Color col = Color.White * progress * progress;
+
+                    float size1 = (0.5f + (progress * 0.5f)) * projectile.scale;
+
+                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.35f, 
+                        previousRotations[i], TexOrigin, size1 * overallScale, SE);
+                }
+            }
+
+            //Border
+            for (int i = 0; i < 3; i++)
+            {
+                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
+                    Color.White with { A = 0 } * 0.4f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
+            }
+
+            //MainTex
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
+
+            return false;
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+
+            for (int i = 0; i < 3 + Main.rand.Next(3); i++)
+            {
+                Vector2 v = Main.rand.NextVector2CircularEdge(1f, 1f) * 1f;
+                Color col = Main.rand.NextBool() ? Color.OrangeRed : Color.Orange;
+                Dust sa = Dust.NewDustPerfect(projectile.Center, DustID.PortalBoltTrail, v * Main.rand.NextFloat(2f, 5f), 0,
+                    col, Main.rand.NextFloat(0.4f, 0.7f) * 1.35f);
+
+                if (sa.velocity.Y > 0)
+                    sa.velocity.Y *= -1;
+            }
+
+            for (int i = 0; i < 14; i++) //16
+            {
+                Color col1 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.3f);
+
+                float progress = (float)i / 13;
+                Color col = Color.Lerp(Color.Brown * 0.35f, col1 with { A = 0 }, progress);
+
+                Vector2 vel = Main.rand.NextVector2Unit() * Main.rand.NextFloat(1.25f, 3.75f) * 1f;
+
+                Dust d = Dust.NewDustPerfect(projectile.Center + vel, ModContent.DustType<MediumSmoke>(), Velocity: vel,
+                    newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.35f) * 1.1f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(6, 25), 0.98f, 0.01f, 1f); //12 28
+
+                d.rotation = Main.rand.NextFloat(6.28f);
+            }
+
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed, Scale: 0.2f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
+
+            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Orange, Scale: 0.12f);
+
+            softGlow2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 14,
+                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
+
+            for (int i = 0; i < 9 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center + randomStart * 0.5f, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Main.rand.NextBool() ? Color.OrangeRed : Color.Orange, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 13, postSlowPower: 0.92f,
+                    velToBeginShrink: 4f, fadePower: 0.91f, shouldFadeColor: false);
+            }
+
+            //return false;
+
+            #region vanilla Kill
+            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            projectile.position.X += projectile.width / 2;
+            projectile.position.Y += projectile.height / 2;
+            projectile.width = 22;
+            projectile.height = 22;
+            projectile.position.X -= projectile.width / 2;
+            projectile.position.Y -= projectile.height / 2;
+            int num977 = 6;
+            for (int num978 = 202; num978 < 20; num978++)
+            {
+                int num979 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 31, 0f, 0f, 100, default(Color), 1.5f);
+                Dust dust78 = Main.dust[num979];
+                Dust dust334 = dust78;
+                dust334.velocity *= 1.4f;
+            }
+            for (int num980 = 0; num980 < 8; num980++)
+            {
+                //int num981 = Dust.NewDust(projectile.position, projectile.width, projectile.height, num977, 0f, 0f, 100, default(Color), 2.5f);
+                //Main.dust[num981].noGravity = true;
+                //Dust dust80 = Main.dust[num981];
+                //Dust dust334 = dust80;
+                //dust334.velocity *= 5f;
+                int a = Dust.NewDust(projectile.position, projectile.width, projectile.height, num977, 0f, 0f, 100, default(Color), 1.5f);
+                Main.dust[a].velocity *= 3f;
+                //dust80 = Main.dust[num981];
+                //dust334 = dust80;
+                //dust334.velocity *= 3f;
+            }
+            
+
+            #endregion
+
+            return false;
+        }
+
+    }
+
+}

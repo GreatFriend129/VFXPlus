@@ -328,14 +328,14 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 Vector2 goalPos = player.Center + diveStartPoint;
 
-                int timeToStartDive = 85; //90
-                float timeForMovement = 30; //35
+                int timeToStartDive = 95; //85
+                float timeForMovement = 25; //30
 
                 if (timer < timeToStartDive)
                 {
                     float timeForOffsetShrink = 80;
                     float offsetProgress = Math.Clamp((float)timer / timeForOffsetShrink, 0f, 1f);
-                    Vector2 goalOffset = Vector2.Lerp(new Vector2(1050f * diveStartSide, 0f), new Vector2(0f + player.velocity.X * 18f, -200f), Easings.easeOutQuad(offsetProgress)); //vel * 6f
+                    Vector2 goalOffset = Vector2.Lerp(new Vector2(1050f * diveStartSide, 0f), new Vector2(0f + player.velocity.X * 14f, -200f), Easings.easeOutQuad(offsetProgress)); //vel * 6f
 
                     BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 4f); //3.5
 
@@ -346,7 +346,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     Vector2 goalVel = new Vector2(NPC.velocity.X * 0.7f, 30f); //23
                     
                     float timeProgress = Math.Clamp((float)((timer - timeToStartDive) / timeForMovement), 0f, 1f);
-                    NPC.velocity = Vector2.Lerp(initialVel, goalVel, Easings.easeInOutSine(timeProgress));// inoutquad
+                    NPC.velocity = Vector2.Lerp(initialVel, goalVel, Easings.easeInOutQuad(timeProgress));// inoutquad
 
                     bool shouldShootFeahters = NPC.velocity.Y > 7; 
 
@@ -396,14 +396,29 @@ namespace VFXPlus.Content.FeatheredFoe
                     }
 
                     bool shouldStartDrill = NPC.velocity.Y > 14;
-                    if (shouldStartDrill)
+                    if (shouldStartDrill && !drawDrill)
+                    {
                         drawDrill = true;
+
+                        int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                        (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 40;
+                        (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.4f;
+                        Main.projectile[pulse].scale = 9f;
+
+                        SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 0.08f, Pitch = 0.7f, PitchVariance = 0.05f, MaxInstances = 1 };
+                        SoundEngine.PlaySound(styleD, NPC.Center);
+
+                        SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.07f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
+                        SoundEngine.PlaySound(styleC, NPC.Center);
+
+                        player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
+                    }
 
                     doPassiveWindParticles = true;
                     passiveWindParticleDirection = MathHelper.PiOver2;
                 }
 
-                if (timer == timeToStartDive + timeForMovement + 35)
+                if (timer == timeToStartDive + timeForMovement + 30) //35
                 {
                     drawDrill = false;
 

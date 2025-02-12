@@ -9,6 +9,7 @@ using VFXPlus.Common;
 using Terraria.GameContent;
 using VFXPlus.Common.Drawing;
 using VFXPlus.Content.Dusts;
+using Terraria.ID;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -814,6 +815,91 @@ namespace VFXPlus.Content.FeatheredFoe
         public float NextFloatFastRandom(FastRandom random, float min, float max)
         {
             return min + random.NextFloat() * (max - min);
+        }
+
+    }
+
+
+    public class LineBarrier : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 64;
+            Projectile.height = 64;
+
+
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = false;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+
+
+        float overallAlpha = 0f;
+        float overallScale = 0f;
+
+        int timer = 0;
+
+        public override void AI()
+        {
+
+            for (int i = 0; i < 1; i++)
+            {
+                Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-500f, 500f), Main.rand.NextFloat(-45f, 45f)).RotatedBy(Projectile.rotation);
+
+                float velVal = Main.rand.NextFloat(5f, 12f);
+                Vector2 vel = new Vector2(velVal, 0f).RotatedBy(Projectile.rotation);
+
+                Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
+
+                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, vel * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(1f, 2f));
+                wind.noGravity = true;
+            }
+
+            for (int i = 0; i < 1; i++)
+            {
+                int dir = 1;// (Main.rand.NextBool() ? 1 : -1);
+
+                Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-500f, 500f), Main.rand.NextFloat(-45f, 45f)).RotatedBy(Projectile.rotation);
+
+                float velVal = Main.rand.NextFloat(5f, 12f) * dir;
+                Vector2 vel = new Vector2(velVal * 3f, 0f).RotatedBy(Projectile.rotation);
+
+                Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
+
+                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, ModContent.DustType<WindLine>(), vel * 1f, newColor: Color.DodgerBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.65f, 2f, 1f, true);
+                wind.customData = wlb;
+
+            }
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D glowThick = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Vector2 vec2Scale = new Vector2(100f, 1f);
+
+            Main.EntitySpriteDraw(glowThick, drawPos, null, Color.DeepSkyBlue with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, new Vector2(15f, 0.12f), 0);
+            Main.EntitySpriteDraw(glowThick, drawPos, null, Color.White with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, new Vector2(15f, 0.05f), 0);
+
+            return false;
         }
 
     }
