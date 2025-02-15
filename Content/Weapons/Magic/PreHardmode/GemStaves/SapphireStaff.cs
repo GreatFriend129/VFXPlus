@@ -13,6 +13,7 @@ using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Interfaces;
 
 
 
@@ -23,13 +24,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.SapphireStaff);
+            return lateInstatiation && (item.type == ItemID.SapphireStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.SapphireStaffToggle;
         }
 
         public override void SetDefaults(Item entity)
         {
             entity.UseSound = SoundID.Item1 with { Volume = 0f, MaxInstances = -1 };
-
             base.SetDefaults(entity); 
         }
 
@@ -48,13 +48,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
         }
 
     }
-    public class SapphireStaffShotOverride : GlobalProjectile
+    public class SapphireStaffShotOverride : GlobalProjectile, IDrawAdditive
     {
         public override bool InstancePerEntity => true;
-
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SapphireBolt);
+            return lateInstantiation && (entity.type == ProjectileID.SapphireBolt) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.SapphireStaffToggle;
+        }
+
+        public override void SetDefaults(Projectile entity) { entity.hide = true; }
+        public override void DrawBehind(Projectile projectile, int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index); //Needed for trail to be under proj
+            base.DrawBehind(projectile, index, behindNPCsAndTiles, behindNPCs, behindProjectiles, overPlayers, overWiresUI);
         }
 
         BaseTrailInfo trail1 = new BaseTrailInfo();
@@ -79,7 +85,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             trail1.TrailLogic();
             #endregion
 
-            if (timer % 3 == 0 && Main.rand.NextBool(1)) //timer mod 1 with high res smoke looks cool
+            if (timer % 3 == 0 && Main.rand.NextBool(1))
             {
                 int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<PixelGlowOrb>(), newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.35f, 0.4f));
                 Main.dust[d].velocity -= projectile.velocity * 0.25f;
@@ -97,19 +103,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             return false;
         }
 
+        public void DrawAdditive(SpriteBatch sb) { trail1.TrailDrawing(sb, false); }
 
         float fadeInAlpha = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            //{
-                trail1.TrailDrawing(Main.spriteBatch);
-
-            //});
-
             Texture2D fireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/SapphireFireball").Value;
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlorbPMA3").Value;
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D star = CommonTextures.RainbowRod.Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
@@ -135,9 +136,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.DodgerBlue with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale, se);
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale * 0.5f, se);
 
-
             return false;
-
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -164,7 +163,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             }
 
             //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.25f);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.2f);
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
                 overallAlpha: 0.12f, DrawWhiteCore: false, 1f, 1f);
@@ -178,7 +177,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
             return base.OnTileCollide(projectile, oldVelocity);
         }
 

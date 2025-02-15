@@ -7,6 +7,8 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent;
+using System.Linq;
+using System;
 
 #endregion
 

@@ -116,7 +116,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
                 Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.25f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.3f,
                         previousRotations[i], TexOrigin, size2, SpriteEffects.None);
 
             }

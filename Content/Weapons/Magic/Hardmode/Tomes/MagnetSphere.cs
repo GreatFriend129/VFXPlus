@@ -17,11 +17,7 @@ using System.Threading;
 using System.Timers;
 using VFXPlus.Common.Drawing;
 using Terraria.Physics;
-using Terraria.Utilities.Terraria.Utilities;
 using Terraria.Graphics;
-using static tModPorter.ProgressUpdate;
-using System.Runtime.InteropServices;
-using static Terraria.GameContent.Bestiary.IL_BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
@@ -426,7 +422,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         public List<Vector2> trailPositions = new List<Vector2>();
 
         public List<Vector2> originalPoints = new List<Vector2>();
-
         public override bool PreDraw(ref Color lightColor)
         {
             if (trailPositions.Count == 0)

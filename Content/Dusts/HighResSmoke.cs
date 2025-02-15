@@ -110,7 +110,7 @@ namespace VFXPlus.Content.Dusts
 
                     if (behavior.isPixelated)
                     {
-                        ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+                        ModContent.GetInstance<PixelationSystem>().QueueRenderAction("Dusts", () =>
                         {
                             //Yes the extra '* dust.fadeIn' is intentional
                             if (behavior.drawSoftGlowUnder)
@@ -145,6 +145,11 @@ namespace VFXPlus.Content.Dusts
 				Main.EntitySpriteDraw(Smoke, dust.position - Main.screenPosition, null, col with { A = 0 } * 0.2f, dust.rotation, Smoke.Size() / 2f, myscale, SpriteEffects.None);
             }
 			return false;
+        }
+
+        public void DrawIt(HighResSmokeBehavior hrsb)
+        {
+
         }
 
 	}

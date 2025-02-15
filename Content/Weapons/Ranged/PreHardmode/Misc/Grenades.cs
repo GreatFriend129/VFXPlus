@@ -17,6 +17,7 @@ using System.Threading;
 using VFXPlus.Common.Drawing;
 using rail;
 using VFXPlus.Content.Projectiles;
+using VFXPLus.Common;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
@@ -142,26 +143,45 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             }
 
             //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed, Scale: 0.2f);
-
-            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
-
-            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Orange, Scale: 0.12f);
-
+            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed * 1.5f, Scale: 0.2f);
             softGlow2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 14,
-                overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
+                overallAlpha: 0.3f, DrawWhiteCore: true, 1f, 1f);
 
-            for (int i = 0; i < 9 + Main.rand.Next(0, 3); i++)
+            for (int fg = 0; fg < 11; fg++)
             {
-                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center + randomStart * 0.5f, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Main.rand.NextBool() ? Color.OrangeRed : Color.Orange, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
-                dust.noLight = false;
-                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 13, postSlowPower: 0.92f,
-                    velToBeginShrink: 4f, fadePower: 0.91f, shouldFadeColor: false);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(3, 3);
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), randomStart * Main.rand.NextFloat(0.3f, 1.35f) * 1.5f, newColor: new Color(255, 125, 5), Scale: Main.rand.NextFloat(1f, 1.4f) * 0.5f);
+                gd.alpha = 2;
             }
 
-            //return false;
+            for (int i = 0; i < 8 + Main.rand.Next(0, 3); i++)
+            {
+                Color col = Color.Lerp(Color.Orange, Color.OrangeRed, 0.85f);
+
+                Vector2 smvel = Main.rand.NextVector2Circular(1.5f, 1.5f) * Main.rand.NextFloat(1f, 2f);
+                Dust sm = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), smvel, newColor: col, Scale: Main.rand.NextFloat(0.5f, 0.8f));
+
+                HighResSmokeBehavior b = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f,
+                    overallAlpha: 1.15f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
+                b.isPixelated = true;
+                sm.customData = b;
+            }
+
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.4f, true, 1, 0.8f, 0.8f);
+
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Orange * 0.25f);
+            d1.scale = 0.04f;
+            d1.customData = cpb2;
+            d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
+
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.OrangeRed * 0.25f);
+            d2.customData = cpb2;
+            d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+
+            float distanceToPlayer = (projectile.Center - Main.player[projectile.owner].Center).Length();
+
+            if (distanceToPlayer < 1400)
+                Main.player[projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = (1f - (distanceToPlayer / 1500f)) * 5f;
 
             #region vanilla Kill
             SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
@@ -179,7 +199,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
                 Dust dust334 = dust78;
                 dust334.velocity *= 1.4f;
             }
-            for (int num980 = 0; num980 < 8; num980++)
+            for (int num980 = 220; num980 < 8; num980++)
             {
                 //int num981 = Dust.NewDust(projectile.position, projectile.width, projectile.height, num977, 0f, 0f, 100, default(Color), 2.5f);
                 //Main.dust[num981].noGravity = true;

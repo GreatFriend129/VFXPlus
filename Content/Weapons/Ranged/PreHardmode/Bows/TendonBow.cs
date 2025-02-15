@@ -20,11 +20,11 @@ using System.Runtime.Intrinsics.Arm;
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 {
     
-    public class DemonBow : GlobalItem 
+    public class TendonBow : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.DemonBow);
+            return lateInstatiation && (item.type == ItemID.TendonBow);
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
@@ -33,23 +33,28 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             {
                 Color col = Color.Gray;
 
-                Dust dp = Dust.NewDustPerfect(position + velocity.SafeNormalize(Vector2.UnitX) * 10, DustID.Shadowflame,
+                Dust dp = Dust.NewDustPerfect(position + velocity.SafeNormalize(Vector2.UnitX) * 10, DustID.Blood,
                     velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.5f, 0.5f)) * Main.rand.Next(2, 6),
-                    newColor: Color.Gray with { A = 0 } * 0.1f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.6f);
+                    newColor: Color.Red with { A = 0 } * 0.1f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.75f);
 
                 dp.noGravity = true;
             }
 
             player.GetModPlayer<HeldBowPlayer>().arrowType = type;
-            player.GetModPlayer<HeldBowPlayer>().bowType = ItemID.DemonBow;
-            player.GetModPlayer<HeldBowPlayer>().holdOffset = new Vector2(-2f, 0f);
+            player.GetModPlayer<HeldBowPlayer>().bowType = ItemID.TendonBow;
+            player.GetModPlayer<HeldBowPlayer>().holdOffset = new Vector2(-2f, 0f); //-2f
             player.GetModPlayer<HeldBowPlayer>().arrowOffset = -10f;
             player.GetModPlayer<HeldBowPlayer>().arrowPullAmount = 15f;
-            player.GetModPlayer<HeldBowPlayer>().underGlowPower = 3f;
-            player.GetModPlayer<HeldBowPlayer>().underGlowColor = new Color(42, 2, 82);
+            player.GetModPlayer<HeldBowPlayer>().underGlowPower = 1f;
+            player.GetModPlayer<HeldBowPlayer>().underGlowColor = Color.Crimson;
 
             return true;
 
+        }
+
+        public override Vector2? HoldoutOffset(int type)
+        {
+            return new Vector2(5f, 0f);
         }
 
         public override void UseStyle(Item item, Player player, Rectangle heldItemFrame) => UseStyleHelper.BasicBowUseStyle(player);

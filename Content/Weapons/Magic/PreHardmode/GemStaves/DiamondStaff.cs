@@ -13,6 +13,7 @@ using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using VFXPlus.Common.Interfaces;
 
 
 
@@ -21,22 +22,17 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
     
     public class DiamondStaff : GlobalItem 
     {
-
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.DiamondStaff);
+            return lateInstatiation && (item.type == ItemID.DiamondStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.DiamondStaffToggle;
         }
-
         public override void SetDefaults(Item entity)
         {
             entity.UseSound = SoundID.Item1 with { Volume = 0f, MaxInstances = -1 };
-
             base.SetDefaults(entity); 
         }
-
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
             SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = 0.8f, Pitch = .25f, PitchVariance = 0.05f };
             SoundEngine.PlaySound(style4, player.Center);
 
@@ -45,19 +41,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_20") with { Volume = 0.65f, Pitch = .45f, PitchVariance = 0.1f};
             SoundEngine.PlaySound(style2, player.Center);
-
-            
             return true;
         }
-
     }
-    public class DiamondStaffShotOverride : GlobalProjectile
+    public class DiamondStaffShotOverride : GlobalProjectile, IDrawAdditive
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.DiamondBolt);
+            return lateInstantiation && (entity.type == ProjectileID.DiamondBolt) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.DiamondStaffToggle;
+        }
+        public override void SetDefaults(Projectile entity) { entity.hide = true; }
+        public override void DrawBehind(Projectile projectile, int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index); //Needed for trail to be under proj
+            base.DrawBehind(projectile, index, behindNPCsAndTiles, behindNPCs, behindProjectiles, overPlayers, overWiresUI);
         }
 
         BaseTrailInfo trail1 = new BaseTrailInfo();
@@ -96,7 +95,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             trail2.TrailLogic();
             #endregion
 
-            if (timer % 3 == 0 && Main.rand.NextBool(1)) //timer mod 1 with high res smoke looks cool
+            if (timer % 3 == 0 && Main.rand.NextBool(1))
             {
                 int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<PixelGlowOrb>(), newColor: Color.White * 0.5f, Scale: Main.rand.NextFloat(0.35f, 0.4f));
                 Main.dust[d].velocity -= projectile.velocity * 0.25f;
@@ -106,7 +105,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             if (timer % 5 == 0)
                 frame = (frame + 1) % 4;
 
-
             Lighting.AddLight(projectile.Center, Color.White.ToVector3() * 0.8f * fadeInAlpha);
 
             fadeInAlpha = Math.Clamp(MathHelper.Lerp(fadeInAlpha, 1.25f, 0.04f), 0f, 1f);
@@ -114,18 +112,20 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             return false;
         }
 
+        public void DrawAdditive(SpriteBatch sb) 
+        { 
+            trail1.TrailDrawing(sb, false);
+            trail2.TrailDrawing(sb, false);
+        }
 
         float fadeInAlpha = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            trail1.TrailDrawing(Main.spriteBatch);
-            trail2.TrailDrawing(Main.spriteBatch);
-
             Texture2D fireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/DiamondFireball").Value;
             Texture2D whiteFireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/PureWhiteFireball").Value;
 
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlorbPMA3").Value;
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D star = CommonTextures.RainbowRod.Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
@@ -138,15 +138,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
             Main.EntitySpriteDraw(glorb, drawPos, null, Color.White with { A = 0 } * fadeInAlpha * 0.5f, projectile.rotation, glorb.Size() / 2, new Vector2(projectile.scale, projectile.scale * 0.5f) * 1f, SpriteEffects.None);
 
-            //Disco underglow
-            for (int i = 0; i < 5; i++)
-            {
-                //Main.EntitySpriteDraw(whiteFireball, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle, FetchRainbow() with { A = 0 } * fadeInAlpha, projectile.rotation, origin, projectile.scale, se);
-            }
 
             for (int i = 0; i < 4; i++)
             {
-                float dist = 1.5f;
+                float dist = 1.25f;
                 float Adist = MathHelper.Lerp(20f, 1.5f, fadeInAlpha);
                 float Aalpha = Easings.easeInSine(fadeInAlpha);
 
@@ -169,9 +164,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha * 0.5f, starRotation, star.Size() / 2f, starScale, se);
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale * 0.5f, se);
 
-
             return false;
-
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -198,7 +191,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             }
 
             //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: FetchRainbow(), Scale: 0.25f);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: FetchRainbow(), Scale: 0.2f);
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
                 overallAlpha: 0.12f, DrawWhiteCore: false, 1f, 1f);
@@ -218,8 +211,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                     Vector2 randomStart = Main.rand.NextVector2Circular(1.75f, 1.75f) * 1f;
                     Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Main.DiscoColor, Scale: Main.rand.NextFloat(0.55f, 0.65f));
 
-                    //dust.velocity += projectile.velocity * 0.25f;
-
                     dust.noLight = false;
                     dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
                         rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.9f, shouldFadeColor: false);
@@ -233,12 +224,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                     d.fadeIn = Main.rand.Next(0, 4);
                     d.alpha = Main.rand.Next(0, 2);
                     d.noLight = false;
-
-                    //d.velocity += projectile.velocity * 0.25f;
                 }
             }
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
@@ -251,17 +238,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public Color FetchRainbow()
         {
             return Main.DiscoColor * 0.85f;
-            //
-            float sin1 = (float)Math.Sin(MathHelper.ToRadians((float)Main.timeForVisualEffects + 100));
-            float sin2 = (float)Math.Sin(MathHelper.ToRadians((float)Main.timeForVisualEffects + 220));
-            float sin3 = (float)Math.Sin(MathHelper.ToRadians((float)Main.timeForVisualEffects + 340));
-            int middle = 180;
-            int length = 75;
-            float r = middle + length * sin1;
-            float g = middle + length * sin2;
-            float b = middle + length * sin3;
-            Color color = new Color((int)r, (int)g, (int)b);
-            return color;
         }
 
     }

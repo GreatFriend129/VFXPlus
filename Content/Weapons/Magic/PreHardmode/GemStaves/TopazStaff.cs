@@ -12,18 +12,19 @@ using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
+using VFXPlus.Common.Interfaces;
 
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 {
     
-    public class TopazStaff : GlobalItem 
+    public class TopazStaff : GlobalItem
     {
 
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.TopazStaff);
+            return lateInstatiation && (item.type == ItemID.TopazStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TopazStaffToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -50,13 +51,20 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         }
 
     }
-    public class TopazStaffShotOverride : GlobalProjectile
+    public class TopazStaffShotOverride : GlobalProjectile, IDrawAdditive
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.TopazBolt);
+            return lateInstantiation && (entity.type == ProjectileID.TopazBolt) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TopazStaffToggle;
+        }
+
+        public override void SetDefaults(Projectile entity) { entity.hide = true; }
+        public override void DrawBehind(Projectile projectile, int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index); //Needed for trail to be under proj
+            base.DrawBehind(projectile, index, behindNPCsAndTiles, behindNPCs, behindProjectiles, overPlayers, overWiresUI);
         }
 
         BaseTrailInfo trail1 = new BaseTrailInfo();
@@ -100,14 +108,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         }
 
 
+        public void DrawAdditive(SpriteBatch sb) { trail1.TrailDrawing(sb, false); }
+
         float fadeInAlpha = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            trail1.TrailDrawing(Main.spriteBatch);
-
             Texture2D fireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/TopazFireball").Value;
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlorbPMA3").Value;
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D star = CommonTextures.RainbowRod.Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
@@ -132,10 +140,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.Orange with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale, se);
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale * 0.5f, se);
 
-
             return false;
-
         }
+
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
@@ -161,10 +168,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             }
 
             //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Orange, Scale: 0.25f);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Orange, Scale: 0.15f);
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
-                overallAlpha: 0.12f, DrawWhiteCore: false, 1f, 1f);
+                overallAlpha: 0.10f, DrawWhiteCore: false, 1f, 1f);
 
             SoundStyle style = new SoundStyle("Terraria/Sounds/Item_118") with { Volume = 1f, Pitch = .2f, PitchVariance = .2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
@@ -204,10 +211,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
-            //SoundEngine.PlaySound(style, projectile.Center);
-
             return base.OnTileCollide(projectile, oldVelocity);
         }
 

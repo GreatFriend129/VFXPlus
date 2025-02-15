@@ -18,6 +18,31 @@ Items: {
 		DisplayName: Skippz Test
 		Tooltip: ""
 	}
+
+	GaussShotgun: {
+		DisplayName: Gauss Shotgun
+		Tooltip: ""
+	}
+
+	DarknessDischarge: {
+		DisplayName: Darkness Discharge
+		Tooltip: ""
+	}
+
+	CavernsYoyo: {
+		DisplayName: Caverns Yoyo
+		Tooltip: ""
+	}
+
+	Glacier: {
+		DisplayName: Glacier
+		Tooltip: ""
+	}
+
+	BookOfBees: {
+		DisplayName: Book Of Bees
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -75,6 +100,14 @@ Projectiles: {
 	ShotgunProj.DisplayName: Shotgun Proj
 	LineBarrier.DisplayName: Line Barrier
 	BasicBowProjLong.DisplayName: Basic Bow Proj Long
+	GaussExplosionVFX.DisplayName: Gauss Explosion V F X
+	GaussianStar.DisplayName: Gaussian Star
+	BasicRecoilProj.DisplayName: Basic Recoil Proj
+	DarknessDart.DisplayName: Darkness Dart
+	CavernsYoyoVFX.DisplayName: Caverns Yoyo V F X
+	CavernsYoyoProj.DisplayName: Caverns Yoyo Proj
+	GlacierProj.DisplayName: Glacier Proj
+	HiveProjectile.DisplayName: Hive Projectile
 }
 
 Configs: {

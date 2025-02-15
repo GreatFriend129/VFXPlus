@@ -78,7 +78,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
 
             float fadeInTime = Math.Clamp((timer + 3f * EU) / 15f * EU, 0f, 1f);
-            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.06f), 0f, 1f);
 
@@ -147,36 +147,33 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Color betweenOrange = Color.Lerp(Color.Orange, Color.OrangeRed, 0.7f) * overallAlpha;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+
+                //Start End
+                Color col = Color.Lerp(betweenOrange, Color.Orange, 1f - Easings.easeInCubic(progress)) * progress * overallAlpha;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f,
+                    previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
+
+                if (i > 1)
                 {
-                    float progress = (float)i / previousRotations.Count;
+                    float middleProg = (float)(i - 1) / previousPostions.Count;
 
-                    //Start End
-                    Color col = Color.Lerp(betweenOrange, Color.Orange, 1f - Easings.easeInCubic(progress)) * progress * overallAlpha;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-                    float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f,
-                        previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
-
-                    if (i > 1)
-                    {
-                        float middleProg = (float)(i - 1) / previousPostions.Count;
-
-                        float size3 = (0.5f + (0.5f * progress));
-                        Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenOrange with { A = 0 } * 0.35f * middleProg,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
+                    float size3 = (0.5f + (0.5f * progress));
+                    Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenOrange with { A = 0 } * 0.35f * middleProg,
+                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
 
 
-                        Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
+                    Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
 
-                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenOrange with { A = 0 } * 0.2f * middleProg,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-                    }
+                    Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenOrange with { A = 0 } * 0.2f * middleProg,
+                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }
         }
