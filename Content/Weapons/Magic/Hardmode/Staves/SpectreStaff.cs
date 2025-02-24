@@ -68,25 +68,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 previousPostions.RemoveAt(0);
 
 
-            #region trail info
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Content/Weapons/Magic/Hardmode/Staves/SpectreAssets/GluttonyGhoul").Value;
-
-            trail1.trailColor = Color.Lerp(Color.LightSkyBlue, Color.White, 0.5f);
-            trail1.timesToDraw = 2;
-
-            trail1.pinch = false;
-            trail1.pinchAmount = 0.9f;
-
-            trail1.trailPointLimit = 150;
-            trail1.trailWidth = (int)(12f * projectile.scale);
-            trail1.trailMaxLength = 175;
-
-            trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + projectile.velocity;
-            trail1.TrailLogic();
-            #endregion
-
-
             if (timer % 2 == 0 && timer > 20)
             {
                 Color col = Main.rand.NextBool() ? Color.White : Color.SkyBlue;
@@ -221,7 +202,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Color StripColor(float progress) => Color.White * 0.35f; //0.15f
 
             //Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Staves/SpectreAssets/Void2").Value;
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Staves/SpectreAssets/lostsoul").Value;
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/FlameTrail").Value;
 
 
@@ -274,7 +255,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public float StripWidth(float progress)
         {
-            return 7f * overallAlpha;
+            return 5f * overallAlpha;
             
             float num = 1f;
             float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);

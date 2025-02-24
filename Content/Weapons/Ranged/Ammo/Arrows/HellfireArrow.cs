@@ -21,13 +21,13 @@ using Mono.Cecil.Cil;
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 {
-    public class FlamingArrowOverride : GlobalProjectile
+    public class HellfireArrowOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.FireArrow);
+            return lateInstantiation && (entity.type == ProjectileID.HellfireArrow);
         }
 
         int trailOffsetAmount = Main.rand.Next(-1, 2);
@@ -36,7 +36,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {            
-            int trailCount = 12 + trailOffsetAmount;
+            int trailCount = 13 + trailOffsetAmount;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -84,6 +84,38 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             timer++;
 
+            #region vanillaAI
+            if (Main.rand.NextBool())
+            {
+                int num240 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 6, 0f, 0f, 100, default(Color), 1.15f);
+                Main.dust[num240].noGravity = true;
+                Main.dust[num240].velocity -= projectile.velocity * 0.2f;
+            }
+
+            projectile.ai[0] += 1f;
+            if (projectile.ai[0] >= 15f)
+            {
+                projectile.ai[0] = 15f;
+                projectile.velocity.Y += 0.1f;
+            }
+
+            if (projectile.type != 344 && projectile.type != 498)
+            {
+                projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) + 1.57f;
+            }
+
+            if (projectile.velocity.Y < -16f)
+            {
+                projectile.velocity.Y = -16f;
+            }
+            if (projectile.velocity.Y > 16f)
+            {
+                projectile.velocity.Y = 16f;
+            }
+
+            #endregion
+
+            return false;
             return base.PreAI(projectile);
         }
 
@@ -112,22 +144,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             for (int i = 0; i < 4; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
-                    Color.White with { A = 0 } * 0.2f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
+                    Color.White with { A = 0 } * 0.25f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
             }
 
             Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.OrangeRed with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
 
-
-            for (int num163 = 220; num163 < 4; num163++)
-            {
-                Vector2 offset = Main.rand.NextVector2Circular(2f, 2f);
-                Main.EntitySpriteDraw(vanillaTex, offset + drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 2f, null, Color.White with { A = 0 } * 1f, projectile.rotation, TexOrigin,
-                    projectile.scale * overallScale, SE);
-
-            }
-
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.Orange with { A = 0 } * 0.65f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White with { A = 0 } * 0.35f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
 
             return false;
         }
@@ -143,7 +166,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            Color betweenOrange = Color.Lerp(Color.Orange, Color.OrangeRed, 0.7f) * overallAlpha;
+            Color betweenOrange = Color.Lerp(Color.Orange, Color.OrangeRed, 0.65f) * overallAlpha;
 
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
@@ -151,7 +174,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 float progress = (float)i / previousRotations.Count;
 
                 //Start End
-                Color col = Color.Lerp(betweenOrange, Color.Orange, 1f - Easings.easeInCubic(progress)) * progress * overallAlpha;
+                Color col = Color.Lerp(betweenOrange, Color.Orange, progress) * progress * overallAlpha;
 
                 Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
                 float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
@@ -165,7 +188,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                     float size3 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenOrange with { A = 0 } * 0.35f * middleProg,
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenOrange with { A = 0 } * 0.4f * middleProg,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
 
 
@@ -179,22 +202,99 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            for (int i = 0; i < 4; i++)
-            {
-                float arrowVel = Math.Clamp(projectile.oldVelocity.Length(), 1f, 7f);
-                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.OrangeRed, Scale: Main.rand.NextFloat(0.6f, 0.7f) * 0.8f);
-                dust.velocity += projectile.oldVelocity.SafeNormalize(Vector2.UnitX) * arrowVel * 0.15f;
 
-                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
-                    rotPower: 0.15f, preSlowPower: 0.97f, timeBeforeSlow: 6, postSlowPower: 0.92f, velToBeginShrink: 2f, fadePower: 0.85f, shouldFadeColor: false);
+            #region Explosion
+            for (int i = 0; i < 2 + Main.rand.Next(2); i++)
+            {
+                Vector2 v = Main.rand.NextVector2CircularEdge(1f, 1f) * 1f;
+                Color col = Main.rand.NextBool() ? Color.OrangeRed : Color.Orange;
+                Dust sa = Dust.NewDustPerfect(projectile.Center, DustID.PortalBoltTrail, v * Main.rand.NextFloat(2f, 5f), 0,
+                    col, Main.rand.NextFloat(0.4f, 0.7f) * 1.35f);
+
+                if (sa.velocity.Y > 0)
+                    sa.velocity.Y *= -1;
             }
 
-            SoundEngine.PlaySound(SoundID.Dig, projectile.position);
-            for (int num418 = 0; num418 < 4; num418++)
+            for (int i = 0; i < 12; i++) //16
             {
-                Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, DustID.Torch);
+                Color col1 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
+
+                float progress = (float)i / 11;
+                Color col = Color.Lerp(Color.Brown * 0.5f, col1 with { A = 0 }, progress);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.75f, 2.5f) * 1f,
+                    newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.7f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 1f); //12 28
+
+                d.rotation = Main.rand.NextFloat(6.28f);
             }
+
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.OrangeRed, Scale: 0.2f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+
+            for (int i = 0; i < 5 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.OrangeRed, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 13, postSlowPower: 0.92f,
+                    velToBeginShrink: 4f, fadePower: 0.91f, shouldFadeColor: false);
+            }
+
+            #endregion
+
+            SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/Fire/FlareImpact") with { Volume = 0.25f, Pitch = -.1f, PitchVariance = .2f, };
+            SoundEngine.PlaySound(styleA, projectile.Center);
+
+            SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.65f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = -1 }, projectile.Center);
+
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+
+
+            #region vanillaKill
+            for (int num731 = 2220; num731 < 10; num731++)
+            {
+                int num732 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 31, 0f, 0f, 100, default(Color), 1.5f);
+            }
+            for (int num733 = 2220; num733 < 5; num733++)
+            {
+                int num734 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 6, 0f, 0f, 100, default(Color), 2.5f);
+                Main.dust[num734].noGravity = true;
+                Dust dust144 = Main.dust[num734];
+                Dust dust334 = dust144;
+                dust334.velocity *= 3f;
+                num734 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 6, 0f, 0f, 100, default(Color), 1.5f);
+                dust144 = Main.dust[num734];
+                dust334 = dust144;
+                dust334.velocity *= 2f;
+            }
+            //int num735 = Gore.NewGore(null, projectile.position, default(Vector2), Main.rand.Next(61, 64));
+            //Gore gore36 = Main.gore[num735];
+            //Gore gore64 = gore36;
+            //gore64.velocity *= 0.4f;
+            //Main.gore[num735].velocity.X += (float)Main.rand.Next(-10, 11) * 0.1f;
+            //Main.gore[num735].velocity.Y += (float)Main.rand.Next(-10, 11) * 0.1f;
+            //num735 = Gore.NewGore(null, projectile.position, default(Vector2), Main.rand.Next(61, 64));
+            //gore36 = Main.gore[num735];
+            //gore64 = gore36;
+            //gore64.velocity *= 0.4f;
+            //Main.gore[num735].velocity.X += (float)Main.rand.Next(-10, 11) * 0.1f;
+            //Main.gore[num735].velocity.Y += (float)Main.rand.Next(-10, 11) * 0.1f;
+            if (projectile.owner == Main.myPlayer)
+            {
+                projectile.penetrate = -1;
+                projectile.position.X += projectile.width / 2;
+                projectile.position.Y += projectile.height / 2;
+                projectile.width = 64;
+                projectile.height = 64;
+                projectile.position.X -= projectile.width / 2;
+                projectile.position.Y -= projectile.height / 2;
+                projectile.Damage();
+            }
+            #endregion
 
             return false;
         }

@@ -588,7 +588,7 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             if (timer == 0)
             {
-                int featherCount = 5;
+                int featherCount = 4;
                 for (int i = 0; i < featherCount; i++)
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount) * i;
@@ -598,13 +598,12 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.04f;
+                        bof.orbitSpeed = 0.06f; //0.04
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
-                        bof.orbitDistance = 270f; //210
-                        bof.orbitDir = 1;
+                        bof.orbitDistance = 230f; //270
+                        bof.orbitDir = startDir;
                     }
                 }
-
 
             }
             
@@ -634,10 +633,10 @@ namespace VFXPlus.Content.FeatheredFoe
                 star.customData = ssb;
             }
 
-            float timeForPopInAnim = 37; //37
+            float timeForPopInAnim = 35; //37
             float animProgress = Math.Clamp((timer + 13) / timeForPopInAnim, 0f, 1f);
 
-            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 2.25f)) * 1f;
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 0.75f)) * 1f;
 
             timer++;
         }
@@ -669,15 +668,15 @@ namespace VFXPlus.Content.FeatheredFoe
             float cosOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.077f) * 0.1f;
 
             float startScale = sinOff;
-            float endScale = 7f * cosOff;
+            float endScale = 6f * cosOff;
 
             float scale = 1f;
 
 
             Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.13f, 0f, Orb.Size() / 2f, endScale * 1f, SpriteEffects.FlipHorizontally);
-            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.5f, 0f, Orb.Size() / 2f, endScale * 0.15f, SpriteEffects.FlipHorizontally);
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.1f, 0f, Orb.Size() / 2f, endScale * 1f * overallScale, SpriteEffects.FlipHorizontally);
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.35f, 0f, Orb.Size() / 2f, endScale * 0.15f * overallScale, SpriteEffects.FlipHorizontally);
 
             for (int i = 0; i < 12; i++) //18
             {
@@ -694,7 +693,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
                 float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
 
-                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f, SpriteEffects.FlipHorizontally);
+                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
 
                 //8
                 if (i >= 8)
@@ -769,10 +768,10 @@ namespace VFXPlus.Content.FeatheredFoe
             Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
             FastRandom r = new("mule".GetHashCode());
-            float speedTime = Main.GlobalTimeWrappedHourly * 2f;
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
 
             float minRange = 40f; //40f | 240 920 for full screen
-            float maxRange = 300f; //120
+            float maxRange = 270f; //120
             for (int i = 0; i < count; i++)
             {
 

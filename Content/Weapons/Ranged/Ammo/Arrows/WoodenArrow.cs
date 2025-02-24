@@ -84,8 +84,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            Color thisBrown = new Color(88, 50, 50);
-
             //After-Image
             if (previousRotations != null && previousPostions != null)
             {
@@ -120,13 +118,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
                     Color.SandyBrown with { A = 0 } * 0.3f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
-            }
-
-            if (overallScale != 1)
-            {
-                Vector2 flareScale = new Vector2(0.5f, 0.3f) * projectile.scale * 1.5f * (1f - overallScale);
-                Main.EntitySpriteDraw(flare, drawPos, null, thisBrown with { A = 0 } * 0.25f, projectile.rotation + MathHelper.PiOver2, flare.Size() / 2, flareScale, SE);
-                Main.EntitySpriteDraw(flare, drawPos, null, thisBrown with { A = 0 } * 0.75f, projectile.rotation + MathHelper.PiOver2, flare.Size() / 2, flareScale * 0.75f, SE);
             }
 
             //MainTex

@@ -10,6 +10,8 @@ using Terraria.Graphics.Shaders;
 using ReLogic.Content;
 using System.Collections.Generic;
 using VFXPlus.Common;
+using Terraria.DataStructures;
+using System.Linq;
 
 namespace VFXPlus.Content.VFXTest
 {
@@ -41,11 +43,11 @@ namespace VFXPlus.Content.VFXTest
 
        public bool secondDash = false;
 
-       public const int DashCooldown = 50; // Time (frames) between starting dashes. If this is shorter than DashDuration you can start a new dash before an old one has finished
-       public const int DashDuration = 35; // Duration of the dash afterimage effect in frames
+       public int DashCooldown = 50; // Time (frames) between starting dashes. If this is shorter than DashDuration you can start a new dash before an old one has finished
+       public int DashDuration = 35; // Duration of the dash afterimage effect in frames
 
-       // The initial velocity.  10 velocity is about 37.5 tiles/second or 50 mph
-       public const float DashVelocity = 10f;
+       // We can only dash if our vel is over the threshold
+       public float VelocityThreshold = 10f;
 
        // The direction the player has double tapped.  Defaults to -1 for no dash double tap
        public int DashDir = -1;
@@ -83,10 +85,12 @@ namespace VFXPlus.Content.VFXTest
        public override void PreUpdateMovement()
        {
            bool canUseFirstDash = (CanUseDash() && DashDir != -1 && DashDelay == 0);
-           bool canUseSecondDash = (CanUseDash() && DashDir != -1 && DashDelay != 0 && (TimeSinceFirstDash > 10 && TimeSinceSecondDash > 60));
+           bool canUseSecondDash = (CanUseDash() && DashDir != -1 && DashDelay != 0 && (TimeSinceFirstDash > 10 && TimeSinceSecondDash > 60)); //10 60
 
-           // if the player can use our dash, has double tapped in a direction, and our dash isn't currently on cooldown
-           if (canUseFirstDash || canUseSecondDash)
+            //Main.NewText(DashDelay);
+
+            // if the player can use our dash, has double tapped in a direction, and our dash isn't currently on cooldown
+            if (canUseFirstDash || canUseSecondDash)
            {
                bool firstDash = canUseFirstDash;
 
@@ -95,8 +99,8 @@ namespace VFXPlus.Content.VFXTest
                switch (DashDir)
                {
                    // Only apply the dash velocity if our current speed in the wanted direction is less than DashVelocity
-                   case DashLeft when Player.velocity.X > -DashVelocity:
-                   case DashRight when Player.velocity.X < DashVelocity:
+                   case DashLeft when Player.velocity.X > -VelocityThreshold:
+                   case DashRight when Player.velocity.X < VelocityThreshold:
                        {
                            int dash = Projectile.NewProjectile(null, Player.Center, Vector2.Zero, ModContent.ProjectileType<EnergyShieldDash>(), 0, 0, Player.whoAmI);
                            (Main.projectile[dash].ModProjectile as EnergyShieldDash).dashDirection = (DashDir == DashRight ? 0f : 3.14f);
@@ -115,9 +119,6 @@ namespace VFXPlus.Content.VFXTest
                DashDelay = DashCooldown;
                DashTimer = DashDuration;
                Player.velocity = newVelocity;
-
-               // Here you'd be able to set an effect that happens when the dash first activates
-               // Some examples include:  the larger smoke effect from the Master Ninja Gear and Tabi
            }
 
            if (DashDelay > 0)
@@ -125,34 +126,11 @@ namespace VFXPlus.Content.VFXTest
 
            if (DashTimer > 0)
            {
-               oldPositions.Add(Player.Center);
-               //dash is active
-               //This is where we set the afterimage effect.  You can replace these two lines with whatever you want to happen during the dash
-               //Some examples include:  spawning dust where the player is, adding buffs, making the player immune, etc.
-               //Here we take advantage of "player.eocDash" and "player.armorEffectDrawShadowEOCShield" to get the Shield of Cthulhu's afterimage effect
-
-               //Player.eocDash = DashTimer;
-               //Player.armorEffectDrawShadowEOCShield = true;
-
-               // count down frames remaining
                DashTimer--;
            }
 
-
-           if (oldPositions.Count > 5 || (oldPositions.Count > 0 && DashTimer == 0))
-               oldPositions.RemoveAt(0);
-
-           if (DashTimer < 20 && oldPositions.Count > 0)
-           {
-               oldPositions.RemoveAt(0); 
-               if (oldPositions.Count > 0)
-                   oldPositions.RemoveAt(0);
-           }
-
-
            TimeSinceFirstDash++;
            TimeSinceSecondDash++;
-
        }
 
        private bool CanUseDash()
@@ -162,16 +140,10 @@ namespace VFXPlus.Content.VFXTest
                && !Player.mount.Active; // player isn't mounted, since dashes on a mount look weird
        }
 
+    }
 
-       //Drawing
-       public List<Vector2> oldPositions = new List<Vector2>();
-       public override void Load()
-       {
-           //Terraria.On_Main.DrawPlayers_AfterProjectiles += Main_DrawPlayers_AfterProjectiles;
-       }
-   }
 
-   public class EnergyShieldDash : ModProjectile
+    public class EnergyShieldDash : ModProjectile
    {
 
        //Spawn Projectile when player presses dash inputs
@@ -239,11 +211,11 @@ namespace VFXPlus.Content.VFXTest
            Player myPlayer = Main.player[Projectile.owner];
            Texture2D Flash = (Texture2D)ModContent.Request<Texture2D>("AerovelenceMod/Content/Items/Weapons/Flares/muzzle_05");
 
-           float rot = dashDirection == 0f ? -MathHelper.PiOver2 : MathHelper.PiOver2;
+            float rot = (dashDirection == 0f ? -MathHelper.PiOver2 : MathHelper.PiOver2);
            float alpha = 1f - Easings.easeOutCirc(easingProgress);
 
-           Vector2 vec2Scale = new Vector2(1f - ((1f - alpha) * 0.5f), 0.25f + (alpha * 0.5f)) * 0.5f;
-           Vector2 origin = new Vector2(Flash.Width / 2f, 0f);
+            Vector2 vec2Scale = new Vector2(1f, 1f);// new Vector2(1f - ((1f - alpha) * 0.5f), 0.25f + (alpha * 0.5f)) * 0.5f;
+           Vector2 origin = new Vector2(0f, Flash.Height / 2f);
 
            Vector2 off = dashDirection == 0f ? new Vector2(-120f, 0f) : new Vector2(120f, 0f);
 
@@ -271,4 +243,5 @@ namespace VFXPlus.Content.VFXTest
            return base.OnTileCollide(oldVelocity);
        }
    }
+
 }

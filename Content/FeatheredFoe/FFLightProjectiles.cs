@@ -459,7 +459,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_42") with { Pitch = .2f, PitchVariance = .2f, Volume = 0.55f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style2, Projectile.Center);
 
-                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * 1f;
+                //Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * 1f;
                 Projectile.rotation = Projectile.velocity.ToRotation();
 
                 pulseIntensity = 1f;
@@ -484,12 +484,12 @@ namespace VFXPlus.Content.FeatheredFoe
                 previousPostions.RemoveAt(0);
 
 
-            if (timer < 90)
+            if (timer < accelTime)
             {
                 Projectile.velocity = Projectile.velocity.RotatedBy(-curveValue);
 
-                if (timer < 50)
-                    Projectile.velocity *= 1.05f;
+                //if (timer < 50)
+                    //Projectile.velocity *= 1.05f;
             }
 
             //Dust
@@ -773,7 +773,7 @@ namespace VFXPlus.Content.FeatheredFoe
             }
             Projectile parentProj = Main.projectile[ParentProj];
 
-            Projectile.velocity = Vector2.Zero;
+            //Projectile.velocity = Vector2.Zero;
 
             Vector2 vecdir = originalDir.SafeNormalize(Vector2.UnitX);
             Vector2 orbitVector = vecdir.RotatedBy(timer * orbitSpeed * orbitDir) * orbitDistance;
@@ -782,11 +782,11 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.Center = Vector2.Lerp(Projectile.Center, parentProj.Center + orbitVector, 1f);
 
 
-            Projectile.rotation = orbitVector.ToRotation() + MathHelper.PiOver2;
+            Projectile.rotation = orbitVector.ToRotation() + MathHelper.PiOver2 * orbitDir;
 
             int trailCount = 10;
             previousRotations.Add(Projectile.rotation);
-            previousPostions.Add(Projectile.Center);
+            previousPostions.Add(Projectile.Center - parentProj.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
@@ -816,18 +816,20 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     float progress = (float)i / previousRotations.Count;
 
+                    Vector2 afterImagePos = Main.projectile[ParentProj].Center - Main.screenPosition + previousPostions[i];
+
                     float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
 
                     Color betweenBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
                     Color col = Color.Lerp(Color.DodgerBlue, betweenBlue, progress) * progress;
 
                     float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
-                    Main.EntitySpriteDraw(FeatherGray, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f * drawAlpha,
+                    Main.EntitySpriteDraw(FeatherGray, afterImagePos, null, col with { A = 0 } * 0.55f * drawAlpha,
                             previousRotations[i], FeatherGray.Size() / 2f, size2 * drawScale, SpriteEffects.None);
 
                     Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
 
-                    Main.EntitySpriteDraw(FeatherWhite, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * drawAlpha,
+                    Main.EntitySpriteDraw(FeatherWhite, afterImagePos, null, col with { A = 0 } * 0.85f * drawAlpha,
                             previousRotations[i], FeatherGray.Size() / 2f, vec2Scale * drawScale, SpriteEffects.None);
                 }
 

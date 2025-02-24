@@ -37,7 +37,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 15 + trailOffsetAmount; //14
+            int trailCount = 17 + trailOffsetAmount; //14
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -126,7 +126,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            Color betweenGold = Color.Lerp(Color.Gold, Color.Orange, 0.65f);
+            Color betweenGold = Color.Lerp(Color.Gold, Color.Orange, 0.85f);
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -151,13 +151,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                         float size3 = (0.5f + (0.5f * progress));
                         Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGold with { A = 0 } * 0.3f * middleProg * overallAlpha,
+                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGold with { A = 0 } * 0.2f * middleProg * overallAlpha,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
 
 
                         Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
 
-                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenGold with { A = 0 } * 0.15f * middleProg * overallAlpha,
+                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenGold with { A = 0 } * 0.10f * middleProg * overallAlpha,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                     }
                 }
@@ -169,9 +169,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             for (int i = 0; i < 4; i++)
             {
+                Color col = Color.Lerp(Color.Orange, Color.OrangeRed, 0.25f);
+
                 float arrowVel = Math.Clamp(projectile.oldVelocity.Length(), 1f, 7f);
                 Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.Orange, Scale: Main.rand.NextFloat(0.6f, 0.7f) * 0.8f);
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.6f, 0.7f) * 0.7f);
                 dust.velocity += projectile.oldVelocity.SafeNormalize(Vector2.UnitX) * arrowVel * 0.15f;
 
                 dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
@@ -179,7 +181,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             }
 
             SoundEngine.PlaySound(SoundID.Dig, projectile.position);
-            for (int num418 = 0; num418 < 4; num418++)
+            for (int num418 = 0; num418 < 3; num418++)
             {
                 Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, DustID.IchorTorch);
             }

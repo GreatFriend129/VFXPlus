@@ -124,15 +124,22 @@ namespace VFXPlus.Content.FeatheredFoe
             strip.PrepareStripWithProceduralPadding(positions, rotations, StripColor, StripWidth, -Main.screenPosition, true);
             ShaderParams();
 
+            Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
+
+
 
             Texture2D glow = Mod.Assets.Request<Texture2D>("Assets/Slash/twirl_03").Value;
             float rot = (float)Main.timeForVisualEffects * 0.15f;
             float rot2 = (float)Main.timeForVisualEffects * 0.23f;
 
+
+            Texture2D glow2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/circle_02black").Value;
+            Main.EntitySpriteDraw(glow2, center - Main.screenPosition, null, between with { A = 0 } * 0.04f, rot, glow2.Size() / 2f, 2.2f, 0);
+
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                Main.EntitySpriteDraw(glow, center - Main.screenPosition, null, Color.SkyBlue with { A = 0 } * 0.03f, rot, glow.Size() / 2f, 1.75f, 0);
-                Main.EntitySpriteDraw(glow, center - Main.screenPosition, null, Color.SkyBlue with { A = 0 } * 0.03f, rot2, glow.Size() / 2f, 1.7f, 0);
+                Main.EntitySpriteDraw(glow, center - Main.screenPosition, null, Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f) with { A = 0 } * 0.03f, rot, glow.Size() / 2f, 1.75f, 0);
+                Main.EntitySpriteDraw(glow, center - Main.screenPosition, null, Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f) with { A = 0 } * 0.03f, rot2, glow.Size() / 2f, 1.7f, 0);
 
 
                 myEffect.CurrentTechnique.Passes["MainPS"].Apply();
@@ -159,7 +166,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float speedTime = Main.GlobalTimeWrappedHourly * 1.5f; //2f
 
             float minRange = 290f; //| 240 920 for full screen | 
-            float maxRange = 440f;
+            float maxRange = 440f; //444
             for (int i = 0; i < count; i++)
             {
 
@@ -209,7 +216,7 @@ namespace VFXPlus.Content.FeatheredFoe
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/WackBeam").Value);
-            myEffect.Parameters["baseColor"].SetValue(Color.Silver.ToVector3() * 1f);
+            myEffect.Parameters["baseColor"].SetValue(Color.Silver.ToVector3() * 1.5f); //1f
             myEffect.Parameters["satPower"].SetValue(0f); //0.25
 
             myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail7").Value);

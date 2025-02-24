@@ -57,7 +57,7 @@ namespace VFXPlus.Content.VFXTest.Aero
         }
     }
 
-    public class GlacierProj : ModProjectile, IDrawAdditive
+    public class GlacierProj : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
@@ -73,6 +73,9 @@ namespace VFXPlus.Content.VFXTest.Aero
             Projectile.tileCollide = false;
 
             Projectile.penetrate = -1;
+
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 10;
         }
 
         Vector2 initialVelocityDir = Vector2.Zero;
@@ -116,12 +119,6 @@ namespace VFXPlus.Content.VFXTest.Aero
                 float easedProgress = Easings.easeInOutHarsh(progress);
 
                 Projectile.velocity = Vector2.Lerp(initialVelocityDir * initialVelocityLength, Vector2.Zero, easedProgress);
-
-                //if (initialVelocityDir.X > 0)
-                //    Projectile.rotation += 0.06f + ((1f - progress) * 1f);
-                //else
-                //    Projectile.rotation -= 0.06f + ((1f - progress) * 1f);
-
             }
             else
             {
@@ -139,11 +136,6 @@ namespace VFXPlus.Content.VFXTest.Aero
                 {
                     Projectile.active = false;
                 }
-
-                //if (initialVelocityDir.X > 0)
-                //    Projectile.rotation -= 0.06f + ((progress) * 1f);
-                //else
-                //    Projectile.rotation += 0.06f + ((progress) * 1f);
             }
 
             for (int i = 0; i < 1; i++)
@@ -196,40 +188,6 @@ namespace VFXPlus.Content.VFXTest.Aero
             Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.25f, Projectile.rotation, Orb.Size() / 2f, 0.8f * Projectile.scale * overallScale, SE);
             Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.3f, Projectile.rotation, Orb.Size() / 2f, 0.4f * Projectile.scale * overallScale, SE);
 
-            //Border
-            for (int i = 0; i < 3; i++)
-            {
-                Main.EntitySpriteDraw(GlowTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                    Color.MediumPurple with { A = 0 } * 0.35f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE);
-            }
-
-            //MainTex
-
-            //Main.EntitySpriteDraw(GlowTex, drawPos, null, Color.LightSkyBlue with { A = 0 } * 0.1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, 0);
-
-            return false;
-        }
-
-        public override void PostDraw(Color lightColor)
-        {
-            Texture2D MainTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/DeadmanScythe2").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Vector2 TexOrigin = MainTex.Size() / 2f;
-            SpriteEffects SE = Projectile.direction == -1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
-            Main.EntitySpriteDraw(MainTex, drawPos, null, lightColor, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE);
-        }
-
-        public void DrawAdditive(SpriteBatch sb)
-        {
-            Texture2D MainTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/DeadmanScythe2").Value;
-            Texture2D GlowTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/DeadmanScythe2Glow").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Vector2 TexOrigin = MainTex.Size() / 2f;
-            SpriteEffects SE = Projectile.direction == -1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
             //After-Image
             for (int i = 0; i < previousPositions.Count - 1; i++)
             {
@@ -242,10 +200,25 @@ namespace VFXPlus.Content.VFXTest.Aero
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(MainTex, AfterImagePos, null, col * progress * 1f,
+                Main.EntitySpriteDraw(MainTex, AfterImagePos, null, col with { A = 0 } * progress * 1f,
                     previousRotations[i], TexOrigin, size1 * overallScale, SE);
 
             }
+
+            //Border
+            for (int i = 0; i < 3; i++)
+            {
+                Main.EntitySpriteDraw(GlowTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
+                    Color.MediumPurple with { A = 0 } * 0.35f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE);
+            }
+
+            //MainTex
+            Main.EntitySpriteDraw(MainTex, drawPos, null, lightColor, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE);
+
+            //Main.EntitySpriteDraw(GlowTex, drawPos, null, Color.LightSkyBlue with { A = 0 } * 0.1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, 0);
+
+            return false;
         }
+
     }
 }

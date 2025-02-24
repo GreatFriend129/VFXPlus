@@ -57,6 +57,11 @@ namespace VFXPlus.Content.Projectiles
 
         public int timeToStartFade = 1;
 
+        public bool doCompositeArm = true;
+
+        //Whether composite arms should always be at max stretch 
+        public bool compositeArmAlwaysFull = false;
+
         public void SetProjInfo(int GunID, int AnimTime, float NormalXOffset, float DestXOffset, float YRecoilAmount,
             Vector2 HoldOffset)
         {
@@ -93,10 +98,6 @@ namespace VFXPlus.Content.Projectiles
             {
                 shotAngle = (Main.MouseWorld - Player.Center).ToRotation();
                 XOffset = BaseXOffset;
-
-                //The chaingun is way too fast to even show a yRecoil, so just have it be off by a random angle instead
-                if (gunID == ItemID.ChainGun)
-                    shotAngle = shotAngle + Main.rand.NextFloat(-0.1f, 0.1f);
             }
 
             GunDirection = shotAngle.ToRotationVector2();
@@ -164,6 +165,20 @@ namespace VFXPlus.Content.Projectiles
                 Player.itemRotation -= 3.14f;
 
             Player.itemRotation = MathHelper.WrapAngle(Player.itemRotation);
+
+            #region compositeArms
+            float Xprog = Utils.GetLerpValue(goalX, baseX, XOffset, true);
+
+            if (Xprog > 0.75f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.5f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.ThreeQuarters, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.25f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Quarter, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.None, GunDirection.ToRotation() - MathHelper.PiOver2);
+
+            #endregion
 
             Player.heldProj = Projectile.whoAmI;
             Projectile.rotation = GunDirection.ToRotation();

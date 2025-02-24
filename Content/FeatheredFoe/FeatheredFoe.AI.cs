@@ -63,19 +63,20 @@ namespace VFXPlus.Content.FeatheredFoe
                     Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
                     for (int iaa = -3; iaa < 4; iaa++)
                     {
-                        Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * 0.5f;
+                        Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1f) * 15f;
 
-                        float curvePower = iaa * 0.009f;
+                        float curvePower = iaa * 0.04f;
 
                         int curveFeather = Projectile.NewProjectile(null, NPC.Center, vel, ModContent.ProjectileType<CurvingFeather>(), 2, 0, Main.myPlayer);
 
                         if (Main.projectile[curveFeather].ModProjectile is CurvingFeather cf)
                         {
-                            cf.curveValue = curvePower * 1.25f; //1.5
+                            cf.curveValue = curvePower;
+                            cf.accelTime = 24;
                         }
 
                         Main.projectile[curveFeather].hostile = true;
-                        Main.projectile[curveFeather].extraUpdates = 2; //1
+                        Main.projectile[curveFeather].extraUpdates = 0; //2
 
                     }
                 }
@@ -251,7 +252,86 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
+        bool isX = true;
+        float cornerTravelGoalRot = 0f;
         public void CornerTravelShot()
+        {
+            //Start at top left of star
+            Vector2 startPoint = new Vector2(350f, 0f).RotatedBy(cornerTravelGoalRot);
+
+            Vector2 goal = player.Center + startPoint;
+
+            BasicMovementVariant3(goal, 8f, 570f);
+
+
+            if (timer > 20 && timer < 70)
+            {
+                windOverlayOpacityGoal = 0.15f;
+                windOverlayRotation = startPoint.ToRotation() + MathHelper.Pi;
+
+                doPassiveWindParticles = true;
+                passiveWindParticleDirection = startPoint.ToRotation() + MathHelper.Pi;
+
+                if (timer % 6 == 0)
+                {
+                    Vector2 vel = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.75f) * 10f; //15
+
+                    Projectile spinShot = Projectile.NewProjectileDirect(null, NPC.Center, vel, ModContent.ProjectileType<SpinShotFeather>(), 10, 5);
+
+                    (spinShot.ModProjectile as SpinShotFeather).targetPlayer = player.whoAmI;
+
+                    SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_66") with { Pitch = .60f, MaxInstances = 1, Volume = 0.5f, PitchVariance = 0.2f };
+                    SoundEngine.PlaySound(style2, NPC.Center);
+
+                    for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++)
+                    {
+                        Vector2 randomStart = Main.rand.NextVector2Circular(2f, 2f) * 1f;
+                        Dust dust = Dust.NewDustPerfect(NPC.Center, ModContent.DustType<GlowPixelCross>(), vel * 0.5f + randomStart, newColor: new Color(40, 125, 255), Scale: Main.rand.NextFloat(0.35f, 0.65f));
+                        //dust.velocity += Projectile.velocity * 0.25f;
+
+                        dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                            rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: false);
+                    }
+                }
+            }
+            else
+            {
+                doPassiveWindParticles = true;
+                windOverlayOpacityGoal = 0f;
+            }
+
+            if (timer == 100)
+            {
+                if (isX)
+                    cornerTravelGoalRot = player.velocity.Y > 0f ? MathHelper.PiOver2 : -MathHelper.PiOver2;
+                else
+                    cornerTravelGoalRot = player.velocity.X > 0f ? 0f : MathHelper.Pi;
+                isX = !isX;
+
+                substate++;
+                timer = -1;
+            }
+
+            if (NPC.velocity.Length() > 12f)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(6f, 6f);
+
+                Color innerCol = Color.Lerp(Color.LightSkyBlue, Color.Tan, 0.5f);
+
+
+                Dust p = Dust.NewDustPerfect(NPC.Center + Main.rand.NextVector2Circular(50f, 50f), ModContent.DustType<WindLine>(), vel + NPC.velocity * 0.5f,
+                    newColor: Color.SkyBlue, Scale: 0.75f);
+
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 0.9f, 0.35f, true);
+                //wlb.randomVelRotatePower = 0.2f;
+                wlb.drawWhiteCore = false;
+                p.customData = wlb;
+            }
+
+        }
+
+
+        public void CornerTravelAggressive()
         {
             //Have him choose whether to go left or right based on ur x vel and whether he goes up or down based on y vel
 

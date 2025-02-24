@@ -53,16 +53,16 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
 
             #region trailInfo
-            trail1.trailTexture = ModContent.Request<Texture2D>("AerovelenceMod/Assets/spark_07_Black").Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 300;
-            trail1.trailWidth = (int)(25 * overallScale);
+            trail1.trailWidth = (int)(20 * overallScale);
             trail1.trailMaxLength = 300f * trailLengthOffset;
             trail1.timesToDraw = 1;
             trail1.shouldSmooth = false;
             trail1.pinch = false;
             
             trail1.gradient = true;
-            trail1.gradientTexture = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Gradients/EosGrad").Value;
+            trail1.gradientTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/BrightEosGrad").Value;
             trail1.shouldScrollColor = true;
 
             trail1.trailTime = (timer * 0.04f);
@@ -73,7 +73,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             trail1.TrailLogic();
             #endregion
 
-            if ((timer + dustRandomOffsetTime) % 2 == 0 && Main.rand.NextBool(1) && timer > 5)
+            if ((timer + dustRandomOffsetTime) % 3 == 0 && Main.rand.NextBool(1) && timer > 5)
             {
                 Color dustCol = getEosColor(Main.rand.NextFloat());
 
@@ -83,7 +83,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 Main.dust[d].customData = new GlowFlareBehavior(0.4f, 2.15f);
             }
 
-            if ((timer + dustRandomOffsetTime) % 4 == 0 && Main.rand.NextBool(2) && timer > 5)
+            if ((timer + dustRandomOffsetTime) % 5 == 0 && Main.rand.NextBool(2) && timer > 5)
             {
                 Color dustCol = getEosColor(Main.rand.NextFloat());
 
@@ -138,7 +138,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             float flareRot = projectile.rotation + MathHelper.PiOver2;
             Vector2 flarePos = drawPos + flareRot.ToRotationVector2() * 10f;
 
-            Vector2 vec2Scale = new Vector2(0.6f, 0.45f) * projectile.scale * overallScale;
+            Vector2 vec2Scale = new Vector2(0.55f, 0.35f) * projectile.scale * overallScale;
             float timeScale = ((float)Main.timeForVisualEffects * 0.02f) % 1;
 
             Color[] cols = { getEosColor(0f + timeScale), getEosColor(0.33f + timeScale), getEosColor(0.66f + timeScale) };
@@ -225,8 +225,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Color myCol = Color.White;
 
             Color purple = new Color(207, 130, 244); //214, 143, 247
-            Color mediumBlue = new Color(97 - 15, 136 - 15, 186 - 15); //97
-            Color brightBlue = new Color(110 - 15, 234 - 15, 215 - 15);
+            Color mediumBlue = new Color(97, 136, 186); //97
+            Color brightBlue = new Color(110, 234, 215);
 
 
             if (progress < 0.33f)
@@ -245,7 +245,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 myCol = Color.Lerp(brightBlue, mediumBlue, fakeProgress * 3f);
 
             }
-            return myCol;
+            return myCol * 1f;
         }
 
     }

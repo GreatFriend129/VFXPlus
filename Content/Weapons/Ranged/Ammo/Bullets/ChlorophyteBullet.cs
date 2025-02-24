@@ -5,19 +5,10 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
-using ReLogic.Content;
 using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using Terraria.Graphics.Shaders;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Interfaces;
-using static Terraria.ModLoader.PlayerDrawLayer;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets

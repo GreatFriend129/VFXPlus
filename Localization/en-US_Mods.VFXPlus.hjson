@@ -43,6 +43,11 @@ Items: {
 		DisplayName: Book Of Bees
 		Tooltip: ""
 	}
+
+	CrystalCrescent: {
+		DisplayName: Crystal Crescent
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -108,6 +113,9 @@ Projectiles: {
 	CavernsYoyoProj.DisplayName: Caverns Yoyo Proj
 	GlacierProj.DisplayName: Glacier Proj
 	HiveProjectile.DisplayName: Hive Projectile
+	CrystalCrescentProj.DisplayName: Crystal Crescent Proj
+	CrystalCrescentProjVFX.DisplayName: Crystal Crescent Proj V F X
+	EocTest.DisplayName: Eoc Test
 }
 
 Configs: {

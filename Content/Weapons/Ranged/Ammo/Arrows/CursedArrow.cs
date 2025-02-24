@@ -13,10 +13,6 @@ using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
-using System.Threading;
-using VFXPlus.Common.Drawing;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -38,7 +34,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         Color CursedGreen = new Color(162, 250, 47);
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 12 + trailOffsetAmount; //14
+            int trailCount = 14 + trailOffsetAmount; //14
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -107,10 +103,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             for (int i = 0; i < 4; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
-                    Color.White with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
+                    Color.White with { A = 0 } * 0.2f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
             }
 
-            Main.EntitySpriteDraw(orb, drawPos, null, CursedGreen with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.GreenYellow with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.GreenYellow with { A = 0 } * 0.35f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
@@ -139,13 +135,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     float progress = (float)i / previousRotations.Count;
 
                     //Start End
-                    Color col = Color.Lerp(Color.GreenYellow, CursedGreen, 1f - Easings.easeInCubic(progress)) * progress;
+                    Color col = Color.Lerp(CursedGreen, CursedGreen, 1f - Easings.easeInCubic(progress)) * progress;
 
                     float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f * overallAlpha,
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.2f * overallAlpha,
                         previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
 
                     if (i > 1)
@@ -154,7 +150,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                         float size3 = (0.5f + (0.5f * progress));
                         Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGreen with { A = 0 } * 0.3f * middleProg * overallAlpha,
+                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGreen with { A = 0 } * 0.2f * middleProg * overallAlpha,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
 
 

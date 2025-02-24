@@ -71,14 +71,10 @@ namespace VFXPlus.Content.Dusts
             if (!dust.noLight)
                 Lighting.AddLight(currentCenter, dust.color.R * dust.scale * 0.005f, dust.color.G * dust.scale * 0.005f, dust.color.B * dust.scale * 0.005f);
 
-
             if (dust.scale < 0.05f)
             {
                 dust.active = false;
             }
-
-            //if (dust.alpha != 0)
-                //dust.color *= 0.95f;
 
 
             dust.shader.UseColor(dust.color * dust.fadeIn);
@@ -99,38 +95,6 @@ namespace VFXPlus.Content.Dusts
             }
 
             return false;
-
-            /*
-            dust.velocity *= 0.91f;
-
-            if (dust.velocity.Length() < 1f)
-            {
-                dust.fadeIn *= 0.85f;
-                //dust.active = false;
-            }
-
-            if (dust.fadeIn <= 0.1f)
-                dust.active = false;
-
-
-            dust.shader.UseColor(dust.color * dust.fadeIn);
-
-
-            if (dust.customData is GlowFlareBehavior gfb)
-            {
-                dust.shader.UseOpacity(gfb.glowThreshold);
-                dust.shader.UseSaturation(gfb.glowPower);
-            }
-            else
-            {
-                dust.shader.UseOpacity(0.4f);
-                dust.shader.UseSaturation(2.5f);
-            }
-
-            dust.position += dust.velocity; 
-
-            return false;
-            */
         }
 
     }

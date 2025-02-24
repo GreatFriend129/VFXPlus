@@ -60,6 +60,11 @@ namespace VFXPlus.Content.Projectiles
         //Makes the glow on MuzzleFlash fade faster
         public bool isShotgun = false;
 
+        public bool doCompositeArm = true;
+        
+        //Whether composite arms should always be at max stretch 
+        public bool compositeArmAlwaysFull = false;
+
         public void SetProjInfo(int GunID, int AnimTime, float NormalXOffset, float DestXOffset, float YRecoilAmount,
             Vector2 HoldOffset, Vector2 TipPos, Vector2 StarPos)
         {
@@ -184,6 +189,21 @@ namespace VFXPlus.Content.Projectiles
 
             Player.itemRotation = MathHelper.WrapAngle(Player.itemRotation);
 
+            #region compositeArms
+            float Xprog = Utils.GetLerpValue(goalX, baseX, XOffset, true);
+            //Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, GunDirection.ToRotation() - MathHelper.PiOver2);
+
+            if (Xprog > 0.75f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.5f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.ThreeQuarters, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.25f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Quarter, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.None, GunDirection.ToRotation() - MathHelper.PiOver2);
+
+            #endregion
+
             Player.heldProj = Projectile.whoAmI;
             Projectile.rotation = GunDirection.ToRotation();
 
@@ -243,6 +263,15 @@ namespace VFXPlus.Content.Projectiles
                 colors[3] = Color.White;
 
                 MuzzleFlash = Mod.Assets.Request<Texture2D>(path + "Purple").Value;
+            }
+            else if (gunID == ItemID.SnowmanCannon)
+            {
+                colors[0] = Color.DeepSkyBlue * 0.5f;
+                colors[1] = Color.SkyBlue;
+                colors[2] = Color.SkyBlue;
+                colors[3] = new Color(240, 240, 255);
+
+                MuzzleFlash = Mod.Assets.Request<Texture2D>(path + "Blue").Value;
             }
 
             //Muzzle Flash

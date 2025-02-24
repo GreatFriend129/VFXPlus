@@ -3,8 +3,6 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
 using System;
@@ -14,12 +12,7 @@ using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
 using Terraria.DataStructures;
 using static Terraria.NPC;
-using static tModPorter.ProgressUpdate;
 using ReLogic.Content;
-using Terraria.Physics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using static Terraria.GameContent.Animations.IL_Actions.Sprites;
-using static System.Formats.Asn1.AsnWriter;
 using VFXPlus.Content.Projectiles;
 
 namespace VFXPlus.Content.VFXTest.Aero
@@ -31,9 +24,9 @@ namespace VFXPlus.Content.VFXTest.Aero
         public override void SetDefaults()
         {
             Item.damage = 26;
-            Item.knockBack = 2;
-
-
+            Item.knockBack = 2f;
+            Item.crit = 4;
+            Item.DamageType = DamageClass.Ranged;
             Item.rare = ItemRarityID.Yellow;
             Item.width = 58;
             Item.height = 20;
@@ -41,7 +34,6 @@ namespace VFXPlus.Content.VFXTest.Aero
             Item.useTime = 20;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.shootSpeed = 7f;
-            Item.knockBack = 6f;
             Item.autoReuse = true;
             Item.noMelee = true;
             Item.value = Item.buyPrice(0, 5, 0, 0);

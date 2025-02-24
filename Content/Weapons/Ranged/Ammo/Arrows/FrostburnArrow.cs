@@ -69,7 +69,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(2) && timer > 5)
             {
-                Color dustCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
+                Color dustCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.65f);
 
                 int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: dustCol, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 1.25f);
                 Main.dust[d].velocity -= projectile.velocity * 0.25f;
@@ -78,10 +78,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             }
 
             //Smoke
-            if (timer % mod3 == 0 && timer > 10)
+            if (timer % mod3 == 0 && timer > 10 && false)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(1.5f, 1.5f);
-                Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.3f);
+                Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
 
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), vel, newColor: col * 1f, Scale: Main.rand.NextFloat(0.25f, 0.5f));
                 d.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.2f);
@@ -146,7 +146,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.25f);
+            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
 
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -156,14 +156,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     float progress = (float)i / previousRotations.Count;
 
                     //Start End
-                    Color col = Color.Lerp(Color.LightSkyBlue, Color.DodgerBlue, 1f - Easings.easeInCubic(progress)) * progress;
+                    Color col = Color.Lerp(Color.SkyBlue, Color.DodgerBlue, 1f - Easings.easeInCubic(progress)) * progress;
 
-                    float size1 = progress * projectile.scale;
                     float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f * overallAlpha,
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.2f * overallAlpha,
                         previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
 
                     if (i > 1)
@@ -172,7 +171,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                         float size3 = (0.5f + (0.5f * progress));
                         Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenBlue with { A = 0 } * 0.35f * middleProg * overallAlpha,
+                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenBlue with { A = 0 } * 0.3f * middleProg * overallAlpha,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
 
                         Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);

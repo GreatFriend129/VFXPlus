@@ -58,41 +58,20 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
-            {
-                Color col = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
 
-                Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
-                Dust sm = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<HighResSmoke>(), smvel, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.75f));
-                
-                HighResSmokeBehavior b = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f,
-                    overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
-                b.isPixelated = true;
-                sm.customData = b;
-            }
+            Vector2 posAA = player.Center + new Vector2(-450f, 600f);
+            Vector2 posBB = player.Center + new Vector2(-450f, -600f);
+            Vector2 posCC = player.Center + new Vector2(-450f, 0f);
 
-            for (int fg = 0; fg < 11; fg++)
-            {
-                Vector2 randomStart = Main.rand.NextVector2CircularEdge(4, 4);
-                Dust gd = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<GlowPixelAlts>(), randomStart * Main.rand.NextFloat(0.3f, 1.35f) * 1.5f, newColor: new Color(255, 145, 0), Scale: Main.rand.NextFloat(1f, 1.4f) * 0.6f);
-                gd.alpha = 2;
-            }
+            Vector2 velAA = new Vector2(8f, 0f);
+            //int bA2 = Projectile.NewProjectile(null, posAA, velAA, ModContent.ProjectileType<FFWindOrb>(), 10, 0, player.whoAmI);
+            //int bB2 = Projectile.NewProjectile(null, posBB, velAA, ModContent.ProjectileType<FFWindOrb>(), 10, 0, player.whoAmI);
+            //int bC2 = Projectile.NewProjectile(null, posCC, velAA, ModContent.ProjectileType<FFWindOrb>(), 10, 0, player.whoAmI);
 
-            for (int i = 0; i < 7; i++)
-            {
-                var v = Main.rand.NextVector2Unit();
-                Dust sa = Dust.NewDustPerfect(Main.MouseWorld, DustID.PortalBoltTrail, v * Main.rand.NextFloat(1f, 6f), 0,
-                    Color.Gold, Main.rand.NextFloat(0.2f, 0.5f) * 1.75f);
-                sa.alpha = 50;
+            //(Main.projectile[bA2].ModProjectile as FFWindOrb).startDir = -1;
 
-                if (sa.velocity.Y > 4)
-                    sa.velocity.Y *= -1f;
+            //return false;
 
-                if (Main.rand.NextBool())
-                    sa.velocity.Y = MathF.Abs(sa.velocity.Y) * -1;
-            }
-
-            return false;
             int[] orbitValues1 = { 25, 100, 175, //20 80 140 | 40 10 160 | 60 120 180
                                   50,  125, 200,
                                   75,  150, 225 };

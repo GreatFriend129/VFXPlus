@@ -21,34 +21,19 @@ using Terraria.GameContent.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class StellarTune : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.SparkleGuitar);
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class StellarTuneShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SparkleGuitar);
+            return lateInstantiation && (entity.type == ProjectileID.SparkleGuitar) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.StellarTuneToggle;
         }
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
             Vector2 previousPosition = projectile.Center;
-
 
             #region vanillaCode
             float num = 90f;
@@ -109,8 +94,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 vel = -velDir * velPower;
 
                 Dust line = Dust.NewDustPerfect(projectile.Center + sideOffset, ModContent.DustType<MuraLineBasic>(), vel, 255,
-                    newColor: Color.DeepPink * 0.2f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
+                    newColor: Color.DeepPink * 0.35f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
 
+                line.customData = new MuraLineBehavior(new Vector2(1f, 1f), WhiteIntensity: 0.6f);
             }
 
             #endregion
@@ -134,12 +120,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-
-            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
-            //{
-                //CerobaStyleDraw(projectile);
-            //});
-
             CerobaStyleDraw(projectile);
 
             if (timer < 2)
@@ -150,17 +130,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public void CerobaStyleDraw(Projectile projectile)
         {
-            
-            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/FireBallBlur").Value;
-            Texture2D FireBallPixel = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
+            Texture2D FireBall = CommonTextures.FireBallBlur.Value;
+            Texture2D FireBallPixel = CommonTextures.Extra_91.Value;
 
-            Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D Glow = CommonTextures.feather_circle128PMA.Value;
 
             Texture2D VStar = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
             Texture2D VStarBlack = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
 
-
-            Vector2 off = (currentRot).ToRotationVector2() * -25f * projectile.scale; //-30f
+            Vector2 off = (currentRot).ToRotationVector2() * -25f * projectile.scale; 
 
             Vector2 pos = projectile.Center - Main.screenPosition;
             float rot = currentRot + MathHelper.PiOver2;
@@ -205,8 +183,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                     Main.EntitySpriteDraw(FireBall, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 1.25f * thisAlpha * colVal,
                             previousVelRots[i] + MathHelper.PiOver2, FireBall.Size() / 2f, vec2Scale * 1.5f, SpriteEffects.None);
-
-
                 }
 
             }
@@ -219,8 +195,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             Main.EntitySpriteDraw(FireBall, pos + off + Main.rand.NextVector2Circular(2f, 2f), null, Color.DeepPink with { A = 0 } * thisAlpha, rot, FireBall.Size() / 2f, projectile.scale * v2scale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(FireBall, pos + off, null, Color.White with { A = 0 } * 100f * thisAlpha, rot, FireBall.Size() / 2f, v2scale * projectile.scale * 0.5f, SpriteEffects.None);
-
 
             //Pink Star
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -256,17 +230,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
                 overallAlpha: 0.11f, DrawWhiteCore: false, 1f, 1f);
-
-
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.15f, true, 1, 0.8f, 0.8f);
-
-            //Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.25f);
-            //d1.customData = cpb2;
-            //d1.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * 0.01f;
-
-            //Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.HotPink * 0.25f);
-            //d2.customData = cpb2;
-            //d2.velocity = projectile.velocity.SafeNormalize(Vector2.UnitX) * -0.01f;
 
 
             //Impact
