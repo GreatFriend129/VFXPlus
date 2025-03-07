@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -33,7 +34,8 @@ namespace VFXPlus.Content.FeatheredFoe
             MeleeTalon = 7,
             CircleDash = 8,
             Dive = 9,
-            UmbrellaRain
+            UmbrellaRain = 10,
+            OffscreenDash = 11,
         }
 
         private FeatheredFoeState CurrentAttack
@@ -85,7 +87,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.CornerTravelShot;
+            CurrentAttack = FeatheredFoeState.OffscreenDash;
 
             switch (CurrentAttack)
             {
@@ -116,8 +118,9 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.UmbrellaRain:
                     UmbrellaRain();
                     break;
-                //case FeatheredFoeState.MeleeTalon:
-
+                case FeatheredFoeState.OffscreenDash:
+                    OffscreenDash();
+                    break;
             }
 
             windOverlayOpacity = MathHelper.Lerp(windOverlayOpacity, windOverlayOpacityGoal, 0.05f);
@@ -138,22 +141,32 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public float bgPulsePower = 0f;
 
+        //How many particles are spawned per frame (defaults to 1)
+        int passiveWindParticlesCount = 1;
+
         float passiveWindParticleDirection = 0f;
         bool doPassiveWindParticles = false;
+
+        bool centerPassiveWindParticlesOnPlayer = false;
         public void PassiveWindParticles()
         {
             float rot = passiveWindParticleDirection;// (player.Center - NPC.Center).ToRotation();
 
             int Ydir = rot.ToRotationVector2().X > 0 ? 1 : -1;
 
+            for (int i = 0; i < passiveWindParticlesCount; i++)
+            {
+                Vector2 anchor = centerPassiveWindParticlesOnPlayer ? player.Center : NPC.Center;
 
-            Vector2 windDustSpawnPosition = NPC.Center + (new Vector2(1f * -550f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloatDirection() * 900f) * 1f).RotatedBy(rot);
-            Vector2 windDustVelocity = new Vector2(1f, Ydir * 0.15f).RotatedBy(rot) * Main.rand.NextFloat(0.1f, 1.8f) * 45f;
+                Vector2 windDustSpawnPosition = anchor + (new Vector2(1f * -550f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloatDirection() * 900f) * 1f).RotatedBy(rot);
+                Vector2 windDustVelocity = new Vector2(1f, Ydir * 0.15f).RotatedBy(rot) * Main.rand.NextFloat(0.1f, 1.8f) * 45f;
 
-            float dustScale = Main.rand.NextFloat(1f, 2f);
+                float dustScale = Main.rand.NextFloat(1f, 2f);
 
-            Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: dustScale); //dust176
-            wind.noGravity = true;
+                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: dustScale); //dust176
+                wind.noGravity = true;
+            }
+
         }
     }
 }

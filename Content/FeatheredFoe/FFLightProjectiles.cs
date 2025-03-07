@@ -284,7 +284,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     Projectile.position.X -= Projectile.width / 3f;
                     Projectile.position.Y -= Projectile.width / 3f;
 
-                    soundVolume = 0.7f;
+                    soundVolume = 0.5f;
                 }
 
                 Projectile.ai[0] = Projectile.velocity.Length();

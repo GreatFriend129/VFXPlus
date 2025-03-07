@@ -233,7 +233,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
-            //vertexStrip.DrawTrail();
+            vertexStrip.DrawTrail();
 
             //vertexStrip.DrawTrail();
 

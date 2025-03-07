@@ -58,7 +58,8 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
+            int bA2 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 10f), ProjectileID.RocketFireworkBlue, 10, 1, player.whoAmI);
+            return false;
             Vector2 posAA = player.Center + new Vector2(-450f, 600f);
             Vector2 posBB = player.Center + new Vector2(-450f, -600f);
             Vector2 posCC = player.Center + new Vector2(-450f, 0f);

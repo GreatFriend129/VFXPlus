@@ -45,7 +45,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             player.GetModPlayer<HeldBowPlayer>().holdOffset = new Vector2(-2f, 0f);
             player.GetModPlayer<HeldBowPlayer>().arrowOffset = -10f;
             player.GetModPlayer<HeldBowPlayer>().arrowPullAmount = 15f;
-            player.GetModPlayer<HeldBowPlayer>().underGlowPower = 3f;
+            player.GetModPlayer<HeldBowPlayer>().underGlowPower = 2f;
             player.GetModPlayer<HeldBowPlayer>().underGlowColor = new Color(42, 2, 82);
 
             return true;

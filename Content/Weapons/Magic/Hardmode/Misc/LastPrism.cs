@@ -765,8 +765,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     public class RainbowSigilTest : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
-
-
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+        }
         public override void SetDefaults()
         {
             Projectile.hostile = false;
@@ -785,22 +787,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         int timer = 0;
         public override void AI()
         {
+            Projectile.rotation += 0.08f;
 
             //Populate Points
-            if (timer == 0 && false)
+            if (timer == 0 || true)
             {
-                int pointsToCreate = 1000;
+                trailPositions.Clear();
+                trailRotations.Clear();
+
+                int pointsToCreate = 350;
                 float distance = 2000f;
 
                 for (int i = 0; i < pointsToCreate; i++)
                 {
                     float distUnit = distance / (float)pointsToCreate;
 
-                    trailPositions.Add(Projectile.Center + new Vector2(distUnit * i, 0f));
-                    trailRotations.Add(0f);
+                    trailPositions.Add(Projectile.Center + new Vector2(distUnit * i, 0f).RotatedBy(Projectile.rotation));
+                    trailRotations.Add(Projectile.rotation);
                 }
 
-                trailPositions.Add(Projectile.Center + new Vector2(distance, 0f));
+                trailPositions.Add(Projectile.Center + new Vector2(distance, 0f).RotatedBy(Projectile.rotation));
                 trailRotations.Add(0f);
 
             }
@@ -815,53 +821,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     Vector2 pos = Projectile.Center + new Vector2(i, 0f);
                     float rot = 0f;
 
-                    Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.6f, 0) * 1f;
+                    Color rainbow = Color.HotPink;
 
                     if (Main.rand.NextBool(2))
                     {
                         Vector2 offset = rot.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-35, 35);
                         Vector2 vel = rot.ToRotationVector2().RotatedByRandom(0.05f) * Main.rand.NextFloat(2, 7);
 
-
-                        //Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowFlare>(), vel * 2.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
-                        //d.noLight = false;
-                        //d.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.2f);
-
-
-                        //Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<WindLine>(), vel * 2.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
-                        //d.noLight = false;
-                        //d.customData = new WindLineBehavior(VelFadePower: 0.95f, YScale: 0.5f, Pixelize: false);
-
                         Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<LineSpark>(), vel * 2.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
                         d.noLight = false;
                         d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.97f, killEarlyTime: 10, XScale: 0.5f, YScale: 0.2f, shouldFadeColor: true);
-                    }
-
-                }
-            }
-
-
-            //EndPointDust
-            if (timer % 1 == 0 && false)
-            {
-                for (int i = 0; i < 3 + Main.rand.Next(0, 2); i++) //4 //2,2
-                {
-                    Vector2 vel = Main.rand.NextVector2Circular(2f, 2f) * 7f;
-
-                    Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.6f, 0) * 1f;
-
-
-                    Dust p = Dust.NewDustPerfect(Projectile.Center + new Vector2(2000, 0f), ModContent.DustType<WindLine>(), vel,
-                        newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1.15f);
-
-                    p.customData = new WindLineBehavior(YScale: 0.5f);
-                    //p.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
-                    //    1f, 0.5f, shouldFadeColor: false);
-
-                    if (i % 1112 == 0)
-                    {
-                        Dust p2 = Dust.NewDustPerfect(Projectile.Center + new Vector2(2000, 0f) + vel * 4f, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.4f);
-                        p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.1f);
                     }
 
                 }
@@ -873,7 +842,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float overallScale = 0f;
         float overallAlpha = 1f;
 
-
         public List<float> trailRotations = new List<float>();
         public List<Vector2> trailPositions = new List<Vector2>();
         Effect myEffect = null;
@@ -882,7 +850,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("Dusts", () =>
             {
                 RainbowLaser();
-                RainbowSigil();
             });
             return false;
         }
@@ -893,24 +860,24 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 startPoint = Projectile.Center;
             Vector2 endPoint = startPoint + new Vector2(2000f, 0f);
 
-            Vector2[] pos_arr = { startPoint, endPoint };
-            float[] rot_arr = { 0f, 0f };
+            Vector2[] pos_arr = trailPositions.ToArray();
+            float[] rot_arr = trailRotations.ToArray();
+
 
             Color StripColor(float progress) => Color.White;
-            //float StripWidth1(float progress) => 150f * overallScale; //200
 
             VertexStrip vertexStrip1 = new VertexStrip();
             vertexStrip1.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
 
-            if (laserEffect == null)
-                laserEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
 
             #region Params
+            if (laserEffect == null)
+                laserEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
 
             laserEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             laserEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value); //ThinLineGlowClear
-            laserEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
+            laserEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/CyverGrad").Value);
             laserEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
             laserEffect.Parameters["satPower"].SetValue(0.8f); //0.9f
 
@@ -919,35 +886,31 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             laserEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
             laserEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value);
 
-            laserEffect.Parameters["grad1Speed"].SetValue(2f);
-            laserEffect.Parameters["grad2Speed"].SetValue(2f);
-            laserEffect.Parameters["grad3Speed"].SetValue(3.1f);
-            laserEffect.Parameters["grad4Speed"].SetValue(2.3f);
+            laserEffect.Parameters["grad1Speed"].SetValue(1f); //1f
+            laserEffect.Parameters["grad2Speed"].SetValue(1f); //1f
+            laserEffect.Parameters["grad3Speed"].SetValue(1f); //1f
+            laserEffect.Parameters["grad4Speed"].SetValue(1f); //1f
 
             laserEffect.Parameters["tex1Mult"].SetValue(1.25f);
             laserEffect.Parameters["tex2Mult"].SetValue(1.5f);
             laserEffect.Parameters["tex3Mult"].SetValue(1.15f);
             laserEffect.Parameters["tex4Mult"].SetValue(2.5f); //1.5
-            laserEffect.Parameters["totalMult"].SetValue(1f);
+            laserEffect.Parameters["totalMult"].SetValue(1.25f);
 
-            laserEffect.Parameters["gradientReps"].SetValue(0.75f); //1f
-            laserEffect.Parameters["tex1reps"].SetValue(0.15f);
-            laserEffect.Parameters["tex2reps"].SetValue(0.15f);
-            laserEffect.Parameters["tex3reps"].SetValue(0.15f);
-            laserEffect.Parameters["tex4reps"].SetValue(0.15f);
+            float dist = (endPoint - startPoint).Length();
+            float repVal = dist / 2000f;
+            laserEffect.Parameters["gradientReps"].SetValue(0.75f * repVal); //1f
+            laserEffect.Parameters["tex1reps"].SetValue(1.15f * repVal);
+            laserEffect.Parameters["tex2reps"].SetValue(1.15f * repVal);
+            laserEffect.Parameters["tex3reps"].SetValue(1.15f * repVal);
+            laserEffect.Parameters["tex4reps"].SetValue(1.15f * repVal);
 
-            laserEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.006f); //0.005
+            laserEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.022f); //0.006
             #endregion
 
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, laserEffect, Main.GameViewMatrix.TransformationMatrix);
             laserEffect.CurrentTechnique.Passes["MainPS"].Apply();
-
             vertexStrip1.DrawTrail();
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
         public float StripWidth(float progress)
@@ -955,62 +918,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float size = 1f * overallScale;
             float start = (float)Math.Cbrt(Utils.GetLerpValue(0f, 0.2f, progress, true));// Math.Clamp(1f * (float)Math.Pow(progress, 0.5f), 0f, 1f);
             float cap = (float)Math.Cbrt(Utils.GetLerpValue(1f, 0.95f, progress, true));
-            return 120 * overallScale; //150
+            return 140 * overallScale * start; //150
 
         }
 
-        public void RainbowSigil()
-        {
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Vector2 endPoint = drawPos + new Vector2(2000f, 0f);
-
-
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Flare/Simple Lens Flare_11").Value;
-            Texture2D star2 = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_16").Value;
-
-            Texture2D sigil = Mod.Assets.Request<Texture2D>("Assets/Orbs/whiteFireEyeA").Value;
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RainbowSigil", AssetRequestMode.ImmediateLoad).Value;
-
-            myEffect.Parameters["rotation"].SetValue((float)Main.timeForVisualEffects * 0.03f * 2f);
-            myEffect.Parameters["rainbowRotation"].SetValue((float)Main.timeForVisualEffects * 0.01f * 2f);
-
-            myEffect.Parameters["intensity"].SetValue(1f);
-            myEffect.Parameters["fadeStrength"].SetValue(1f);
-
-            float sin1 = MathF.Sin((float)Main.timeForVisualEffects * 0.04f);
-            float sin2 = MathF.Cos((float)Main.timeForVisualEffects * 0.06f);
-            float sin3 = -MathF.Cos(((float)Main.timeForVisualEffects * 0.05f) / 2f) + 1f;
-
-            Vector2 sigilScale1 = new Vector2(0.2f, 1f) * 0.55f * overallScale;
-            Vector2 sigilScale2 = sigilScale1 * (1.75f + (0.25f * sin1)) * 1f;
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
-
-            Main.spriteBatch.Draw(sigil, drawPos, null, Color.White, 0f, sigil.Size() / 2, sigilScale1, 0, 0f);
-            Main.spriteBatch.Draw(sigil, drawPos, null, Color.White, 0f, sigil.Size() / 2, sigilScale1, 0, 0f);
-
-            Main.spriteBatch.Draw(star, drawPos + new Vector2(1f, 0f) * (15f * sin3), null, Color.White, Projectile.rotation, star.Size() / 2, sigilScale2, 0, 0f);
-
-            Main.spriteBatch.Draw(star2, drawPos, null, Color.White, 0f, star2.Size() / 2, sigilScale1 * 1f, 0, 0f);
-            Main.spriteBatch.Draw(star2, drawPos, null, Color.White, 0f, star2.Size() / 2, sigilScale1 * 1f, 0, 0f);
-
-
-            //EndPoint
-            //Main.spriteBatch.Draw(star, endPoint, null, Color.White, (float)Main.timeForVisualEffects * 0f, star.Size() / 2f, 0.7f, 0, 0f);
-            //Main.spriteBatch.Draw(star, endPoint, null, Color.White, (float)Main.timeForVisualEffects * 0f, star.Size() / 2f, 0.7f, 0, 0f);
-
-            Main.spriteBatch.Draw(star, endPoint, null, Color.White, (float)Main.timeForVisualEffects * 0.02f, star.Size() / 2f, 0.45f, 0, 0f);
-            Main.spriteBatch.Draw(star2, endPoint, null, Color.White, (float)Main.timeForVisualEffects * 0.05f, star2.Size() / 2f, 0.6f, 0, 0f);
-            Main.spriteBatch.Draw(star2, endPoint, null, Color.White, (float)Main.timeForVisualEffects * 0.077f, star2.Size() / 2f, 0.5f, 0, 0f);
-
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-        }
     }
 
 }

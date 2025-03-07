@@ -48,6 +48,17 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
+            if (timer == 0)
+            {
+                float circlePulseSize = 0.13f;
+
+                Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.25f, newColor: Color.OrangeRed);
+                CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 6, 0.2f, 0.4f);
+                b2.drawLayer = "Dusts";
+                d2.customData = b2;
+                d2.scale = circlePulseSize * 0.05f;
+            }
+            
             int trailCount = 14;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center + projectile.velocity);
@@ -64,8 +75,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -3f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity * 0.3f;
 
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.15f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 0.6f;
+                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.45f);
+                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 0.45f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 1f, Scale: dustScale);
                 smoke.alpha = 2;
@@ -101,8 +112,14 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
-            Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.35f);
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Vector2 orbPos = drawPos + new Vector2(0f, 0f);
+            Vector2 orbScale = new Vector2(0.4f, 0.32f) * projectile.scale * overallScale * 1.5f;
+            Main.EntitySpriteDraw(orb, orbPos, null, Color.OrangeRed with { A = 0 } * overallAlpha * 0.25f, rot, orb.Size() / 2f, orbScale, SE);
+            Main.EntitySpriteDraw(orb, orbPos, null, Color.OrangeRed with { A = 0 } * overallAlpha * 0.25f, rot, orb.Size() / 2f, orbScale * 0.75f, SE);
 
+
+            Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.35f);
             for (int i = 0; i < 8; i++)
             {
                 Vector2 offset = Main.rand.NextVector2Circular(2f, 2f);
@@ -134,7 +151,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             float[] rot_arr = previousRotations.ToArray();
 
             Color StripColor(float progress) => Color.White * (progress * progress) * overallAlpha;
-            float StripWidth(float progress) => 30f * Easings.easeOutQuad(progress) * overallAlpha;// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
+            float StripWidth(float progress) => 35f * Easings.easeOutQuad(progress) * overallAlpha;// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
 
 
             VertexStrip vertexStrip = new VertexStrip();
@@ -159,7 +176,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
             myEffect.Parameters["ColorOne"].SetValue(col.ToVector3() * 5f);
             myEffect.Parameters["glowThreshold"].SetValue(0.8f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.9f);
+            myEffect.Parameters["glowIntensity"].SetValue(2f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 

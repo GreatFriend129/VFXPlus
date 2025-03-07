@@ -48,6 +48,11 @@ Items: {
 		DisplayName: Crystal Crescent
 		Tooltip: ""
 	}
+
+	CyverCannon: {
+		DisplayName: Cyver Cannon
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -116,6 +121,10 @@ Projectiles: {
 	CrystalCrescentProj.DisplayName: Crystal Crescent Proj
 	CrystalCrescentProjVFX.DisplayName: Crystal Crescent Proj V F X
 	EocTest.DisplayName: Eoc Test
+	CyverCannonLaser.DisplayName: Cyver Cannon Laser
+	CyverCannonProjectile.DisplayName: Cyver Cannon Projectile
+	CyverCannonHyperBeam.DisplayName: Cyver Cannon Hyper Beam
+	CyverCannonFinaleProjectile.DisplayName: Cyver Cannon Finale Projectile
 }
 
 Configs: {

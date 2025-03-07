@@ -330,7 +330,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-
         public void CornerTravelAggressive()
         {
             //Have him choose whether to go left or right based on ur x vel and whether he goes up or down based on y vel
@@ -391,7 +390,128 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        public void CircleDash() { }
+        Vector2 storedOffscreenDashEndPos = Vector2.Zero;
+        Vector2 storedOffscreenDashStartPos = Vector2.Zero;
+        float offscreenDashDir = 0f;
+        public void OffscreenDash() 
+        {
+            float offscreenDashDistance = 1000f;
+            int timeBeforeDash = 79; //79
+            int timeOfDash = 50;
+            int timeAfterDash = 5; //30
+
+            if (timer == 0)
+            {
+                NPC.velocity = Vector2.Zero;
+                offscreenDashDir = Main.rand.NextFloat(6.28f);
+            }
+
+            if (timer <= timeBeforeDash)
+            {
+                Vector2 dashStartPos = offscreenDashDir.ToRotationVector2() * offscreenDashDistance;
+                NPC.Center = player.Center + dashStartPos;
+
+                if (timer == timeBeforeDash)
+                {
+                    storedOffscreenDashStartPos = NPC.Center;
+                    storedOffscreenDashEndPos = player.Center - dashStartPos;
+                }
+
+                float beforeDashProgress = (float)timer / (float)timeBeforeDash;
+
+
+                windOverlayOpacityGoal = MathHelper.Lerp(0f, 0.75f, Easings.easeInCirc(beforeDashProgress));
+                windOverlayRotation = (-dashStartPos).ToRotation();
+
+                doPassiveWindParticles = true;
+
+                centerPassiveWindParticlesOnPlayer = true;
+                passiveWindParticleDirection = (-dashStartPos).ToRotation();
+                passiveWindParticlesCount = 1;
+            }
+            else if (timer <= timeOfDash + timeBeforeDash)
+            {
+                if (timer == timeBeforeDash + 1)
+                {
+                    int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                    (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 40;
+                    (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.75f;
+                    Main.projectile[pulse].scale = 10f;
+
+                    SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 0.11f, Pitch = 0.7f, PitchVariance = 0.05f, MaxInstances = 1 };
+                    SoundEngine.PlaySound(styleD, NPC.Center);
+
+                    SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.09f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(styleC, NPC.Center);
+
+                    player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 25f;
+
+                    drawDrill = true;
+                    drillRotation = offscreenDashDir + MathHelper.PiOver2;
+                }
+
+                float dashProgress = (float)(timer - timeBeforeDash) / (float)timeOfDash;
+                float easedProgress = Easings.easeInOutHarsh(dashProgress);
+
+                NPC.Center = Vector2.Lerp(storedOffscreenDashStartPos, storedOffscreenDashEndPos, easedProgress);
+
+                //Spawn feathers
+                if (easedProgress > 0.20f && easedProgress < 0.7f && timer % 3 == 0)
+                {
+                    Vector2 vel = offscreenDashDir.ToRotationVector2() * -12f;
+
+                    Projectile spinShot = Projectile.NewProjectileDirect(null, NPC.Center, vel, ModContent.ProjectileType<SpinShotFeather>(), 10, 5);
+
+                    (spinShot.ModProjectile as SpinShotFeather).targetPlayer = player.whoAmI;
+                }
+
+                //Spawn Dust
+                if (easedProgress > 0f && easedProgress < 0.85f)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (Main.rand.NextBool())
+                        {
+                            Vector2 yOffset = new Vector2(0f, 1f).RotatedBy(offscreenDashDir) * Main.rand.NextFloat(-65f, 65f);
+
+                            Vector2 fakeNPCVel = offscreenDashDir.ToRotationVector2() * -20f * Main.rand.NextFloat(0.75f, 1.25f);
+
+                            Color dustCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, Main.rand.NextFloat(0.25f, 0.75f));
+
+                            Dust p = Dust.NewDustPerfect(NPC.Center + Main.rand.NextVector2Circular(20f, 20f) + yOffset, ModContent.DustType<WindLine>(), fakeNPCVel,
+                                newColor: dustCol, Scale: Main.rand.NextFloat(0.75f, 1f));
+
+                            WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 1f, 0.5f, true);
+                            wlb.drawWhiteCore = true;
+                            p.customData = wlb;
+                        }
+                    }
+                }
+
+
+                if (timer >= (0.5f * timeOfDash) + timeBeforeDash)
+                    windOverlayOpacityGoal = 0f;
+
+                passiveWindParticlesCount = 2;
+            }
+            else if (timer <= timeAfterDash + timeOfDash + timeBeforeDash)
+            {
+                drawDrill = false;
+                doPassiveWindParticles = false;
+                passiveWindParticlesCount = 1;
+                
+                windOverlayOpacityGoal = 0f;
+                windOverlayOpacity *= 0.8f;
+
+                //Reset
+                if (timer == timeAfterDash + timeOfDash + timeBeforeDash)
+                {
+                    timer = -1;
+                }
+            }
+
+            //Main.NewText(timer + "|" + (timeAfterDash + timeOfDash + timeBeforeDash));
+        }
 
         int diveStartSide = 0; //Which side FF is on when it starts to move above player
         Vector2 diveStartPoint;
@@ -479,6 +599,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (shouldStartDrill && !drawDrill)
                     {
                         drawDrill = true;
+                        drillRotation = 0f;
 
                         int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
                         (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 40;
@@ -538,7 +659,6 @@ namespace VFXPlus.Content.FeatheredFoe
                 //Update the past directions list
                 pastDirections = new Tuple<int, int>(randomDirection, pastDirections.Item1);
 
-
                 //Choose the new point
                 Vector2 newPoint = new Vector2(dashAwayDistance * randomDirection, -230f);
 
@@ -589,7 +709,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     windOverlayOpacityGoal = 1f;
                     windOverlayRotation = MathHelper.PiOver2;
 
-                    float overallVolume = 0.4f;
+                    float overallVolume = 0.33f;
 
                     //Sound
                     SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.5f * overallVolume, Pitch = .7f, PitchVariance = 0.05f, MaxInstances = -1 };

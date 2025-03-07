@@ -44,9 +44,22 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
 
-           
+            if (timer == 0)
+                dustRandomOffsetTime = Main.rand.Next(0, 3);
 
-            float EU = 1f + projectile.extraUpdates;
+            int EU = 1 + projectile.extraUpdates;
+
+            //Want less dust when the arrow has extra updates (magic quiver)
+            int mod = Math.Clamp(2 * EU, 2, 100);
+
+            if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(3) && timer > 5)
+            {
+                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: Color.HotPink, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 0.85f);
+                Main.dust[d].velocity -= projectile.velocity * 0.25f;
+                Main.dust[d].velocity *= 0.45f;
+                Main.dust[d].customData = new GlowFlareBehavior(0.4f, 2f);
+            }
+
 
             float fadeInTime = Math.Clamp((timer + 7f * EU) / 20f * EU, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
@@ -87,8 +100,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             }
 
             #endregion
-
-
 
             return false;
         }
@@ -133,6 +144,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                         Vector2 vec2Scale = new Vector2(2.5f, 1f * size2) * overallScale * projectile.scale * 0.5f;
                         Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenPink with { A = 0 } * 0.2f * middleProg,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
+
+                        Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
+
+                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, Color.HotPink with { A = 0 } * 0.1f * middleProg, 
+                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
                     }
                 }
             }
@@ -146,7 +162,60 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            return true;
+
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.15f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.11f, DrawWhiteCore: false, 1f, 1f);
+
+            //Impact
+            for (int i = 0; i < 6; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1.5f;
+                Vector2 randomStartOffsetPos = projectile.Center + Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
+
+                Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : Color.HotPink;
+
+                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowFlare>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1.35f);
+                dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
+
+                dust.velocity += projectile.oldVelocity * 0.05f;
+            }
+
+            #region vanillaKill
+            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.75f, Pitch = 0.15f, PitchVariance = 0.05f, MaxInstances = -1 }, projectile.position);
+            if ((projectile.type == 91 || (projectile.type == 92 && projectile.ai[0] > 0f)) && projectile.owner == Main.myPlayer)
+            {
+                float x = projectile.position.X + (float)Main.rand.Next(-400, 400);
+                float y = projectile.position.Y - (float)Main.rand.Next(600, 900);
+                Vector2 vector53 = new Vector2(x, y);
+                float num575 = projectile.position.X + (float)(projectile.width / 2) - vector53.X;
+                float num576 = projectile.position.Y + (float)(projectile.height / 2) - vector53.Y;
+                int num577 = 22;
+                float num578 = (float)Math.Sqrt(num575 * num575 + num576 * num576);
+                num578 = (float)num577 / num578;
+                num575 *= num578;
+                num576 *= num578;
+                int num579 = projectile.damage;
+                if (projectile.type == 91)
+                {
+                    num579 /= 3;
+                }
+                int num580 = Projectile.NewProjectile(projectile.GetSource_FromThis(), x, y, num575, num576, 92, num579, projectile.knockBack, projectile.owner);
+                if (projectile.type == 91)
+                {
+                    Main.projectile[num580].ai[1] = projectile.position.Y;
+                    Main.projectile[num580].ai[0] = 1f;
+                }
+                else
+                {
+                    Main.projectile[num580].ai[1] = projectile.position.Y;
+                }
+            }
+            #endregion
+
+            return false;
         }
 
 
@@ -164,10 +233,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            Vector2 previousPosition = projectile.Center;
-
             currentRot = projectile.velocity.ToRotation();
 
+            #region trail (add 3 positions each frame
             int trailCount = 34;
             previousVelRots.Add(currentRot);
             previousPostions.Add(projectile.Center);
@@ -196,9 +264,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
+            #endregion
 
             #region dust
-
             if (timer % 3 == 0 && Main.rand.NextBool(2) && timer > 3)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(4f, 4f);
@@ -212,18 +280,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 dust212.velocity += currentRot.ToRotationVector2() * 6f;
 
             }
-
-            if (timer % 3 == 0 && timer > 8f && false)
-            {
-                Vector2 sideOffset = new Vector2(0f, Main.rand.NextFloat(-10f, 10f)).RotatedBy(projectile.velocity.ToRotation());
-                //Vector2 vel = -velDir * velPower;
-
-                //Dust line = Dust.NewDustPerfect(projectile.Center + sideOffset, ModContent.DustType<MuraLineBasic>(), vel, 255,
-                //    newColor: Color.DeepPink * 0.35f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
-
-                //line.customData = new MuraLineBehavior(new Vector2(1f, 1f), WhiteIntensity: 0.6f);
-            }
-
             #endregion
 
             timer++;
@@ -240,6 +296,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             //Tile collide slightly earlier than vanilla to stop the star going slightly into ground
             if (projectile.Center.Y > projectile.ai[1] - 15)
                 projectile.tileCollide = true;
+
+            projectile.soundDelay = 10;
+
+            if (timer == 1)
+            {
+                //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/starUIToss") with { Volume = .1f, Pitch = .85f, PitchVariance = 0.15f, MaxInstances = -1};
+                //SoundEngine.PlaySound(style, projectile.Center);
+
+                SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/star_impact_01") with { Volume = .15f, Pitch = .55f, PitchVariance = .1f, MaxInstances = -1 }; 
+                SoundEngine.PlaySound(style2, projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("Terraria/Sounds/Item_9") with { Volume = 0.25f, Pitch = .2f, PitchVariance = 0.05f, MaxInstances = -1 }; 
+                SoundEngine.PlaySound(style3, projectile.Center);
+            }
 
             return true;
         }
@@ -454,7 +524,71 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
 
-            return true;
+            //Light Dust
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.2f);
+
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.11f, DrawWhiteCore: false, 1f, 1f);
+
+            ParticleOrchestrator.RequestParticleSpawn(clientOnly: true, ParticleOrchestraType.StellarTune, new ParticleOrchestraSettings
+            {
+                PositionInWorld = projectile.Center
+            }, projectile.owner);
+
+            //Impact
+            for (int i = 0; i < 8; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1.5f;
+                Vector2 randomStartOffsetPos = projectile.Center + Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
+
+                Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : Color.HotPink;
+
+                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowFlare>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1.35f);
+                dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
+
+                dust.velocity += projectile.oldVelocity * 0.05f;
+            }
+
+            #region vanillaKill
+            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.75f, Pitch = 0.15f, PitchVariance = 0.05f, MaxInstances = -1}, projectile.position);
+            for (int num572 = 220; num572 < 10; num572++)
+            {
+                Dust.NewDust(projectile.position, projectile.width, projectile.height, 58, projectile.velocity.X * 0.1f, projectile.velocity.Y * 0.1f, 150, default(Color), 1.2f);
+            }
+            for (int num573 = 220; num573 < 3; num573++)
+            {
+                Gore.NewGore(null, projectile.position, new Vector2(projectile.velocity.X * 0.05f, projectile.velocity.Y * 0.05f), Main.rand.Next(16, 18));
+            }
+            if ((projectile.type == 91 || (projectile.type == 92 && projectile.ai[0] > 0f)) && projectile.owner == Main.myPlayer)
+            {
+                float x = projectile.position.X + (float)Main.rand.Next(-400, 400);
+                float y = projectile.position.Y - (float)Main.rand.Next(600, 900);
+                Vector2 vector53 = new Vector2(x, y);
+                float num575 = projectile.position.X + (float)(projectile.width / 2) - vector53.X;
+                float num576 = projectile.position.Y + (float)(projectile.height / 2) - vector53.Y;
+                int num577 = 22;
+                float num578 = (float)Math.Sqrt(num575 * num575 + num576 * num576);
+                num578 = (float)num577 / num578;
+                num575 *= num578;
+                num576 *= num578;
+                int num579 = projectile.damage;
+                if (projectile.type == 91)
+                {
+                    num579 /= 3;
+                }
+                int num580 = Projectile.NewProjectile(projectile.GetSource_FromThis(), x, y, num575, num576, 92, num579, projectile.knockBack, projectile.owner);
+                if (projectile.type == 91)
+                {
+                    Main.projectile[num580].ai[1] = projectile.position.Y;
+                    Main.projectile[num580].ai[0] = 1f;
+                }
+                else
+                {
+                    Main.projectile[num580].ai[1] = projectile.position.Y;
+                }
+            }
+            #endregion
+            return false;
         }
 
     }

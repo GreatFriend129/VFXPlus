@@ -231,7 +231,7 @@ namespace VFXPlus.Common.Drawing
 
     //Seperate Pixelization System for when we want to additive draw
     //Is there a smarter way to have done this? Absolutely.
-    //However this was the path of least resistance so I did it anyway. v^v
+    //However this was the path of least resistance so I did it anyway
     public class AdditivePixelationSystem : ModSystem
     {
         public List<PixelationTarget> pixelationTargets = new();
@@ -375,4 +375,9 @@ namespace VFXPlus.Common.Drawing
         }
     }
 
+    //////////////////////////////////////
+    public class NewPixelationSystem : ModSystem
+    {
+
+    }
 }
