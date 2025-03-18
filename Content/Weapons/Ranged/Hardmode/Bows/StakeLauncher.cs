@@ -45,8 +45,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
                     GunID: ItemID.StakeLauncher,
                     AnimTime: 10,
                     NormalXOffset: 16f,
-                    DestXOffset: 6f,
-                    YRecoilAmount: 0.05f,
+                    DestXOffset: 0f,
+                    YRecoilAmount: 0.07f,
                     HoldOffset: new Vector2(0f, 2f)
                     );
             }
@@ -70,10 +70,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
         public override bool PreAI(Projectile projectile)
         {
+            int trailCount = 45;
+
             previousPositions.Add(projectile.Center);
             previousRotations.Add(projectile.rotation);
 
-            int trailCount = 18;
+            if (previousPositions.Count > trailCount)
+            {
+                previousPositions.RemoveAt(0);
+                previousRotations.RemoveAt(0);
+            }
+
+            previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
+            previousRotations.Add(projectile.rotation);
+
             if (previousPositions.Count > trailCount)
             {
                 previousPositions.RemoveAt(0);
@@ -82,7 +92,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
             if (timer % 3 == 0 && Main.rand.NextBool(2) && timer > 5)
             {
-                Color thisBrown = new Color(50, 25, 0) * 1.75f;
+                Color thisBrown = new Color(161 - 40, 144 - 40, 106 - 40) * 0.55f;
 
                 float rot = projectile.velocity.ToRotation();
 
@@ -108,32 +118,30 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            for (int i = 1; i < previousPositions.Count; i++)
+            for (int i = 0; i < previousPositions.Count - 1; i++)
             {
                 float progress = (float)i / previousPositions.Count;
 
-                Vector2 trailPos = previousPositions[i] - Main.screenPosition + new Vector2(0f, 0f);
+                Vector2 trailPos = previousPositions[i] - Main.screenPosition;
                 float trailAlpha = progress * projectile.Opacity;
 
-                Vector2 flareScale = new Vector2(1f, 0.55f * progress * projectile.Opacity);
-                Main.EntitySpriteDraw(flare, trailPos, null, Color.SaddleBrown with { A = 0 } * trailAlpha * 0.35f, projectile.rotation + MathHelper.PiOver2, flare.Size() / 2f, flareScale, SE);
+                if (i > previousPositions.Count - 15)
+                {
+                    float thisAlpha = Easings.easeInQuad(progress) * projectile.Opacity;
+
+                    Main.EntitySpriteDraw(vanillaTex, trailPos, null, Color.White * thisAlpha * 0.3f, projectile.rotation, TexOrigin, projectile.scale, SE);
+                }
+
+                Vector2 flareScale = new Vector2(1f, 0.45f * progress * projectile.Opacity);
+                Main.EntitySpriteDraw(flare, trailPos, null, new Color(161, 144, 106) with { A = 0 } * trailAlpha * 0.15f, projectile.rotation + MathHelper.PiOver2, flare.Size() / 2f, flareScale, SE);
             }
 
-            for (int i = 1; i < previousPositions.Count; i++)
-            {
-                float progress = (float)i / previousPositions.Count;
 
-                Vector2 trailPos = previousPositions[i] - Main.screenPosition + new Vector2(0f, 0f);
-                float trailAlpha = progress * projectile.Opacity;
-                Vector2 trailScale = new Vector2(1f * projectile.Opacity, 1f) * progress;
 
-                Main.EntitySpriteDraw(vanillaTex, trailPos, null, Color.White * trailAlpha * 0.5f, projectile.rotation, TexOrigin, trailScale, SE);
-            }
-
-            for (int i = 20; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 Vector2 offsetPos = drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f);
-                Main.EntitySpriteDraw(vanillaTex, offsetPos, null, Color.SandyBrown with { A = 0 } * projectile.Opacity * 0.4f, projectile.rotation, TexOrigin, projectile.scale * 1.05f, SE);
+                Main.EntitySpriteDraw(vanillaTex, offsetPos, null, new Color(161, 144, 106) with { A = 0 } * projectile.Opacity * 0.4f, projectile.rotation, TexOrigin, projectile.scale * 1.05f, SE);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SE);

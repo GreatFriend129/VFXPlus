@@ -36,6 +36,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Dive = 9,
             UmbrellaRain = 10,
             OffscreenDash = 11,
+            Madison = 12,
         }
 
         private FeatheredFoeState CurrentAttack
@@ -87,7 +88,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.OffscreenDash;
+            CurrentAttack = FeatheredFoeState.BasicAttack;
 
             switch (CurrentAttack)
             {
@@ -120,6 +121,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     break;
                 case FeatheredFoeState.OffscreenDash:
                     OffscreenDash();
+                    break;
+                case FeatheredFoeState.Madison:
+                    MadisonTornado();
                     break;
             }
 

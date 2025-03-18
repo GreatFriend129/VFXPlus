@@ -19,6 +19,15 @@ using VFXPlus.Common.Interfaces;
 
 namespace VFXPlus.Common.Drawing
 {
+
+    //This is VERY VERY heavily based on Starlight River's Pixelation system
+    //https://github.com/ProjectStarlight/StarlightRiver/blob/master/Core/Systems/PixelationSystem/PixelationSystem.cs
+
+    //Their code is under the GPL v3 License which basically means that if you use their code then you have to 
+    // open source yours too.
+
+    //VFXPlus is also under the same license.
+
     public class PixelationSystem : ModSystem
     {
         public List<PixelationTarget> pixelationTargets = new();
@@ -34,15 +43,15 @@ namespace VFXPlus.Common.Drawing
 
         public override void PostSetupContent()
         {
-            RegisterScreenTarget("UnderTiles", RenderLayer.UnderTiles);
+            RegisterScreenTarget(RenderLayer.UnderTiles);
 
-            RegisterScreenTarget("UnderNPCs", RenderLayer.UnderNPCs);
+            RegisterScreenTarget(RenderLayer.UnderNPCs);
 
-            RegisterScreenTarget("UnderProjectiles", RenderLayer.UnderProjectiles);
+            RegisterScreenTarget(RenderLayer.UnderProjectiles);
 
-            RegisterScreenTarget("OverPlayers", RenderLayer.OverPlayers);
+            RegisterScreenTarget(RenderLayer.OverPlayers);
 
-            RegisterScreenTarget("Dusts", RenderLayer.Dusts);
+            RegisterScreenTarget(RenderLayer.Dusts);
         }
 
         public override void Unload()
@@ -131,24 +140,37 @@ namespace VFXPlus.Common.Drawing
         /// Registers a ScreenTarget for use with a drawing action or list of drawing actions.
         /// </summary>
         /// <param name="id">ID of the rendertarget and its layer.</param>
-        public void RegisterScreenTarget(string id, RenderLayer renderType = RenderLayer.UnderProjectiles)
+        public void RegisterScreenTarget(RenderLayer renderType = RenderLayer.UnderProjectiles)
         {
-            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(id, renderType)));
+            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(renderType)));
         }
 
-        /// <summary>
-        /// Registers a ScreenTarget for use with a drawing action or list of drawing actions. This is used so that all draw calls of a needed palette can be done with a single ScreenTarget.
-        /// </summary>
-        /// <param name="id">ID of the rendertarget and its layer.</param>
-        /// <param name="palettePath">The given palette's texture path.</param>
-        public void RegisterScreenTarget(string id, string palettePath, RenderLayer renderType = RenderLayer.UnderProjectiles)
+        public void QueueRenderAction(string id, Action renderAction, int order = 0)
         {
-            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(id, renderType)));
+            RenderLayer layer;
+            if (id == "UnderTiles")
+                layer = RenderLayer.UnderTiles;
+            else if (id == "UnderNPCs")
+                layer = RenderLayer.UnderNPCs;
+            else if (id == "UnderProjectiles")
+                layer = RenderLayer.UnderProjectiles;
+            else if (id == "OverPlayers")
+                layer = RenderLayer.OverPlayers;
+            else
+                layer = RenderLayer.Dusts;
+
+
+
+            PixelationTarget target = pixelationTargets.Find(t => t.renderType == layer);
+
+            target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
+            target.renderTimer = 2;
         }
 
-        public void QueueRenderAction(string id, Action renderAction, int order = 0, bool drawAdditive = false)
+        public void QueueRenderAction(RenderLayer renderType, Action renderAction, int order = 0)
         {
-            PixelationTarget target = pixelationTargets.Find(t => t.id == id);
+
+            PixelationTarget target = pixelationTargets.Find(t => t.renderType == renderType);
 
             target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
             target.renderTimer = 2;
@@ -158,8 +180,6 @@ namespace VFXPlus.Common.Drawing
     public class PixelationTarget
     {
         public int renderTimer;
-
-        public string id;
 
         // list of actions, and their draw order. Default order is zero, but actions with an order of 1 are drawn over 0, etc.
         public List<Tuple<Action, int>> pixelationDrawActions;
@@ -172,7 +192,7 @@ namespace VFXPlus.Common.Drawing
 
         public bool Active => renderTimer > 0;
 
-        public PixelationTarget(string id, RenderLayer renderType)
+        public PixelationTarget(RenderLayer renderType)
         {
             pixelationDrawActions = new List<Tuple<Action, int>>();
 
@@ -181,8 +201,6 @@ namespace VFXPlus.Common.Drawing
 
 
             this.renderType = renderType;
-
-            this.id = id;
         }
 
         //Draw RenderTarget at half scale
@@ -217,6 +235,7 @@ namespace VFXPlus.Common.Drawing
             sb.End();
             sb.Begin(default, default, Main.DefaultSamplerState, default, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
         }
+        
     }
 
     public enum RenderLayer : int
@@ -232,6 +251,8 @@ namespace VFXPlus.Common.Drawing
     //Seperate Pixelization System for when we want to additive draw
     //Is there a smarter way to have done this? Absolutely.
     //However this was the path of least resistance so I did it anyway
+    //I could only get this to work when it was a separate class for some reason
+    //Make sure to use Effect matrix if using a shader with this 
     public class AdditivePixelationSystem : ModSystem
     {
         public List<PixelationTarget> pixelationTargets = new();
@@ -247,15 +268,15 @@ namespace VFXPlus.Common.Drawing
 
         public override void PostSetupContent()
         {
-            RegisterScreenTarget("UnderTiles", RenderLayer.UnderTiles);
+            RegisterScreenTarget(RenderLayer.UnderTiles);
 
-            RegisterScreenTarget("UnderNPCs", RenderLayer.UnderNPCs);
+            RegisterScreenTarget(RenderLayer.UnderNPCs);
 
-            RegisterScreenTarget("UnderProjectiles", RenderLayer.UnderProjectiles);
+            RegisterScreenTarget(RenderLayer.UnderProjectiles);
 
-            RegisterScreenTarget("OverPlayers", RenderLayer.OverPlayers);
+            RegisterScreenTarget(RenderLayer.OverPlayers);
 
-            RegisterScreenTarget("Dusts", RenderLayer.Dusts);
+            RegisterScreenTarget(RenderLayer.Dusts);
         }
 
         public override void Unload()
@@ -326,8 +347,6 @@ namespace VFXPlus.Common.Drawing
                 sb.End();
             }
 
-
-            //Note the use of Main.GameViewMatrix.EffectMatrix
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
@@ -340,8 +359,6 @@ namespace VFXPlus.Common.Drawing
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             sb.End();
 
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
 
             if (endSpriteBatch)
                 sb.Begin(default, default, Main.DefaultSamplerState, default, RasterizerState.CullNone, default, Main.GameViewMatrix.TransformationMatrix);
@@ -353,7 +370,7 @@ namespace VFXPlus.Common.Drawing
         /// <param name="id">ID of the rendertarget and its layer.</param>
         public void RegisterScreenTarget(string id, RenderLayer renderType = RenderLayer.UnderProjectiles)
         {
-            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(id, renderType)));
+            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(renderType)));
         }
 
         /// <summary>
@@ -361,23 +378,40 @@ namespace VFXPlus.Common.Drawing
         /// </summary>
         /// <param name="id">ID of the rendertarget and its layer.</param>
         /// <param name="palettePath">The given palette's texture path.</param>
-        public void RegisterScreenTarget(string id, string palettePath, RenderLayer renderType = RenderLayer.UnderProjectiles)
+        public void RegisterScreenTarget(RenderLayer renderType = RenderLayer.UnderProjectiles)
         {
-            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(id, renderType)));
+            Main.QueueMainThreadAction(() => pixelationTargets.Add(new PixelationTarget(renderType)));
         }
 
-        public void QueueRenderAction(string id, Action renderAction, int order = 0, bool drawAdditive = false)
+        public void QueueRenderAction(string id, Action renderAction, int order = 0)
         {
-            PixelationTarget target = pixelationTargets.Find(t => t.id == id);
+            RenderLayer layer;
+            if (id == "UnderTiles")
+                layer = RenderLayer.UnderTiles;
+            else if (id == "UnderNPCs")
+                layer = RenderLayer.UnderNPCs;
+            else if (id == "UnderProjectiles")
+                layer = RenderLayer.UnderProjectiles;
+            else if (id == "OverPlayers")
+                layer = RenderLayer.OverPlayers;
+            else
+                layer = RenderLayer.Dusts;
+
+
+
+            PixelationTarget target = pixelationTargets.Find(t => t.renderType == layer);
 
             target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
             target.renderTimer = 2;
         }
-    }
 
-    //////////////////////////////////////
-    public class NewPixelationSystem : ModSystem
-    {
+        public void QueueRenderAction(RenderLayer renderType, Action renderAction, int order = 0)
+        {
 
+            PixelationTarget target = pixelationTargets.Find(t => t.renderType == renderType);
+
+            target.pixelationDrawActions.Add(new Tuple<Action, int>(renderAction, order));
+            target.renderTimer = 2;
+        }
     }
 }

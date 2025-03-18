@@ -29,17 +29,6 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            for (int i = 0; i < 5 + Main.rand.Next(0, 4); i++)
-            {
-                Color col = Color.Gray;
-
-                Dust dp = Dust.NewDustPerfect(position + velocity.SafeNormalize(Vector2.UnitX) * 10, DustID.Shadowflame,
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.5f, 0.5f)) * Main.rand.Next(2, 6),
-                    newColor: Color.Gray with { A = 0 } * 0.1f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.6f);
-
-                dp.noGravity = true;
-            }
-
             player.GetModPlayer<HeldBowPlayer>().arrowType = type;
             player.GetModPlayer<HeldBowPlayer>().bowType = ItemID.DemonBow;
             player.GetModPlayer<HeldBowPlayer>().holdOffset = new Vector2(-2f, 0f);
@@ -49,7 +38,6 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             player.GetModPlayer<HeldBowPlayer>().underGlowColor = new Color(42, 2, 82);
 
             return true;
-
         }
 
         public override void UseStyle(Item item, Player player, Rectangle heldItemFrame) => UseStyleHelper.BasicBowUseStyle(player);

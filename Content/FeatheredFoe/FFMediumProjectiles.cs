@@ -38,6 +38,10 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
+        public override bool? CanDamage()
+        {
+            return timer > 50;
+        }
 
         float alpha = 0f;
         float scale = 0f;
@@ -155,7 +159,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override bool PreDraw(ref Color lightColor)
         {
-            DrawWindVortex(-1, Color.White * 0.33f);
+            DrawWindVortex(-1, Color.LightSkyBlue * 0.33f);
 
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FFTornado").Value;
 
@@ -171,7 +175,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue * 0.5f, progress) * progress * progress * alpha;
+                    Color col = Color.Lerp(Color.SkyBlue, Color.SkyBlue * 0.5f, progress) * progress * progress * alpha;
 
                     float size2 = (0.5f + (progress * 0.75f)) * Projectile.scale * scale;
 
@@ -193,7 +197,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Main.EntitySpriteDraw(Tex, drawPos, sourceRectangle, lightColor * alpha, Projectile.rotation, TexOrigin, Projectile.scale * scale, se);
 
 
-            DrawWindVortex(1, Color.White * 0.7f);
+            DrawWindVortex(1, Color.LightSkyBlue * 0.7f);
             return false;
         }
 
@@ -207,7 +211,7 @@ namespace VFXPlus.Content.FeatheredFoe
             var dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
 
-            for (int i = 0; i < 30; i++) //60
+            for (int i = 0; i < 30; i++)
             {
                 Texture2D texture;
                 Rectangle frame;
@@ -243,7 +247,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 float yOffset = scaleWave * waveDistance * 0.3f * yWave; //0.3
                 float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
-                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir); //-20 14 | -120
+                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir).RotatedBy(Projectile.rotation); //-20 14 | -120
 
                 Main.spriteBatch.Draw(
                     texture,
@@ -844,59 +848,74 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-
-
-        float overallAlpha = 0f;
-        float overallScale = 0f;
+        public bool startBlocking = false;
+        public bool startFade = false;
 
         int timer = 0;
 
+        public int dir = 1;
         public override void AI()
         {
 
-            for (int i = 0; i < 1; i++)
+            if (startBlocking)
             {
-                Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-500f, 500f), Main.rand.NextFloat(-45f, 45f)).RotatedBy(Projectile.rotation);
+                for (int i = 0; i < 2; i++)
+                {
+                    Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-1100f, 1100f), Main.rand.NextFloat(-12f, 12f)).RotatedBy(Projectile.rotation);
 
-                float velVal = Main.rand.NextFloat(5f, 12f);
-                Vector2 vel = new Vector2(velVal, 0f).RotatedBy(Projectile.rotation);
+                    float velVal = Main.rand.NextFloat(5f, 18f) * dir;
+                    Vector2 vel = new Vector2(velVal, 0f).RotatedBy(Projectile.rotation);
 
-                Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
+                    Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
 
-                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, vel * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(1f, 2f));
-                wind.noGravity = true;
-            }
+                    Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, vel * 1f, newColor: Color.SkyBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(1f, 2f));
+                    wind.noGravity = true;
+                }
 
-            for (int i = 0; i < 1; i++)
-            {
-                int dir = 1;// (Main.rand.NextBool() ? 1 : -1);
+                for (int i = 0; i < 1; i++)
+                {
+                    Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-1100f, 1100f), Main.rand.NextFloat(-12f, 12f)).RotatedBy(Projectile.rotation);
 
-                Vector2 spawnVec = new Vector2(Main.rand.NextFloat(-500f, 500f), Main.rand.NextFloat(-45f, 45f)).RotatedBy(Projectile.rotation);
+                    float velVal = Main.rand.NextFloat(5f, 18f) * dir;
+                    Vector2 vel = new Vector2(velVal * 3f, 0f).RotatedBy(Projectile.rotation);
 
-                float velVal = Main.rand.NextFloat(5f, 12f) * dir;
-                Vector2 vel = new Vector2(velVal * 3f, 0f).RotatedBy(Projectile.rotation);
+                    Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
 
-                Vector2 windDustSpawnPosition = Projectile.Center + spawnVec;
+                    Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, ModContent.DustType<WindLine>(), vel * 1f, newColor: Color.DodgerBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+                    WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.65f, 2f, 1f, true);
+                    wind.customData = wlb;
 
-                Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, ModContent.DustType<WindLine>(), vel * 1f, newColor: Color.DodgerBlue with { A = 0 } * 1f, Scale: Main.rand.NextFloat(0.35f, 0.55f));
-                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.65f, 2f, 1f, true);
-                wind.customData = wlb;
-
+                }
             }
 
             timer++;
         }
 
+        float overallAlpha = 0f;
+        float overallScale = 0f;
         public override bool PreDraw(ref Color lightColor)
         {
             Texture2D glowThick = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Vector2 vec2Scale = new Vector2(100f, 1f);
+            Vector2 vec2Scale = new Vector2(100f, 0.75f);
 
-            Main.EntitySpriteDraw(glowThick, drawPos, null, Color.DeepSkyBlue with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, new Vector2(15f, 0.12f), 0);
-            Main.EntitySpriteDraw(glowThick, drawPos, null, Color.White with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, new Vector2(15f, 0.05f), 0);
+            Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
+
+            float sineWidthAddition1 = 1f + (MathF.Sin((float)Main.timeForVisualEffects * 0.08f) * 0.25f);
+            float sineWidthAddition2 = 1f + (MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.25f);
+
+            Vector2 vec2Scale1 = new Vector2(15f, 0.1f * sineWidthAddition1);
+            Vector2 vec2Scale2 = new Vector2(15f, 0.04f * sineWidthAddition2);
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                Main.EntitySpriteDraw(glowThick, drawPos, null, col with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, vec2Scale1, 0);
+
+                if (startBlocking)
+                    Main.EntitySpriteDraw(glowThick, drawPos, null, Color.White with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, vec2Scale2, 0);
+            });
 
             return false;
         }

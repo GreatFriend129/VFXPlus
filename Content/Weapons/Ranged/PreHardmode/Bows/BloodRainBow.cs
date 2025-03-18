@@ -16,6 +16,7 @@ using Terraria.GameContent;
 using static tModPorter.ProgressUpdate;
 using System.Runtime.Intrinsics.Arm;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
@@ -47,6 +48,14 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
+            if (timer == 0)
+            {
+                Vector2 portalVel = projectile.velocity.SafeNormalize(Vector2.UnitX) * 3f;
+                int portal = Projectile.NewProjectile(null, projectile.Center, portalVel, ModContent.ProjectileType<BloodRainBowVFX>(), 0, 0, Main.myPlayer);
+                Main.projectile[portal].rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+            }
+
+            
             //VERY IMPORTANT
             projectile.hide = false;
 
@@ -74,7 +83,41 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
             timer++;
 
-            return base.PreAI(projectile);
+            if (timer % 1 == 0)
+            {
+                Vector2 dustPos = projectile.Center;
+                Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
+                Dust d = Dust.NewDustPerfect(dustPos, DustID.Blood, dustVel, Scale: 1f);
+                d.velocity += projectile.velocity * 0.1f;
+
+                if (Main.rand.NextBool())
+                {
+                    Vector2 dustVel2 = Main.rand.NextVector2Circular(0.75f, 0.75f);
+                    Dust d2 = Dust.NewDustPerfect(dustPos, DustID.Blood, dustVel, Scale: 0.75f);
+                    d2.velocity += projectile.velocity * 0.1f;
+                }
+            }
+
+            #region vanillaAI
+            projectile.ai[0] += 1f;
+
+            if (projectile.ai[0] >= 15f)
+            {
+                projectile.ai[0] = 15f;
+
+                projectile.velocity.Y += 0.1f;
+            }
+
+            projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) + 1.57f;
+            if (projectile.velocity.Y > 16f)
+            {
+                projectile.velocity.Y = 16f;
+            }
+
+            Lighting.AddLight(projectile.Center, 0.3f, 0.05f, 0.05f);
+            #endregion
+
+            return false;
         }
 
         float overallAlpha = 1f;
@@ -90,9 +133,11 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             Vector2 TexOrigin = flare.Size() / 2f;
 
             float drawScale = projectile.scale * overallScale;
+            Color darkerRed = new Color(103, 0, 0);
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
+
                 //After-Image
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
@@ -101,7 +146,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
                     //Start End
-                    Color col = Color.Lerp(Color.Red, Color.DarkRed, progress) * progress;
+                    Color col = Color.Lerp(Color.DarkRed, darkerRed, progress) * progress;
 
                     Vector2 size = new Vector2(1f, 0.3f * progress) * drawScale;
 
@@ -109,12 +154,16 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                         previousRotations[i], TexOrigin, size, SpriteEffects.None);
 
                     //SIZE 2 IS REAL
-                    Vector2 size2 = new Vector2(0.5f, 2.5f * progress) * drawScale;
+                    Vector2 size2 = new Vector2(0.7f, 3f * progress) * drawScale;
 
-                    Main.EntitySpriteDraw(flare2, AfterImagePos, null, Color.Red with { A = 0 } * 0.3f * progress,
+                    Main.EntitySpriteDraw(flare2, AfterImagePos, null, Color.Red with { A = 0 } * 0.11f * progress,
                         previousRotations[i], flare2.Size() / 2f, size2, SpriteEffects.None);
                 }
+
             });
+
+            Main.EntitySpriteDraw(flare, projectile.Center - Main.screenPosition, null, Color.Red * 1f, projectile.velocity.ToRotation(), TexOrigin, new Vector2(1f, 0.75f), SpriteEffects.None);
+            Main.EntitySpriteDraw(flare, projectile.Center - Main.screenPosition, null, new Color(255, 175, 175) with { A = 0 } * 0f, projectile.velocity.ToRotation(), TexOrigin, 0.55f, SpriteEffects.None);
 
             return false;
         }
@@ -135,4 +184,78 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             return true;
         }
     }
+
+    public class BloodRainBowVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetStaticDefaults()
+        {
+            //Make sure to draw projectile even if its position is off screen
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+        }
+
+        //Safety Checks
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.tileCollide = false;
+
+            Projectile.timeLeft = 2400;
+        }
+
+        int timer = 0;
+        float true_width = 1f;
+        float true_alpha = 1f;
+
+        public override void AI()
+        {
+            if (timer > 2)
+                true_width = Math.Clamp(MathHelper.Lerp(true_width, -0.5f, 0.08f), 0, 1f);
+
+            if (timer == 100 || true_width <= 0.05f)
+                Projectile.active = false;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                DrawPortal(false);
+            });
+            DrawPortal(true);
+
+            return false;
+        }
+
+        public void DrawPortal(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+
+            //Portal at first node
+            Vector2 portalPos = Projectile.Center - Main.screenPosition;
+            float rot = Projectile.rotation;
+
+            float easedScale = true_width;
+            Vector2 v2Scale = new Vector2(1f * easedScale, 0.25f + (easedScale * 0.75f)) * Projectile.scale * 1.25f;
+
+
+            Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.DarkRed with { A = 0 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.Red with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.5f, SpriteEffects.None);
+
+        }
+    }
+
 }

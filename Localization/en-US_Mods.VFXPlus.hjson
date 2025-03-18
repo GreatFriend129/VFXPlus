@@ -53,6 +53,11 @@ Items: {
 		DisplayName: Cyver Cannon
 		Tooltip: ""
 	}
+
+	StormRazor: {
+		DisplayName: Storm Razor
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -125,6 +130,13 @@ Projectiles: {
 	CyverCannonProjectile.DisplayName: Cyver Cannon Projectile
 	CyverCannonHyperBeam.DisplayName: Cyver Cannon Hyper Beam
 	CyverCannonFinaleProjectile.DisplayName: Cyver Cannon Finale Projectile
+	StormbowVFX.DisplayName: Stormbow V F X
+	BloodRainBowVFX.DisplayName: Blood Rain Bow V F X
+	EoCDashTest.DisplayName: Eo C Dash Test
+	StormRazorProj.DisplayName: Storm Razor Proj
+	IchorHitFlare.DisplayName: Ichor Hit Flare
+	GlacierStormProj.DisplayName: Glacier Storm Proj
+	JackOFace.DisplayName: Jack O Face
 }
 
 Configs: {

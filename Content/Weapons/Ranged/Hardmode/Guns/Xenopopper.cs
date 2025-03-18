@@ -34,13 +34,26 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         public override void SetDefaults(Item entity)
         {
             //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            //entity.noUseGraphic = true;
+            entity.noUseGraphic = true;
             base.SetDefaults(entity);
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            
+            int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicRecoilProj>(), 0, 0, player.whoAmI);
+            if (Main.projectile[gun].ModProjectile is BasicRecoilProj held)
+            {
+                held.SetProjInfo(
+                    GunID: ItemID.Xenopopper,
+                    AnimTime: 20,
+                    NormalXOffset: 19f,
+                    DestXOffset: 0f,
+                    YRecoilAmount: 0.3f,
+                    HoldOffset: new Vector2(0f, 0f)
+                    );
+
+                held.compositeArmAlwaysFull = false;
+            }
             return true;
         }
     }
@@ -81,8 +94,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White * 0.75f, projectile.rotation, TexOrigin, projectile.scale, 0);
 
-
-
             float glowscale = (float)(Math.Sin(Main.GlobalTimeWrappedHourly * 6f) / 5f + 1f) * 1.15f;
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White with { A = 0 } * 0.25f, projectile.rotation, TexOrigin, projectile.scale * glowscale, 0);
 
@@ -98,14 +109,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             return true;
         }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
 
     }
 

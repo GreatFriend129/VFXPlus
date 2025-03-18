@@ -166,6 +166,17 @@ namespace VFXPlus.Content.Projectiles
 
             Player.itemRotation = MathHelper.WrapAngle(Player.itemRotation);
 
+            float Xprog = Utils.GetLerpValue(goalX, baseX, XOffset, true);
+
+            if (Xprog > 0.75f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.5f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.ThreeQuarters, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else if (Xprog > 0.25f)
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Quarter, GunDirection.ToRotation() - MathHelper.PiOver2);
+            else
+                Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.None, GunDirection.ToRotation() - MathHelper.PiOver2);
+
             Player.heldProj = Projectile.whoAmI;
             Projectile.rotation = GunDirection.ToRotation();
 

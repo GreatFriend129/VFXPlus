@@ -47,12 +47,16 @@ namespace VFXPlus.Content.VFXTest
         }
         public override bool PreDraw(ref Color lightColor)
         {
-            TrailPreDraw();
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            {
+                TrailPreDraw();
+            });
             return false;
         }
         public void TrailPreDraw()
         {
-            Texture2D texture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            //Texture2D texture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D texture = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
             //Texture2D texture = Terraria.GameContent.TextureAssets.Projectile[Projectile.type].Value;
             Vector2 drawOrigin = new Vector2(texture.Width * 0.5f, texture.Height * 0.5f);
@@ -64,7 +68,7 @@ namespace VFXPlus.Content.VFXTest
                 {
                     break;
                 }
-                Color color = Main.hslToRgb((Projectile.localAI[2] * 0.01f + 0.5f) % 1f, 1f, 0.7f, 0);//Pastel(MathHelper.ToRadians(Projectile.ai[1] + k * 2), true);
+                Color color = Main.hslToRgb((Projectile.localAI[2] * 0.01f + 0.5f) % 1f, 1f, 0.4f, 0);//Pastel(MathHelper.ToRadians(Projectile.ai[1] + k * 2), true);
                 color.A = 0;
 
                 Color rainbow = Main.hslToRgb((Projectile.localAI[2] * 0.01f + 0.5f) % 1f, 1f, 0.7f, 0);
@@ -79,7 +83,11 @@ namespace VFXPlus.Content.VFXTest
                 {
                     drawPos = previousPosition + -betweenPositions * (i / max) - Main.screenPosition;
                     if (trailPos[k] != Projectile.Center)
+                    {
                         Main.spriteBatch.Draw(texture, drawPos, null, color with { A = 0 }, betweenPositions.ToRotation(), drawOrigin, scale, SpriteEffects.None, 0f);
+                        Main.spriteBatch.Draw(texture, drawPos, null, Color.White with { A = 0 } * ((trailPos.Length - k) / (float)trailPos.Length) * 0.33f, betweenPositions.ToRotation(), drawOrigin, scale * 0.75f, SpriteEffects.None, 0f);
+
+                    }
                 }
                 previousPosition = currentPos;
             }

@@ -221,4 +221,74 @@ namespace VFXPlus.Content.VFXTest.Aero
         }
 
     }
+
+    public class GlacierStormProj : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 32;
+            Projectile.height = 32;
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.DamageType = DamageClass.MeleeNoSpeed;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.timeLeft = 1000000;
+
+            Projectile.penetrate = -1;
+
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 10;
+        }
+
+        int timer = 0;
+        public override void AI()
+        {
+            
+            for (int i = 0; i < 1; i++)
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 8f);
+
+                Dust dp = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<Snowflakes>(), dustVel, newColor: Color.Black, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1f);
+                dp.rotation = Main.rand.NextFloat(6.28f);
+                SnowflakeBehavior sb = new SnowflakeBehavior(VelShrinkAmount: 0.93f, ScaleShrinkAmount: 0.91f, AlphaShrinkAmount: 0.92f, ColorIntensity: 1f);
+                dp.customData = sb;
+            }
+
+            for (int i = 0; i < 1; i++)
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 8f);
+
+                Dust d2 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<HighResSmoke>(), Velocity: dustVel, 
+                    newColor: Color.SkyBlue with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.55f);
+
+
+                HighResSmokeBehavior hrsb = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 0, fadeDuration: 10, softGlowIntensity: 2f);
+                hrsb.isPixelated = true;
+                d2.customData = hrsb;
+
+                d2.rotation = Main.rand.NextFloat(6.28f);
+            }
+
+
+            float fadeInTime = Math.Clamp((timer + 4f) / 8f, 0f, 1f);
+            overallScale = Easings.easeInOutHarsh(fadeInTime);
+
+            timer++;
+        }
+
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            return false;
+        }
+
+    }
+
 }

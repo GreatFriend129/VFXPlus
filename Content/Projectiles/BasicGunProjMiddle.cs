@@ -179,7 +179,7 @@ namespace VFXPlus.Content.Projectiles
                 muzzleFlashPower = Math.Clamp(MathHelper.Lerp(muzzleFlashPower, -0.5f, 0.15f), 0f, 1f);
 
             //StandardHeldProjCode
-            GunDirection = shotAngle.ToRotationVector2().RotatedBy(YRecoil * Player.direction * -1f); ;
+            GunDirection = shotAngle.ToRotationVector2().RotatedBy(YRecoil * Player.direction * -1f);
             Projectile.Center = Player.MountedCenter + (GunDirection * XOffset);
             Projectile.velocity = Vector2.Zero;
             Player.itemRotation = shotAngle;

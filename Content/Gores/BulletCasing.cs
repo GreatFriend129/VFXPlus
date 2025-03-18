@@ -34,6 +34,16 @@ namespace AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun
             }
             
             gore.frameCounter++;
+
+
+            if (gore.velocity.Y == 0 && gore.light == 0)
+            {
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Coin_3") with { Volume = 0.018f, Pitch = -1f, PitchVariance = 0.1f, MaxInstances = -1 };
+                SoundEngine.PlaySound(style, gore.position);
+
+                gore.light = -0.01f;
+            }
+
             return base.Update(gore);
         }
 

@@ -208,6 +208,4 @@ namespace VFXPlus.Common.Drawing
                 ResizeScreens(new Vector2(Main.screenWidth, Main.screenHeight));
         }
     }
-
-
 }
