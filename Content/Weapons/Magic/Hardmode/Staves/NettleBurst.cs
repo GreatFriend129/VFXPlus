@@ -123,19 +123,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 4; i++)
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
-                    float dist = 1.5f;
+                    float dist = 2f;
 
                     Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                     Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.15f * projectile.direction);
 
                     Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, null,
-                        Color.Red with { A = 0 } * 0.75f * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
+                        Color.Red with { A = 0 } * 1 * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             });
 
@@ -218,12 +218,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        Color.Red with { A = 0 } * 0.25f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.05f, SpriteEffects.None, 0f); //1.1f
+                    float dist = 2f;
+
+                    Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                    Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.15f * projectile.direction);
+
+                    Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, null,
+                        Color.Red with { A = 0 } * 1 * myAlpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             });
 

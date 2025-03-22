@@ -88,7 +88,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            CurrentAttack = FeatheredFoeState.BasicAttack;
+            CurrentAttack = FeatheredFoeState.Madison;
 
             switch (CurrentAttack)
             {
