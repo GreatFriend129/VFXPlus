@@ -18,6 +18,7 @@ using VFXPlus.Common.Drawing;
 using Terraria.GameContent;
 using System.Drawing.Drawing2D;
 using Terraria.GameContent.Drawing;
+using VFXPlus.Content.Projectiles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
@@ -27,18 +28,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.RainbowGun);
+            return lateInstatiation && (item.type == ItemID.RainbowGun) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RainbowGunToggle;
         }
 
         public override void SetDefaults(Item entity)
         {
             //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
             SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style, player.Center);
 
@@ -57,6 +58,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 }
             }
 
+            int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicRecoilProj>(), 0, 0, player.whoAmI);
+            if (Main.projectile[gun].ModProjectile is BasicRecoilProj held)
+            {
+                held.SetProjInfo(
+                    GunID: ItemID.RainbowGun,
+                    AnimTime: 20,
+                    NormalXOffset: 18f,
+                    DestXOffset: -3f,
+                    YRecoilAmount: 0.1f,
+                    HoldOffset: new Vector2(0f, 2f)
+                    );
+            }
+
             return true;
         }
 
@@ -67,7 +81,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.RainbowFront);
+            return lateInstantiation && (entity.type == ProjectileID.RainbowFront) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RainbowGunToggle;
         }
 
         int timer = 0;
@@ -105,15 +119,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 float randomStart = Main.rand.NextFloat(0f, 1f);
                 for (int j = 0; j < 10; j++)
                 {
-                    //Color rainbow = Main.hslToRgb((j * 0.1f + randomStart) % 1f, 1f, 0.6f, 0) * 1f;
-                    Color rainbow = Main.hslToRgb((randRainbowOffset + 0.08f) % 1f, 1f, 0.7f, 0) * 0.75f;
-                    // ^ Doing + 0.08 so that the colors match up by the time the circle are visible
+                    Color rainbow = Main.hslToRgb((randomStart + (j * 0.1f)) % 1f, 1f, 0.75f, 0) * 0.75f;
 
-                    if (j == 0)
-                        rainbow = Color.White;
 
                     float progress = (float)j / 9;
-                    int inverse = 9 - j;
 
                     float widthStretch = Easings.easeOutSine(progress) * 0.5f; //j * 0.1f
 
@@ -121,39 +130,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                     Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity, ModContent.DustType<CirclePulse>(), 0.75f * lessVel, newColor: rainbow);
                     d2.scale = 0.05f;
-                    CirclePulseBehavior b2 = new CirclePulseBehavior(0.17f + (j * 0.00f), true, 2, 0.25f, 0.35f + widthStretch); //0.35scale
+                    CirclePulseBehavior b2 = new CirclePulseBehavior(0.17f + (j * 0.00f), true, 2, 0.25f, 0.35f + widthStretch); 
                     b2.drawLayer = "Dusts";
                     d2.customData = b2;
                 }
 
-                //Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), lessVel, newColor: Color.White);
-                //CirclePulseBehavior b = new CirclePulseBehavior(0.3f, true, 1, 0.4f, 0.8f);
-                //b.drawLayer = "Dusts";
-                //d.customData = b;
-
-                //Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), lessVel * 1.2f, newColor: Color.White);
-                //CirclePulseBehavior b2 = new CirclePulseBehavior(0.3f, true, 1, 0.2f, 0.4f);
-                //b2.drawLayer = "Dusts";
-                //d2.customData = b2;
-                //Rainbow burst dust (unused)
-
-                for (int i = 200; i < 22 + Main.rand.Next(0, 2); i++)
+                for (int i = 0; i < 19 + Main.rand.Next(0, 2); i++)
                 {
-                    Vector2 vel = Main.rand.NextVector2Circular(10f, 10f) * 2f;
+                    Vector2 vel = Main.rand.NextVector2Circular(8f, 8f) * 2f;
 
-                    Color rainbow = Main.hslToRgb((i * 0.05f + 0.5f) % 1f, 1f, 0.6f, 0) * 1f;
+                    Color rainbow = Main.hslToRgb((i * 0.05f + 0.5f) % 1f, 1f, 0.7f, 0) * 1f;
 
                     Dust pa = Dust.NewDustPerfect(projectile.Center - projectile.velocity * 0.25f, ModContent.DustType<PixelatedLineSpark>(), vel,
-                        newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.7f);
+                        newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.65f);
 
                     pa.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.83f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
-                        1f, 0.5f, shouldFadeColor: false);
-
-                    if (i % 1 == 0)
-                    {
-                        Dust p2 = Dust.NewDustPerfect(projectile.Center + (vel * 3f) - projectile.velocity, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.2f);
-                        p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.04f);
-                    }
+                        0.75f, 0.45f, shouldFadeColor: false);
 
                 }
             }
@@ -164,19 +156,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).AddPoint(projectile.Center, projectile.velocity.ToRotation());
             }
 
-            if (timer % 2 == 0 && false)
-            {
-                ParticleOrchestraSettings particleSettings = new()
-                {
-                    PositionInWorld = projectile.Center,
-                    MovementVector = Main.rand.NextVector2CircularEdge(1f, 1f) + projectile.velocity * 0.05f
-
-                };
-
-                ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.ShimmerBlock, particleSettings);
-            }
-
-
             timer++;
 
             return base.PreAI(projectile);
@@ -184,16 +163,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return false;
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-            SpriteEffects se = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale, se);
-
             return false;
         }
 
@@ -203,26 +172,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             {
                 (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).isAttached = false;
                 (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).headCollidePower = 2f;
-            }
 
-            for (int i = 220; i < 10 + Main.rand.Next(0, 2); i++) //4 //2,2
-            {
-                Vector2 vel = Main.rand.NextVector2Circular(9f, 9f);
-
-                Color rainbow = Main.hslToRgb((i * 0.05f + 0.5f) % 1f, 1f, 0.6f, 0) * 1f;
-
-                Dust p = Dust.NewDustPerfect(projectile.Center - projectile.velocity, ModContent.DustType<PixelatedLineSpark>(), vel,
-                    newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.7f);
-
-                p.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
-                    1f, 0.5f, shouldFadeColor: false);
-
-                if (i % 122 == 0)
-                {
-                    Dust p2 = Dust.NewDustPerfect(projectile.Center + (vel * 4f) - projectile.velocity, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.2f);
-                    p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.1f);
-                }
-
+                Main.projectile[vfxIndex].timeLeft = timeLeft + timer;
             }
 
             return base.PreKill(projectile, timeLeft);
@@ -236,7 +187,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.RainbowBack);
+            return lateInstantiation && (entity.type == ProjectileID.RainbowBack) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RainbowGunToggle;
         }
 
         public override bool PreAI(Projectile projectile)
@@ -287,6 +238,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         float true_alpha = 0.1f;
 
 
+        public bool longFade = false;
+
         public bool shouldFade = false;
         public bool isAttached = true;
 
@@ -297,6 +250,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void AI()
         {
+            if (Projectile.timeLeft < 30)
+                shouldFade = true;
+
             if (!shouldFade)
                 true_alpha = Math.Clamp(MathHelper.Lerp(true_alpha, 1.5f, 0.05f), 0f, 1f); //0.04
             else
@@ -308,40 +264,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             }
 
             //For the head of the trail to pop when rainbowgunfront dies
-            headCollidePower = Math.Clamp(MathHelper.Lerp(headCollidePower, 0.5f, 0.07f), 1f, 2f); 
+            headCollidePower = Math.Clamp(MathHelper.Lerp(headCollidePower, 0.5f, 0.07f), 1f, 2f);
 
             //Cast light from every 10 points. This is a possible source of lag if rainbow is long | "LagPos"
-            for (int i = 0; i < l_positions.Count; i += 10)
+            for (int i = 0; i < l_positions.Count; i += 12)
             {
-                //Dust.NewDustPerfect(l_positions[i], DustID.Adamantite, new Vector2(0f, -10f));
-                Lighting.AddLight(l_positions[i], Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.75f, 0).ToVector3() * 0.75f);
+                Lighting.AddLight(l_positions[i], Main.hslToRgb((timer * 0.015f + rainbowOffset) % 1f, 1f, 0.75f, 0).ToVector3() * 0.75f);
             }
 
 
             //Line dust all throughout trail
-            if (timer > 5 && timer % 1 == 0)
+            if (timer > 5 && timer % 4 == 0)
             {
-                for (int i = 0; i < l_positions.Count * 0.9f; i += 3)
+                for (int i = 0; i < l_positions.Count * 0.9f; i += 6)
                 {
                     Vector2 pos = l_positions[i];
                     float rot = l_rotations[i];
 
-                    Color rainbow = Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.5f, 0) * 0.75f;
+                    Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.6f, 0) * 0.75f;
 
                     if (Main.rand.NextBool() && (!shouldFade || Main.rand.NextBool()))
                     {
                         Vector2 offset = rot.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-15, 15);
                         Vector2 vel = rot.ToRotationVector2().RotatedByRandom(0.05f) * Main.rand.NextFloat(2, 7);
 
+                        Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowPixelCross>(), vel * 1f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1f) * 0.35f);
+                        d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(velToBeginShrink: 3f, fadePower: 0.93f, shouldFadeColor: false);
 
-                        Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<LineSpark>(), vel * 1.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
-                        d.noLight = false;
-                        if (shouldFade)
-                            d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.9f, postShrinkPower: 0.92f, timeToStartShrink: 10, killEarlyTime: 100, XScale: 0.4f, YScale: 0.25f, shouldFadeColor: true, colorFadePower: 0.92f);
-                        else
-                            d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.97f, killEarlyTime: 10, XScale: 0.5f, YScale: 0.2f, shouldFadeColor: true);
+                        //Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<LineSpark>(), vel * 1.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
+                        //d.noLight = false;
+                        //if (shouldFade)
+                        //    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.9f, postShrinkPower: 0.92f, timeToStartShrink: 10, killEarlyTime: 100, XScale: 0.4f, YScale: 0.25f, shouldFadeColor: true, colorFadePower: 0.92f);
+                        //else
+                        //    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.97f, killEarlyTime: 10, XScale: 0.5f, YScale: 0.2f, shouldFadeColor: true);
                     }
-
                 }
             }
 
@@ -359,19 +315,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 d.noGravity = true;
             }
 
-            
-            if (i % 2 == 0 && Main.rand.NextBool() && false)
-            {
-                Vector2 offset2 = rot.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-10, 10);
-                Vector2 vel2 = rot.ToRotationVector2().RotatedByRandom(0.15f) * Main.rand.NextFloat(2, 9);
-
-                Dust d2 = Dust.NewDustPerfect(pos + offset2, ModContent.DustType<ElectricSparkGlow>(), vel2 * 1.25f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.75f);
-
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(KillEarlyTime: 100, XScale: 1f, YScale: 0.5f, UnderGlowPower: 2f, WhiteLayerPower: 0.15f);
-                d2.customData = esb;
-                //d2.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 3, postSlowPower: 0.92f, velToBeginShrink: 1.5f, fadePower: 0.93f, shouldFadeColor: false);
-
-            }
             */
             #endregion
 
@@ -390,7 +333,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             float ease2 = shouldFade ? Easings.easeOutQuad(true_alpha) : Easings.easeInOutBack(true_alpha, 0f, 2f);
             float ease3 = shouldFade ? Easings.easeOutQuad(true_alpha) : Easings.easeOutCirc(true_alpha);
 
-            Color rainbow = Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.7f, 0) * 0.75f * ease1;
+            Color rainbow = Main.hslToRgb((timer * 0.03f + rainbowOffset) % 1f, 1f, 0.75f, 0) * 0.75f * ease1;
 
             #region Portal
             Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
@@ -404,6 +347,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 drawPosStart = l_positions[0] - Main.screenPosition;
             float starRotStart = l_rotations[0] + MathHelper.PiOver2;
 
+            //Start Portal
             Main.EntitySpriteDraw(portal, drawPosStart, null, Color.Black * 0.3f * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
 
             Main.EntitySpriteDraw(bloom, drawPosStart, null, rainbow with { A = 0 } * true_alpha * 0.4f, starRotStart, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
@@ -412,34 +356,31 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(3f, 3f), null, rainbow with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
-            //Draw at end if disconnected
-            if (true)
-            {
-                float lerpXVal = MathHelper.Lerp(1f, 0.6f, headCollidePower - 1f);
-                float lerpYVal = MathHelper.Lerp(0.6f, 1f, headCollidePower - 1f);
+            //End Portal
+            float lerpXVal = MathHelper.Lerp(1f, 0.6f, headCollidePower - 1f);
+            float lerpYVal = MathHelper.Lerp(0.6f, 1f, headCollidePower - 1f);
 
-                if (isAttached)
-                    v2Scale = new Vector2(0.6f * ease1, 1f * ease2) * true_width * sinScale * 0.85f;
-                else
-                    v2Scale = new Vector2(lerpXVal * ease1, lerpYVal * ease2) * true_width * sinScale;
-                //v2Scale *= headCollidePower;
+            if (isAttached)
+                v2Scale = new Vector2(0.6f * ease1, 1f * ease2) * true_width * sinScale * 0.85f;
+            else
+                v2Scale = new Vector2(lerpXVal * ease1, lerpYVal * ease2) * true_width * sinScale;
+            //v2Scale *= headCollidePower;
 
-                Vector2 drawPosEnd = l_positions[l_positions.Count - 1] - Main.screenPosition;
-                float starRotEnd = l_rotations[l_rotations.Count - 1] + MathHelper.PiOver2;
+            Vector2 drawPosEnd = l_positions[l_positions.Count - 1] - Main.screenPosition;
+            float starRotEnd = l_rotations[l_rotations.Count - 1] + MathHelper.PiOver2;
 
-                Main.EntitySpriteDraw(portal, drawPosEnd, null, Color.Black * 0.3f * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd, null, Color.Black * 0.3f * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(bloom, drawPosEnd, null, rainbow with { A = 0 } * true_alpha * 0.4f, starRotEnd, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(bloom, drawPosEnd, null, rainbow with { A = 0 } * true_alpha * 0.4f, starRotEnd, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-                Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(3f, 3f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
-                Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
-            }
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(3f, 3f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
             #endregion
 
             if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/ComboLaserVertex", AssetRequestMode.ImmediateLoad).Value;
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
@@ -452,7 +393,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public void DrawTrail(bool giveUp = false)
         {
-            if (giveUp)
+            if (giveUp || true_alpha < 0.25f)
                 return;
 
             //Create arrays
@@ -462,7 +403,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             float widthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.07f) * 0.15f;
 
             Color StripColor(float progress) => Color.White * true_alpha;
-            float StripWidth(float progress) => 40f * Easings.easeOutQuad(true_alpha) * widthMult;// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
+            float StripWidth(float progress) => 45f * Easings.easeInSine(true_alpha) * widthMult;// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
 
             VertexStrip vertexStrip = new VertexStrip();
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -475,36 +416,39 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         }
         public void ShaderParams()
         {
-            float fadeOut = shouldFade ? Math.Clamp(Easings.easeOutSine(true_alpha), 0.15f, 1f) : true_alpha;
+            float fadeOut = shouldFade ? Math.Clamp(Easings.easeInQuad(true_alpha), 0.15f, 1f) : true_alpha;
 
-            Color rainbow = Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.72f, 0) * 0.75f * fadeOut; //0.6 gives a fucking amazing orange
+            //Color rainbow = Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.72f, 0) * 0.75f * fadeOut; //0.6 gives a fucking amazing orange
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
-            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
+            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
+            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
-            myEffect.Parameters["satPower"].SetValue(0.95f); //higher power -> less affected by background  |95 | 3f looks very goozma
+            myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background  |95 | 3f looks very goozma
 
             myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
-            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value);
-            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/FlameTrail").Value); //smokeTrail4_512
+            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value); //smokeTrail4_512
 
-            myEffect.Parameters["Color1"].SetValue(rainbow.ToVector4());
-            myEffect.Parameters["Color2"].SetValue(rainbow.ToVector4());
-            myEffect.Parameters["Color3"].SetValue(rainbow.ToVector4());
-            myEffect.Parameters["Color4"].SetValue(rainbow.ToVector4());
 
-            myEffect.Parameters["Color1Mult"].SetValue(1.55f * 1f); 
-            myEffect.Parameters["Color2Mult"].SetValue(1.55f * 1f);
-            myEffect.Parameters["Color3Mult"].SetValue(0.75f * 1f); 
-            myEffect.Parameters["Color4Mult"].SetValue(1f * 0.25f);
-            myEffect.Parameters["totalMult"].SetValue(1.05f); // 10f looks cool and void-y
+            myEffect.Parameters["grad1Speed"].SetValue(2f / 3f);
+            myEffect.Parameters["grad2Speed"].SetValue(2f / 3f);
+            myEffect.Parameters["grad3Speed"].SetValue(3.1f / 3f);
+            myEffect.Parameters["grad4Speed"].SetValue(2.3f / 3f);
+
+            myEffect.Parameters["tex1Mult"].SetValue(1.25f);
+            myEffect.Parameters["tex2Mult"].SetValue(1.5f);
+            myEffect.Parameters["tex3Mult"].SetValue(1.15f);
+            myEffect.Parameters["tex4Mult"].SetValue(2.5f); //1.5
+            myEffect.Parameters["totalMult"].SetValue(1f);
+            //myEffect.Parameters["totalMult"].SetValue(1.05f); // 10f looks cool and void-y
 
 
             //We want the number of repititions to be relative to the number of points
             float repValue = 0.05f * l_positions.Count;
-
+            myEffect.Parameters["gradientReps"].SetValue(0.25f * repValue); //1f
             myEffect.Parameters["tex1reps"].SetValue(1f * repValue); //2.5
             myEffect.Parameters["tex2reps"].SetValue(0.3f * repValue);
             myEffect.Parameters["tex3reps"].SetValue(1f * repValue);

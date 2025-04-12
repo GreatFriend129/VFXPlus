@@ -33,7 +33,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity);
         }
@@ -47,11 +47,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     GunID: ItemID.NailGun,
                     AnimTime: 16,
                     NormalXOffset: 18f,
-                    DestXOffset: 8f,
-                    YRecoilAmount: 0.1f,
+                    DestXOffset: 6f,
+                    YRecoilAmount: 0.15f,
                     HoldOffset: new Vector2(0f, 2f)
                     );
             }
+
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_108") with { Volume = 0.55f, PitchVariance = 0.1f, MaxInstances = -1 }; 
+            SoundEngine.PlaySound(style2, player.Center);
+
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_ogre_spit") with { Volume = 0.6f, Pitch = .33f, PitchVariance = 0.1f, MaxInstances = -1 }; 
+            //SoundEngine.PlaySound(style, player.Center);
+
             return true;
         }
     }
@@ -70,7 +77,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         {            
             if (projectile.ai[0] == 0)
             {
-                int trailCount = 15;
+                int trailCount = 20;
                 previousRotations.Add(projectile.rotation);
                 previousPositions.Add(projectile.Center + projectile.velocity);
 
@@ -103,8 +110,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             pulsePower = Math.Clamp(MathHelper.Lerp(pulsePower, 0.5f, 0.1f), 1f, 2f);
 
-            float fadeInTime = Math.Clamp((timer + 6f) / 12f, 0f, 1f);
+            float fadeInTime = Math.Clamp((timer + 11f) / 18f, 0f, 1f);
             overallScale = Easings.easeInOutHarsh(fadeInTime);
+
+            float initPowerTime = Math.Clamp(timer / 30f, 0f, 1f);
+            initialPower = 1f - Easings.easeOutCubic(initPowerTime);
+
 
             timer++;
             return true;
@@ -112,6 +123,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         bool hasDonePulse = false;
         float pulsePower = 1f;
+        float initialPower = 0f;
 
         float overallAlpha = 0f;
         float overallScale = 1f;
@@ -126,6 +138,29 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
+            //Shakes before exploding
+            if (projectile.ai[0] != 0f)
+            {
+                float shakeIntesity = Math.Clamp((projectile.ai[1] / 90f), 0f, 1f);
+                drawPos += Main.rand.NextVector2Circular(4.5f, 4.5f) * Easings.easeInCubic(shakeIntesity);
+            }
+
+            if (initialPower > 0f)
+            {
+                Texture2D spike = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+                Vector2 starScaleVec2 = new Vector2(1f, 0.5f) * projectile.scale * initialPower;
+
+                Main.EntitySpriteDraw(spike, drawPos, null, Color.Red with { A = 0 } * initialPower, projectile.rotation + MathHelper.PiOver2, spike.Size() / 2f, starScaleVec2, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * initialPower, projectile.rotation + MathHelper.PiOver2, spike.Size() / 2f, starScaleVec2 * 0.65f, SpriteEffects.None);
+            }
+
+            //Glorb
+            Texture2D glorb = CommonTextures.feather_circle128PMA.Value;
+
+            Vector2 glorbScale = new Vector2(1f, 0.75f) * overallScale * projectile.scale * 0.3f;
+            Main.EntitySpriteDraw(glorb, drawPos + new Vector2(0f, 0f), null, Color.Red with { A = 0 } * 0.2f, projectile.rotation + MathHelper.PiOver2, glorb.Size() / 2f, glorbScale, SpriteEffects.None);
+
+
             //After Image
             for (int i = 0; i < previousPositions.Count - 1; i++)
             {
@@ -138,9 +173,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, col with { A = 0 } * progress * 0.6f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, col with { A = 0 } * progress * 0.75f,
                     previousRotations[i], TexOrigin, size1 * overallScale, SE);
-
             }
 
             //Border
@@ -153,12 +187,37 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //MainTex
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor, projectile.rotation, TexOrigin, projectile.scale * overallScale * pulsePower, SE);
 
+            //Just Stick Overlay
+            if (pulsePower > 1f)
+                Main.EntitySpriteDraw(vanillaTex, drawPos, null, new Color(255, 150, 150) with { A = 0 } * (pulsePower - 1f) * 10f, projectile.rotation, TexOrigin, projectile.scale * overallScale * pulsePower, SE);
+
+
+            //Star overlay (Easingsmaxing)
+            if (projectile.ai[0] != 0f)
+            {
+                Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
+
+                float starPower = Utils.GetLerpValue(55, 90, projectile.ai[1], true);
+                float starAlpha = Easings.easeOutQuart(starPower) * 1f;
+                
+                float spinInBonusRot = MathHelper.Lerp(12f * projectile.direction, 0f, Easings.easeOutCirc(starPower));
+                
+                float starScale = Easings.easeInOutBack(Easings.easeOutCubic(starPower), 0f, 3f) * projectile.scale * overallScale * 0.4f;
+
+                float bonusStarScaleProgress = Utils.GetLerpValue(80, 90, projectile.ai[1], true);
+                starScale += bonusStarScaleProgress * 0.5f;
+
+                Main.EntitySpriteDraw(star, drawPos, null, Color.Red with { A = 0 } * starAlpha, projectile.rotation - spinInBonusRot, star.Size() / 2f, starScale, 0);
+                Main.EntitySpriteDraw(star, drawPos, null, Color.White with { A = 0 } * starAlpha, projectile.rotation - spinInBonusRot, star.Size() / 2f, 0.65f * starScale, 0);
+            }
+
             return false;
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             #region Explosion
+            //Spark Dust
             for (int i = 0; i < 3 + Main.rand.Next(2); i++)
             {
                 Vector2 v = Main.rand.NextVector2CircularEdge(1f, 1f) * 1f;
@@ -170,6 +229,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     sa.velocity.Y *= -1;
             }
 
+            //Smoke Dust
             for (int i = 0; i < 11; i++) //16
             {
                 Color col1 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.25f);
@@ -202,10 +262,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             #endregion
 
+            SoundEngine.PlaySound(SoundID.Item70 with { Pitch = 0.2f, Volume = 0.4f, MaxInstances = -1, PitchVariance = 0.35f }, projectile.Center);
+
+            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/hero_fury_charm_burst") with { Pitch = 0.6f, PitchVariance = 0.3f, MaxInstances = -1, Volume = 0.2f };
+            SoundEngine.PlaySound(style2, projectile.Center);
+
+            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_explosive_trap_explode_1") with { PitchVariance = 0.25f, Pitch = 0.25f, Volume = 0.4f };
+            SoundEngine.PlaySound(style3, projectile.Center);
 
 
             #region vanillaKill
-            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
             for (int num736 = 220; num736 < 10; num736++)
             {
                 int num737 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 31, 0f, 0f, 100, default(Color), 1.3f);
@@ -253,7 +320,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             for (int i = 0; i < 4; i++)
             {
                 Vector2 vel = projectile.oldVelocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.25f) * -Main.rand.NextFloat(1f, 2.5f);
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: Color.Crimson, Scale: Main.rand.NextFloat(0.3f, 0.45f));
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: Color.Crimson, Scale: Main.rand.NextFloat(0.35f, 0.5f));
 
                 dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
                     rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);

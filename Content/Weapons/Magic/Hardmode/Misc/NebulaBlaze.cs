@@ -60,12 +60,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (timer == 0)
             {
                 Dust d2 = Dust.NewDustPerfect(projectile.Center - projectile.velocity * 0.35f, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.55f, newColor: Color.HotPink * 0.6f, Scale: 0.01f);
-                CirclePulseBehavior b2 = new CirclePulseBehavior(0.65f * 1f, false, 3, 0.2f, 0.4f);
+                CirclePulseBehavior b2 = new CirclePulseBehavior(0.65f * 1f, true, 3, 0.2f, 0.4f);
                 b2.drawLayer = "OverPlayers";
                 d2.customData = b2;
 
                 Dust d2A = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), projectile.velocity * 0.7f, newColor: Color.HotPink * 0.7f, Scale: 0.01f);
-                CirclePulseBehavior b2A = new CirclePulseBehavior(0.65f * 1f, false, 2, 0.15f, 0.3f);
+                CirclePulseBehavior b2A = new CirclePulseBehavior(0.65f * 1f, true, 2, 0.15f, 0.3f);
                 b2A.drawLayer = "OverPlayers";
                 d2A.customData = b2A;
             }
@@ -287,10 +287,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail2.gradientTime = (float)Main.timeForVisualEffects * 0.02f;
             trail2.trailTime = (float)Main.timeForVisualEffects * 0.03f;
 
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                trail1.TrailDrawing(Main.spriteBatch);
-                trail2.TrailDrawing(Main.spriteBatch);
+                trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+                trail2.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
             });
 
 
@@ -773,9 +774,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail2.gradientTime = (float)Main.timeForVisualEffects * 0.02f;
             trail2.trailTime = (float)Main.timeForVisualEffects * 0.03f;
 
-            trail1.TrailDrawing(Main.spriteBatch);
-            trail2.TrailDrawing(Main.spriteBatch);
-
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+                trail2.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+            });
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             float drawScale = projectile.scale * overallScale;

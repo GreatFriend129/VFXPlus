@@ -99,7 +99,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             if (!player.channel)
                 Projectile.active = false;
 
-            Projectile.Center = player.MountedCenter + new Vector2(0f, 3f);
+            Projectile.Center = player.MountedCenter + new Vector2(0f, 3f) + new Vector2(300f, 0f);
             Projectile.position.X += player.width / 2 * player.direction;
             Projectile.spriteDirection = player.direction;
 

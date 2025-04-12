@@ -90,9 +90,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawTrail(projectile, true);
+                DrawTrail(projectile, false);
             });
-            DrawTrail(projectile, false);
+            DrawTrail(projectile, true);
 
             //Border
             for (int i = 0; i < 4; i++)
@@ -112,7 +112,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = CommonTextures.Flare.Value;
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            //Texture2D flare = CommonTextures.Flare.Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
@@ -139,7 +140,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
                     float size2 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(1.5f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 150, 150) with { A = 0 } * 0.1f * middleProg,
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 150, 150) with { A = 0 } * 0.17f * middleProg,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
                 }
             }

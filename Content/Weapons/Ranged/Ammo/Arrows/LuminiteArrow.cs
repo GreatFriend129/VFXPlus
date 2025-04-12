@@ -15,6 +15,7 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using static Terraria.ModLoader.PlayerDrawLayer;
 using Terraria.GameContent.Drawing;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -287,8 +288,24 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawAfterImage(projectile, false);
+            });
+            DrawAfterImage(projectile, true);
+
             
-            Texture2D flare = CommonTextures.Flare.Value;
+            return false;
+        }
+
+        public void DrawAfterImage(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            //Texture2D flare = CommonTextures.Flare.Value;
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
             for (int i = 0; i < previousPositions.Count - 1; i++)
             {
@@ -300,19 +317,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 float size1 = 1f * progress * projectile.scale * overallScale;
 
                 Vector2 lineScale = new Vector2(1.15f, 0.55f) * size1;
-
+                Vector2 lineScale2 = new Vector2(1.15f, 0.3f) * size1;
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Main.EntitySpriteDraw(flare, AfterImagePos, null, col with { A = 0 } * progress * 0.5f * overallAlpha,
                     previousVelRots[i], flare.Size() / 2f, lineScale, 0);
 
-                Main.EntitySpriteDraw(flare, AfterImagePos, null, Color.White with { A = 0 } * progress * 0.5f * overallAlpha, 
-                    previousVelRots[i], flare.Size() / 2f, lineScale * 0.5f, 0);
+                Main.EntitySpriteDraw(flare, AfterImagePos, null, Color.White with { A = 0 } * progress * 0.5f * overallAlpha,
+                    previousVelRots[i], flare.Size() / 2f, lineScale2, 0);
             }
-            return false;
-        }
 
+        }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {

@@ -157,6 +157,10 @@ namespace VFXPlus
         [DefaultValue(true)]
         [ReloadRequired]
         public bool StaffOfEarthToggle;
+
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool BetsysWrathToggle;
         #endregion
 
         //-----------------------------------------------------------
@@ -304,6 +308,10 @@ namespace VFXPlus
         [DefaultValue(true)]
         [ReloadRequired]
         public bool ToxicFlaskToggle;
+
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool NightglowToggle;
 
         [DefaultValue(true)]
         [ReloadRequired]

@@ -137,6 +137,8 @@ Projectiles: {
 	IchorHitFlare.DisplayName: Ichor Hit Flare
 	GlacierStormProj.DisplayName: Glacier Storm Proj
 	JackOFace.DisplayName: Jack O Face
+	NightglowPulseVFX.DisplayName: Nightglow Pulse V F X
+	NightglowPulseVFX2.DisplayName: Nightglow Pulse V F X2
 }
 
 Configs: {
@@ -532,6 +534,16 @@ Configs: {
 
 		BeeGunToggle: {
 			Label: Bee Gun Toggle
+			Tooltip: ""
+		}
+
+		BetsysWrathToggle: {
+			Label: Betsys Wrath Toggle
+			Tooltip: ""
+		}
+
+		NightglowToggle: {
+			Label: Nightglow Toggle
 			Tooltip: ""
 		}
 	}

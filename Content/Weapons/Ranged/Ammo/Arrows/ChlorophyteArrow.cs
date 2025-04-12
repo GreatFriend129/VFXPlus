@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using static Terraria.ModLoader.PlayerDrawLayer;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -33,7 +34,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {            
-            int trailCount = 20 + trailOffsetAmount;
+            int trailCount = 40 + trailOffsetAmount;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -42,6 +43,16 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             if (previousPostions.Count > trailCount)
                 previousPostions.RemoveAt(0);
+
+            previousRotations.Add(projectile.rotation);
+            previousPostions.Add(projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPostions.Count > trailCount)
+                previousPostions.RemoveAt(0);
+
 
             if (timer % 4 == 0 && Main.rand.NextBool() && timer > 15)
             {
@@ -125,40 +136,33 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            //After-Image
-            if (previousRotations != null && previousPostions != null)
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                for (int i = 0; i < previousRotations.Count - 1; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                DrawPixelTrail(projectile, false);
+            });
+            DrawPixelTrail(projectile, true);
 
-                    //Start End
-                    Color col = Color.Lerp(Color.ForestGreen, Color.DarkGreen, 1f - Easings.easeInCubic(progress)) * progress;
+            //After-Image
+            for (int i = 0; i < previousRotations.Count - 1; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
 
-                    float size1 = (0.5f + (0.5f * progress)) * projectile.scale;
+                //Start End
+                Color col = Color.Lerp(Color.ForestGreen, Color.DarkGreen, 1f - Easings.easeInCubic(progress)) * Easings.easeInCubic(progress);
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                float size1 = (0.5f + (0.5f * progress)) * projectile.scale;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.35f,
-                        previousRotations[i], TexOrigin, size1 * overallScale, SE);
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    if (i > 1)
-                    {
-                        float middleProg = (float)(i - 1) / previousPostions.Count;
-
-                        float size2 = (0.5f + (0.5f * progress));
-                        Vector2 vec2Scale = new Vector2(3f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, Color.ForestGreen with { A = 0 } * 0.15f * middleProg,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
-                    }
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.White * Easings.easeInQuint(progress) * 0.35f,
+                    previousRotations[i], TexOrigin, size1 * overallScale, SE);
             }
 
             //Border
             for (int i = 0; i < 3; i++)
             {
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
-                    Color.SandyBrown with { A = 0 } * 0.3f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
+                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3f, 3f), sourceRectangle,
+                    Color.LawnGreen with { A = 0 } * 0.8f, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SE);
             }
 
             //MainTex
@@ -166,6 +170,46 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
 
             return false;
+        }
+
+        public void DrawPixelTrail(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
+            Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
+            SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            //After-Image
+            for (int i = 0; i < previousRotations.Count - 2; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                //Start End
+                Color col = Color.Lerp(Color.ForestGreen, Color.DarkGreen, 1f - Easings.easeInCubic(progress)) * progress;
+
+                float size1 = (0.5f + (0.5f * progress)) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+
+                //Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.35f,
+                //    previousRotations[i], TexOrigin, size1 * overallScale, SE);
+
+                if (i > 1)
+                {
+                    float middleProg = (float)(i - 1) / previousPostions.Count;
+
+                    float size2 = (0.5f + (0.5f * progress));
+                    Vector2 vec2Scale = new Vector2(3f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, Color.ForestGreen with { A = 0 } * 0.1f * middleProg,
+                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
+                }
+            }
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

@@ -23,7 +23,7 @@ using VFXPlus.Content.Projectiles;
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
 {
-    public class RocketLauncer : GlobalItem
+    public class RocketLauncherOverride : GlobalItem
     {
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstatiation)

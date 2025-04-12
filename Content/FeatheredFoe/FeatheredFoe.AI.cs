@@ -1071,23 +1071,23 @@ namespace VFXPlus.Content.FeatheredFoe
             //Spawn Line Barriers
             if (timer == 0)
             {
-                int lineTop = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
-                LineBarrierTop = Main.projectile[lineTop];
-                (LineBarrierTop.ModProjectile as LineBarrier).dir = 1;
+                //int lineTop = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
+                //LineBarrierTop = Main.projectile[lineTop];
+                //(LineBarrierTop.ModProjectile as LineBarrier).dir = 1;
 
-                int lineBottom = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
-                LineBarrierBottom = Main.projectile[lineBottom];
-                (LineBarrierBottom.ModProjectile as LineBarrier).dir = -1;
+                //int lineBottom = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
+                //LineBarrierBottom = Main.projectile[lineBottom];
+                //(LineBarrierBottom.ModProjectile as LineBarrier).dir = -1;
             }
 
             if (timer <= timeBeforeSpawnNados)
             {
-                LineBarrierTop.Center = player.Center + new Vector2(0f, -200f);
-                LineBarrierBottom.Center = player.Center + new Vector2(0f, 200f);
+                //LineBarrierTop.Center = player.Center + new Vector2(0f, -200f);
+                //LineBarrierBottom.Center = player.Center + new Vector2(0f, 200f);
 
                 if (timer == timeBeforeSpawnNados)
                 {
-                    (LineBarrierTop.ModProjectile as LineBarrier).startBlocking = true;
+                    //(LineBarrierTop.ModProjectile as LineBarrier).startBlocking = true;
                     (LineBarrierBottom.ModProjectile as LineBarrier).startBlocking = true;
 
                 }
@@ -1095,18 +1095,18 @@ namespace VFXPlus.Content.FeatheredFoe
             }
             else if (timer <= timeBeforeSpawnNados + timeSpawnNados)
             {
-                LineBarrierTop.Center = new Vector2(player.Center.X, LineBarrierTop.Center.Y);
-                LineBarrierBottom.Center = new Vector2(player.Center.X, LineBarrierBottom.Center.Y);
+                //LineBarrierTop.Center = new Vector2(player.Center.X, LineBarrierTop.Center.Y);
+                //LineBarrierBottom.Center = new Vector2(player.Center.X, LineBarrierBottom.Center.Y);
 
 
                 //Spawn tornado
                 if (timer % 120 == 0)
                 {
 
-                    for (int i = -6; i < 6; i++)
+                    for (int i = -5; i < 5; i++)
                     {
 
-                        Vector2 tornadoSpawnPos = new Vector2(player.Center.X, LineBarrierTop.Center.Y + 200f + 30f);
+                        Vector2 tornadoSpawnPos = player.Center;
                         tornadoSpawnPos.Y += i * 90f;
 
                         int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), tornadoSpawnPos, Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);

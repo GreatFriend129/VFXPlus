@@ -375,7 +375,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 Dust d = Dust.NewDustPerfect(effectPos, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 3f) * 2.75f,
                     newColor: col * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
                 d.customData = new MediumSmokeBehavior(Main.rand.Next(15, 25), 0.93f, 0.01f, 0.9f); //12 28
-
             }
 
             for (int i = 0; i < 12 + Main.rand.Next(0, 6); i++)
@@ -391,6 +390,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 dust.scale *= 1.75f;
 
                 dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 1f);
+
+                dust.noLight = false;
             }
 
             for (int i = 0; i < 4 + Main.rand.Next(0, 5); i++)

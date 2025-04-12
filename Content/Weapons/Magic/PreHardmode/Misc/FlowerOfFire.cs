@@ -21,7 +21,6 @@ using System.Reflection.Metadata;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
-    
     public class FlowerOfFireShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;

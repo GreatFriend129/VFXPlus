@@ -37,7 +37,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 19 + trailOffsetAmount;
+            int trailCount = 17 + trailOffsetAmount;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -119,25 +119,31 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
+            //Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            DrawTrail(projectile, false);
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(projectile, false);
+            });
+            DrawTrail(projectile, true);
 
             //Border
             for (int i = 0; i < 4; i++)
             {
-                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle,
-                    Color.White with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
+                Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle,
+                    Color.White with { A = 0 } * 0.5f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SE);
             }
 
             Main.EntitySpriteDraw(orb, drawPos, null, Color.Purple with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
-            //Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.Gold with { A = 0 } * 0.35f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
 
             return false;
         }
+
+        Color betweenPurp = Color.Lerp(Color.Purple, Color.MediumPurple, 0.45f);
 
         public void DrawTrail(Projectile projectile, bool giveUp = false)
         {
@@ -145,27 +151,26 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = CommonTextures.Flare.Value;
-
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
+
+            SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
             Color betweenPurp = Color.Lerp(Color.Purple, Color.MediumPurple, 0.45f);
 
             //After-Image
-            for (int i = 0; i < previousRotations.Count; i++)
+            for (int i = 0; i < previousRotations.Count - 1; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
-                //Start End
-                Color col = Color.Lerp(Color.MediumPurple, Color.Purple, 1f - Easings.easeInSine(progress)) * progress;
-
-                float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
-
                 Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f * overallAlpha,
-                    previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
+                float size1 = 1f * projectile.scale;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.SkyBlue with { A = 0 } * Easings.easeInQuart(progress) * 0.35f,
+                    previousRotations[i], TexOrigin, size1 * overallScale, SE);
 
                 if (i > 1)
                 {
@@ -174,12 +179,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     float size3 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
                     Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenPurp with { A = 0 } * 0.2f * middleProg * overallAlpha,
-                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-
-
-                    Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
-
-                    Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenPurp with { A = 0 } * 0.10f * middleProg * overallAlpha,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }

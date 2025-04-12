@@ -113,7 +113,7 @@ float4 ComboLaser(VertexShaderOutput input) : COLOR0
 	
     float4 combined1 = length(col1 + col2 + col3 + col4) * float4(input_color.rgb * 0.3f, satPower) * input_color.a;
     float4 combined2 = (combined1 * totalMult) + (pow(col1 + col2 + col3 + col4, float4(2, 2, 2, 2))); //2,2,2,2
-    
+        
     return combined2;
 
 }

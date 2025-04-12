@@ -29,6 +29,7 @@ using VFXPlus.Content.Weapons.Ranged.Ammo.Arrows;
 using VFXPlus.Content.VFXTest.Aero;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
+using VFXPlus.Common;
 
 
 namespace VFXPlus.Content
@@ -60,8 +61,40 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-           // int bA2 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ModContent.ProjectileType<LineBarrier>(), 0, 0, player.whoAmI);
-            
+            //int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 1f), ProjectileID.BlackBolt, 10, 0, player.whoAmI);
+
+            Color purple3 = new Color(121, 7, 179);
+            Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.2f);
+
+            for (int i = 0; i < 13; i++)
+            {
+                float prog = (float)i / 13f;
+
+                float proggg = Main.rand.NextFloat();
+                Color col = Color.Lerp(betweenGold with { A = 0 }, Color.Purple * 1.25f, Easings.easeOutQuad(1f - prog));
+
+                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 3f) * 2.5f,
+                    newColor: col * Easings.easeOutCubic(prog), Scale: Main.rand.NextFloat(1.15f, 1.5f) * 1f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(15, 25), 0.93f, 0.01f, 0.9f); //12 28
+
+            }
+
+            for (int i = 0; i < 7 + Main.rand.Next(0, 6); i++)
+            {
+                Color col = Main.rand.NextBool(2) ? Color.Purple * 1f : Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
+
+
+                float velMult = Main.rand.NextFloat(1f, 6f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult);
+                Dust dust = Dust.NewDustPerfect(Main.MouseWorld + randomStart * 5f, ModContent.DustType<PixelGlowOrb>(), randomStart, Alpha: 0,
+                    newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+
+                dust.scale *= 1.75f;
+
+                dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 0.95f);
+            }
+
+            return false;
             
             //return false;
             Vector2 posAA = player.Center + new Vector2(-450f, 600f);
