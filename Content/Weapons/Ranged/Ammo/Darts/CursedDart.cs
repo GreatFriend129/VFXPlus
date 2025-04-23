@@ -287,6 +287,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
         {
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
+            //Star
             if (overallScale < 1f)
             {
                 Texture2D Flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;

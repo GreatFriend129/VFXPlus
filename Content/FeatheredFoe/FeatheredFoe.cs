@@ -88,6 +88,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
+            //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen
+
             CurrentAttack = FeatheredFoeState.Madison;
 
             switch (CurrentAttack)
@@ -138,6 +140,17 @@ namespace VFXPlus.Content.FeatheredFoe
                 drillAlpha = Math.Clamp(MathHelper.Lerp(drillAlpha, 1.35f, 0.04f), 0f, 1f);
             else
                 drillAlpha = Math.Clamp(MathHelper.Lerp(drillAlpha, -1f, 0.09f), 0f, 1f);
+
+            //Basic After-Image
+            int trailCount = 10;
+            previousPositions.Add(NPC.Center);
+            previousRotations.Add(NPC.rotation);
+
+            if (previousPositions.Count > trailCount)
+            {
+                previousPositions.RemoveAt(0);
+                previousRotations.RemoveAt(0);
+            }
 
             timer++;
         }

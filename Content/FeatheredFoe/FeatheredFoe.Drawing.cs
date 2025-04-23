@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
@@ -14,7 +15,11 @@ using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using VFXPlus.Common;
+using VFXPlus.Common.Drawing;
+using static System.Formats.Asn1.AsnWriter;
 using static Terraria.GameContent.Animations.IL_Actions.Sprites;
+using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -30,12 +35,26 @@ namespace VFXPlus.Content.FeatheredFoe
 
         float stretchIntensity = 0f;
         float squashAmount = 0f;
+
+
+        public List<Vector2> dashTrailPositions = new List<Vector2>();
+        public List<float> dashTrailRotations = new List<float>();
+
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public List<float> previousRotations = new List<float>();
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             if (windOverlayOpacity > 0.05f)
                 DrawScrollOverlay();
 
             DrawWindDrill(-1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f) * 0.35f); //33
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderNPCs, () =>
+            {
+                DrawDashAfterImage();
+            });
+
+            DrawBasicAfterImage();
 
             Vector2 drawPos = NPC.Center - Main.screenPosition + (Main.rand.NextVector2Circular(7f, 7f) * randomShakePower);
             Vector2 origin = NPCTexture.Size() / 2;
@@ -212,6 +231,59 @@ namespace VFXPlus.Content.FeatheredFoe
                 );
             }
         }
+
+        public void DrawBasicAfterImage()
+        {
+            Vector2 origin = NPCTexture.Size() / 2;
+
+            //Basic After-Image
+            for (int i = 0; i < previousPositions.Count; i++)
+            {
+                float prog = (float)i / (float)previousPositions.Count;
+
+                Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
+
+                Color col = between with { A = 0 } * Easings.easeInCubic(prog) * 0.15f;
+
+                Main.EntitySpriteDraw(NPCTexture, previousPositions[i] - Main.screenPosition, null, col * overallAlpha, previousRotations[i], origin, NPC.scale * overallScale, SpriteEffects.None);
+            }
+        }
+
+        public void DrawDashAfterImage()
+        {
+            //Flare After-Image
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            for (int i = 0; i < dashTrailPositions.Count; i++)
+            {
+                float progress = (float)i / (float)dashTrailPositions.Count;
+
+                Vector2 offset1 = new Vector2(0f, -35f * progress * overallScale).RotatedBy(dashTrailRotations[i]);
+                Vector2 offset2 = new Vector2(0f, 35f * progress * overallScale).RotatedBy(dashTrailRotations[i]);
+
+                offset1 += Main.rand.NextVector2Circular(15f, 15f);
+                offset2 += Main.rand.NextVector2Circular(15f, 15f);
+
+
+                Vector2 flarePos = dashTrailPositions[i] - Main.screenPosition;
+
+                Color col = Color.Lerp(Color.Blue, Color.DeepSkyBlue, progress) * overallAlpha;
+
+                Vector2 lineScale = new Vector2(1.5f, 1.5f) * progress * overallScale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.45f * progress,
+                    dashTrailRotations[i], line.Size() / 2f, lineScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, flarePos + offset2, null, col with { A = 0 } * 0.45f * progress,
+                    dashTrailRotations[i], line.Size() / 2f, lineScale, SpriteEffects.None);
+
+                Vector2 innerScale = new Vector2(1.5f, 1.5f * 0.1f) * progress * overallScale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, Color.White with { A = 0 } * 0.6f * progress * overallAlpha,
+                    dashTrailRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, flarePos + offset2, null, Color.White with { A = 0 } * 0.6f * progress * overallAlpha,
+                    dashTrailRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+            }
+        }
+
 
         public float NextFloatF(FastRandom random, float min, float max)
         {

@@ -33,10 +33,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         int trailOffsetAmount = Main.rand.Next(-1, 2);
         int dustRandomOffsetTime = 0;
 
+        float randomSineOffset = Main.rand.NextFloat();
+
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 12 + trailOffsetAmount;
+            int trailCount = 11 + trailOffsetAmount;
             previousRotations.Add(projectile.rotation);
             previousPostions.Add(projectile.Center);
 
@@ -53,45 +55,31 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             //Want less dust when the arrow has extra updates (magic quiver)
             int mod = Math.Clamp(2 * EU, 2, 100);
-            int mod3 = Math.Clamp(3 * EU, 2, 100);
-
-            if (timer % mod == 0 && timer > 10)
+            if (timer % mod == 0 && timer > 10 && Main.rand.NextBool())
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.15f;
 
-                Color dustCol = Color.Lerp(Color.SkyBlue, Color.LightSkyBlue, 0.25f);
+                Color dustCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
                 float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 0.75f;
 
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.25f, Scale: dustScale);
+                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.15f, Scale: dustScale);
                 smoke.alpha = 2;
             }
 
-            if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(2) && timer > 5)
+            if (timer % mod == 0 && Main.rand.NextBool())
             {
-                Color dustCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.65f);
-
-                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: dustCol, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 1.25f);
-                Main.dust[d].velocity -= projectile.velocity * 0.25f;
-                Main.dust[d].velocity *= 0.45f;
-                Main.dust[d].customData = new GlowFlareBehavior(0.4f, 2.25f);
+                int num4 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.IceTorch, projectile.velocity.X * -0.55f, projectile.velocity.Y * -0.55f, 150,
+                    default(Color), 1.3f);
+                Main.dust[num4].noGravity = true;
+                Main.dust[num4].velocity.X *= 3f;
+                Main.dust[num4].velocity.Y *= 3f;
+                Main.dust[num4].velocity = (Main.dust[num4].velocity + projectile.velocity) / 2f;
             }
 
-            //Smoke
-            if (timer % mod3 == 0 && timer > 10 && false)
-            {
-                Vector2 vel = Main.rand.NextVector2Circular(1.5f, 1.5f);
-                Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), vel, newColor: col * 1f, Scale: Main.rand.NextFloat(0.25f, 0.5f));
-                d.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.2f);
-                d.velocity += projectile.velocity * 0.2f;
-            }
-
-            float fadeInTime = Math.Clamp((timer + 5f * EU) / 15f * EU, 0f, 1f);
-            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
-
-            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.06f), 0f, 1f);
+            float fadeInTime = Math.Clamp((timer + 3f * EU) / 15f * EU, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
             timer++;
 
@@ -115,9 +103,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawTrail(projectile, true);
+                DrawTrail(projectile, false);
             });
-            DrawTrail(projectile, false);
+            DrawTrail(projectile, true);
 
 
             //Border
@@ -127,7 +115,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     Color.White with { A = 0 } * 0.15f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
             }
 
-            Main.EntitySpriteDraw(orb, drawPos, null, Color.DeepSkyBlue with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.SkyBlue with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.SkyBlue with { A = 0 } * 0.65f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
@@ -141,44 +129,38 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = CommonTextures.Flare.Value;
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
+            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.65f) * overallAlpha;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+
+                //Start End
+                Color col = Color.Lerp(Color.White, betweenBlue, Easings.easeOutQuad(1f - progress)) * progress * overallAlpha;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.35f,
+                    previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
+
+                if (i < previousPostions.Count - 1)
                 {
-                    float progress = (float)i / previousRotations.Count;
+                    float yScaleMult = 1f + (float)Math.Sin((Main.timeForVisualEffects * 0.11f) + randomSineOffset) * 0.25f;
 
-                    //Start End
-                    Color col = Color.Lerp(Color.SkyBlue, Color.DodgerBlue, 1f - Easings.easeInCubic(progress)) * progress;
+                    float middleProg = (float)(i - 1) / previousPostions.Count;
 
-                    float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.2f * overallAlpha,
-                        previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
-
-                    if (i > 1)
-                    {
-                        float middleProg = (float)(i - 1) / previousPostions.Count;
-
-                        float size3 = (0.5f + (0.5f * progress));
-                        Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenBlue with { A = 0 } * 0.3f * middleProg * overallAlpha,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-
-                        Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
-
-                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenBlue with { A = 0 } * 0.15f * middleProg * overallAlpha,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-                    }
+                    float size3 = (0.5f + (0.5f * progress));
+                    Vector2 vec2Scale = new Vector2(3f, 1f * size3 * yScaleMult) * overallScale * projectile.scale * 0.5f;
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, col with { A = 0 } * 0.35f * middleProg,
+                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }
         }
@@ -186,11 +168,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
 
+            Color dustCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
             for (int i = 0; i < 4; i++)
             {
                 float arrowVel = Math.Clamp(projectile.oldVelocity.Length(), 1f, 7f);
                 Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.6f, 0.7f) * 0.8f);
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: dustCol, Scale: Main.rand.NextFloat(0.6f, 0.7f) * 0.8f);
                 dust.velocity += projectile.oldVelocity.SafeNormalize(Vector2.UnitX) * arrowVel * 0.15f;
 
                 dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
@@ -204,12 +187,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             }
 
             return false;
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)

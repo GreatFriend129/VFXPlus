@@ -117,7 +117,7 @@ namespace VFXPlus.Content.Projectiles
 
                 //The chaingun is way too fast to even show a yRecoil, so just have it be off by a random angle instead
                 if (gunID == ItemID.ChainGun)
-                    shotAngle = shotAngle + Main.rand.NextFloat(-0.1f, 0.1f);
+                    shotAngle = shotAngle + Main.rand.NextFloat(-0.13f, 0.13f);
             }
 
             GunDirection = shotAngle.ToRotationVector2();

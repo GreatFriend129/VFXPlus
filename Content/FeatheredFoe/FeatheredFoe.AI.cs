@@ -488,6 +488,33 @@ namespace VFXPlus.Content.FeatheredFoe
                     }
                 }
 
+                //Dash Trail
+                #region DashTrail
+                int trailCount = 30;
+                dashTrailPositions.Add(NPC.Center);
+                dashTrailRotations.Add(offscreenDashDir);
+                if (dashTrailPositions.Count > trailCount)
+                {
+                    dashTrailPositions.RemoveAt(0);
+                    dashTrailRotations.RemoveAt(0);
+                }
+
+                //Calculate next position
+                float dashProgressNext = (float)(timer + 1 - timeBeforeDash) / (float)timeOfDash;
+                float easedProgressNext = Easings.easeInOutHarsh(dashProgressNext);
+
+                Vector2 nextPos = Vector2.Lerp(storedOffscreenDashStartPos, storedOffscreenDashEndPos, easedProgressNext);
+
+                dashTrailPositions.Add(Vector2.Lerp(NPC.Center, nextPos, 0.5f));
+                dashTrailRotations.Add(offscreenDashDir);
+                if (dashTrailPositions.Count > trailCount)
+                {
+                    dashTrailPositions.RemoveAt(0);
+                    dashTrailRotations.RemoveAt(0);
+                }
+                #endregion
+
+
 
                 if (timer >= (0.5f * timeOfDash) + timeBeforeDash)
                     windOverlayOpacityGoal = 0f;
@@ -502,6 +529,9 @@ namespace VFXPlus.Content.FeatheredFoe
                 
                 windOverlayOpacityGoal = 0f;
                 windOverlayOpacity *= 0.8f;
+
+                dashTrailPositions.Clear();
+                dashTrailRotations.Clear();
 
                 //Reset
                 if (timer == timeAfterDash + timeOfDash + timeBeforeDash)
@@ -531,6 +561,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 int timeToStartDive = 95; //85
                 float timeForMovement = 25; //30
 
+                //Pre Dive
                 if (timer < timeToStartDive)
                 {
                     float timeForOffsetShrink = 80;
@@ -540,6 +571,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     BasicMovementVariant3(goalPos + goalOffset, moveSpeed: 4f); //3.5
 
                 }
+                //Dive
                 else if (timer >= timeToStartDive)
                 {
                     Vector2 initialVel = new Vector2(NPC.velocity.X, -20f); //20
@@ -614,11 +646,26 @@ namespace VFXPlus.Content.FeatheredFoe
 
                         player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
                     }
+                    
+                    //DashTrail
+                    if (shouldStartDrill)
+                    {
+                        int trailCount = 20;
+                        dashTrailPositions.Add(NPC.Center);
+                        dashTrailRotations.Add(NPC.velocity.ToRotation());
+
+                        if (dashTrailPositions.Count > trailCount)
+                        {
+                            dashTrailPositions.RemoveAt(0);
+                            dashTrailRotations.RemoveAt(0);
+                        }
+                    }
 
                     doPassiveWindParticles = true;
                     passiveWindParticleDirection = MathHelper.PiOver2;
                 }
 
+                //Reseting
                 if (timer == timeToStartDive + timeForMovement + 30) //35
                 {
                     drawDrill = false;
@@ -626,6 +673,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     doPassiveWindParticles = false;
                     windOverlayOpacityGoal = 0f;
                     timer = -1;
+
+                    dashTrailPositions.Clear();
+                    dashTrailRotations.Clear();
                 }
 
             }
@@ -1055,49 +1105,54 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        Projectile LineBarrierTop = null;
-        Projectile LineBarrierBottom = null;
+
+        bool spawnUp = false;
+        int nadoSpawnCount = 0;
+        Vector2 storedTornadoSpawnPos = Vector2.Zero;
         public void MadisonTornado()
         {
             int timeBeforeSpawnNados = 100;
             int timeSpawnNados = 1000000;
 
+            //How many nados above and below player to spawn
+            int nadoDoubleCount = 4;
+
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
 
             Vector2 goalPos = player.Center + new Vector2(0f, -250);
-            BasicMovementVariant3(goalPos, moveSpeed: hoverSpeed); //3.5
-
-            //Spawn Line Barriers
-            if (timer == 0)
-            {
-                //int lineTop = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
-                //LineBarrierTop = Main.projectile[lineTop];
-                //(LineBarrierTop.ModProjectile as LineBarrier).dir = 1;
-
-                //int lineBottom = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<LineBarrier>(), 0, 0);
-                //LineBarrierBottom = Main.projectile[lineBottom];
-                //(LineBarrierBottom.ModProjectile as LineBarrier).dir = -1;
-            }
+            BasicMovementVariant3(goalPos, moveSpeed: hoverSpeed);
 
             if (timer <= timeBeforeSpawnNados)
             {
-                //LineBarrierTop.Center = player.Center + new Vector2(0f, -200f);
-                //LineBarrierBottom.Center = player.Center + new Vector2(0f, 200f);
-
+                //Store position to spawn tornados from
                 if (timer == timeBeforeSpawnNados)
-                {
-                    //(LineBarrierTop.ModProjectile as LineBarrier).startBlocking = true;
-                    (LineBarrierBottom.ModProjectile as LineBarrier).startBlocking = true;
-
-                }
+                    storedTornadoSpawnPos = player.Center;
 
             }
             else if (timer <= timeBeforeSpawnNados + timeSpawnNados)
             {
-                //LineBarrierTop.Center = new Vector2(player.Center.X, LineBarrierTop.Center.Y);
-                //LineBarrierBottom.Center = new Vector2(player.Center.X, LineBarrierBottom.Center.Y);
+                //Spawn a tornado every 15 frames in a line moving up or down
 
+                float distanceBetweenNados = 90;
+
+                if (timer % 2 == 0 && nadoSpawnCount != 1 + (nadoDoubleCount * 2))
+                {
+                    Vector2 startPos = storedTornadoSpawnPos + new Vector2(0f, -distanceBetweenNados * (spawnUp ? 1f : -1f)) * nadoDoubleCount;
+
+                    float yVal = nadoSpawnCount * distanceBetweenNados * (spawnUp ? 1f : -1f);
+
+                    int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(0f, yVal), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+                    (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
+
+                    nadoSpawnCount++;
+                }
+                
+                if (timer == 150)
+                {
+                    timer = -1;
+                    nadoSpawnCount = 0;
+                }
 
                 //Spawn tornado
                 if (timer % 120 == 0)
@@ -1106,27 +1161,13 @@ namespace VFXPlus.Content.FeatheredFoe
                     for (int i = -5; i < 5; i++)
                     {
 
-                        Vector2 tornadoSpawnPos = player.Center;
-                        tornadoSpawnPos.Y += i * 90f;
+                        //Vector2 tornadoSpawnPos = player.Center;
+                        //tornadoSpawnPos.Y += i * 90f;
 
-                        int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), tornadoSpawnPos, Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-                        (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
-                    }
-
-
-                    for (int i = 111; i < 2; i++)
-                    {
-                        Vector2 tornadoSpawnPos = new Vector2(player.Center.X, LineBarrierTop.Center.Y + 150f);
-                        tornadoSpawnPos.Y += i * 90f;
-
-                        int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), tornadoSpawnPos, Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-                        (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
+                        //int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), tornadoSpawnPos, Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+                        //(Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
                     }
                 }
-
-
-                //float playerY = Math.Clamp(player.Center.Y, LineBarrierTop.Center.Y, LineBarrierBottom.Center.Y);
-                //player.Center = new Vector2(player.Center.X, playerY);
             }
 
         }

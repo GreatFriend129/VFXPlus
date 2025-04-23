@@ -318,7 +318,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Projectile.timeLeft = 100;
 
-            Projectile.velocity = new Vector2(0f, -13f);
+            //Projectile.velocity = new Vector2(0f, -13f);
 
             Projectile.scale = 1.15f;//1.15f;
 

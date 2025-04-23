@@ -139,6 +139,7 @@ Projectiles: {
 	JackOFace.DisplayName: Jack O Face
 	NightglowPulseVFX.DisplayName: Nightglow Pulse V F X
 	NightglowPulseVFX2.DisplayName: Nightglow Pulse V F X2
+	EventideStarVFX.DisplayName: Eventide Star V F X
 }
 
 Configs: {

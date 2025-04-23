@@ -120,7 +120,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
-            //Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -142,8 +141,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             return false;
         }
-
-        Color betweenPurp = Color.Lerp(Color.Purple, Color.MediumPurple, 0.45f);
 
         public void DrawTrail(Projectile projectile, bool giveUp = false)
         {

@@ -202,7 +202,7 @@ namespace VFXPlus.Content.VFXTest
         public void EyeSwordDash(Player player)
         {
             int timeToAim = 60;
-            float dashTime = 40f;
+            float dashTime = 30f; //40f
             float dashDistance = 800f;
 
             if (advancer == 0)

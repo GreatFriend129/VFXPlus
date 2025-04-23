@@ -61,12 +61,14 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 1f), ProjectileID.BlackBolt, 10, 0, player.whoAmI);
+            int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ProjectileID.MolotovFire, 10, 0, player.whoAmI);
+
+            return false;
 
             Color purple3 = new Color(121, 7, 179);
             Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.2f);
 
-            for (int i = 0; i < 13; i++)
+            for (int i = 220; i < 13; i++)
             {
                 float prog = (float)i / 13f;
 
@@ -79,7 +81,7 @@ namespace VFXPlus.Content
 
             }
 
-            for (int i = 0; i < 7 + Main.rand.Next(0, 6); i++)
+            for (int i = 220; i < 7 + Main.rand.Next(0, 6); i++)
             {
                 Color col = Main.rand.NextBool(2) ? Color.Purple * 1f : Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
 
@@ -93,6 +95,37 @@ namespace VFXPlus.Content
 
                 dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 0.95f);
             }
+
+            int[] orbitValues1 = { 25, 100, 175, //20 80 140 | 40 10 160 | 60 120 180
+                                  50,  125, 200,
+                                  75,  150, 225 };
+
+            int[] orbitValues2 = { 30, 86, 142, //20 60 40 | 100 40 100 | 60 80 80
+                                  38,  94, 150,
+                                  46,  102, 158 };
+
+            int[][] orbitValues = { orbitValues1, orbitValues2 };
+
+            int numberOfFeahters = 9;
+            for (int ab = 0; ab < 2; ab++)
+            {
+                for (int index = 1; index <= numberOfFeahters; index++)
+                {
+                    int orbfeather = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<OrbitingFeather>(), damage, 0, Main.myPlayer);
+
+                    if (Main.projectile[orbfeather].ModProjectile is OrbitingFeather of)
+                    {
+                        of.timeToOrbit = 60 + (orbitValues[ab][index - 1] * 1) + (225 * ab);  //60 * index;
+                        of.orbitVector = new Vector2(405f - (85 * ab), 0f).RotatedBy(MathHelper.TwoPi * ((index - 1f) / numberOfFeahters));
+                        of.orbitVal = 300f - (100 * ab);
+                        of.rotSpeed = ab == 0 ? 1.85f : 1.5f;
+                    }
+
+                }
+            }
+
+            int barrier = Projectile.NewProjectile(null, player.Center + new Vector2(0f, -255f), Vector2.Zero, ModContent.ProjectileType<WindBarrier>(), 0, 0, Main.myPlayer);
+            (Main.projectile[barrier].ModProjectile as WindBarrier).center = player.Center;
 
             return false;
             
@@ -110,36 +143,7 @@ namespace VFXPlus.Content
 
             return false;
 
-            int[] orbitValues1 = { 25, 100, 175, //20 80 140 | 40 10 160 | 60 120 180
-                                  50,  125, 200,
-                                  75,  150, 225 };
-
-            int[] orbitValues2 = { 30, 86, 142, //20 60 40 | 100 40 100 | 60 80 80
-                                  38,  94, 150,
-                                  46,  102, 158 };
-
-            int[][] orbitValues = { orbitValues1, orbitValues2 };
-
-            int numberOfFeahters = 9;
-            for (int ab = 220; ab < 2; ab++)
-            {
-                for (int index = 1; index <= numberOfFeahters; index++)
-                {
-                    int orbfeather = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<OrbitingFeather>(), damage, 0, Main.myPlayer);
-
-                    if (Main.projectile[orbfeather].ModProjectile is OrbitingFeather of)
-                    {
-                        of.timeToOrbit = 60 + (orbitValues[ab][index - 1] * 1) + (225 * ab);  //60 * index;
-                        of.orbitVector = new Vector2(405f - (85 * ab), 0f).RotatedBy(MathHelper.TwoPi * ((index - 1f) / numberOfFeahters));
-                        of.orbitVal = 300f - (100 * ab);
-                        of.rotSpeed = ab == 0 ? 1.85f : 1.5f;
-                    }
-
-                }
-            }
-
-            //int barrier = Projectile.NewProjectile(null, player.Center + new Vector2(0f, -255f), Vector2.Zero, ModContent.ProjectileType<WindBarrier>(), 0, 0, Main.myPlayer);
-            //(Main.projectile[barrier].ModProjectile as WindBarrier).center = player.Center;
+            
             //
 
             for (int i = 220; i < 22 + Main.rand.Next(0, 2); i++) //4 //2,2

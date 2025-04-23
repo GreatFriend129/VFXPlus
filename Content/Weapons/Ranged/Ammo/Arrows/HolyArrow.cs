@@ -15,6 +15,7 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using static Terraria.ModLoader.PlayerDrawLayer;
 using Terraria.GameContent.Drawing;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -110,6 +111,29 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
+            Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
+            SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(projectile, true);
+            });
+            DrawTrail(projectile, false);
+
+            //MainTex
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
+            return false;
+        }
+
+        public void DrawTrail(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Texture2D flare = CommonTextures.Flare.Value;
             Texture2D orb = CommonTextures.feather_circle128PMA.Value;
 
@@ -147,17 +171,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                         Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
 
-                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, Color.HotPink with { A = 0 } * 0.1f * middleProg, 
+                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, Color.HotPink with { A = 0 } * 0.1f * middleProg,
                             previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
                     }
                 }
             }
 
             Main.EntitySpriteDraw(orb, drawPos, null, Color.HotPink with { A = 0 } * 0.15f, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.6f) * overallScale, SE);
-
-            //MainTex
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
-            return false;
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -326,6 +346,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
             if (previousPostions.Count > 0)
                 DrawProjWithStarryTrail(projectile, lightColor, 0f);
+
             return false;
         }
 

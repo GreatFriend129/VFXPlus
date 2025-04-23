@@ -47,7 +47,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     AnimTime: 10,
                     NormalXOffset: 20f,
                     DestXOffset: 17f,
-                    YRecoilAmount: 1f, //Literally too fast to even have a recoil LMAO
+                    YRecoilAmount: 0f, //Literally too fast to even have a recoil LMAO
                     HoldOffset: new Vector2(0f, -2f),
                     TipPos: new Vector2(36f, -1f),
                     StarPos: new Vector2(33f, -1f)
