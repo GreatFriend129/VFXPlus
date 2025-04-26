@@ -53,25 +53,26 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             int EU = 1 + projectile.extraUpdates;
 
             //Want less dust when the arrow has extra updates (magic quiver)
-            int mod = Math.Clamp(2 * EU, 2, 100);
+            int mod = Math.Clamp(3 * EU, 3, 100);
 
-            if (timer % mod == 0 && timer > 10 && false)
+            if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(2) && timer > 5)
             {
-                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.15f;
+                Color dustCol = Color.Lerp(Color.Purple, Color.MediumPurple, 0.5f);
 
-                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 0.7f;
-
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: Color.Goldenrod * 0.35f, Scale: dustScale);
-                smoke.alpha = 2;
-            }
-
-            if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(2) && timer > 5 && false)
-            {
-                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: Color.Orange, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 1.25f);
+                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: Color.Orange * 0.5f, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 1f);
                 Main.dust[d].velocity -= projectile.velocity * 0.25f;
                 Main.dust[d].velocity *= 0.45f;
                 Main.dust[d].customData = new GlowFlareBehavior(0.4f, 2f);
+            }
+
+            if (timer % 2 == 0 && Main.rand.NextBool())
+            {
+                int num207 = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.Ichor, 0f, 0f, 255);
+                Main.dust[num207].scale = (float)Main.rand.Next(3, 9) * 0.1f;
+                Main.dust[num207].noGravity = true;
+                Main.dust[num207].fadeIn = 0.5f;
+                Main.dust[num207].velocity *= 0.35f;
+                Main.dust[num207].velocity = projectile.velocity * 0.25f;
             }
 
 
@@ -106,7 +107,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             for (int i = 0; i < 4; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle,
-                    Color.White with { A = 0 } * 0.25f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SE);
+                    Color.Orange with { A = 0 } * 0.2f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SE);
             }
 
             Main.EntitySpriteDraw(orb, drawPos, null, Color.Orange with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
@@ -141,8 +142,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                 float size1 = 1f * projectile.scale;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, betweenYellow with { A = 0 } * Easings.easeInQuart(progress) * 0.35f,
+                Color grad = Color.Lerp(Color.LightGoldenrodYellow, betweenYellow, Easings.easeOutQuart(1f - progress));
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.Orange with { A = 0 } * Easings.easeInQuart(progress) * 0.25f,
                     previousRotations[i], TexOrigin, size1 * overallScale, SE);
+
 
                 if (i > 1)
                 {
@@ -150,7 +154,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                     float size3 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenYellow with { A = 0 } * 0.1f * middleProg * overallAlpha,
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, grad with { A = 0 } * 0.1f * middleProg * overallAlpha,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }

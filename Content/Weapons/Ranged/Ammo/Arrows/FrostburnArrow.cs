@@ -135,7 +135,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.65f) * overallAlpha;
+            Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.8f) * overallAlpha; //0.65
 
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)

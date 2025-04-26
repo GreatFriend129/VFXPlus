@@ -95,7 +95,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
             if (timer == 0)
                 SoundEngine.PlaySound(SoundID.DD2_PhantomPhoenixShot with { MaxInstances = -1 }, projectile.Center);
 
-            float fadeInTime = Math.Clamp((timer + 18f) / 45f, 0f, 1f);
+            float fadeInTime = Math.Clamp((timer + 9f) / 25f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
 
             timer++;
@@ -250,10 +250,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
             }
 
             //Border
-            for (int i = 0; i < 4; i++)
+            for (int i = 220; i < 4; i++)
             {
                 Vector2 offsetPos = drawPos + Main.rand.NextVector2Circular(2f, 2f);
                 Main.EntitySpriteDraw(vanillaTex, offsetPos, sourceRectangle, Color.Orange with { A = 0 } * 0.5f, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SE);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 offset = Main.rand.NextVector2Circular(2f, 2f);
+                Main.EntitySpriteDraw(vanillaTex, offset + drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)i) * 2f, sourceRectangle, Color.White with { A = 0 } * 2f, rot, TexOrigin,
+                    projectile.scale * overallScale, SE);
+
             }
 
             //MainTex
@@ -290,7 +298,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
                 Vector2 flarePos = previousPositions[i] - Main.screenPosition;
 
-                Color col = Color.Lerp(Color.OrangeRed, Color.Orange, progress) * overallAlpha;
+                Color col = Color.Lerp(Color.OrangeRed, Color.Orange, Easings.easeOutCubic(progress)) * overallAlpha;
 
                 Vector2 lineScale = new Vector2(1f, 1f) * progress * overallScale;
                 Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.45f * progress,

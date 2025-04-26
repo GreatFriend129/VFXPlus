@@ -66,6 +66,12 @@ namespace VFXPlus.Common
             }
             protected override void Draw(ref PlayerDrawSet drawInfo)
             {
+                if (drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().bowType == ItemID.PulseBow)
+                {
+                    DrawPulseBowArrow(drawInfo);
+                    return;
+                }
+
                 int dir = drawInfo.drawPlayer.direction;
 
                 float rot = drawInfo.drawPlayer.itemRotation + MathHelper.PiOver2 * dir;
@@ -105,6 +111,39 @@ namespace VFXPlus.Common
                 drawInfo.DrawDataCache.Add(new DrawData(arrow, drawPos + off, null, Color.White * alpha, rot, arrow.Size() / 2f, scale, SpriteEffects.None, 0));
 
             }
+
+            public void DrawPulseBowArrow(PlayerDrawSet drawInfo)
+            {
+                int dir = drawInfo.drawPlayer.direction;
+
+                float rot = drawInfo.drawPlayer.itemRotation;// + MathHelper.PiOver2 * dir;
+
+                //HoldoutOffset
+                float xOff = drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().holdOffset.X;
+                float yOff = drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().holdOffset.Y;
+                Vector2 off = new Vector2(xOff * dir, yOff);
+
+                //AlphaScale
+                float prog = Math.Clamp(drawInfo.drawPlayer.itemTime / (float)drawInfo.drawPlayer.itemTimeMax, 0f, 1f);
+                float alpha = Easings.easeInOutQuad(1f - prog);
+                Vector2 scale = new Vector2(1f, 0.35f + (0.65f * alpha));
+
+                //Arrow Pos
+                float arrowProg = 1f - Easings.easeInQuad(1f - prog);
+
+                float arrowOff = drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().arrowOffset;
+                float arrowPull = drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().arrowPullAmount;
+
+                Vector2 drawPos = drawInfo.drawPlayer.MountedCenter - Main.screenPosition + new Vector2(arrowOff - (arrowPull * arrowProg), 0f).RotatedBy(rot);
+                drawPos.Y += drawInfo.drawPlayer.gfxOffY;
+
+                //Arrow Texture
+                Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.DeepSkyBlue with { A = 0 } * alpha, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0));
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.White with { A = 0 } * alpha, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0)); 
+            }
+
         }
     }
 }

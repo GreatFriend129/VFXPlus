@@ -61,7 +61,7 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ProjectileID.MolotovFire, 10, 0, player.whoAmI);
+            int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ModContent.ProjectileType<LucentBeamTest>(), 10, 0, player.whoAmI);
 
             return false;
 

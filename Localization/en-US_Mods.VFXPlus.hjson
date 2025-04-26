@@ -58,6 +58,11 @@ Items: {
 		DisplayName: Storm Razor
 		Tooltip: ""
 	}
+
+	LuncentBeam: {
+		DisplayName: Luncent Beam
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -140,6 +145,8 @@ Projectiles: {
 	NightglowPulseVFX.DisplayName: Nightglow Pulse V F X
 	NightglowPulseVFX2.DisplayName: Nightglow Pulse V F X2
 	EventideStarVFX.DisplayName: Eventide Star V F X
+	LucentBeamHeldProj.DisplayName: Lucent Beam Held Proj
+	LucentBeamTest.DisplayName: Lucent Beam Test
 }
 
 Configs: {
