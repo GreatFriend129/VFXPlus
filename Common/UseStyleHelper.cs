@@ -116,7 +116,7 @@ namespace VFXPlus.Common
             {
                 int dir = drawInfo.drawPlayer.direction;
 
-                float rot = drawInfo.drawPlayer.itemRotation;// + MathHelper.PiOver2 * dir;
+                float rot = drawInfo.drawPlayer.itemRotation + (dir == 1 ? MathHelper.Pi : 0);// + MathHelper.PiOver2 * dir;
 
                 //HoldoutOffset
                 float xOff = drawInfo.drawPlayer.GetModPlayer<HeldBowPlayer>().holdOffset.X;
@@ -126,7 +126,7 @@ namespace VFXPlus.Common
                 //AlphaScale
                 float prog = Math.Clamp(drawInfo.drawPlayer.itemTime / (float)drawInfo.drawPlayer.itemTimeMax, 0f, 1f);
                 float alpha = Easings.easeInOutQuad(1f - prog);
-                Vector2 scale = new Vector2(1f, 0.35f + (0.65f * alpha));
+                Vector2 scale = new Vector2(0.7f, 0.25f + (0.65f * alpha));
 
                 //Arrow Pos
                 float arrowProg = 1f - Easings.easeInQuad(1f - prog);
@@ -138,10 +138,12 @@ namespace VFXPlus.Common
                 drawPos.Y += drawInfo.drawPlayer.gfxOffY;
 
                 //Arrow Texture
-                Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+                Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
-                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.DeepSkyBlue with { A = 0 } * alpha, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0));
-                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.White with { A = 0 } * alpha, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0)); 
+                Color col = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.35f);
+
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, col with { A = 0 } * alpha * 0.85f, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0));
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.White with { A = 0 } * alpha, rot, flare.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0)); 
             }
 
         }
