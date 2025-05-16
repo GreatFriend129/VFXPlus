@@ -168,7 +168,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1.5f, 3.5f) * 1f,
                     newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(7, 21), 0.98f, 0.01f, 1f); //12 28
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(11, 25), 0.95f, 0.01f, 1f); //7 21
 
                 d.rotation = Main.rand.NextFloat(6.28f);
             }

@@ -184,7 +184,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (projectile.ai[1] == -1)
                 return false;
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //GF
             float rot = projectile.velocity.ToRotation();
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
@@ -219,41 +219,38 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 }, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.75f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 }, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.75f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 }, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.75f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 }, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 }, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 }, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
 
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //Flare
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count - 2; i++)
             {
-                for (int i = 0; i < previousRotations.Count - 2; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Aqua, Color.DeepSkyBlue * 1f, progress) * 1f;// * Easings.easeInQuad(progress);
+                Color col = Color.Lerp(Color.Aqua, Color.DeepSkyBlue * 1f, progress) * 1f;// * Easings.easeInQuad(progress);
 
-                    //DodgerBlue or Blue
+                //DodgerBlue or Blue
 
-                    Vector2 lineScale = new Vector2(1f, 0.3f * progress * drawScale) * progress;
+                Vector2 lineScale = new Vector2(1f, 0.3f * progress * drawScale) * progress;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Vector2 offset = Main.rand.NextVector2Circular(5f, 8f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 offset = Main.rand.NextVector2Circular(5f, 8f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
 
-                    Vector2 innerScale = new Vector2(1f, 0.15f * progress * drawScale) * progress;
+                Vector2 innerScale = new Vector2(1f, 0.15f * progress * drawScale) * progress;
 
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset, null, col with { A = 0 } * 0.85f * progress * 1f,
-                        previousRotations[i], line.Size() / 2f, lineScale * 1.25f * 1.5f, SpriteEffects.None);
+                Main.EntitySpriteDraw(line, AfterImagePos + offset, null, col with { A = 0 } * 0.85f * progress * 1f,
+                    previousRotations[i], line.Size() / 2f, lineScale * 1.25f * 1.5f, SpriteEffects.None);
 
 
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset, null, Color.White with { A = 0 } * 0.85f * progress * 1f,
-                        previousRotations[i], line.Size() / 2f, innerScale * 1.5f, SpriteEffects.None);
+                Main.EntitySpriteDraw(line, AfterImagePos + offset, null, Color.White with { A = 0 } * 0.85f * progress * 1f,
+                    previousRotations[i], line.Size() / 2f, innerScale * 1.5f, SpriteEffects.None);
 
 
-                }
             }
 
         }
@@ -366,7 +363,35 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         float alpha = 1f;
         float scale = 0f;
         public override bool PreDraw(ref Color lightColor)
-        {            
+        {
+            Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/NewLunarExplodeMain").Value;
+            Texture2D ExploB = Mod.Assets.Request<Texture2D>("Assets/Anim/GrayscaleVanillaExplode").Value;
+            Texture2D ExploC = Mod.Assets.Request<Texture2D>("Assets/Anim/NewLunarExplodeGlowmask").Value;
+            //Texture2D ExploD = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion").Value;
+
+            int frameHeight = ExploA.Height / Main.projFrames[Projectile.type];
+            int startY = frameHeight * Projectile.frame;
+
+            Rectangle sourceRectangle = new Rectangle(0, startY, ExploA.Width, frameHeight);
+            Vector2 origin = sourceRectangle.Size() / 2f;
+
+
+            float scale12 = Projectile.scale * scale;
+
+            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * scale * Projectile.scale, 0, 0f);
+
+
+            Main.spriteBatch.Draw(ExploB, Projectile.Center - Main.screenPosition, sourceRectangle, Color.DodgerBlue * 0.65f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } * 0.65f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.Draw(ExploC, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } , Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
+
+
+            return false;
+        }
+
+        public void oldShit()
+        {
             Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion2").Value;
             Texture2D ExploB = Mod.Assets.Request<Texture2D>("Assets/Anim/GrayscaleVanillaExplode").Value;
             Texture2D ExploC = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion2Glowmask").Value;
@@ -389,7 +414,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Main.spriteBatch.Draw(ExploC, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 }, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
 
-            return false;
+            return;
         }
     }
 

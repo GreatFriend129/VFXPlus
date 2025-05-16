@@ -566,4 +566,7 @@ Configs: {
 	}
 }
 
-NPCs.FeatheredFoe.DisplayName: Feathered Foe
+NPCs: {
+	FeatheredFoe.DisplayName: Feathered Foe
+	ReduxQueenBee.DisplayName: Redux Queen Bee
+}
