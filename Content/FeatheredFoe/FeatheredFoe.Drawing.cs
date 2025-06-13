@@ -67,8 +67,6 @@ namespace VFXPlus.Content.FeatheredFoe
                 Main.EntitySpriteDraw(BorderTexture, drawPos + Main.rand.NextVector2Circular(3f, 3f), null, col with { A = 0 } * overallAlpha, NPC.rotation, origin, NPC.scale * overallScale, SpriteEffects.None);
             }
 
-            //Utils.DrawBorderString(Main.spriteBatch, "" + windOverlayOpacity, drawPos, Color.Black);
-
             DrawTriStar();
 
             DrawWindDrill(1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f) * 1f); //0.7f

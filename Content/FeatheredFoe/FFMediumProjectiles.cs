@@ -34,7 +34,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.tileCollide = false;
 
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 500;
+            Projectile.timeLeft = 250;
 
         }
 
@@ -49,6 +49,14 @@ namespace VFXPlus.Content.FeatheredFoe
         int timer = 0;
         public int advancer = 0;
         public int startDir = 1;
+
+
+        //Max vel after we start accelerating
+        public float postAccelMaxVel = 28;
+
+        //Max vel before we start accelerating
+        public float maxVel = 18f;
+        public int timeForVelShift = 60;
 
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
@@ -75,30 +83,44 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
             //Movement
-            Vector2 initialVel = new Vector2(15f * startDir, 0f);
-            Vector2 goalVel = new Vector2(-15f * startDir, 0f);
-            if (Projectile.velocity.Length() <= 25)
+            Vector2 initialVel = new Vector2((maxVel * 1.25f) * startDir, 0f);
+            Vector2 goalVel = new Vector2(-maxVel * startDir, 0f);
+            float timeForMovement = timeForVelShift;
+            float timeProgress = Math.Clamp((float)timer / timeForMovement, 0f, 1f);
+            Projectile.velocity = Vector2.Lerp(initialVel, goalVel, timeProgress);
+
+            if (timer > timeForVelShift * 1.05f)
             {
-                float timeForMovement = 100;
-                float timeProgress = Math.Clamp((float)timer / timeForMovement, 0f, 1f);
-                Projectile.velocity = Vector2.Lerp(initialVel, goalVel, timeProgress);
+                maxVel = Math.Clamp(maxVel * 1.005f, 0f, postAccelMaxVel);
             }
 
-            //Dust
-            if (timer % 3 == 0)
+            //Dust--
+            //Vanilla weather pain dust
+            if (timer % 3 == 0 && Main.rand.NextBool())
             {
-                int num6 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 120, default(Color), 0.5f);
+                int num6 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 120, default(Color), 0.35f);
                 Main.dust[num6].noGravity = true;
-                Main.dust[num6].fadeIn = 0.9f;
+                Main.dust[num6].fadeIn = 0.45f;
                 Main.dust[num6].velocity = Main.rand.NextVector2Circular(2f, 2f) + new Vector2(0f, -2f) + Projectile.velocity * 0.75f;
-                for (int j = 0; j < 2; j++)
+                for (int j = 0; j < 1; j++)
                 {
-                    Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 60, default(Color), 0.5f);
+                    Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 60, default(Color), 0.35f);
                     dust.noGravity = true;
-                    dust.fadeIn = 0.7f;
+                    dust.fadeIn = 0.35f;
                     dust.velocity = Main.rand.NextVector2Circular(2f, 2f) * 0.2f + new Vector2(0f, -0.4f) + Projectile.velocity * 1.5f;
                     dust.position -= Projectile.velocity * 3f;
                 }
+            }
+
+            if (timer % 2 == 0)
+            {
+                Vector2 dustPos = Projectile.Center + Main.rand.NextVector2Circular(30f, 30f);
+                Vector2 dustVel = Main.rand.NextVector2Circular(3f, 3f) - Projectile.velocity * 0.5f;
+
+                float dustScale = Main.rand.NextFloat(0.5f, 1f);
+
+                Dust wind = Dust.NewDustPerfect(dustPos, 176, dustVel * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 0.5f, Scale: dustScale); //dust176
+                wind.noGravity = true;
             }
 
             //Anim
@@ -109,7 +131,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
             }
 
-            Projectile.rotation = 0f + Projectile.velocity.X * 0.03f;
+            Projectile.rotation = 0f + Projectile.velocity.X * 0.02f;
 
 
             #region vanillaWeatherPainStuff
@@ -159,9 +181,10 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override bool PreDraw(ref Color lightColor)
         {
-            DrawWindVortex(-1, Color.LightSkyBlue * 0.33f);
+            //DrawWindDrill(-1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f) * 0.35f, 20);
 
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FFTornado").Value;
+            Texture2D Bloom = CommonTextures.feather_circle128PMA.Value;
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = Tex.Frame(1, Main.projFrames[Projectile.type], frameY: Projectile.frame);
@@ -169,24 +192,19 @@ namespace VFXPlus.Content.FeatheredFoe
             SpriteEffects se = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.SkyBlue, Color.SkyBlue * 0.5f, progress) * progress * progress * alpha;
+                Color col = Color.Lerp(Color.DodgerBlue, Color.SkyBlue, progress) * progress * progress * alpha;
 
-                    float size2 = (0.5f + (progress * 0.75f)) * Projectile.scale * scale;
+                float size2 = (0.5f + (progress * 0.75f)) * Projectile.scale * scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(Tex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.25f,
-                            previousRotations[i], TexOrigin, size2, se);
-                }
-
+                Main.EntitySpriteDraw(Tex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
+                        previousRotations[i], TexOrigin, size2, se);
             }
-
             //Border
             for (int i = 0; i < 4; i++)
             {
@@ -194,86 +212,96 @@ namespace VFXPlus.Content.FeatheredFoe
                     Color.LightSkyBlue with { A = 0 } * 0.35f * alpha, Projectile.rotation, TexOrigin, Projectile.scale * 1.07f * scale, se);
             }
 
+            //Bloom
+            Vector2 bloomScale = new Vector2(0.7f, 0.9f);
+            Main.EntitySpriteDraw(Bloom, drawPos, null, Color.DeepSkyBlue with { A = 0 } * alpha * 0.25f, Projectile.rotation, Bloom.Size() / 2f, bloomScale * Projectile.scale * scale, se);
+            Main.EntitySpriteDraw(Bloom, drawPos, null, Color.SkyBlue with { A = 0 } * alpha * 0.15f, Projectile.rotation, Bloom.Size() / 2f, bloomScale * Projectile.scale * scale * 0.8f, se);
+
+
             Main.EntitySpriteDraw(Tex, drawPos, sourceRectangle, lightColor * alpha, Projectile.rotation, TexOrigin, Projectile.scale * scale, se);
 
 
-            DrawWindVortex(1, Color.LightSkyBlue * 0.7f);
+            //DrawWindDrill(1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f) * 0.75f, 20); //0.7f
+
             return false;
         }
 
-        public void DrawWindVortex(int yDir, Color color)
-        {            
-            FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
+        public void DrawWindDrill(int yDir, Color color, int particleCount)
+        {
+            float drillRotation = Projectile.rotation;
+
+            FastRandom r = new("PENIS".GetHashCode());
 
             float speedTime = Main.GlobalTimeWrappedHourly * 1.25f;
 
-            var windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
+            var windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Nightglow").Value;
             var dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
+            //Todo swap name
+            float ringMinLength = 45f;
+            float ringMaxLength = 15f; 
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < particleCount; i++) //160
             {
                 Texture2D texture;
                 Rectangle frame;
                 Vector2 scale;
-                float rotation = MathHelper.PiOver2;
+                float rotation = drillRotation + MathHelper.PiOver2;
                 if (r.NextFloat() < 0.1f)
                 {
                     texture = windTexture;
                     frame = texture.Bounds;
-                    scale = new(0.3f, 0.66f); //0.3 0.66
+                    scale = new(0.11f * 2f, 0.25f * 2f); //0.3 0.66
                 }
                 else
                 {
                     texture = dustTexture;
                     frame = texture.Frame(verticalFrames: 3, frameY: r.Next(3));
-                    scale = new(1f, 1f);
-                    rotation += speedTime * NextFloatF(r, 0.8f, 1.2f);
+                    scale = new(0.45f, 0.45f);
+                    rotation += speedTime * GeneralUtilities.NextFloatF(r, 0.8f, 1.2f);
                 }
                 var origin = frame.Size() / 2f;
-                float speed = NextFloatF(r, 0.8f, 4f);
-                //float progress = (speedTime * speed + NextFloatF(r, 0f, 1f)) % 3f;
+                float speed = GeneralUtilities.NextFloatF(r, 0.8f, 4f);
+
                 float progress = (speedTime * speed + r.NextFloat()) % 3f;
 
                 float scaleWave = MathF.Sin(progress * MathHelper.Pi);
-                float waveDistance = NextFloatF(r, 40f, 70f); //40 120 overall distance of the ring
+                float waveDistance = GeneralUtilities.NextFloatF(r, ringMinLength, ringMaxLength) + 10f; 
 
-                //float yWave = Helper.Wave(Main.GlobalTimeWrappedHourly * 2f, 0.5f, 1.5f);
                 float time = speedTime * 2f;
-                float min = 0.75f;
-                float max = 1.25f;
+                float min = 1f; //Controls how much the ring sways 
+                float max = 1f; //^
 
                 float yWave = min + ((float)Math.Sin(time) + 1f) / 2f * (max - min);
 
-                float yOffset = scaleWave * waveDistance * 0.3f * yWave; //0.3
+                float yOffset = scaleWave * waveDistance * 0.15f * yWave; //0.3 --> How wide is the gap of the ring ()
                 float xWave = MathF.Sin(progress * MathHelper.Pi - MathHelper.PiOver2) * yDir;
-                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir).RotatedBy(Projectile.rotation); //-20 14 | -120
+
+                Vector2 posOffset = new Vector2(0f, 20f).RotatedBy(drillRotation);
+
+                var drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, GeneralUtilities.NextFloatF(r, -60f, 15f) + yOffset * yDir).RotatedBy(drillRotation) + posOffset;
+
+                //Makes the rings closer to tip smaller
+                float ringDistProg = 1f - Utils.GetLerpValue(ringMinLength, ringMaxLength, waveDistance, true);
+                float adjustedScale = 0.9f + (0.45f * ringDistProg);
+
+                Main.spriteBatch.Draw(texture, (drawPosition - Main.screenPosition).Floor(), frame, Color.Black * 0.25f, rotation - xWave / 3f * yWave * yDir, origin,
+                    new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 2.25f, SpriteEffects.None, 0f);
 
                 Main.spriteBatch.Draw(
                     texture,
                     (drawPosition - Main.screenPosition).Floor(),
                     frame,
-                    color * alpha,
+                    color with { A = 0 } * alpha * 3f,
                     rotation - xWave / 3f * yWave * yDir,
                     origin,
-                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 2f,
+                    new Vector2(scale.X * scaleWave * scaleWave * adjustedScale, scale.Y * scaleWave * adjustedScale) * 2.25f,
                     SpriteEffects.None,
                     0f
                 );
             }
-
         }
 
-        public float NextFloatF(FastRandom random, float min, float max)
-        {
-            return min + random.NextFloat() * (max - min);
-        }
-
-        public override void OnKill(int timeLeft)
-        {
-
-            base.OnKill(timeLeft);
-        }
     }
 
     public class TornadoTest : ModProjectile
@@ -602,7 +630,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.06f; //0.04
+                        bof.orbitSpeed = 0.02f; //0.04
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
                         bof.orbitDistance = 230f; //270
                         bof.orbitDir = startDir;
@@ -650,6 +678,8 @@ namespace VFXPlus.Content.FeatheredFoe
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
                 GoddamnMonsoonCirc(50); //460 | 50 | 10
+
+                DrawVanillaSwirl2(true);
             });
 
             DrawVanillaSwirl2(false);

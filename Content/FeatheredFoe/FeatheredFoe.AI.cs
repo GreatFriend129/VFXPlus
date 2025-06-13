@@ -1106,16 +1106,17 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
 
+        int madisonSide = 1;
         bool spawnUp = false;
         int nadoSpawnCount = 0;
         Vector2 storedTornadoSpawnPos = Vector2.Zero;
         public void MadisonTornado()
         {
-            int timeBeforeSpawnNados = 100;
+            int timeBeforeSpawnNados = 45; //100
             int timeSpawnNados = 1000000;
 
             //How many nados above and below player to spawn
-            int nadoDoubleCount = 4;
+            int nadoDoubleCount = 8; //4
 
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
@@ -1136,39 +1137,66 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 float distanceBetweenNados = 90;
 
-                if (timer % 2 == 0 && nadoSpawnCount != 1 + (nadoDoubleCount * 2))
+                if (timer == timeBeforeSpawnNados + 1)
                 {
-                    Vector2 startPos = storedTornadoSpawnPos + new Vector2(0f, -distanceBetweenNados * (spawnUp ? 1f : -1f)) * nadoDoubleCount;
+                    int vfx = Projectile.NewProjectile(null, storedTornadoSpawnPos, new Vector2(0f, 0f), ModContent.ProjectileType<MadisonVFXOld>(), 0, 0, player.whoAmI);
 
-                    float yVal = nadoSpawnCount * distanceBetweenNados * (spawnUp ? 1f : -1f);
+                    int pulse = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                    (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 30;
+                    (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.1f;
+                    Main.projectile[pulse].scale = 6f;
 
-                    int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(0f, yVal), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-                    (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
+                    for (int i = 0; i < 1 + (nadoDoubleCount * 2); i++)
+                    {
+                        int randir = madisonSide;// Main.rand.NextBool() ? 1 : -1;
+                        
+                        //if (i % 2 == 0)
+                            madisonSide *= -1;
 
-                    nadoSpawnCount++;
+                        Vector2 startPos = storedTornadoSpawnPos + new Vector2(0f, -distanceBetweenNados * (spawnUp ? 1f : -1f)) * nadoDoubleCount;
+
+                        float yVal = nadoSpawnCount * distanceBetweenNados * (spawnUp ? 1f : -1f);
+
+                        int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(100f * randir, yVal), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+                        (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = randir;
+
+                        nadoSpawnCount++;
+                    }
+
+                    //Sound
+                    SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = .03f, Pitch = 0.7f, PitchVariance = 0.15f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(style, player.Center);
+
+                    SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_66") with { Pitch = .60f, MaxInstances = -1, Volume = 0.35f, PitchVariance = 0.3f };
+                    SoundEngine.PlaySound(style2, player.Center);
+
+                    SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.1f, Pitch = 1f, PitchVariance = 0.05f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(style3, player.Center);
+
+                    SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_68") with { Volume = 0.2f, Pitch = -.05f, PitchVariance = .15f, MaxInstances = -1 };
+                    SoundEngine.PlaySound(style4, player.Center);
                 }
-                
-                if (timer == 150)
+
+                if (timer == timeBeforeSpawnNados + 50)
                 {
                     timer = -1;
                     nadoSpawnCount = 0;
                 }
-
-                //Spawn tornado
-                if (timer % 120 == 0)
-                {
-
-                    for (int i = -5; i < 5; i++)
-                    {
-
-                        //Vector2 tornadoSpawnPos = player.Center;
-                        //tornadoSpawnPos.Y += i * 90f;
-
-                        //int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), tornadoSpawnPos, Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
-                        //(Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
-                    }
-                }
             }
+
+        }
+
+        public void Maelstrom()
+        {
+            NPC.velocity = Vector2.Zero;
+
+            if (timer == 0)
+            {
+                int swirl = Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<FFMaelstrom>(), 0, 0, Main.myPlayer);
+                //(Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
+            }
+
+            
 
         }
 

@@ -21,38 +21,32 @@
           "Microsoft.Build.Locator": "1.0.0.0",
           "Microsoft.Build.Tasks.Core": "15.1.0.0",
           "Microsoft.Build.Utilities.Core": "15.1.0.0",
-          "Microsoft.CodeAnalysis.CSharp": "4.9.0.0",
-          "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.9.0.0",
-          "Microsoft.CodeAnalysis": "4.9.0.0",
-          "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler": "4.9.0.0",
+          "Microsoft.CodeAnalysis.CSharp": "4.12.0.0",
+          "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.12.0.0",
+          "Microsoft.CodeAnalysis": "4.12.0.0",
+          "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler": "4.12.0.0",
           "Microsoft.CodeAnalysis.FlowAnalysis.Utilities": "2.9.5.0",
-          "Microsoft.CodeAnalysis.Workspaces": "4.9.0.0",
-          "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost": "4.9.0.0",
-          "Microsoft.CodeAnalysis.Workspaces.MSBuild": "4.9.0.0",
-          "Microsoft.Extensions.Configuration.Abstractions": "7.0.0.0",
-          "Microsoft.Extensions.Configuration.Binder": "7.0.0.0",
-          "Microsoft.Extensions.Configuration": "7.0.0.0",
+          "Microsoft.CodeAnalysis.Workspaces": "4.12.0.0",
+          "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost": "4.12.0.0",
+          "Microsoft.CodeAnalysis.Workspaces.MSBuild": "4.12.0.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0.0",
-          "Microsoft.Extensions.DependencyInjection": "7.0.0.0",
+          "Microsoft.Extensions.DependencyInjection": "8.0.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0.0",
-          "Microsoft.Extensions.Logging.Configuration": "7.0.0.0",
-          "Microsoft.Extensions.Logging.Console": "7.0.0.0",
-          "Microsoft.Extensions.Logging": "7.0.0.0",
-          "Microsoft.Extensions.Options.ConfigurationExtensions": "7.0.0.0",
-          "Microsoft.Extensions.Options": "7.0.0.0",
-          "Microsoft.Extensions.Primitives": "7.0.0.0",
+          "Microsoft.Extensions.Logging": "8.0.0.0",
+          "Microsoft.Extensions.Options": "8.0.0.0",
+          "Microsoft.Extensions.Primitives": "8.0.0.0",
           "Microsoft.NET.StringTools": "1.0.0.0",
-          "Microsoft.Win32.SystemEvents": "6.0.0.0",
+          "Microsoft.VisualStudio.Setup.Configuration.Interop": "1.0.0.0",
           "Mono.Cecil": "0.11.5.0",
           "Mono.Cecil.Mdb": "0.11.5.0",
           "Mono.Cecil.Pdb": "0.11.5.0",
           "Mono.Cecil.Rocks": "0.11.5.0",
-          "MonoMod.Backports": "1.1.1.0",
-          "MonoMod.Core": "1.1.1.0",
-          "MonoMod.Iced": "1.17.0.0",
-          "MonoMod.ILHelpers": "1.0.1.0",
-          "MonoMod.RuntimeDetour": "25.1.1.0",
-          "MonoMod.Utils": "25.0.5.0",
+          "MonoMod.Backports": "1.1.2.0",
+          "MonoMod.Core": "1.2.3.0",
+          "MonoMod.Iced": "1.21.0.0",
+          "MonoMod.ILHelpers": "1.1.0.0",
+          "MonoMod.RuntimeDetour": "25.2.3.0",
+          "MonoMod.Utils": "25.0.8.0",
           "MP3Sharp": "1.0.0.0",
           "Newtonsoft.Json": "13.0.0.0",
           "NVorbis": "0.10.0.3",
@@ -61,23 +55,24 @@
           "Steamworks.NET": "20.1.0.0",
           "SteelSeriesEngineWrapper": "1.0.0.0",
           "Stubble.Core": "1.10.0.0",
-          "System.CodeDom": "6.0.0.0",
+          "System.CodeDom": "7.0.0.0",
           "System.CommandLine": "2.0.0.0",
           "System.Composition.AttributedModel": "8.0.0.0",
           "System.Composition.Convention": "8.0.0.0",
           "System.Composition.Hosting": "8.0.0.0",
           "System.Composition.Runtime": "8.0.0.0",
           "System.Composition.TypedParts": "8.0.0.0",
-          "System.Configuration.ConfigurationManager": "6.0.0.0",
-          "System.Drawing.Common": "6.0.0.0",
+          "System.Configuration.ConfigurationManager": "8.0.0.0",
+          "System.Diagnostics.EventLog": "8.0.0.0",
           "System.IO.Pipelines": "8.0.0.0",
           "System.Reflection.MetadataLoadContext": "8.0.0.0",
-          "System.Resources.Extensions": "6.0.0.0",
-          "System.Security.Cryptography.Pkcs": "6.0.0.0",
-          "System.Security.Cryptography.ProtectedData": "6.0.0.0",
-          "System.Security.Cryptography.Xml": "6.0.0.0",
-          "System.Security.Permissions": "6.0.0.0",
-          "System.Windows.Extensions": "6.0.0.0",
+          "System.Resources.Extensions": "8.0.0.0",
+          "System.Security.Cryptography.Pkcs": "7.0.0.0",
+          "System.Security.Cryptography.ProtectedData": "8.0.0.0",
+          "System.Security.Cryptography.Xml": "7.0.0.0",
+          "System.Security.Permissions": "8.0.0.0",
+          "System.Text.Json": "8.0.0.0",
+          "System.Windows.Extensions": "8.0.0.0",
           "TerrariaHooks": "0.0.0.0",
           "tModLoader": "1.4.4.9",
           "tModPorter": "1.0.0.0",
@@ -148,7 +143,7 @@
         "runtime": {
           "Microsoft.Build.dll": {
             "assemblyVersion": "15.1.0.0",
-            "fileVersion": "17.3.2.46306"
+            "fileVersion": "17.7.2.37605"
           }
         }
       },
@@ -156,7 +151,7 @@
         "runtime": {
           "Microsoft.Build.Framework.dll": {
             "assemblyVersion": "15.1.0.0",
-            "fileVersion": "17.3.2.46306"
+            "fileVersion": "17.7.2.37605"
           }
         }
       },
@@ -172,7 +167,7 @@
         "runtime": {
           "Microsoft.Build.Tasks.Core.dll": {
             "assemblyVersion": "15.1.0.0",
-            "fileVersion": "17.3.2.46306"
+            "fileVersion": "17.7.2.37605"
           }
         }
       },
@@ -180,15 +175,15 @@
         "runtime": {
           "Microsoft.Build.Utilities.Core.dll": {
             "assemblyVersion": "15.1.0.0",
-            "fileVersion": "17.3.2.46306"
+            "fileVersion": "17.7.2.37605"
           }
         }
       },
-      "Microsoft.CodeAnalysis.CSharp/4.9.0.0": {
+      "Microsoft.CodeAnalysis.CSharp/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.CSharp.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         },
         "resources": {
@@ -233,11 +228,11 @@
           }
         }
       },
-      "Microsoft.CodeAnalysis.CSharp.Workspaces/4.9.0.0": {
+      "Microsoft.CodeAnalysis.CSharp.Workspaces/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         },
         "resources": {
@@ -282,11 +277,11 @@
           }
         }
       },
-      "Microsoft.CodeAnalysis/4.9.0.0": {
+      "Microsoft.CodeAnalysis/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         },
         "resources": {
@@ -331,11 +326,11 @@
           }
         }
       },
-      "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler/4.9.0.0": {
+      "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         }
       },
@@ -347,11 +342,11 @@
           }
         }
       },
-      "Microsoft.CodeAnalysis.Workspaces/4.9.0.0": {
+      "Microsoft.CodeAnalysis.Workspaces/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.Workspaces.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         },
         "resources": {
@@ -396,19 +391,19 @@
           }
         }
       },
-      "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost/4.9.0.0": {
+      "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         }
       },
-      "Microsoft.CodeAnalysis.Workspaces.MSBuild/4.9.0.0": {
+      "Microsoft.CodeAnalysis.Workspaces.MSBuild/4.12.0.0": {
         "runtime": {
           "Microsoft.CodeAnalysis.Workspaces.MSBuild.dll": {
-            "assemblyVersion": "4.9.0.0",
-            "fileVersion": "4.900.224.12906"
+            "assemblyVersion": "4.12.0.0",
+            "fileVersion": "4.1200.24.57207"
           }
         },
         "resources": {
@@ -453,30 +448,6 @@
           }
         }
       },
-      "Microsoft.Extensions.Configuration.Abstractions/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Configuration.Abstractions.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
-      "Microsoft.Extensions.Configuration.Binder/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Configuration.Binder.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
-      "Microsoft.Extensions.Configuration/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Configuration.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
       "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0.0": {
         "runtime": {
           "Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
@@ -485,11 +456,11 @@
           }
         }
       },
-      "Microsoft.Extensions.DependencyInjection/7.0.0.0": {
+      "Microsoft.Extensions.DependencyInjection/8.0.0.0": {
         "runtime": {
           "Microsoft.Extensions.DependencyInjection.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
@@ -501,51 +472,27 @@
           }
         }
       },
-      "Microsoft.Extensions.Logging.Configuration/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Logging.Configuration.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
-      "Microsoft.Extensions.Logging.Console/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Logging.Console.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
-      "Microsoft.Extensions.Logging/7.0.0.0": {
+      "Microsoft.Extensions.Logging/8.0.0.0": {
         "runtime": {
           "Microsoft.Extensions.Logging.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "Microsoft.Extensions.Options.ConfigurationExtensions/7.0.0.0": {
-        "runtime": {
-          "Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
-          }
-        }
-      },
-      "Microsoft.Extensions.Options/7.0.0.0": {
+      "Microsoft.Extensions.Options/8.0.0.0": {
         "runtime": {
           "Microsoft.Extensions.Options.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "Microsoft.Extensions.Primitives/7.0.0.0": {
+      "Microsoft.Extensions.Primitives/8.0.0.0": {
         "runtime": {
           "Microsoft.Extensions.Primitives.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
@@ -553,15 +500,15 @@
         "runtime": {
           "Microsoft.NET.StringTools.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "17.3.2.46306"
+            "fileVersion": "17.7.2.37605"
           }
         }
       },
-      "Microsoft.Win32.SystemEvents/6.0.0.0": {
+      "Microsoft.VisualStudio.Setup.Configuration.Interop/1.0.0.0": {
         "runtime": {
-          "Microsoft.Win32.SystemEvents.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+          "Microsoft.VisualStudio.Setup.Configuration.Interop.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "3.2.2146.50370"
           }
         }
       },
@@ -597,51 +544,51 @@
           }
         }
       },
-      "MonoMod.Backports/1.1.1.0": {
+      "MonoMod.Backports/1.1.2.0": {
         "runtime": {
           "MonoMod.Backports.dll": {
-            "assemblyVersion": "1.1.1.0",
-            "fileVersion": "1.1.1.0"
+            "assemblyVersion": "1.1.2.0",
+            "fileVersion": "1.1.2.0"
           }
         }
       },
-      "MonoMod.Core/1.1.1.0": {
+      "MonoMod.Core/1.2.3.0": {
         "runtime": {
           "MonoMod.Core.dll": {
-            "assemblyVersion": "1.1.1.0",
-            "fileVersion": "1.1.1.0"
+            "assemblyVersion": "1.2.3.0",
+            "fileVersion": "1.2.3.0"
           }
         }
       },
-      "MonoMod.Iced/1.17.0.0": {
+      "MonoMod.Iced/1.21.0.0": {
         "runtime": {
           "MonoMod.Iced.dll": {
-            "assemblyVersion": "1.17.0.0",
-            "fileVersion": "1.17.0.0"
+            "assemblyVersion": "1.21.0.0",
+            "fileVersion": "1.21.0.0"
           }
         }
       },
-      "MonoMod.ILHelpers/1.0.1.0": {
+      "MonoMod.ILHelpers/1.1.0.0": {
         "runtime": {
           "MonoMod.ILHelpers.dll": {
-            "assemblyVersion": "1.0.1.0",
+            "assemblyVersion": "1.1.0.0",
             "fileVersion": "0.0.0.0"
           }
         }
       },
-      "MonoMod.RuntimeDetour/25.1.1.0": {
+      "MonoMod.RuntimeDetour/25.2.3.0": {
         "runtime": {
           "MonoMod.RuntimeDetour.dll": {
-            "assemblyVersion": "25.1.1.0",
-            "fileVersion": "25.1.1.0"
+            "assemblyVersion": "25.2.3.0",
+            "fileVersion": "25.2.3.0"
           }
         }
       },
-      "MonoMod.Utils/25.0.5.0": {
+      "MonoMod.Utils/25.0.8.0": {
         "runtime": {
           "MonoMod.Utils.dll": {
-            "assemblyVersion": "25.0.5.0",
-            "fileVersion": "25.0.5.0"
+            "assemblyVersion": "25.0.8.0",
+            "fileVersion": "25.0.8.0"
           }
         }
       },
@@ -709,11 +656,11 @@
           }
         }
       },
-      "System.CodeDom/6.0.0.0": {
+      "System.CodeDom/7.0.0.0": {
         "runtime": {
           "System.CodeDom.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.22.51805"
           }
         }
       },
@@ -721,7 +668,7 @@
         "runtime": {
           "System.CommandLine.dll": {
             "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.23.40701"
+            "fileVersion": "2.0.24.32403"
           }
         },
         "resources": {
@@ -806,19 +753,19 @@
           }
         }
       },
-      "System.Configuration.ConfigurationManager/6.0.0.0": {
+      "System.Configuration.ConfigurationManager/8.0.0.0": {
         "runtime": {
           "System.Configuration.ConfigurationManager.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "System.Drawing.Common/6.0.0.0": {
+      "System.Diagnostics.EventLog/8.0.0.0": {
         "runtime": {
-          "System.Drawing.Common.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+          "System.Diagnostics.EventLog.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
@@ -838,51 +785,59 @@
           }
         }
       },
-      "System.Resources.Extensions/6.0.0.0": {
+      "System.Resources.Extensions/8.0.0.0": {
         "runtime": {
           "System.Resources.Extensions.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "System.Security.Cryptography.Pkcs/6.0.0.0": {
+      "System.Security.Cryptography.Pkcs/7.0.0.0": {
         "runtime": {
           "System.Security.Cryptography.Pkcs.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.522.21309"
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.723.27404"
           }
         }
       },
-      "System.Security.Cryptography.ProtectedData/6.0.0.0": {
+      "System.Security.Cryptography.ProtectedData/8.0.0.0": {
         "runtime": {
           "System.Security.Cryptography.ProtectedData.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "System.Security.Cryptography.Xml/6.0.0.0": {
+      "System.Security.Cryptography.Xml/7.0.0.0": {
         "runtime": {
           "System.Security.Cryptography.Xml.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.222.60605"
           }
         }
       },
-      "System.Security.Permissions/6.0.0.0": {
+      "System.Security.Permissions/8.0.0.0": {
         "runtime": {
           "System.Security.Permissions.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
-      "System.Windows.Extensions/6.0.0.0": {
+      "System.Text.Json/8.0.0.0": {
+        "runtime": {
+          "System.Text.Json.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.1024.46610"
+          }
+        }
+      },
+      "System.Windows.Extensions/8.0.0.0": {
         "runtime": {
           "System.Windows.Extensions.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
           }
         }
       },
@@ -993,22 +948,22 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.CSharp/4.9.0.0": {
+    "Microsoft.CodeAnalysis.CSharp/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.CSharp.Workspaces/4.9.0.0": {
+    "Microsoft.CodeAnalysis.CSharp.Workspaces/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis/4.9.0.0": {
+    "Microsoft.CodeAnalysis/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler/4.9.0.0": {
+    "Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1018,32 +973,17 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.Workspaces/4.9.0.0": {
+    "Microsoft.CodeAnalysis.Workspaces/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost/4.9.0.0": {
+    "Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.CodeAnalysis.Workspaces.MSBuild/4.9.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Configuration.Abstractions/7.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Configuration.Binder/7.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Configuration/7.0.0.0": {
+    "Microsoft.CodeAnalysis.Workspaces.MSBuild/4.12.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1053,7 +993,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.DependencyInjection/7.0.0.0": {
+    "Microsoft.Extensions.DependencyInjection/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1063,32 +1003,17 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.Logging.Configuration/7.0.0.0": {
+    "Microsoft.Extensions.Logging/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.Logging.Console/7.0.0.0": {
+    "Microsoft.Extensions.Options/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.Logging/7.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Options.ConfigurationExtensions/7.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Options/7.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Extensions.Primitives/7.0.0.0": {
+    "Microsoft.Extensions.Primitives/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1098,7 +1023,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Win32.SystemEvents/6.0.0.0": {
+    "Microsoft.VisualStudio.Setup.Configuration.Interop/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1123,32 +1048,32 @@
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.Backports/1.1.1.0": {
+    "MonoMod.Backports/1.1.2.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.Core/1.1.1.0": {
+    "MonoMod.Core/1.2.3.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.Iced/1.17.0.0": {
+    "MonoMod.Iced/1.21.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.ILHelpers/1.0.1.0": {
+    "MonoMod.ILHelpers/1.1.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.RuntimeDetour/25.1.1.0": {
+    "MonoMod.RuntimeDetour/25.2.3.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "MonoMod.Utils/25.0.5.0": {
+    "MonoMod.Utils/25.0.8.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1193,7 +1118,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.CodeDom/6.0.0.0": {
+    "System.CodeDom/7.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1228,12 +1153,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Configuration.ConfigurationManager/6.0.0.0": {
+    "System.Configuration.ConfigurationManager/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Drawing.Common/6.0.0.0": {
+    "System.Diagnostics.EventLog/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1248,32 +1173,37 @@
       "serviceable": false,
       "sha512": ""
     },
-    "System.Resources.Extensions/6.0.0.0": {
+    "System.Resources.Extensions/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Security.Cryptography.Pkcs/6.0.0.0": {
+    "System.Security.Cryptography.Pkcs/7.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Security.Cryptography.ProtectedData/6.0.0.0": {
+    "System.Security.Cryptography.ProtectedData/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Security.Cryptography.Xml/6.0.0.0": {
+    "System.Security.Cryptography.Xml/7.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Security.Permissions/6.0.0.0": {
+    "System.Security.Permissions/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "System.Windows.Extensions/6.0.0.0": {
+    "System.Text.Json/8.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Windows.Extensions/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

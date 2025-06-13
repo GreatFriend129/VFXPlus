@@ -147,6 +147,11 @@ Projectiles: {
 	EventideStarVFX.DisplayName: Eventide Star V F X
 	LucentBeamHeldProj.DisplayName: Lucent Beam Held Proj
 	LucentBeamTest.DisplayName: Lucent Beam Test
+	BloodHitAnim.DisplayName: Blood Hit Anim
+	FFMaelstrom.DisplayName: F F Maelstrom
+	LotusFlower.DisplayName: Lotus Flower
+	MadisonVFX.DisplayName: Madison V F X
+	MadisonVFXOld.DisplayName: Madison V F X Old
 }
 
 Configs: {

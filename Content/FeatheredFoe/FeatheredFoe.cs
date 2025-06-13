@@ -37,6 +37,7 @@ namespace VFXPlus.Content.FeatheredFoe
             UmbrellaRain = 10,
             OffscreenDash = 11,
             Madison = 12,
+            Maelstrom = 13,
         }
 
         private FeatheredFoeState CurrentAttack
@@ -88,9 +89,9 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
-            //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen
+            //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Madison;
+            CurrentAttack = FeatheredFoeState.Dive;
 
             switch (CurrentAttack)
             {
@@ -126,6 +127,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     break;
                 case FeatheredFoeState.Madison:
                     MadisonTornado();
+                    break;
+                case FeatheredFoeState.Maelstrom:
+                    Maelstrom();
                     break;
             }
 

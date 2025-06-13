@@ -72,7 +72,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 Main.dust[num207].noGravity = true;
                 Main.dust[num207].fadeIn = 0.5f;
                 Main.dust[num207].velocity *= 0.35f;
-                Main.dust[num207].velocity = projectile.velocity * 0.25f;
+                Main.dust[num207].velocity = -projectile.velocity * 0.25f;
             }
 
 

@@ -255,7 +255,7 @@ namespace VFXPlus.Content.Projectiles
 
                 MuzzleFlash = Mod.Assets.Request<Texture2D>(path + "Blue").Value;
             }
-            else if (gunID == ItemID.OnyxBlaster)
+            else if (gunID == ItemID.OnyxBlaster || gunID == ItemID.Xenopopper)
             {
                 colors[0] = new Color(225, 25, 225);
                 colors[1] = new Color(225, 25, 225);

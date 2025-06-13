@@ -19,10 +19,10 @@ using Terraria.GameContent.Drawing;
 using Terraria.Physics;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Terraria.Graphics;
 using VFXPLus.Common;
 using static tModPorter.ProgressUpdate;
+using Terraria.UI;
 
 namespace VFXPlus.Content.VFXTest.Aero
 {
@@ -49,9 +49,24 @@ namespace VFXPlus.Content.VFXTest.Aero
             Item.shoot = ModContent.ProjectileType<CyverCannonProjectile>();
             Item.noUseGraphic = true;
         }
+        public override bool AltFunctionUse(Player player) => true;
+
+        public override bool CanUseItem(Player player)
+        {
+            if (player.altFunctionUse == 2)
+            {
+                if (Main.player[player.whoAmI].GetModPlayer<CyverCannonPlayer>().barProgress < 1f)
+                    return false;
+            }
+
+            return base.CanUseItem(player);
+        }
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            if (player.altFunctionUse == 2)
+                type = ModContent.ProjectileType<CyverCannonFinaleProjectile>();
+
             Projectile.NewProjectile(source, position, Vector2.Zero, type, damage, knockback, player.whoAmI);
             return false;
         }
@@ -165,7 +180,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                 Main.projectile[a].scale = 0.8f; //75
                 (Main.projectile[a].ModProjectile as CyverCannonLaser).bigLaser = true;
 
-                player.velocity -= Projectile.rotation.ToRotationVector2() * 3f;
+                player.velocity -= Projectile.rotation.ToRotationVector2() * 2f;
 
                 //Dust
                 for (int i = 0; i < 6 + Main.rand.Next(1, 4); i++)
@@ -274,8 +289,8 @@ namespace VFXPlus.Content.VFXTest.Aero
             //Dust
             if (timer < 3)
             {
-                int dustCount = bigLaser ? 15 : 8;
-                float scaleMult = bigLaser ? 1f : 0.5f;
+                int dustCount = bigLaser ? 11 : 8;
+                float scaleMult = bigLaser ? 0.8f : 0.45f;
 
                 for (int i = 0; i < dustCount; i++)
                 {
@@ -284,7 +299,7 @@ namespace VFXPlus.Content.VFXTest.Aero
 
                     Vector2 dustVel = new Vector2(Main.rand.NextFloat(5f, 19f), 0f).RotatedBy(Projectile.rotation);
 
-                    Dust d = Dust.NewDustPerfect(dustPos, ModContent.DustType<MuraLineBasic>(), dustVel, newColor: Color.HotPink, Scale: Main.rand.NextFromList(0.15f, 0.55f) * scaleMult);
+                    Dust d = Dust.NewDustPerfect(dustPos, ModContent.DustType<MuraLineBasic>(), dustVel, newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.15f, 0.55f) * scaleMult);
                     d.alpha = 12;
                 }
 
@@ -301,7 +316,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             }
 
             //Lighting
-            DelegateMethods.v3_1 = Color.HotPink.ToVector3() * 1f * Projectile.scale;
+            DelegateMethods.v3_1 = Color.HotPink.ToVector3() * 1f * Projectile.scale * (bigLaser ? 1.35f : 1f) * overallScale;
             Utils.PlotTileLine(startPos, endPos, 10f * Projectile.scale, DelegateMethods.CastLight);
 
             timer++;
@@ -315,12 +330,31 @@ namespace VFXPlus.Content.VFXTest.Aero
             if (timer == 0)
                 return false;
 
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
+            {
+                DrawLaser(true);
+            });
+            DrawLaser(false);
+
             //Star
             Texture2D StarTex = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
             Vector2 starPoint = Projectile.Center - Main.screenPosition;
             Color starColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.35f);
             Main.spriteBatch.Draw(StarTex, starPoint, null, starColor with { A = 0 }, Projectile.rotation, StarTex.Size() / 2f, Projectile.scale * 2.4f * overallScale, 0, 0);
             Main.spriteBatch.Draw(StarTex, starPoint, null, Color.White with { A = 0 }, Projectile.rotation, StarTex.Size() / 2f, Projectile.scale * 1.2f * overallScale, 0, 0);
+
+
+            return false;
+        }
+
+        public void DrawLaser(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D StarTex = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
+            Vector2 starPoint = Projectile.Center - Main.screenPosition;
+            Color starColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.35f);
 
             //Beam
             Texture2D BeamTex = Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/GlowTrailClear").Value;
@@ -330,7 +364,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Vector2 beamOriginBack = new Vector2(0f, BeamTexBlack.Height / 2);
 
             Vector2 beamScale = new Vector2(7.5f, 0.75f * overallScale * Projectile.scale);
-            Vector2 beamScaleBack = new Vector2(7.5f, 0.9f * overallScale * Projectile.scale);
+            Vector2 beamScaleBack = new Vector2(7.5f, 0.75f * overallScale * Projectile.scale);
 
 
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/CheapScroll", AssetRequestMode.ImmediateLoad).Value;
@@ -338,18 +372,18 @@ namespace VFXPlus.Content.VFXTest.Aero
             myEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.spark_07_Black.Value);
             myEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.Extra_196_Black.Value);
 
-            Color c1 = new Color(240, 10, 115);//Color.DeepPink;
-            Color c2 = new Color(240, 10, 115);//Color.DeepPink;
+            Color c1 = new Color(245, 15, 120) * 14f;//Color.DeepPink;
+            Color c2 = new Color(245, 15, 120);//Color.DeepPink;
 
             myEffect.Parameters["Color1"].SetValue(c1.ToVector4());
             myEffect.Parameters["Color2"].SetValue(c2.ToVector4());
             myEffect.Parameters["Color1Mult"].SetValue(0.95f + (bigLaser ? 0.5f : 0f));
             myEffect.Parameters["Color2Mult"].SetValue(0.95f);
-            myEffect.Parameters["totalMult"].SetValue(0.75f);
+            myEffect.Parameters["totalMult"].SetValue(0.5f);
 
             myEffect.Parameters["tex1reps"].SetValue(0.75f);
             myEffect.Parameters["tex2reps"].SetValue(0.75f);
-            myEffect.Parameters["satPower"].SetValue(0.8f);
+            myEffect.Parameters["satPower"].SetValue(0.6f); //0.8
             myEffect.Parameters["time1Mult"].SetValue(1f);
             myEffect.Parameters["time2Mult"].SetValue(1f);
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.018f);
@@ -368,9 +402,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            return false;
         }
-
 
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
@@ -404,6 +436,17 @@ namespace VFXPlus.Content.VFXTest.Aero
                 overallAlpha: 0.25f, DrawWhiteCore: true, 1f, 1f);
 
             target.immune[Projectile.owner] = 2; //Collision only lasts for 1 frame so it doesn't matter that it is this low 
+
+            if (bigLaser)
+            {
+                if (Main.player[Projectile.owner].GetModPlayer<CyverCannonPlayer>().barProgress < 1f)
+                {
+                    Main.player[Projectile.owner].GetModPlayer<CyverCannonPlayer>().barProgress += 0.34f;
+                    Main.player[Projectile.owner].GetModPlayer<CyverCannonPlayer>().justShotPower = 1f;
+                }
+
+            }
+
 
             base.OnHitNPC(target, hit, damageDone);
         }
@@ -473,9 +516,15 @@ namespace VFXPlus.Content.VFXTest.Aero
 
                 laser = Main.projectile[proj];
                 shootingLaser = true;
+
+                Main.player[player.whoAmI].GetModPlayer<CyverCannonPlayer>().barProgress = 0f;
+                Main.player[player.whoAmI].GetModPlayer<CyverCannonPlayer>().barVisualProgress = 1f;
             }
             else if (timer > 90 && timer < 140)
             {
+                float barProg = MathHelper.Lerp(1f, 0f, Utils.GetLerpValue(91, 139, timer, true));
+                Main.player[player.whoAmI].GetModPlayer<CyverCannonPlayer>().barVisualProgress = barProg;
+
                 justShotPower = 1f;
             }
 
@@ -502,7 +551,7 @@ namespace VFXPlus.Content.VFXTest.Aero
         public float overallScale = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            if (timer == 0)
+            if (timer == 0 || timer == 1)
                 return false;
             
             Player player = Main.player[Projectile.owner];
@@ -510,6 +559,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Texture2D MainTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/CyverCannonProj").Value;
             Texture2D GlowTexFull = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/CyverCannonProjWhiteGlow").Value;
             Texture2D Glowmask = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/CyverCannonProj_Glow").Value;
+            Texture2D PureWhie = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/CyverCannonProjPureWhite").Value;
 
             float randomShakePower = Utils.GetLerpValue(0f, 90f, timer, true) * (shootingLaser ? justShotPower : 1f);
 
@@ -523,9 +573,10 @@ namespace VFXPlus.Content.VFXTest.Aero
             SpriteEffects SE = player.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
 
+            Color underGlowColor = Color.Lerp(Color.DeepPink, Color.HotPink, randomShakePower);
             for (int i = 0; i < 5; i++)
             {
-                Main.EntitySpriteDraw(MainTex, drawPos + Main.rand.NextVector2CircularEdge(2.5f, 2.5f), sourceRectangle, Color.HotPink with { A = 0 } * randomShakePower * 2f, 
+                Main.EntitySpriteDraw(PureWhie, drawPos + Main.rand.NextVector2CircularEdge(2.5f, 2.5f), sourceRectangle, underGlowColor with { A = 0 } * randomShakePower * 0.2f, 
                     Projectile.rotation, origin, Projectile.scale * overallScale, SE);
             }
 
@@ -551,10 +602,10 @@ namespace VFXPlus.Content.VFXTest.Aero
                 Color col2 = Color.DeepPink * 0.525f * justShotPower;
                 Color col3 = Color.SkyBlue * 0.375f * justShotPower;
 
-                float scale1 = 0.95f;
+                float scale1 = 1.1f; //0.95
                 float scale2 = 1.75f;
                 float scale3 = 2.25f;
-                float scale = 0.13f;
+                float scale = 0.13f; //0.13
 
                 float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
                 float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
@@ -567,7 +618,6 @@ namespace VFXPlus.Content.VFXTest.Aero
             return false;
         }
     }
-
 
     public class CyverCannonHyperBeam : ModProjectile
     {
@@ -585,8 +635,27 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             Projectile.penetrate = -1;
             Projectile.timeLeft = 22900;
+
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = 6;
         }
 
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        {
+            if (overallScale < 0.15f)
+                return false;
+            
+            //Check collision in a radius for every 4 positions
+            int i = 0;
+            foreach (Vector2 vec in trailPositions)
+            {
+                if (i % 4 == 0 && targetHitbox.Distance(vec) < 25)
+                    return true;
+                i++;
+
+            }
+            return false;
+        }
 
         int timer = 0;
         public override void AI()
@@ -620,7 +689,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                 SoundStyle style6 = new SoundStyle("AerovelenceMod/Sounds/Effects/AnnihilatorCharge") with { Volume = .4f, Pitch = .65f, }; 
                 SoundEngine.PlaySound(style6, Projectile.Center);
 
-                FlashSystem.SetCAFlashEffect(0.45f, 30, 1f, 0.85f, true);
+                FlashSystem.SetCAFlashEffect(0.4f, 30, 1f, 0.85f, true);
 
                 Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 60f;
             }
@@ -782,10 +851,135 @@ namespace VFXPlus.Content.VFXTest.Aero
 
         }
 
-        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+    }
+
+    public class CyverCannonPlayer : ModPlayer
+    {
+        public float barProgress = 0f;
+
+        public float justShotPower = 0f;
+
+        public bool firingFinaleBeam = false;
+
+        public float barVisualProgress = 0f;
+
+        //public override void ResetEffects() { ResetVariables(); }
+        public override void UpdateDead() { ResetVariables(); }
+        private void ResetVariables()
         {
-            return base.Colliding(projHitbox, targetHitbox);
+            barProgress = 0f;
         }
 
+        public override void PostUpdateMiscEffects() { Update(); }
+
+        private void Update()
+        {
+            justShotPower = Math.Clamp(MathHelper.Lerp(justShotPower, -0.5f, 0.08f), 0f, 1f);
+        }
+    }
+
+    public class CyverCannonBarDrawLayer : PlayerDrawLayer
+    {
+        public override Position GetDefaultPosition()
+        {
+            return new AfterParent(PlayerDrawLayers.HeldItem);
+        }
+        public float timeJustHeld = 0f;
+        protected override void Draw(ref PlayerDrawSet drawInfo)
+        {
+            Player Player = drawInfo.drawPlayer;
+
+            if (Player.HeldItem.type != ModContent.ItemType<CyverCannon>())
+                return;
+
+
+            //Ensures that this isn't drawn multiple times if the player has an afterimage
+            if (drawInfo.shadow == 0f)
+            {
+                Vector2 drawPos = Player.MountedCenter - Main.screenPosition - new Vector2(0, -34f - Player.gfxOffY);
+
+                Texture2D BarTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/UI/CyverCannonBar").Value;
+                Texture2D BarBorder = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/UI/CyverCannonBarBorderGlow").Value;
+                Texture2D BarFill = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/UI/CyverCannonBarFill").Value;
+
+                float fillPercent = Player.GetModPlayer<CyverCannonPlayer>().barProgress;
+                float justShotPower = Player.GetModPlayer<CyverCannonPlayer>().justShotPower;
+
+                bool firingGiga = false;
+                if (Player.GetModPlayer<CyverCannonPlayer>().barVisualProgress > 0f)
+                {
+                    firingGiga = true;
+                    fillPercent = Player.GetModPlayer<CyverCannonPlayer>().barVisualProgress;
+                    justShotPower = 1f;
+                }
+
+                float bonusScale = 1f + (Easings.easeInCubic(justShotPower) * 0.04f);
+
+                //Border
+                for (int i = 220; i < 3; i++)
+                {
+                    Color col = Color.HotPink;
+
+                    //float offsetRot = ((float)Main.timeForVisualEffects * 0.25f) + ((MathHelper.TwoPi / 4f) * i);
+                    //Vector2 offsetPos = drawPos + new Vector2(1.5f, 0f).RotatedBy(offsetRot);
+
+                    Vector2 randPos = drawPos + Main.rand.NextVector2Circular(1f, 1f);
+
+                    DrawData Border = new DrawData(BarBorder, new Vector2((int)randPos.X, (int)randPos.Y), null, 
+                        col with { A = 0 } * 0.2f, 0f, BarBorder.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                    drawInfo.DrawDataCache.Add(Border);
+                }
+
+                //Border
+                if (fillPercent >= 1f)
+                {
+                    float sineAlpha = (float)(Math.Sin(Main.timeForVisualEffects * 0.1f)) * 0.15f;
+
+                    DrawData Border = new DrawData(BarBorder, new Vector2((int)drawPos.X, (int)drawPos.Y), null, 
+                        Color.HotPink with { A = 0 } * (0.2f + sineAlpha), 0f, BarBorder.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                    drawInfo.DrawDataCache.Add(Border);
+                }
+
+                //BaseBar
+                DrawData Bar = new DrawData(BarTex, new Vector2((int)drawPos.X, (int)drawPos.Y), null, 
+                    Color.White, 0f, BarTex.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                drawInfo.DrawDataCache.Add(Bar);
+
+
+
+                int fillAmount = (fillPercent > 0.99f) ? BarFill.Width : (int)(BarFill.Width * fillPercent);
+                Rectangle fillFrame = new Rectangle(0, 0, fillAmount, BarFill.Height);
+
+                //Fill
+                Color betweenPink = new Color(240, 12, 73);// Color.Lerp(Color.DeepPink, Color.HotPink, 0.05f);
+
+                if (fillPercent >= 1f)
+                {
+                    float sinVal = (float)(Math.Sin(Main.timeForVisualEffects * 0.1f)) * 0.07f;
+
+                    betweenPink = Color.Lerp(betweenPink, Color.Pink, 0.02f + (0.07f + sinVal));
+                }
+
+                Color fillColor = Color.Lerp(betweenPink, Color.White, justShotPower);
+
+                Vector2 fillScale = new Vector2(1f, 1f + justShotPower * 0.2f);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    Vector2 randPos = drawPos + Main.rand.NextVector2Circular(1.5f, 1.5f);
+
+                    DrawData FillUnder = new DrawData(BarFill, new Vector2((int)randPos.X, (int)randPos.Y), fillFrame,
+                        fillColor with { A = 0 } * 0.25f, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                    drawInfo.DrawDataCache.Add(FillUnder);
+                }
+
+                DrawData Fill = new DrawData(BarFill, new Vector2((int)drawPos.X, (int)drawPos.Y), fillFrame, 
+                    fillColor with { A = 0 } * 1f, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                drawInfo.DrawDataCache.Add(Fill);
+
+
+
+            }
+        }
     }
 }

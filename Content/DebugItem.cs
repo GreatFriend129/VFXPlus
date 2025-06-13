@@ -61,7 +61,19 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ModContent.ProjectileType<LunarExplosionAnim>(), 10, 0, player.whoAmI);
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = .03f, Pitch = 0.7f, PitchVariance = 0.15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
+
+            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_66") with { Pitch = .60f, MaxInstances = -1, Volume = 0.35f, PitchVariance = 0.3f };
+            //SoundEngine.PlaySound(style2, player.Center);
+
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.1f, Pitch = 1f, PitchVariance = 0.05f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style3, player.Center);
+
+            //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_68") with { Volume = 0.2f, Pitch = -.05f, PitchVariance = .15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style4, player.Center);
+
+            //int bA22 = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, 0f), ModContent.ProjectileType<FFMaelstrom>(), 0, 0, player.whoAmI);
 
             return false;
 

@@ -22,7 +22,7 @@ using VFXPLus.Common;
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
 
-    public class LastPrism : GlobalItem 
+    public class LastPrismItemOverride : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
@@ -41,6 +41,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
     }
 
+    //This also handles the combined laser vfx
     public class LastPrismHeldProjectileOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
@@ -59,6 +60,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             if (projectile.ai[0] == 180f)
             {
+                GetCombinedLaserInfo();
+
                 drawCombinedLaser = true;
 
                 for (int i = 0; i < 35; i++)
@@ -107,21 +110,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 {
                     float dist = projectile.ai[2];
 
-                    for (int i = 0; i < dist * 0.75f; i += 100)
+                    for (int i = 0; i < dist * 0.75f; i += 125)
                     {
                         Vector2 pos = projectile.Center + new Vector2(i, 0f).RotatedBy(projectile.velocity.ToRotation());
                         float rot = projectile.velocity.ToRotation();
 
-                        Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.55f, 0) * 1f;
+
+                        //Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.55f, 0) * 1f;
+                        int dustColsLength = lpci.dustColors.Count;
+                        Color rainbow = lpci.dustColors[Main.rand.Next(0, dustColsLength)];
+                        //rainbow = Color.Lerp(rainbow, Color.White, 0.25f);
 
                         if (Main.rand.NextBool(3))
                         {
                             Vector2 offset = rot.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-35, 35);
-                            Vector2 vel = rot.ToRotationVector2().RotatedByRandom(0.05f) * Main.rand.NextFloat(2, 7);
+                            Vector2 vel = rot.ToRotationVector2().RotatedByRandom(0.05f) * Main.rand.NextFloat(2, 7) * 1.4f; //1f
 
                             if (!Main.rand.NextBool(3))
                             {
-                                Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowFlare>(), vel * 2.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
+                                Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowFlare>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
                                 d.noLight = false;
                                 d.customData = new GlowFlareBehavior(0.4f, 2.5f);
                             }
@@ -129,7 +136,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                             {
                                 Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowPixelCross>(), vel * 3.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.35f);
                                 d.noLight = false;
-                                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.17f, postSlowPower:0.88f, velToBeginShrink: 5f, fadePower: 0.9f, shouldFadeColor: false);
+                                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.17f, postSlowPower:0.84f, velToBeginShrink: 5f, fadePower: 0.9f, shouldFadeColor: false);
                             }
 
                             //Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<PixelGlowOrb>(), vel * 2.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
@@ -160,7 +167,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     {
                         Vector2 vel = Main.rand.NextVector2Circular(22f, 22f);
 
-                        Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.55f, 0);
+                        int dustColsLength = lpci.dustColors.Count;
+                        Color rainbow = lpci.dustColors[Main.rand.Next(0, dustColsLength)];
+                        //rainbow = Color.Lerp(rainbow, Color.White, 0.25f);
+                        //Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.55f, 0);
 
                         Dust p = Dust.NewDustPerfect(dustPos, ModContent.DustType<WindLine>(), vel,
                             newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1f);
@@ -169,7 +179,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                         if (i == 0)
                         {
-                            Dust p2 = Dust.NewDustPerfect(dustPos + vel * 4f, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.4f);
+                            Dust p2 = Dust.NewDustPerfect(dustPos + vel * 3f, ModContent.DustType<SoftGlowDust>(), vel * 2f, newColor: rainbow * 0.85f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.35f);
                             p2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(overallAlpha: 0.1f);
                         }
 
@@ -281,7 +291,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             laserEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
-            GetCombinedLaserInfo();
             String GradLocation = "VFXPlus/Assets/Gradients/";
 
             laserEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value); //ThinLineGlowClear
@@ -313,7 +322,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             laserEffect.Parameters["tex3reps"].SetValue(1.15f * repVal);
             laserEffect.Parameters["tex4reps"].SetValue(1.15f * repVal);
 
-            laserEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.018f); //0.006
+            laserEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.024f); //0.006
             #endregion
 
             laserEffect.CurrentTechnique.Passes["MainPS"].Apply();
@@ -385,21 +394,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             String configOption = ModContent.GetInstance<MiscCustomization>().LastPrismPrideColor;
 
             if (configOption == "None")
-                lpci = new LastPrismColorInfo("RainbowGrad1", 2f / 3f, 2f / 3f, 3.1f / 3f, 2.3f / 3f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.None, "RainbowGrad1", 0.66f, 0.66f, 1.03f, 0.77f);
             else if (configOption == "Lesbian")
-                lpci = new LastPrismColorInfo("Pride/LesbianGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Lesbian, "Pride/LesbianGrad", 0.66f, 0.66f, 1.03f, 0.77f);
             else if (configOption == "Bisexual")
-                lpci = new LastPrismColorInfo("Pride/BisexualGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Bisexual, "Pride/BisexualGrad", 1f, 1f, 1f, 1f);
             else if (configOption == "Trans")
-                lpci = new LastPrismColorInfo("Pride/TransGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Trans, "Pride/TransGrad", 0.8f, 0.8f, 0.8f, 0.8f);
             else if (configOption == "Non-Binary") //Fucked loop
-                lpci = new LastPrismColorInfo("Pride/NBGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.NonBinary, "Pride/NBGrad", 0.85f, 0.85f, 0.85f, 0.85f);
             else if (configOption == "Asexual") //Fucked Black
-                lpci = new LastPrismColorInfo("Pride/AceGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Asexual, "Pride/AceGrad", 1f, 1f, 1f, 1f);
             else if (configOption == "Aromantic") //Fuvcked Black
-                lpci = new LastPrismColorInfo("Pride/AroGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Aromantic, "Pride/AroGrad", 1f, 1f, 1f, 1f);
             else if (configOption == "Aroace")
-                lpci = new LastPrismColorInfo("Pride/AroaceGrad", 1f, 1f, 1f, 1f);
+                lpci = new LastPrismColorInfo(LastPrismColorType.Aroace, "Pride/AroaceGrad", 1.1f, 1.1f, 1.1f, 1.1f);
         }
     }
 
@@ -420,6 +429,107 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             grad3Speed = Grad3Speed;
             grad4Speed = Grad4Speed;
         }
+
+        public LastPrismColorInfo(LastPrismColorType Type, String TexLocation, float Grad1Speed = 1f, float Grad2Speed = 1f, float Grad3Speed = 1f, float Grad4Speed = 1f)
+        {
+            //Yandev moment
+            if (Type == LastPrismColorType.None)
+            {
+                dustColors.Add(Color.Red);
+                dustColors.Add(Color.Orange);
+                dustColors.Add(Color.Yellow);
+                dustColors.Add(Color.LawnGreen);
+                dustColors.Add(Color.DeepSkyBlue);
+                dustColors.Add(Color.Purple);
+
+                //laserMainColors.Add(Color.Red);
+                //laserMainColors.Add(Color.Orange);
+                //laserMainColors.Add(Color.Gold);
+                //laserMainColors.Add(Color.LawnGreen);
+                //laserMainColors.Add(Color.DeepSkyBlue);
+                //laserMainColors.Add(Color.Purple);
+
+                //laserBackColors.Add(Color.DarkRed);
+                //laserBackColors.Add(Color.OrangeRed);
+                //laserBackColors.Add(Color.DarkGoldenrod);
+                //laserBackColors.Add(Color.ForestGreen);
+                //laserBackColors.Add(Color.DodgerBlue);
+                //laserBackColors.Add(Color.Purple);
+            }
+            else if (Type == LastPrismColorType.Lesbian)
+            {
+                dustColors.Add(Color.Purple);
+                dustColors.Add(Color.Orange);
+                dustColors.Add(Color.Goldenrod);
+                dustColors.Add(Color.HotPink);
+                dustColors.Add(Color.HotPink);
+            }
+            else if (Type == LastPrismColorType.Bisexual)
+            {
+                dustColors.Add(Color.DodgerBlue);
+                dustColors.Add(Color.DeepPink);
+                dustColors.Add(Color.Purple);
+            }
+            else if (Type == LastPrismColorType.Trans)
+            {
+                dustColors.Add(Color.SkyBlue);
+                dustColors.Add(Color.LightSkyBlue);
+                dustColors.Add(Color.DeepSkyBlue);
+                dustColors.Add(Color.HotPink);
+                dustColors.Add(Color.Pink);
+                dustColors.Add(Color.LightPink);
+            }
+            else if (Type == LastPrismColorType.NonBinary)
+            {
+                dustColors.Add(Color.Gold);
+                dustColors.Add(Color.Purple);
+                dustColors.Add(Color.Purple * 1f);
+            }
+            else if (Type == LastPrismColorType.Asexual)
+            {
+                dustColors.Add(Color.Purple);
+                dustColors.Add(Color.Purple * 1.5f);
+            }
+            else if (Type == LastPrismColorType.Aromantic)
+            {
+                dustColors.Add(Color.ForestGreen);
+                dustColors.Add(Color.DarkGreen);
+            }
+            else if (Type == LastPrismColorType.Aroace)
+            {
+                dustColors.Add(Color.Orange);
+                dustColors.Add(Color.Gold);
+                dustColors.Add(Color.DeepSkyBlue);
+                dustColors.Add(Color.DodgerBlue);
+                dustColors.Add(Color.DodgerBlue);
+                dustColors.Add(Color.Gold);
+            }
+
+            textureLocation = TexLocation;
+
+            grad1Speed = Grad1Speed;
+            grad2Speed = Grad2Speed;
+            grad3Speed = Grad3Speed;
+            grad4Speed = Grad4Speed;
+        }
+
+        public List<Color> dustColors = new List<Color>();
+
+        public List<Color> laserMainColors = new List<Color>();
+
+        public List<Color> laserBackColors = new List<Color>();
+    }
+
+    public enum LastPrismColorType
+    {
+        None = 0,
+        Lesbian = 1, 
+        Bisexual = 2, 
+        Trans = 3,
+        NonBinary = 4, 
+        Asexual = 5,
+        Aromantic = 6, 
+        Aroace = 7
     }
 
     public class LastPrismLaserOverride : GlobalProjectile
@@ -444,8 +554,31 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         }
 
         int timer = 0;
+        LastPrismColorInfo lpci = null;
         public override bool PreAI(Projectile projectile)
         {
+            if (timer == 0)
+            {
+                String configOption = ModContent.GetInstance<MiscCustomization>().LastPrismPrideColor;
+
+                if (configOption == "None")
+                    lpci = new LastPrismColorInfo(LastPrismColorType.None, "RainbowGrad1", 0.66f, 0.66f, 1.03f, 0.77f);
+                else if (configOption == "Lesbian")
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Lesbian, "Pride/LesbianGrad", 1f, 1f, 1f, 1f);
+                else if (configOption == "Bisexual")
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Bisexual, "Pride/BisexualGrad", 1f, 1f, 1f, 1f);
+                else if (configOption == "Trans")
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Trans, "Pride/TransGrad", 0.66f, 0.66f, 0.66f, 0.66f);
+                else if (configOption == "Non-Binary") //Fucked loop
+                    lpci = new LastPrismColorInfo(LastPrismColorType.NonBinary, "Pride/NBGrad", 1f, 1f, 1f, 1f);
+                else if (configOption == "Asexual") //Fucked Black
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Asexual, "Pride/AceGrad", 1f, 1f, 1f, 1f);
+                else if (configOption == "Aromantic") //Fuvcked Black
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Aromantic, "Pride/AroGrad", 1f, 1f, 1f, 1f);
+                else if (configOption == "Aroace")
+                    lpci = new LastPrismColorInfo(LastPrismColorType.Aroace, "Pride/AroaceGrad", 1f, 1f, 1f, 1f);
+            }
+
 
             #region vanilla LPL behavior (without dust) && now respects gfxOffYproj
             Vector2? vector133 = null;
@@ -638,14 +771,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             if (timer % 1 == 0 && parent.ai[0] < 180f)
             {
-                for (int i = 0; i < 1 + Main.rand.Next(0, 0); i++)
+                for (int i = 0; i < 1; i++)
                 {
-                    Color col = Main.hslToRgb(lastPrismHue, 1f, 0.65f);// color;
+                    //Color col = Main.hslToRgb(lastPrismHue, 1f, 0.65f);// color;
+                    int dustColsLength = lpci.dustColors.Count;
+                    Color col = lpci.dustColors[Main.rand.Next(0, dustColsLength)];
 
-                    Vector2 vel = Main.rand.NextVector2Circular(3f, 3f) * (1f + projectile.scale * 0.5f);
+                    Vector2 vel = Main.rand.NextVector2Circular(2.75f, 2.75f) * (1f + projectile.scale * 0.5f);
 
                     Dust p = Dust.NewDustPerfect(projectile.Center + (projectile.velocity * projectile.localAI[1]), ModContent.DustType<PixelGlowOrb>(), vel * Main.rand.NextFloat(0.8f, 1.05f), 
-                        newColor: col * 1f, Scale: Main.rand.NextFloat(0.35f, 0.45f) * projectile.scale);
+                        newColor: col * 1f, Scale: Main.rand.NextFloat(0.35f, 0.4f) * projectile.scale);
                     p.customData = DustBehaviorUtil.AssignBehavior_PGOBase(velToBeginShrink: 2.5f, fadePower: 0.9f);
                 }
             }
@@ -661,8 +796,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             Projectile parent = Main.projectile[(int)projectile.ai[1]];
 
-            if (parent.ai[0] < 180f)
-                DrawVertexTrail(projectile, false);
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                if (parent.ai[0] < 180f)
+                    DrawVertexTrailNew(projectile, true);
+
+                if (parent.ai[0] < 180f)
+                    DrawVertexTrailRainbow(projectile, false);
+            });
 
             return false;
 
@@ -711,8 +852,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.0f;
 
             Color StripColor(float progress) => Color.White;
-            float StripWidth1(float progress) => 15f * overallScale * sineWidthMult * colAlpha; //25
-            float StripWidth2(float progress) => 120f * overallScale * sineWidthMult * colAlpha; //25
+            float StripWidth1(float progress) => 25f * overallScale * sineWidthMult * colAlpha; //15
+            float StripWidth2(float progress) => 120f * overallScale * sineWidthMult * colAlpha; //
 
             VertexStrip vertexStrip1 = new VertexStrip();
             vertexStrip1.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth1, -Main.screenPosition, includeBacksides: true);
@@ -754,12 +895,185 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             #endregion
         }
 
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        public void DrawVertexTrailNew(Projectile projectile, bool giveUp)
         {
-            base.OnHitNPC(projectile, target, hit, damageDone);
+            if (giveUp)
+                return;
+
+            Color mainCol = lpci.laserMainColors[(int)projectile.ai[0]];
+            Color backCol = lpci.laserBackColors[(int)projectile.ai[0]];
+
+            float colAlpha = projectile.Opacity * 1f; //0.8
+
+            float laserLuminance = 0.5f;
+            float laserAlphaMultiplier = 0f;
+            Color lastPrismCol = Main.hslToRgb(projectile.GetLastPrismHue(projectile.ai[0], ref laserLuminance, ref laserAlphaMultiplier), 1f, laserLuminance) * colAlpha;
+
+            //Make the color a bit brighter
+            lastPrismCol = Color.Lerp(lastPrismCol, Color.White, 0.1f);
+
+            Vector2 startPoint = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
+            Vector2 endPoint = startPoint + (projectile.velocity * projectile.localAI[1]);
+            float dist = (endPoint - startPoint).Length();
+
+            //EndPoints
+            Texture2D bloomOrb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
+            float bloomEndSize = 1.3f * colAlpha;
+            Main.EntitySpriteDraw(bloomOrb, endPoint - Main.screenPosition, null, lastPrismCol with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, bloomEndSize, 0, 0);
+            Main.EntitySpriteDraw(bloomOrb, endPoint - Main.screenPosition, null, Color.White with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, 0.5f * bloomEndSize, 0, 0);
+
+            Main.EntitySpriteDraw(bloomOrb, startPoint - Main.screenPosition, null, lastPrismCol with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, bloomEndSize, 0, 0);
+            Main.EntitySpriteDraw(bloomOrb, startPoint - Main.screenPosition, null, Color.White with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, 0.5f * bloomEndSize, 0, 0);
+
+
+            //TRAIL
+            Texture2D bloomSliver = Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/BloomSliver").Value;
+
+            Vector2 bloomSliverScale1 = new Vector2(dist, 0.45f * colAlpha);
+            Vector2 bloomSliverScale2 = new Vector2(dist, 0.25f * colAlpha);
+            Vector2 bloomSliverScale3 = new Vector2(dist, 0.1f * colAlpha);
+            Main.EntitySpriteDraw(bloomSliver, startPoint - Main.screenPosition, null, backCol with { A = 0 } * 0.35f, projectile.velocity.ToRotation(), bloomSliver.Size() * new Vector2(0f, 0.5f), bloomSliverScale1, 0, 0);
+            Main.EntitySpriteDraw(bloomSliver, startPoint - Main.screenPosition, null, mainCol with { A = 0 } * 0.65f, projectile.velocity.ToRotation(), bloomSliver.Size() * new Vector2(0f, 0.5f), bloomSliverScale2, 0, 0);
+            Main.EntitySpriteDraw(bloomSliver, startPoint - Main.screenPosition, null, Color.White with { A = 0 } * 0.65f, projectile.velocity.ToRotation(), bloomSliver.Size() * new Vector2(0f, 0.5f), bloomSliverScale3, 0, 0);
+
+
+            Texture2D trailTexture1 = CommonTextures.spark_07_Black.Value;
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinnerGlowTrail").Value; 
+            //CommonTextures.ThinGlowLine.Value
+
+            Vector2[] pos_arr = { startPoint, endPoint };
+            float[] rot_arr = { projectile.velocity.ToRotation(), projectile.velocity.ToRotation() };
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.0f;
+
+            Color StripColor(float progress) => Color.White;// * Easings.easeOutCirc(projectile.Opacity);
+            float StripWidth1(float progress) => 25f * overallScale * sineWidthMult * Easings.easeOutQuad(colAlpha); //15
+
+            VertexStrip vertexStrip1 = new VertexStrip();
+            vertexStrip1.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth1, -Main.screenPosition, includeBacksides: true);
+
+            #region shaderInfo
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(timer * -0.03f);
+
+            float repValue = dist / 700f;
+            myEffect.Parameters["reps"].SetValue(repValue);
+
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["ColorOne"].SetValue(backCol.ToVector3() * 1.5f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.9f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.15f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStrip1.DrawTrail();
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture1);
+            myEffect.Parameters["ColorOne"].SetValue(mainCol.ToVector3() * 1f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.65f);
+            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStrip1.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+            #endregion
         }
 
+        //makes the scrolling of each laser start at a random point
+        float randomTimeOffset = Main.rand.NextFloat(0f, 0.15f);
+        public void DrawVertexTrailRainbow(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
 
+            float colAlpha = projectile.Opacity * 0.4f;
+            float easedAlpha = Easings.easeOutQuad(projectile.Opacity);
+
+            float laserLuminance = 0.5f;
+            float laserAlphaMultiplier = 0f;
+            Color lastPrismCol = Main.hslToRgb(projectile.GetLastPrismHue(projectile.ai[0], ref laserLuminance, ref laserAlphaMultiplier), 1f, laserLuminance) * colAlpha;
+
+            //Make the color a bit brighter
+            lastPrismCol = Color.Lerp(lastPrismCol, Color.White, 0.1f);
+
+            Vector2 startPoint = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
+            Vector2 endPoint = startPoint + (projectile.velocity * projectile.localAI[1]);
+            float dist = (endPoint - startPoint).Length();
+
+            //EndPoints
+            Texture2D bloomOrb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
+            float bloomEndSize = 1.3f * colAlpha;
+            //Main.EntitySpriteDraw(bloomOrb, endPoint - Main.screenPosition, null, lastPrismCol with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, bloomEndSize, 0, 0);
+            Main.EntitySpriteDraw(bloomOrb, endPoint - Main.screenPosition, null, Color.White with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, 1f * bloomEndSize, 0, 0);
+
+            //Main.EntitySpriteDraw(bloomOrb, startPoint - Main.screenPosition, null, lastPrismCol with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, bloomEndSize, 0, 0);
+            Main.EntitySpriteDraw(bloomOrb, startPoint - Main.screenPosition, null, Color.White with { A = 0 } * 0.85f, projectile.velocity.ToRotation(), bloomOrb.Size() / 2f, 1f * bloomEndSize, 0, 0);
+
+
+            //TRAIL
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture1 = CommonTextures.EnergyTex.Value;
+            Texture2D trailTexture2 = CommonTextures.ThinGlowLine.Value;
+
+            Vector2[] pos_arr = { startPoint, endPoint };
+            float[] rot_arr = { projectile.velocity.ToRotation(), projectile.velocity.ToRotation() };
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.0f;
+
+            Color StripColor(float progress) => Color.White;
+            float StripWidth1(float progress) => 40f * overallScale * sineWidthMult * Easings.easeOutCirc(colAlpha); //50
+
+            VertexStrip vertexStrip1 = new VertexStrip();
+            vertexStrip1.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth1, -Main.screenPosition, includeBacksides: true);
+
+            #region shaderInfo
+            String GradLocation = "VFXPlus/Assets/Gradients/";
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+
+            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
+            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>(GradLocation + lpci.textureLocation).Value);
+            myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
+            myEffect.Parameters["satPower"].SetValue(0.25f); //higher power -> less affected by background  |0.15f
+
+            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value); //smokeTrail4_512
+
+
+            myEffect.Parameters["grad1Speed"].SetValue(lpci.grad1Speed);
+            myEffect.Parameters["grad2Speed"].SetValue(lpci.grad2Speed);
+            myEffect.Parameters["grad3Speed"].SetValue(lpci.grad3Speed);
+            myEffect.Parameters["grad4Speed"].SetValue(lpci.grad4Speed);
+
+            myEffect.Parameters["tex1Mult"].SetValue(2f * easedAlpha); //2f
+            myEffect.Parameters["tex2Mult"].SetValue(1f * easedAlpha); //1.5
+            myEffect.Parameters["tex3Mult"].SetValue(1.15f * easedAlpha);
+            myEffect.Parameters["tex4Mult"].SetValue(2.5f * easedAlpha); //1.5
+            myEffect.Parameters["totalMult"].SetValue(1f);
+
+
+            //We want the number of repititions to be relative to the number of points
+            float repValue = dist / 500;
+            myEffect.Parameters["gradientReps"].SetValue(0.35f * repValue); //1f
+            myEffect.Parameters["tex1reps"].SetValue(1f * repValue); //2.5
+            myEffect.Parameters["tex2reps"].SetValue(0.3f * repValue);
+            myEffect.Parameters["tex3reps"].SetValue(1f * repValue);
+            myEffect.Parameters["tex4reps"].SetValue(0.25f * repValue);
+
+            myEffect.Parameters["uTime"].SetValue(((float)Main.timeForVisualEffects * -0.025f) + randomTimeOffset); //-0.015
+
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip1.DrawTrail();
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            #endregion
+        }
     }
 
     public class RainbowSigilTest : ModProjectile

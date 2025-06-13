@@ -100,7 +100,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                 //if (collided)
                 //Main.NewText("HIT");
 
-                //Do hit dust
+                //Do hit dust (doing here and not OnHit so we can have custom hit position)
                 if (collided)
                 {
                     for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++)
@@ -111,10 +111,12 @@ namespace VFXPlus.Content.VFXTest.Aero
 
                         Dust.NewDustPerfect(l_positions[m], ModContent.DustType<GlowPixelCross>(), dustVel, newColor: dustCol, Scale: Main.rand.NextFloat(0.2f, 0.3f));
                     }
-                }
 
-                if (collided)
+                    SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/star_impact_01") with { Volume = .05f, Pitch = 1f, PitchVariance = .33f, };
+                    SoundEngine.PlaySound(style, l_positions[m]);
+
                     return true;
+                }
             }
 
             /*
@@ -226,7 +228,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             {
                 for (int i = 0; i < 1; i++)
                 {
-                    Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.7f, 0) * 1f;
+                    Color rainbow = Main.hslToRgb(Main.rand.NextFloat(0f, 1f), 1f, 0.65f, 0) * 1f;
 
                     int index = Main.rand.Next(0, (int)(l_positions.Count * 0.75f));
                     Vector2 dustPos = l_positions[index] + Main.rand.NextVector2Circular(10f, 10f);
@@ -258,6 +260,12 @@ namespace VFXPlus.Content.VFXTest.Aero
                 bool manaResult = player.CheckMana(player.inventory[player.selectedItem], pay: true);
                 if (manaResult == false)
                     fadeOut = true;
+            }
+
+            //Light
+            for (int i = 0; i < l_positions.Count * 0.9f; i += 12)
+            {
+                Lighting.AddLight(l_positions[i], Main.hslToRgb((timer * 0.015f) % 1f, 1f, 0.75f, 0).ToVector3() * 0.75f);
             }
 
             timer++;
