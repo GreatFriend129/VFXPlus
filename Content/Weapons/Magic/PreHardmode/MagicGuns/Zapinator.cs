@@ -134,7 +134,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
             //Electric hit sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/NPC_Hit_53") with { Volume = .08f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_53") with { Volume = .08f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
             //Hit dust
@@ -155,7 +155,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         {
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.OnTileCollide(projectile, oldVelocity);

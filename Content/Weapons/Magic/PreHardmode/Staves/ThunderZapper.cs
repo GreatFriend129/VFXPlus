@@ -19,7 +19,6 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 {
-    
     public class ThunderZapper : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
@@ -29,6 +28,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override void SetDefaults(Item entity)
         {
+            //Want no sound
             entity.UseSound = SoundID.Item4 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
@@ -36,7 +36,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
             Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 45;
 
             Color col = Color.DeepSkyBlue;
@@ -57,7 +56,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             SoundStyle style5 = new SoundStyle("Terraria/Sounds/Custom/dd2_lightning_bug_zap_" + soundVar) with { Volume = 0.45f, Pitch = 0.51f, PitchVariance = 0.15f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style5, player.Center);
 
-            SoundStyle stylea = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Volume = 0.12f, Pitch = 1f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundStyle stylea = new SoundStyle("VFXPlus/Sounds/Effects/Thunder/lightning_flash_01") with { Volume = 0.12f, Pitch = 1f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(stylea, position);
             return true;
         }
@@ -67,12 +66,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     {
         public override bool InstancePerEntity => true;
 
-
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
             return lateInstantiation && (entity.type == ProjectileID.ThunderStaffShot) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ThunderZapperToggle;
         }
-
 
         Vector2 initialVel;
         int timer = 0;
@@ -82,11 +79,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 initialVel = projectile.velocity;
 
             int trailCount = 16;
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
             previousRotations.Add(projectile.velocity.ToRotation());
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
@@ -170,10 +167,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         float scale = 1f;
         float fadeInAlpha = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 Draw(projectile, false);
             });
@@ -206,24 +203,20 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Vector2 vec2Sccale2 = new Vector2(1.15f, 0.5f) * projectile.scale * 1.15f * scale;
 
             //Trail
-            if (previousPostions != null)
+            for (int i = 0; i < previousPositions.Count; i++)
             {
-                for (int i = 0; i < previousPostions.Count; i++)
-                {
-                    float progress = (float)i / previousPostions.Count;
+                float progress = (float)i / previousPositions.Count;
 
-                    Vector2 thisScale = vec2Sccale * scale * 1f * Easings.easeOutSine(progress);
-                    Vector2 thisScale2 = vec2Sccale2 * scale * 1f * Easings.easeOutSine(progress);
+                Vector2 thisScale = vec2Sccale * scale * 1f * Easings.easeOutSine(progress);
+                Vector2 thisScale2 = vec2Sccale2 * scale * 1f * Easings.easeOutSine(progress);
 
-                    Vector2 drawPos = previousPostions[i] - Main.screenPosition;
-                    Color col = thisCol with { A = 0 } * 0.85f * Easings.easeInSine(progress);
+                Vector2 drawPos = previousPositions[i] - Main.screenPosition;
+                Color col = thisCol with { A = 0 } * 0.85f * Easings.easeInSine(progress);
 
-                    float prevRot = previousRotations[i];
+                float prevRot = previousRotations[i];
 
-                    Main.spriteBatch.Draw(Core, drawPos, null, col, prevRot, Core.Size() / 2, thisScale, SpriteEffects.None, 0);
-                    Main.spriteBatch.Draw(Core, drawPos, null, col, prevRot, Core.Size() / 2, thisScale2, SpriteEffects.None, 0);
-                }
-
+                Main.spriteBatch.Draw(Core, drawPos, null, col, prevRot, Core.Size() / 2, thisScale, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw(Core, drawPos, null, col, prevRot, Core.Size() / 2, thisScale2, SpriteEffects.None, 0);
             }
 
             //Main

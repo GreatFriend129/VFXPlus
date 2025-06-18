@@ -19,7 +19,6 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 {
-    
     public class AquaScepter : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
@@ -29,10 +28,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override void SetDefaults(Item entity)
         {
+            //No Sound
             entity.UseSound = SoundID.Item4 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
-
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
@@ -41,8 +40,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/CommonWaterFallLight00") with { Volume = .1f, Pitch = .2f, PitchVariance = .2f, MaxInstances = 1 }; 
             SoundEngine.PlaySound(style2, player.Center);
-
-            //return true;
 
             Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, 0.75f);
             for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
@@ -136,7 +133,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 Draw(projectile);
             });
@@ -149,44 +146,38 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Texture2D line = CommonTextures.Flare.Value;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
+                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(6f, 6f); //3f
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(6f, 6f); //3f
 
-                    float startScale = projectile.ai[2] + sineScale;
+                float startScale = projectile.ai[2] + sineScale;
 
-                    Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f);
-                    Color col = Color.Lerp(between, Color.MediumBlue, 1f - progress);
+                Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f);
+                Color col = Color.Lerp(between, Color.MediumBlue, 1f - progress);
 
-                    float easedFadeValue = progress * progress;
+                float easedFadeValue = progress * progress;
 
 
-                    Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
-                    Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
+                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
+                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
 
-                    //Black
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * easedFadeValue,
-                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
+                //Black
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * easedFadeValue,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
-                    //Main
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.75f * easedFadeValue,
-                        previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
+                //Main
+                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.75f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
-                    //White
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * easedFadeValue,
-                        previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
-                }
+                //White
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
 
             }
-
-
 
         }
 
@@ -206,7 +197,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 }
             }
 
-            //CHANGE BACK TO 0.2 Vol????
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.08f, Pitch = .5f, PitchVariance = 0.5f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 

@@ -1,0 +1,4 @@
+I am making copies of vanilla sounds so they don't give overriden by resource packs and ruin some of my sound design.
+i.e. if I use a vanilla sound as a component for a more complex sound and set it at a very different pitch then I want to make sure that it doesn't sound absolutely horrendous because a player has something that replaces the intended sound.
+
+Another reason is to not tread over the max instances of a vanilla sound. For example my bullet kill sound is the same sound file as the SDMG shot (but at a much higher pitch), however because it is the same sound file the bullet dying will cut off the sound of the gun itself which sounds bad.

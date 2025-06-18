@@ -37,13 +37,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle stylees = new SoundStyle("Terraria/Sounds/Item_117") with { Pitch = .45f, PitchVariance = .25f, Volume = 0.2f, MaxInstances = -1 };
+            SoundStyle stylees = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_117") with { Pitch = .45f, PitchVariance = .25f, Volume = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(stylees, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_book_staff_cast_0") with { Volume = 0.3f, Pitch = -0.25f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_book_staff_cast_0") with { Volume = 0.2f, Pitch = -0.5f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, player.Center);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_8") with { Volume = 0.85f, PitchVariance = 0.1f, Pitch = .05f, MaxInstances = -1, }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_8") with { Volume = 0.85f, PitchVariance = 0.1f, Pitch = .05f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(style, player.Center);
 
             return true;
@@ -63,7 +63,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            
             int trailCount = 50;
             previousRotations.Add(projectile.velocity.ToRotation());
             previousPostions.Add(projectile.Center);
@@ -96,10 +95,15 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity;
 
                 Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 1.25f;
+                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 1.2f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.5f, Scale: dustScale);
                 smoke.alpha = 2;
+
+                Vector2 dustPos2 = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustVel2 = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity;
+                Dust d = Dust.NewDustPerfect(dustPos2, 6, dustVel2);
+                d.noGravity = true;
             }
 
             #region vanillaAI dear god
@@ -198,6 +202,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             #endregion
 
+            Color lightingCol = Color.Lerp(Color.Orange, Color.OrangeRed, 0.4f);
+            Lighting.AddLight(projectile.Center, lightingCol.ToVector3() * 0.65f);
+
             timer++;
             return false;
         }
@@ -209,7 +216,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawVertexTrail(false);
             });

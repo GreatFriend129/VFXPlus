@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using System.Runtime.InteropServices;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Projectiles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
@@ -33,18 +34,27 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             base.SetDefaults(entity); 
         }
 
+        public override Vector2? HoldoutOffset(int type)
+        {
+            return new Vector2(-2f, 0f);
+
+            return base.HoldoutOffset(type);
+        }
+
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
 
             Color betweenGreen = Color.Lerp(Color.LawnGreen, Color.Green, 0.75f);
             //Dust
-            for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++) //2 //0,3
+            for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++) //2 //0,3
             {
                 Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 30f;
-                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(1.5f, 10f);
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(2f, 8.5f);
 
                 Dust dp = Dust.NewDustPerfect(pos + vel, ModContent.DustType<MuraLineBasic>(), vel, newColor: betweenGreen, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.6f);
                 dp.alpha = 10 + Main.rand.Next(-2, 5);
+
+                dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.94f, 0.97f));
             }
 
             return true;
@@ -83,7 +93,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("Dusts", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 Draw(projectile, true);
             });
@@ -139,19 +149,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
             //Electric hit sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/NPC_Hit_53") with { Volume = .06f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_53") with { Volume = .06f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
             //Hit dust
             for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
             {
-                //Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<LineSpark>(),
-                //    projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.Next(5, 15),
-                //    newColor: Color.Green, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.55f);
-
-                //dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 5 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                //    1f, 0.5f); //80
-
                 Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.NextFloat(2f, 10f);
 
                 Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel, newColor: Color.LimeGreen, Scale: Main.rand.NextFloat(0.35f, 0.65f) * 0.65f);
@@ -174,7 +177,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         {
             Collision.HitTiles(projectile.position + oldVelocity, oldVelocity, projectile.width, projectile.height);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.OnTileCollide(projectile, oldVelocity);

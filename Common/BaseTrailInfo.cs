@@ -49,6 +49,8 @@ namespace VFXPlus.Common
 
         public bool shouldSmooth = true;
 
+        //Want to use when pixelizing
+        public bool useEffectMatrix = false;
         //------------------
         public int trailPointLimit = 60;
 
@@ -174,8 +176,10 @@ namespace VFXPlus.Common
                 //sb.End();
                 //sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
+                Matrix matrix = useEffectMatrix ? Main.GameViewMatrix.EffectMatrix : Main.GameViewMatrix.TransformationMatrix;
+
                 sb.End();
-                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointWrap, default, RasterizerState.CullNone, default, Main.GameViewMatrix.TransformationMatrix);
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointWrap, default, RasterizerState.CullNone, default, matrix);
 
             }
 

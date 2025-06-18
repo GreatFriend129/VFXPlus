@@ -16,30 +16,7 @@ using static Terraria.ModLoader.ModContent;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 {
-    
-    public class WandOfFrosting : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.WandofFrosting) && GetInstance<VFXPlusToggles>().MagicToggle.WandOfFrostingToggle;
-        }
 
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_42") with { Volume = .3f, Pitch = .25f, PitchVariance = .15f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(style, player.Center);
-
-            return true;
-        }
-
-    }
     public class WandOfFrostingShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;

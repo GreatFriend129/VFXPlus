@@ -63,22 +63,18 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    
-                    Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue * 0.1f, progress) * progress * projectile.Opacity;
+                float progress = (float)i / previousRotations.Count;
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale * overallScale;
+                Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue * 0.1f, progress) * progress * projectile.Opacity;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                float size2 = (1f + (progress * 0.25f)) * projectile.scale * overallScale;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-                }
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
             }
 
             //Border

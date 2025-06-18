@@ -98,21 +98,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             #region Trail
-            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0f) * overallAlpha;
+            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.08f) * overallAlpha;
 
-            int trueTrailWidth = (int)(25f * overallScale); //20
+            int trueTrailWidth = (int)(27f * overallScale); //20
 
             if (trueTrailWidth < 3)
                 trueTrailWidth = 0;
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
-            trail1.trailPointLimit = 65;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value; //EvenThinnerGlowLine == Really clean
+            trail1.trailPointLimit = 90;
             trail1.trailWidth = trueTrailWidth;
             trail1.trailMaxLength = 250;
             trail1.timesToDraw = 2;
             trail1.shouldSmooth = false;
             trail1.pinch = true;
+            trail1.useEffectMatrix = true;
 
             trail1.trailColor = thisPink;
 
@@ -126,12 +127,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             //Trail2 Info Dump
             trail2.trailTexture = trail1.trailTexture;
-            trail2.trailPointLimit = 65;
+            trail2.trailPointLimit = 90;
             trail2.trailWidth = trueTrailWidth;
             trail2.trailMaxLength = 250;
             trail2.timesToDraw = 2;
             trail2.shouldSmooth = false;
             trail2.pinch = true;
+            trail2.useEffectMatrix = true;
 
             float OffsetAmount2 = 20f * MathF.Sin((float)timer / 30 * projectile.extraUpdates);
             Vector2 offsetPosition2 = new Vector2(0, -OffsetAmount2).RotatedBy(projectile.velocity.ToRotation());
@@ -338,7 +340,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
             
             //After-Image
             if (previousRotations != null && previousPostions != null)
@@ -452,7 +454,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             Dust softGlow = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DeepPink, Scale: 0.25f);
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
-                overallAlpha: 0.18f, DrawWhiteCore: true, 1f, 1f);
+                overallAlpha: 0.21f, DrawWhiteCore: true, 1f, 1f);
+
+            //SoftGlowDustBehavior sgbt = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.87f, sizeChangeSpeed: 0.80f, timeToKill: 150,
+                //overallAlpha: 0.27f, DrawWhiteCore: true, 1f, 1f);
+            
+            //Dust softGlow2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DeepPink, Scale: 0.35f);
+            //softGlow2.customData = sgbt;
+            //Dust softGlow3 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.25f);
+            //softGlow3.customData = sgbt;
+            //Dust softGlow4 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.LightPink, Scale: 0.15f);
+            //softGlow4.customData = sgbt;
+
 
             #region vanillaKill
             int num121 = Utils.SelectRandom<int>(Main.rand, 242, 73, 72, 71, 255);
@@ -596,12 +609,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
-            trail1.trailPointLimit = 65;
+            trail1.trailPointLimit = 85;
             trail1.trailWidth = trueTrailWidth;
             trail1.trailMaxLength = 250;
             trail1.timesToDraw = 2;
             trail1.shouldSmooth = false;
             trail1.pinch = true;
+            trail1.useEffectMatrix = true;
 
             trail1.trailColor = thisBlue;
 
@@ -615,12 +629,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             //Trail2 Info Dump
             trail2.trailTexture = trail1.trailTexture;
-            trail2.trailPointLimit = 65;
+            trail2.trailPointLimit = 85;
             trail2.trailWidth = trueTrailWidth;
             trail2.trailMaxLength = 250;
             trail2.timesToDraw = 2;
             trail2.shouldSmooth = false;
             trail2.pinch = true;
+            trail2.useEffectMatrix = true;
 
             float OffsetAmount2 = 25f * MathF.Sin((float)timer / 35 * projectile.extraUpdates);
             Vector2 offsetPosition2 = new Vector2(0, -OffsetAmount2).RotatedBy(projectile.velocity.ToRotation());
@@ -819,7 +834,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
             //After-Image
             if (previousRotations != null && previousPostions != null)

@@ -82,7 +82,6 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                 smoke.alpha = 2;
             }
 
-            
             float fadeInTime = Math.Clamp((timer + 2f) / 20f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
 
@@ -98,7 +97,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawVertexTrail(false);
             });
