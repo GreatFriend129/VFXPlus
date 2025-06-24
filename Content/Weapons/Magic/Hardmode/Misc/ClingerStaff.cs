@@ -298,7 +298,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             ShaderParams();
 
             Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect);
             myEffect.CurrentTechnique.Passes["Aura"].Apply();
 

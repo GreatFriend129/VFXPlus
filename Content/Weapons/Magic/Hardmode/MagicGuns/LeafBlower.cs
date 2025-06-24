@@ -40,7 +40,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_book_staff_cast_2") with { Volume = 0.25f, Pitch = .65f, PitchVariance = 0.2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style2, position);
 
-            SoundStyle styleVan = new SoundStyle("Terraria/Sounds/Item_7") with { Volume = 0.9f, Pitch = .15f, PitchVariance = .15f, MaxInstances = -1 }; 
+            SoundStyle styleVan = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_7") with { Volume = 0.9f, Pitch = .15f, PitchVariance = .15f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(styleVan, position);
 
             //Dust
@@ -106,32 +106,27 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+                float size = (0.75f + (progress * 0.25f)) * projectile.scale;
+
+                Color col = Color.Lerp(Color.Green, Color.DarkGreen, progress) * progress * projectile.Opacity;
+
+                float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
+
+                if (i > 4)
                 {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-
-                    Color col = Color.Lerp(Color.Green, Color.DarkGreen, progress) * progress * projectile.Opacity;
-
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
-                    if (i > 4)
-                    {
-                        float middleProg = (float)(i - 4) / previousPostions.Count; 
-                        Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
-                        Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.DarkGreen with { A = 0 } * 0.85f * middleProg,
-                            previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
-                    }
+                    float middleProg = (float)(i - 4) / previousPostions.Count;
+                    Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.DarkGreen with { A = 0 } * 0.85f * middleProg,
+                        previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
                 }
-
             }
 
             //Border
@@ -165,10 +160,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 int grass = Dust.NewDust(projectile.position, projectile.width, projectile.height, DustID.JungleGrass, Scale: 0.75f);
             }
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Grab") with { Pitch = .85f, PitchVariance = .3f, Volume = 0.4f, MaxInstances = -1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Grab") with { Pitch = .85f, PitchVariance = .3f, Volume = 0.4f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/NPC_Hit_11") with { Pitch = .35f, PitchVariance = .25f, Volume = 0.55f, MaxInstances = -1};
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_11") with { Pitch = .35f, PitchVariance = .25f, Volume = 0.55f, MaxInstances = -1};
             SoundEngine.PlaySound(style2, projectile.Center);
 
             return false;

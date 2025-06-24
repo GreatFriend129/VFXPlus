@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.CrystalStorm);
+            return lateInstatiation && (item.type == ItemID.CrystalStorm) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrystalStormToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -52,7 +52,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.CrystalStorm);
+            return lateInstantiation && (entity.type == ProjectileID.CrystalStorm) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrystalStormToggle;
         }
 
 

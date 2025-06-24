@@ -23,33 +23,13 @@ using VFXPlus.Content.VFXTest;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class PoisonStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.PoisonStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class PoisonStaffShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.PoisonFang;
+            return lateInstantiation && (entity.type == ProjectileID.PoisonFang) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.PoisonStaffToggle;
         }
 
 
@@ -64,23 +44,23 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             int trailCount = 22 + randomLengthOffset; //13 | 33 | 26 | 23
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center + projectile.velocity);
+            previousPositions.Add(projectile.Center + projectile.velocity);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             //Add a second pos this tick
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center + projectile.velocity + projectile.velocity * 0.33f);
+            previousPositions.Add(projectile.Center + projectile.velocity + projectile.velocity * 0.33f);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
 
             float timeForPopInAnim = 21;
@@ -98,24 +78,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity * 0.15f;
 
-
                 float dustScale = Main.rand.NextFloat(0.55f, 0.75f) * 0.35f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowFlare>(), dustVel, newColor: Color.YellowGreen, Scale: dustScale);
                 smoke.alpha = 2;
-                //smoke.customData = DustBehaviorUtil.AssignBehavior_GPCBase(fadePower: 0.97f, shouldFadeColor: false);
             }
 
             projectile.rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
             projectile.spriteDirection = projectile.velocity.X > 0 ? 1 : -1;
 
+            Lighting.AddLight(projectile.Center, Color.GreenYellow.ToVector3() * 0.55f);
+
             timer++;
-
-            //Randomly offset sound 
-            if (projectile.timeLeft == 1 + Math.Abs(randomLengthOffset))
-            {
-
-            }
 
             #region vanillaAI (w/o dust)
             if (projectile.alpha > 0)
@@ -143,10 +117,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float overallAlpha = 0f;
         float overallScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawVertexTrail(projectile, false);
             });
@@ -175,8 +149,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Vector2 lineScale = new Vector2(1f, 1.2f * overallScale) * 1.15f;
 
-            //Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.Black * 0.15f * overallAlpha,
-            //projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
 
             Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.GreenYellow with { A = 0 } * 1f * overallAlpha,
                 projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
@@ -205,7 +177,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
             //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
+            Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f + timeOffset) * 0.15f;
@@ -251,10 +223,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             int i = 0;
-            foreach (Vector2 pos in previousPostions)
+            foreach (Vector2 pos in previousPositions)
             {
                 i++;
-                if (i % 6 == 0 && i > previousPostions.Count * 0.4f)
+                if (i % 6 == 0 && i > previousPositions.Count * 0.4f)
                 {
                     int a = Dust.NewDust(pos, 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.YellowGreen, Scale: 0.35f);
                     Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
@@ -269,11 +241,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.8f, PitchVariance = .5f, MaxInstances = -1, Volume = 0.12f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.8f, PitchVariance = .5f, MaxInstances = -1, Volume = 0.12f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             int soundVariant2 = Main.rand.Next(3);
-            SoundStyle tile_hit = new SoundStyle("Terraria/Sounds/Dig_" + soundVariant2) with { Volume = 0.1f, Pitch = 0.7f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundStyle tile_hit = new SoundStyle("Terraria/Sounds/Dig_" + soundVariant2) with { Volume = 0.11f, Pitch = 0.7f, PitchVariance = 0.35f, MaxInstances = -1 };
             SoundEngine.PlaySound(tile_hit, projectile.Center);
 
             return false;

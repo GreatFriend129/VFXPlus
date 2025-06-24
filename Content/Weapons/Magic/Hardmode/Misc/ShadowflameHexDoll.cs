@@ -17,114 +17,38 @@ using System.Threading;
 using Terraria.Graphics;
 using rail;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
-    
-    public class ShadowflameHexDoll : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.ShadowFlameHexDoll);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/hero_super_dash_burst") with { Volume = 0.2f, Pitch = -.25f, PitchVariance = .2f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(style, position);
-            return true;
-        }
-
-    }
+   
     public class ShadowflameHexDollShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ShadowFlame);
+            return lateInstantiation && (entity.type == ProjectileID.ShadowFlame) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ShadowflameHexDollToggle;
         }
 
         int tendril_index = 0;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-
             //Spawn tendril visuals projectile
             if (timer == 0)
             {
                 int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowflameTendrilVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
                 tendril_index = p;
-
-                //projectile.aiStyle = -1;
-                //Main.NewText(projectile.aiStyle);
             }
 
-            (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
-            
-            //Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStrong>(), Vector2.Zero, Scale: 0.5f, newColor: Color.OrangeRed);
             //Update tendril coords
-            ShadowflameHexDollVanillaAI(projectile);
+            (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
 
+            #region vanilla AI without dust 
 
-            timer++;
-            return false;
-            //return base.PreAI(projectile);
-        }
-
-
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            return false;
-            
-            Texture2D vanillaTex = TextureAssets.Projectile[2].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;// + drawPosOffset;
-            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White, projectile.velocity.ToRotation(), TexOrigin, 1f, SpriteEffects.None);
-
-            return false;
-
-        }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            //Let tendril know we have detatched
-            if (Main.projectile[tendril_index] != null)
-                (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).isAttached = false;
-
-            //return false;
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
-        //Vanilla SHD behavior but without the purple dust
-        public void ShadowflameHexDollVanillaAI(Projectile projectile)
-        {
             Vector2 center12 = projectile.Center;
             projectile.scale = 1f - projectile.localAI[0];
             projectile.width = (int)(20f * projectile.scale);
@@ -174,8 +98,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 }
             }
             */
+            #endregion
+
+            timer++;
+            return false;
         }
 
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            //Let tendril know we have detatched
+            if (Main.projectile[tendril_index] != null)
+                (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).isAttached = false;
+
+            //return false;
+            return base.PreKill(projectile, timeLeft);
+        }
     }
 
     public class ShadowflameTendrilVFX : ModProjectile
@@ -197,18 +134,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Projectile.hostile = false;
             Projectile.friendly = false;
             Projectile.tileCollide = false;
-            //Projectile.hide = true; //for draw behind
 
             Projectile.timeLeft = 4400; //180
         }
 
-        //public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-        //{
-        //    overPlayers.Add(index);
-        //}
-
         int timer = 0;
-        float true_width = 1f;
+        int timeSinceDetatched = 0;
+        
+        float true_width = 0f;
         float true_alpha = 1f;
 
         public List<Vector2> l_positions = new List<Vector2>();
@@ -231,11 +164,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 if (l_positions.Count > 3)
                     l_positions.RemoveAt(l_positions.Count - 1);
-                true_width -= 0.02f;
-                true_alpha -= 0.02f;
-            }
 
-            bool shouldStopDust = (true_width <= 0.99);
+                if (timeSinceDetatched > 3)
+                    true_width = Math.Clamp(MathHelper.Lerp(true_width, -0.5f, 0.08f), 0, 1f);
+
+                timeSinceDetatched++;
+            }
+            else
+                true_width = Math.Clamp(MathHelper.Lerp(true_width, 2f, 0.1f), 0, 1f);
+
+            bool shouldStopDust = (true_width <= 0.85);
             if (timer > 5 && timer % 4 == 0 && !shouldStopDust)
             {
                 for (int i = 0; i < l_positions.Count * 0.75f; i += 5)
@@ -263,12 +201,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                         Dust d2 = Dust.NewDustPerfect(pos + offset2, ModContent.DustType<GlowPixelCross>(), vel2, newColor: new Color(42, 2, 82) * 3f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.25f);
                         d2.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 3, postSlowPower: 0.92f, velToBeginShrink: 1.5f, fadePower: 0.93f, shouldFadeColor: false);
-
+                        d2.noLight = false;
                     }
                 }
             }
 
-            if (true_width <= 0 || true_alpha <= 0)
+            if (true_width <= 0.15)
                 Projectile.active = false;
 
             timer++;
@@ -277,101 +215,97 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
+            {
+                DrawTrail();
 
-            Color purple = new Color(61, 2, 92); //new Color(121, 7, 179);
-            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+                Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
 
-            #region Portal
-                Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/Starlight").Value;
+                //Portal at first node
+                Vector2 portalPos = startPos - Main.screenPosition;
+                float rot = Projectile.rotation + MathHelper.PiOver2;
 
-                Vector2 drawPos = startPos - Main.screenPosition;
-                Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
+                float easedScale = Easings.easeInQuad(true_width);// Easings.easeInOutCubic(true_width);
+                Vector2 v2Scale = new Vector2(1f * easedScale, 0.5f + (easedScale * 0.5f)) * Projectile.scale * 1f;
 
-                Main.EntitySpriteDraw(portal, drawPos, null, Color.Black * 0.3f * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+                Color purple = new Color(61, 2, 92);
+                Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+                Color purple3 = new Color(121, 7, 179);
 
+                Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.Purple with { A = 0 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.15f, SpriteEffects.None);
+                Main.EntitySpriteDraw(portal, portalPos, null, purple3 with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.65f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-                Main.EntitySpriteDraw(portal, drawPos, null, purple with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            });
 
-                Main.EntitySpriteDraw(portal, drawPos, null, Color.White with { A = 0 } * true_alpha, Projectile.rotation + MathHelper.PiOver2, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
-
-                #endregion
-
-            #region trail
-                Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value;
-                Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LintyTrail").Value;
-
-
-                if (myEffect == null)
-                    myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-                //Convert lists to arrays for use in vertex strip
-                Vector2[] pos_arr = l_positions.ToArray();
-                float[] rot_arr = l_rotations.ToArray();
-
-                VertexStrip vertexStrip = new VertexStrip();
-                vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-                VertexStrip vertexStrip2 = new VertexStrip();
-                vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
-
-                myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-                myEffect.Parameters["progress"].SetValue(timer * -0.03f);
-
-
-            //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-                myEffect.Parameters["ColorOne"].SetValue(darkPurple.ToVector3() * 2.5f); //*2f | 2.5f | 3f
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            myEffect.Parameters["glowThreshold"].SetValue(0.9f);
-                myEffect.Parameters["glowIntensity"].SetValue(1.1f);
-
-
-                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-                vertexStrip2.DrawTrail();
-                vertexStrip2.DrawTrail();
-
-                //Under Layer
-                myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-                myEffect.Parameters["ColorOne"].SetValue(purple.ToVector3() * 3f);
-
-
-                myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-                myEffect.Parameters["glowIntensity"].SetValue(2f);
-
-                myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-                vertexStrip.DrawTrail();
-                vertexStrip.DrawTrail();
-
-                Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-                #endregion
 
             return false;
         }
 
-        public void AddTendrilPosition(Vector2 position, float rotation)
+        public void DrawTrail()
         {
-            l_positions.Add(position);
-            l_rotations.Add(rotation);
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+
+            Color purple3 = new Color(121, 7, 179);
+            #region shaderPrep
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/s06sBloom").Value; //|spark_06 | Extra_196_Black
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinnerGlowTrail").Value;
+
+            Vector2[] pos_arr = l_positions.ToArray();
+            float[] rot_arr = l_rotations.ToArray();
+
+
+            Color StripColor(float progress) => Color.White * true_alpha;
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            VertexStrip vertexStrip2 = new VertexStrip();
+            vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
+            #endregion
+
+            #region Shader
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            //float dist = (node.head - node.tail).Length();
+            //float repValue = dist / 700f;
+            myEffect.Parameters["reps"].SetValue(0.5f);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.02f); //timer * 0.02
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+
+            //UnderLayer
+            myEffect.Parameters["ColorOne"].SetValue(darkPurple.ToVector3() * 2.85f * true_alpha);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip2.DrawTrail();
+
+            Color purp = new Color(215, 18, 215);
+
+            //Over layer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(purp.ToVector3() * 5f * true_alpha);
+            myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
+            myEffect.Parameters["glowIntensity"].SetValue(2.2f); //2.25
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+            #endregion
         }
 
-        public Color StripColor(float progress)
-        {
-            float alpha = 1f;
-
-            alpha = 1f - Easings.easeInSine(progress);
-
-            Color color = new Color(0f, 0f, 0f, alpha);
-
-            return color * Easings.easeInSine(true_alpha);
-        }
         public float StripWidth(float progress)
         {
             float num = 1f;
             float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
             num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-            return MathHelper.Lerp(0f, 100f, Easings.easeInCirc(num)) * 0.4f * Easings.easeInQuad(true_width); //* 1.15f * Easings.easeInSine(width); //0.5f; // 0.3f 
+            return MathHelper.Lerp(0f, 25f, Easings.easeInCirc(num)) * Easings.easeInQuad(true_width) * 0.85f; //* 1.15f * Easings.easeInSine(width); //0.5f; // 0.3f 
         }
 
         public float StripWidth2(float progress)
@@ -379,7 +313,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float num = 1f;
             float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
             num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-            return MathHelper.Lerp(0f, 90f, Easings.easeInCirc(num)) * 0.35f * Easings.easeInQuad(true_width); 
+            return MathHelper.Lerp(0f, 70, Easings.easeInCirc(num)) * Easings.easeInQuad(true_width) * 0.85f; //100 | 25 -- 75 25
+        }
+
+        public void AddTendrilPosition(Vector2 position, float rotation)
+        {
+            l_positions.Add(position);
+            l_rotations.Add(rotation);
         }
 
     }

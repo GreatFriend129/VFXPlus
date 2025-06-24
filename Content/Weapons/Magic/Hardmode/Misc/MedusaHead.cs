@@ -35,13 +35,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             int trailCount = 12;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
 
             float timeForPopInAnim = 25;
@@ -58,7 +58,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float drawAlpha = 0f;
         float drawScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -69,21 +69,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SpriteEffects se = Main.player[projectile.owner].direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = projectile.scale * progress;
+                float progress = (float)i / previousRotations.Count;
+                float size = projectile.scale * progress;
 
-                    Color col = Color.Gold * progress * projectile.Opacity * drawAlpha;
+                Color col = Color.Gold * progress * projectile.Opacity * drawAlpha;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
-                            previousRotations[i], TexOrigin, size, se);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
+                        previousRotations[i], TexOrigin, size, se);
 
             }
 
@@ -106,7 +102,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override void PostDraw(Projectile projectile, Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("OverPlayers", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
                 DrawOrb(projectile, false);
             });
@@ -199,7 +195,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (overallWidth == 0)
                 return false;
             
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("OverPlayers", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
                 DrawRay(projectile, false);
             });
@@ -217,7 +213,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Texture2D beam = CommonTextures.Medusa_Gray.Value;
 
             Vector2 startPosition = projectile.Center + new Vector2(0f, Main.player[projectile.owner].gfxOffY);
-            Vector2 goalPosition = startPosition + storedVelocity;
             Vector2 drawPosition = startPosition - Main.screenPosition;
 
             float rot = storedVelocity.ToRotation();

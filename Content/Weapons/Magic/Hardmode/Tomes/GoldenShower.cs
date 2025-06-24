@@ -26,7 +26,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.GoldenShower);
+            return lateInstatiation && (item.type == ItemID.GoldenShower) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.GoldenShowerToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -40,31 +40,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         int shotCount = 0;
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            if (shotCount == 0)
-            {
-                
-            }
-
-            shotCount++;
-
-            if (shotCount == 3)
-                shotCount = 0;
-
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.2f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, player.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/CommonWaterFallLight00") with { Volume = 0.05f, Pitch = 0.65f, PitchVariance = .2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style2, player.Center);
 
-            /*
-             * 
-             * 
-             * SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.2f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
-
-            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/CommonWaterFallLight00") with { Volume = 0.05f, Pitch = 0.25f, PitchVariance = .2f, MaxInstances = -1 }; 
-            SoundEngine.PlaySound(style2, player.Center);
-             */
             return true;
         }
 
@@ -76,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.GoldenShowerFriendly);
+            return lateInstantiation && (entity.type == ProjectileID.GoldenShowerFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.GoldenShowerToggle;
         }
 
         int timer = 0;
@@ -182,7 +163,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         {
             //Utils.DrawBorderString(Main.spriteBatch, "" + projectile.scale, projectile.Center - Main.screenPosition, Color.White);
             
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 Draw(projectile);
             });
@@ -192,46 +173,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public void Draw(Projectile projectile)
         {
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = CommonTextures.Flare.Value;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
+                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f); //3f
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f); //3f
 
-                    float startScale = projectile.ai[2] + sineScale;
+                float startScale = projectile.ai[2] + sineScale;
 
-                    Color col = Color.Orange;
+                Color col = Color.Orange;
 
-                    float easedFadeValue = progress * progress;
+                float easedFadeValue = progress * progress;
 
 
-                    Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
-                    Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
+                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
+                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
 
-                    //Black
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.4f * easedFadeValue,
-                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+                //Black
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.4f * easedFadeValue,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
 
-                    //Main
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.5f * easedFadeValue,
-                        previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
+                //Main
+                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.5f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
-                    //White
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * easedFadeValue,
-                        previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
-                }
+                //White
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
 
             }
-
-
 
         }
 

@@ -43,9 +43,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             //Dust
             for (int i = 0; i < 4 + Main.rand.Next(1, 4); i++) //2 //0,3
             {
+                Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 30f;
+
                 Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<LineSpark>(),
                     velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(6f, 22f),
-                    newColor: Color.DeepPink * 1.5f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
+                    newColor: Color.DeepPink * 1.25f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
 
                 dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
                     1f, 0.5f); //80
@@ -140,7 +142,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
             //Electric hit sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/NPC_Hit_53") with { Volume = .06f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_53") with { Volume = .06f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
             //Hit dust
@@ -161,7 +163,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.OnTileCollide(projectile, oldVelocity);

@@ -37,7 +37,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             Vector2 spawnPos = position + velocity.SafeNormalize(Vector2.UnitX) * 28f;
 
-            for (int i = 0; i < 7 + Main.rand.Next(0, 2); i++)
+            for (int i = 220; i < 7 + Main.rand.Next(0, 2); i++)
             {
                 Vector2 randomStart = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1) * 3f;
 
@@ -48,7 +48,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
 
             //Smoke
-            for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
+            for (int i = 220; i < 7 + Main.rand.Next(0, 3); i++)
             {
                 Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
                 Dust sm = Dust.NewDustPerfect(spawnPos, ModContent.DustType<HighResSmoke>(), smvel, newColor: new Color(255, 130, 20) * 0.85f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
@@ -125,6 +125,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void OnKill(Projectile projectile, int timeLeft)
         {
+            if (vfxIndex != -1)
+                (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;
+
+            
             //Dust
             for (int i = 0; i < 12 + Main.rand.Next(0, 2); i++) //4 //2,2
             {
@@ -216,15 +220,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Projectile.hostile = false;
             Projectile.friendly = false;
             Projectile.tileCollide = false;
-            //Projectile.hide = true; //for draw behind
 
             Projectile.timeLeft = 1000; //180
         }
 
-        //public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
-        //{
-        //    overPlayers.Add(index);
-        //}
 
         int timer = 0;
         float true_width = 1f;
@@ -241,11 +240,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 startingScroll = Main.rand.NextFloat(0f, 1000f);
                 startPos = Projectile.Center;
                 Projectile.velocity = Vector2.Zero;
+
+                float dist = (startPos).Distance(endPos);
+                Main.NewText(dist);
+
+                //Dust
+                float numberOfReps = dist / 25f;
+
+                for (int j = 222220; j < numberOfReps; j++)
+                {
+                    float rand = Main.rand.Next();
+
+                    float percent = Main.rand.NextFloat(0f, 0.8f);
+
+                    Vector2 pos = Vector2.Lerp(startPos, endPos, percent);
+                    Vector2 off = Main.rand.NextVector2Circular(14f, 14f);
+
+                    float dir = (endPos - startPos).ToRotation();
+                    Vector2 vel = dir.ToRotationVector2().RotatedByRandom(0.08f) * Main.rand.NextFloat(2, 10);
+
+                    Dust d = Dust.NewDustPerfect(pos + off, ModContent.DustType<LineSpark>(), vel * 2f, newColor: Color.OrangeRed * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
+                    d.noLight = false;
+                    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.89f, postShrinkPower: 0.89f, timeToStartShrink: 16, killEarlyTime: 100, XScale: 0.2f, YScale: 0.35f, shouldFadeColor: false);
+                }
+
             }
 
             true_width = Math.Clamp(MathHelper.Lerp(true_width, -0.5f, 0.05f), 0, 1f); //0.04
 
-            if (timer == 100 || true_width <= 0.05f)
+            float timeForWidthOut = 19;
+            float animProgress = Math.Clamp((float)timer / timeForWidthOut, 0f, 1f);
+
+            true_width = MathHelper.Lerp(1f, 0f, Easings.easeOutSine(animProgress));
+
+            if (timer == 100 || true_width <= 0.07f)
                 Projectile.active = false;
 
             timer++;
@@ -255,13 +283,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool PreDraw(ref Color lightColor)
         {
             #region endPoints
-            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
             //Vector2 v2Scale = new Vector2(0.6f, 1f) * true_width;
             Color inBetweenOrange = Color.Lerp(Color.Orange, Color.OrangeRed, 0.25f);
 
-            int dir = Projectile.rotation.ToRotationVector2().X >= 0 ? 1 : -1; 
+            int dir = Projectile.rotation.ToRotationVector2().X >= 0 ? 1 : -1;
             float rot = Projectile.rotation;
 
             float starRot = (float)(Main.timeForVisualEffects * 0.05f * dir);
@@ -287,11 +315,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             if (endPos.Equals(Vector2.Zero))
                 return false;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
                 //Create arrays
                 Vector2[] pos_arr = { startPos, endPos };
                 float[] rot_arr = { Projectile.rotation, Projectile.rotation };
+
+
+                Color StripColor(float progress) => Color.White * true_alpha;
+                float StripWidth(float progress) => 40f * true_width;
 
                 VertexStrip vertexStrip = new VertexStrip();
                 vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -308,94 +340,38 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             return false;
         }
 
-        public void ShaderParams()
-        {
-            
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-
-            myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
-            myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
-            myEffect.Parameters["satPower"].SetValue(0.6f); //higher power -> less affected by background 
-
-            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
-            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
-            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/smokeTrail4_512").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value); //smokeTrail4_512
-
-            // orange = 255, 165, 0 
-            // orangeRed = 255 69 0 
-            Color a = Color.Orange;
-            Color b = Color.OrangeRed;
-            Color c = new Color(255, 110, 5);
-            Color c1 = new Color(255, 96, 30, 255);
-            Color c2 = new Color(240, 79, 30, 255);
-            Color c3 = new Color(255, 173, 30, 255);
-            Color c4 = new Color(255, 169, 30, 255);
-
-            myEffect.Parameters["Color1"].SetValue(c.ToVector4());
-            myEffect.Parameters["Color2"].SetValue(Color.White.ToVector4());
-            myEffect.Parameters["Color3"].SetValue(c3.ToVector4());
-            myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
-
-            myEffect.Parameters["Color1Mult"].SetValue(1f * 1f); //1.75
-            myEffect.Parameters["Color2Mult"].SetValue(0.75f * 1f);
-            myEffect.Parameters["Color3Mult"].SetValue(0.5f * 1f); //0.25f
-            myEffect.Parameters["Color4Mult"].SetValue(0.75f * 1f); //0.75f
-            myEffect.Parameters["totalMult"].SetValue(1.15f);
-
-
-            //We want the number of repititions to be relative to the length of the laser
-            float dist = (Projectile.Center - endPos).Length();
-            float repValue = dist / 1000f;
-
-            myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
-            myEffect.Parameters["tex2reps"].SetValue(2.5f * repValue);
-            myEffect.Parameters["tex3reps"].SetValue(2.5f * repValue);
-            myEffect.Parameters["tex4reps"].SetValue(2.5f * repValue);
-
-            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.02f * 1f);
-            
-        }
-
         public void NewShaderParams()
         {
-
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/ThinLineGlowClear").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
-            myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
+            myEffect.Parameters["satPower"].SetValue(0.45f); //higher power -> less affected by background 
 
             myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
             myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value);
             myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/s06sBloom").Value); //smokeTrail4_512
+            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/smoketrailsmudge").Value); //smokeTrail4_512
 
-            // orange = 255, 165, 0 
-            // orangeRed = 255 69 0 
-            Color a = Color.Orange;
-            Color b = Color.OrangeRed;
-            Color c = new Color(255, 110, 5);
+            Color a = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
             Color c1 = new Color(255, 96, 30, 255);
-            Color c2 = new Color(240, 79, 30, 255);
-            Color c3 = new Color(255, 173, 30, 255);
             Color c4 = new Color(255, 169, 30, 255);
 
             myEffect.Parameters["Color1"].SetValue(a.ToVector4());
             myEffect.Parameters["Color2"].SetValue(c1.ToVector4());
             myEffect.Parameters["Color3"].SetValue(Color.White.ToVector4());
-            myEffect.Parameters["Color4"].SetValue(c4.ToVector4());
+            myEffect.Parameters["Color4"].SetValue(c1.ToVector4());
 
-            myEffect.Parameters["Color1Mult"].SetValue(1.25f * 1f); //1.75
+            myEffect.Parameters["Color1Mult"].SetValue(1f * 1f); //1.75
             myEffect.Parameters["Color2Mult"].SetValue(1.25f * 1f);
             myEffect.Parameters["Color3Mult"].SetValue(0.75f * 1f); //0.25f
-            myEffect.Parameters["Color4Mult"].SetValue(1f * 0f); //0.75f
-            myEffect.Parameters["totalMult"].SetValue(1.15f);
+            myEffect.Parameters["Color4Mult"].SetValue(1f * 1f); //0.75f
+            myEffect.Parameters["totalMult"].SetValue(1f);
 
 
             //We want the number of repititions to be relative to the length of the laser
             float dist = (Projectile.Center - endPos).Length();
-            float repValue = dist / 1000f;
+            float repValue = dist / 1500f;
 
             myEffect.Parameters["tex1reps"].SetValue(2.5f * repValue);
             myEffect.Parameters["tex2reps"].SetValue(2.5f * repValue);
@@ -404,36 +380,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.03f + startingScroll);
 
-        }
-
-
-        public Color StripColor(float progress)
-        {
-            return Color.White;
-
-            float alpha = 1f;
-            alpha = 1f - Easings.easeInSine(progress);
-            Color color = new Color(0f, 0f, 0f, alpha);
-            return color * Easings.easeInSine(true_alpha);
-        }
-        public float StripWidth(float progress)
-        {
-            return 80f * true_width; //80f
-
-            //float num = 1f;
-            //float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
-            //num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-            //return MathHelper.Lerp(0f, 100f, Easings.easeInCirc(num)) * 0.4f * Easings.easeInQuad(true_width); //* 1.15f * Easings.easeInSine(width); //0.5f; // 0.3f 
-        }
-
-        public float StripWidth2(float progress)
-        {
-            return 40f;
-            
-            float num = 1f;
-            float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
-            num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-            return MathHelper.Lerp(0f, 90f, Easings.easeInCirc(num)) * 0.35f * Easings.easeInQuad(true_width);
         }
 
     }

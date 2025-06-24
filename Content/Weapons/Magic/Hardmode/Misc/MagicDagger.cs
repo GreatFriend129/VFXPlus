@@ -32,13 +32,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             int trailCount = 6;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 5 == 0 && Main.rand.NextBool())
             {
@@ -57,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         }
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -67,22 +67,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.LightGoldenrodYellow * progress * projectile.Opacity;
+                Color col = Color.LightGoldenrodYellow * progress * projectile.Opacity;
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+                float size2 = (1f + (progress * 0.25f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
 
             }
 
@@ -115,16 +111,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_crystal_impact_" + soundVariant1) with { Volume = 0.2f, Pitch = .05f, PitchVariance = .25f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
-            SoundStyle tile_hit = new SoundStyle("Terraria/Sounds/Dig_" + soundVariant2) with { Volume = 1f, Pitch = 0f, PitchVariance = 0f, MaxInstances = -1 }; 
-            SoundEngine.PlaySound(tile_hit, projectile.Center);
+            SoundEngine.PlaySound(SoundID.Dig, projectile.Center);
 
             return false;
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
@@ -133,8 +122,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
-
-
     }
 
 }

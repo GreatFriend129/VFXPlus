@@ -35,13 +35,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             
             int trailCount = 9;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer == 0)
             {
@@ -93,7 +93,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         float inFadePower = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Color purp = new Color(121, 7, 179) * inFadePower;
@@ -113,22 +113,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 vec2Scale = new Vector2(easeVal, 1f);
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = (purp2 * 3f) * progress * inFadePower;
+                Color col = (purp2 * 3f) * progress * inFadePower;
 
-                    float size2 = (0.25f + (progress * 0.75f)) * projectile.scale;
+                float size2 = (0.25f + (progress * 0.75f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + posOffset;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
-                            previousRotations[i], TexOrigin, vec2Scale * size2, SpriteEffects.None);
-                }
-
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
+                        previousRotations[i], TexOrigin, vec2Scale * size2, SpriteEffects.None);
             }
 
             //Orb glow
@@ -200,7 +196,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
 
             //Sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_14") with { Pitch = .3f, MaxInstances = -1, PitchVariance = 0.2f, Volume = 0.3f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_14") with { Pitch = .3f, MaxInstances = -1, PitchVariance = 0.2f, Volume = 0.3f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             string randomSound = Main.rand.NextBool() ? "2" : "1";
@@ -208,7 +204,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SoundStyle style4 = new SoundStyle("Terraria/Sounds/Custom/dd2_flameburst_tower_shot_" + randomSound) with { Pitch = .25f, PitchVariance = .32f, MaxInstances = -1, Volume = 0.35f };
             SoundEngine.PlaySound(style4, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_62") with { Volume = .23f, Pitch = .51f, PitchVariance = .27f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_62") with { Volume = .23f, Pitch = .51f, PitchVariance = .27f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
             #endregion

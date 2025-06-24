@@ -20,11 +20,11 @@ using VFXPlus.Common.Drawing;
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
     
-    public class TomeOfInfiniteWisdom : GlobalItem 
+    public class TomeOfInfiniteWisdomItemOverride : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.BookStaff);
+            return lateInstatiation && (item.type == ItemID.BookStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TomeOfInfiniteWisdomToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -68,8 +68,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             }
 
-            //Main.NewText(player.altFunctionUse);
-
             return true;
         }
 
@@ -80,7 +78,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BookStaffShot);
+            return lateInstantiation && (entity.type == ProjectileID.BookStaffShot) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TomeOfInfiniteWisdomToggle;
         }
 
         int timer = 0;
@@ -99,13 +97,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             int trailCount = 14; //8
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 3 == 0 && Main.rand.NextBool() && timer > 8)
             {
@@ -126,7 +124,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         float fadeInAlpha = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -135,7 +133,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawAE(projectile);
             });
@@ -163,7 +161,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            if (previousRotations != null && previousPositions != null)
             {
                 Texture2D trailLine = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
 
@@ -176,7 +174,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                     float size2 = (0.5f + (progress * 0.5f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                     Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f * progress, //0.5f
                             previousRotations[i], TexOrigin, size2 * fadeInAlpha, SpriteEffects.None);
@@ -243,40 +241,4 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         }
 
     }
-
-    public class ToIWTornadoOverride : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
-            return lateInstantiation && (entity.type == ProjectileID.DD2ApprenticeStorm);
-        }
-
-        float glowAlpha = 0f;
-        int timer = 0;
-        public override bool PreAI(Projectile projectile)
-        {
-            glowAlpha = Math.Clamp(glowAlpha + 0.03f, 0f, 1f);
-
-            timer++;
-            return base.PreAI(projectile);
-        }
-
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-
-            return true;
-        }
-
-        public override void PostDraw(Projectile projectile, Color lightColor)
-        {
-            Texture2D bloom = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
-
-            Main.EntitySpriteDraw(bloom, projectile.Center - Main.screenPosition, null, Color.Tan with { A = 0 } * 0.2f * glowAlpha, projectile.rotation, bloom.Size() / 2f, 5f * new Vector2(0.65f, 1.5f), 0, 0);
-
-        }
-
-    }
-
 }

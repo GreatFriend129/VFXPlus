@@ -23,33 +23,13 @@ using VFXPlus.Content.VFXTest;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class VenomStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.VenomStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class VenomStaffShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.VenomFang;
+            return lateInstantiation && (entity.type == ProjectileID.VenomFang) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VenomStaffToggle;
         }
 
 
@@ -64,23 +44,23 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             int trailCount = 29 + randomLengthOffset; //22 |32
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center + projectile.velocity);
+            previousPositions.Add(projectile.Center + projectile.velocity);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             //Add a second pos this tick
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center + projectile.velocity + projectile.velocity * 0.33f);
+            previousPositions.Add(projectile.Center + projectile.velocity + projectile.velocity * 0.33f);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
 
             float timeForPopInAnim = 21;
@@ -93,7 +73,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float bloomGrowProgress = Math.Clamp((float)timer / timeForBloomGrowAnim, 0f, 1f);
             bloomVel = Vector2.Lerp(Vector2.Zero, projectile.velocity, Easings.easeOutQuad(bloomGrowProgress));
 
-            if (timer % 2 == 0 && Main.rand.NextBool() && timer > 5)
+            if (timer % 3 == 0 && Main.rand.NextBool() && timer > 5)
             {
                 Color purp = new Color(255, 85, 255); //135
 
@@ -101,7 +81,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity * 0.15f;
 
 
-                float dustScale = Main.rand.NextFloat(0.55f, 0.75f) * 0.35f;
+                float dustScale = Main.rand.NextFloat(0.55f, 0.75f) * 0.45f;
 
                 Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowFlare>(), dustVel, newColor: purp, Scale: dustScale);
                 smoke.alpha = 2;
@@ -109,6 +89,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             projectile.rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
             projectile.spriteDirection = projectile.velocity.X > 0 ? 1 : -1;
+
+            Lighting.AddLight(projectile.Center, Color.Purple.ToVector3() * 0.95f);
 
             timer++;
 
@@ -138,10 +120,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float overallAlpha = 0f;
         float overallScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawVertexTrail(projectile, false);
             });
@@ -180,11 +162,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, purp with { A = 0 } * 1f * overallAlpha,
                 projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, purp with { A = 0 } * 0.65f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.4f * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, purp with { A = 0 } * 1.5f * overallAlpha,
+                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.45f * 1f, SpriteEffects.None);
 
             Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.3f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(1f, 0.5f * overallScale) * 1f, SpriteEffects.None);
+                projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(0.8f, 0.5f * overallScale) * 1f, SpriteEffects.None);
 
             return false;
 
@@ -203,7 +185,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
             //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
+            Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f + timeOffset) * 0.15f;
@@ -228,43 +210,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             //vertexStrip.DrawTrail();
 
-            Color purp = new Color(230, 20, 230);
+            Color purp = new Color(200, 20, 200);
 
             //Over layer
-            myEffect.Parameters["ColorOne"].SetValue(purp.ToVector3() * 5f * overallAlpha);
+            myEffect.Parameters["ColorOne"].SetValue(purp.ToVector3() * 3f * overallAlpha);
             myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
             myEffect.Parameters["glowIntensity"].SetValue(2f); //2.25
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            
-            /*
-            //Draw FlareLine
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
-            Texture2D lineHalf = Mod.Assets.Request<Texture2D>("Assets/Pixel/Medusa_Gray").Value;
-
-            //Bloom
-            Vector2 bloomOrigin = new Vector2(0f, lineHalf.Height / 2f);
-            Vector2 bloomScale = new Vector2(0.1f * bloomVel.Length(), 1.15f);
-
-            Main.EntitySpriteDraw(lineHalf, projectile.Center - Main.screenPosition, null, Color.GreenYellow with { A = 0 } * 0.2f * overallAlpha,
-                projectile.velocity.ToRotation() + MathHelper.Pi, bloomOrigin, bloomScale, SpriteEffects.None);
-
-            Vector2 lineScale = new Vector2(1f, 1.2f) * overallScale * 1.15f;
-
-            //Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.Black * 0.15f * overallAlpha,
-            //projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
-
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.GreenYellow with { A = 0 } * 1f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
-
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.GreenYellow with { A = 0 } * 0.65f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.4f * 1f, SpriteEffects.None);
-
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.3f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(1f, 0.5f) * overallScale * 1f, SpriteEffects.None);
-            */
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -289,10 +244,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             int i = 0;
-            foreach (Vector2 pos in previousPostions)
+            foreach (Vector2 pos in previousPositions)
             {
                 i++;
-                if (i % 7 == 0 && i > previousPostions.Count * 0.4f)
+                if (i % 7 == 0 && i > previousPositions.Count * 0.4f)
                 {
                     int a = Dust.NewDust(pos, 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: purp, Scale: 0.35f);
                     Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
@@ -302,7 +257,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.8f, PitchVariance = .5f, MaxInstances = -1, Volume = 0.1f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.8f, PitchVariance = .5f, MaxInstances = -1, Volume = 0.1f };
             SoundEngine.PlaySound(style, projectile.Center);
 
             int soundVariant2 = Main.rand.Next(3);

@@ -40,7 +40,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style, player.Center);
 
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
@@ -382,7 +382,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Scroll/ComboLaserVertexGradient", AssetRequestMode.ImmediateLoad).Value;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawTrail(false);
             });
@@ -427,11 +427,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
             myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background  |95 | 3f looks very goozma
 
-            myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
-            myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
-            myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value); //smokeTrail4_512
+            //myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
+            //myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
+            //myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
+            //myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value); //smokeTrail4_512
 
+            myEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.ThinGlowLine.Value);
+            myEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.spark_06.Value);
+            myEffect.Parameters["sampleTexture3"].SetValue(CommonTextures.Extra_196_Black.Value);
+            myEffect.Parameters["sampleTexture4"].SetValue(CommonTextures.Trail5Loop.Value); //smokeTrail4_512
 
             myEffect.Parameters["grad1Speed"].SetValue(2f / 3f);
             myEffect.Parameters["grad2Speed"].SetValue(2f / 3f);

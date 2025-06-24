@@ -37,13 +37,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             int trailCount = 25;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 5 == 0 && Main.rand.NextBool())
             {   
@@ -63,7 +63,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             float totalAlpha = Easings.easeOutBack(fadeInAlpha);
@@ -76,24 +76,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
+                float progress = (float)i / previousRotations.Count;
+                float size = (0.75f + (progress * 0.25f)) * projectile.scale;
 
-                    Color col = Color.Lerp(Color.Purple, Color.MediumPurple, progress) * progress * totalAlpha;// Color.LightGoldenrodYellow * progress * projectile.Opacity;
-                    // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
+                Color col = Color.Lerp(Color.Purple, Color.MediumPurple, progress) * progress * totalAlpha;// Color.LightGoldenrodYellow * progress * projectile.Opacity;
+                                                                                                           // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
 
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+                float size2 = (1f + (progress * 0.25f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 2f, //0.5f
-                            previousRotations[i], TexOrigin, progress * progress * totalScale, SpriteEffects.None);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 2f, //0.5f
+                        previousRotations[i], TexOrigin, progress * progress * totalScale, SpriteEffects.None);
 
             }
 
@@ -108,25 +104,5 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return false;
 
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            return true;
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
-
 }

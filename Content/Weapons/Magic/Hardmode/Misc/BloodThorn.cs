@@ -78,20 +78,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Border
             for (int i = 0; i < 4; i++)
             {
-                float dist = 2f + (MathF.Sin((float)Main.timeForVisualEffects * 0.11f) * 0.5f); //3f
+                float dist = 2.5f + (MathF.Sin((float)Main.timeForVisualEffects * 0.11f) * 0.5f); //3f
 
                 float colorProg = i * 0.25f;
-                Color col = Color.Lerp(Color.Red, Color.Crimson, colorProg);
+                Color col = Color.Lerp(Color.DarkRed, Color.Crimson, colorProg);
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.2f * projectile.direction);
 
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle, 
-                    col with { A = 0 } * 0.7f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
+                    col with { A = 0 } * 0.35f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
             }
-
-            //Main.EntitySpriteDraw(vanillaTex, drawPos + new Vector2(0f, 0f), sourceRectangle, Color.Black * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
             
             return true;
 

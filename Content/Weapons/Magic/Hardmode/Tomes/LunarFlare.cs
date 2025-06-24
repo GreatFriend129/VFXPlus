@@ -18,36 +18,13 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 {
-    
-    public class LunarFlare : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.LunarFlareBook);
-        }
-
-        public override void SetDefaults(Item entity)
-        {            
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            //SoundStyle stylea = new SoundStyle("AerovelenceMod/Sounds/Effects/star_impact_01") with { Volume= 0.2f, Pitch = 1f, PitchVariance = .35f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(stylea, player.Center);
-
-            return true;
-        }
-
-    }
     public class LunarFlareShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.LunarFlare);
+            return lateInstantiation && (entity.type == ProjectileID.LunarFlare) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LunarFlareToggle;
         }
 
         float drawScale = 0;
@@ -60,13 +37,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (timer % 2 == 0)
             {
                 previousRotations.Add(projectile.velocity.ToRotation());
-                previousPostions.Add(projectile.Center);
+                previousPositions.Add(projectile.Center);
 
                 if (previousRotations.Count > trailCount)
                     previousRotations.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
             }
 
             float timeForPopInAnim = 180;
@@ -173,10 +150,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         }
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawShit(projectile);
             });
@@ -237,7 +214,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 Vector2 lineScale = new Vector2(1f, 0.3f * progress * drawScale) * progress;
 
-                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Vector2 offset = Main.rand.NextVector2Circular(5f, 8f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
 
@@ -254,16 +231,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             }
 
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-
-            return false;
-            return base.PreKill(projectile, timeLeft);
-        }
-
-
-
     }
 
     public class LunarExplosionAnim : ModProjectile
@@ -322,24 +289,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     float progress = (float)i / 21;
                     Color col = Color.Lerp(Color.Black, col1, progress);
 
-                    //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
                     Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1f, 4f) * 2.5f,
                         newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 2.15f);
                     d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.25f); //12 28
                 }
-
-                //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_explosive_trap_explode_1") with { PitchVariance = 0.16f, Pitch = 0.5f };
-                //SoundEngine.PlaySound(style, Projectile.Center);
-
-                CirclePulseBehavior cpb2 = new CirclePulseBehavior(1.5f, true, 1, 0.8f, 0.8f);
-
-                //Dust d2 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Aqua * 0.1f);
-                //d2.scale = 0f;
-                //d2.customData = cpb2;
-                //d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
             }
 
-            scale = Math.Clamp(MathHelper.Lerp(scale, 2.25f, 0.1f), 0f, 2.25f);
+            overallScale = Math.Clamp(MathHelper.Lerp(overallScale, 2.25f, 0.1f), 0f, 2.25f);
             pulseVal *= 0.8f;
 
 
@@ -360,8 +316,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         float pulseVal = 0f;
 
-        float alpha = 1f;
-        float scale = 0f;
+        float overallScale = 0f;
         public override bool PreDraw(ref Color lightColor)
         {
             Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/NewLunarExplodeMain").Value;
@@ -371,14 +326,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             int frameHeight = ExploA.Height / Main.projFrames[Projectile.type];
             int startY = frameHeight * Projectile.frame;
-
             Rectangle sourceRectangle = new Rectangle(0, startY, ExploA.Width, frameHeight);
             Vector2 origin = sourceRectangle.Size() / 2f;
 
 
-            float scale12 = Projectile.scale * scale;
+            float scale12 = Projectile.scale * overallScale;
 
-            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * scale * Projectile.scale, 0, 0f);
+            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * overallScale * Projectile.scale, 0, 0f);
 
 
             Main.spriteBatch.Draw(ExploB, Projectile.Center - Main.screenPosition, sourceRectangle, Color.DodgerBlue * 0.65f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
@@ -386,35 +340,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Main.spriteBatch.Draw(ExploC, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } , Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
 
-
             return false;
-        }
-
-        public void oldShit()
-        {
-            Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion2").Value;
-            Texture2D ExploB = Mod.Assets.Request<Texture2D>("Assets/Anim/GrayscaleVanillaExplode").Value;
-            Texture2D ExploC = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion2Glowmask").Value;
-            //Texture2D ExploD = Mod.Assets.Request<Texture2D>("Assets/Anim/LunarExplosion").Value;
-
-            int frameHeight = ExploA.Height / Main.projFrames[Projectile.type];
-            int startY = frameHeight * Projectile.frame;
-
-            Rectangle sourceRectangle = new Rectangle(0, startY, ExploA.Width, frameHeight);
-            Vector2 origin = sourceRectangle.Size() / 2f;
-
-
-            float scale12 = Projectile.scale * scale;
-
-            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * scale * Projectile.scale, 0, 0f);
-
-
-            Main.spriteBatch.Draw(ExploB, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Black * 0.5f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } * 0.65f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.Draw(ExploC, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 }, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
-
-            return;
         }
     }
 

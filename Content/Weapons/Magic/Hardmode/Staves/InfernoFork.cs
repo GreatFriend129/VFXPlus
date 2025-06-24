@@ -23,33 +23,14 @@ using VFXPlus.Content.VFXTest;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class InfernoFork : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.InfernoFork);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
+   
     public class InfernoForkBoltOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.InfernoFriendlyBolt;
+            return lateInstantiation && (entity.type == ProjectileID.InfernoFriendlyBolt) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.InfernoForkToggle;
         }
 
 
@@ -102,7 +83,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawFireball(projectile, false);
             });
@@ -139,30 +120,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             #region after image
-            if (previousRotations != null && previousPositions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    Vector2 pos = previousPositions[i] - Main.screenPosition + off;
+                Vector2 pos = previousPositions[i] - Main.screenPosition + off;
 
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Vector2 size = (1f - (progress * 0.5f)) * totalScale;
+                Vector2 size = (1f - (progress * 0.5f)) * totalScale;
 
-                    float colVal = progress;
+                float colVal = progress;
 
-                    Color col = Color.Lerp(Color.Red * 0.75f, betweenOrangeRed, progress) * progress * 0.7f;
+                Color col = Color.Lerp(Color.Red * 0.75f, betweenOrangeRed, progress) * progress * 0.7f;
 
-                    Vector2 size2 = (1f - (progress * 0.15f)) * totalScale;
-                    Main.EntitySpriteDraw(FireBallPixel, pos + Main.rand.NextVector2Circular(10f, 10f) * (1f - progress), null, col with { A = 0 } * 0.85f * overallAlpha * colVal,
-                            previousRotations[i] + MathHelper.PiOver2, FireBallPixel.Size() / 2f, size2, SpriteEffects.None);
+                Vector2 size2 = (1f - (progress * 0.15f)) * totalScale;
+                Main.EntitySpriteDraw(FireBallPixel, pos + Main.rand.NextVector2Circular(10f, 10f) * (1f - progress), null, col with { A = 0 } * 0.85f * overallAlpha * colVal,
+                        previousRotations[i] + MathHelper.PiOver2, FireBallPixel.Size() / 2f, size2, SpriteEffects.None);
 
-                    Vector2 vec2Scale = new Vector2(0.25f, 1.15f) * size;
+                Vector2 vec2Scale = new Vector2(0.25f, 1.15f) * size;
 
-                    Main.EntitySpriteDraw(FireBall, pos + Main.rand.NextVector2Circular(0f, 0f) * (1f - progress), null, col with { A = 0 } * 1.25f * overallAlpha * colVal,
-                            previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, vec2Scale * 1.5f, SpriteEffects.None);
-                }
-
+                Main.EntitySpriteDraw(FireBall, pos + Main.rand.NextVector2Circular(0f, 0f) * (1f - progress), null, col with { A = 0 } * 1.25f * overallAlpha * colVal,
+                        previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, vec2Scale * 1.5f, SpriteEffects.None);
             }
             #endregion
 
@@ -181,7 +158,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.InfernoFriendlyBlast;
+            return lateInstantiation && entity.type == ProjectileID.InfernoFriendlyBlast && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.InfernoForkToggle;
         }
 
         int vfxBlastIndex = -1;
@@ -327,7 +304,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float overallAlpha = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("Dusts", () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 DrawInferno(true);
             });

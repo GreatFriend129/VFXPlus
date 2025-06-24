@@ -43,10 +43,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
                 Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f,
                     newColor: col with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1.5f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.3f); //12 28
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.05f); //12 28
             }
 
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = 0.2f, Pitch = -.25f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_43") with { Volume = 0.2f, Pitch = -.25f, PitchVariance = 0.15f, MaxInstances = -1 };
             SoundEngine.PlaySound(style4, player.Center);
 
             return true;
@@ -79,7 +79,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             if (firstHit)
             {
-                SoundStyle style23 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/cleaver_hit_06") with { Pitch = 0.1f, PitchVariance = .2f, Volume = 0.03f, MaxInstances = -1 };
+                SoundStyle style23 = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/cleaver_hit_06") with { Pitch = 0.1f, PitchVariance = .2f, Volume = 0.03f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style23, projectile.Center);
 
                 firstHit = false;
@@ -175,7 +175,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * drawAlpha * 0.25f, 0f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
             Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * drawAlpha * 0.3f, 0f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 GoddamnMonsoon(34); //50
             });
@@ -187,7 +187,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public void GoddamnMonsoon(int count = 50)
         {
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
-            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/anotheranotherorb").Value;
 
             FastRandom r = new("Penis".GetHashCode());
             float speedTime = Main.GlobalTimeWrappedHourly * 0.75f * Projectile.spriteDirection; //2f
@@ -197,6 +196,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             for (int i = 0; i < count; i++)
             {
                 float iprog = (float)i / (float)count;
+
+
 
                 Texture2D texture = Tex;
                 Rectangle frame = texture.Bounds;

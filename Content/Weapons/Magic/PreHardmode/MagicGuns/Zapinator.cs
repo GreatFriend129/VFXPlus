@@ -34,22 +34,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
         public override Vector2? HoldoutOffset(int type)
         {
-            return new Vector2(-2f, 1f);
+            return new Vector2(-2f, 0f); // -2 1
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             //Dust
-            for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
+            for (int i = 0; i < 6 + Main.rand.Next(1, 5); i++) //2 //0,3
             {
-                Vector2 spawnOffset = new Vector2(0f, velocity.X > 0 ? -5f : 5).RotatedBy(velocity.ToRotation());
-                Vector2 spawnPos = position + (velocity.SafeNormalize(Vector2.UnitX) * 40f) + spawnOffset;
+                Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 32f;
+                pos += new Vector2(0f, -3f);
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(2f, 8.5f);
 
-                Dust dp = Dust.NewDustPerfect(spawnPos, ModContent.DustType<MuraLineBasic>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.4f, 0.4f)) * Main.rand.NextFloat(1.5f, 6f),
-                    newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.4f, 0.65f) * 0.3f);
+                Dust dp = Dust.NewDustPerfect(pos + vel, ModContent.DustType<MuraLineBasic>(), vel, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 0.6f);
+                dp.alpha = 10 + Main.rand.Next(-2, 5);
 
-                dp.alpha = 10;
+                dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.91f, 0.97f));
             }
 
             return true;

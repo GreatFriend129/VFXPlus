@@ -153,13 +153,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             SoundEngine.PlaySound(style, projectile.Center);
 
             //Hit dust
-            for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
+            if (projectile.penetrate > 1)
             {
-                Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.NextFloat(2f, 10f);
+                for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
+                {
+                    Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.NextFloat(2f, 10f);
 
-                Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel, newColor: Color.LimeGreen, Scale: Main.rand.NextFloat(0.35f, 0.65f) * 0.65f);
-                dp.alpha = 10 + Main.rand.Next(-2, 5);
+                    Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel, newColor: Color.LimeGreen, Scale: Main.rand.NextFloat(0.35f, 0.65f) * 0.65f);
+                    dp.alpha = 10 + Main.rand.Next(-2, 5);
+
+                    dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.94f, 0.97f));
+                }
             }
+
 
             for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++)
             {

@@ -55,22 +55,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             int trailCount = 12;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center + projectile.velocity * 0.5f);
+            previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
 
             float timeForPopInAnim = 30;
@@ -87,7 +87,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float starPower = 0f;
         float drawScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -97,21 +97,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = projectile.scale * drawScale;
+                float progress = (float)i / previousRotations.Count;
+                float size = projectile.scale * drawScale;
 
-                    Color col = Color.Aquamarine * progress * projectile.Opacity;
+                Color col = Color.Aquamarine * progress * projectile.Opacity;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
-                            previousRotations[i], TexOrigin, size, SpriteEffects.None);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
+                        previousRotations[i], TexOrigin, size, SpriteEffects.None);
 
             }
 
@@ -174,45 +170,4 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
     }
-
-    public class ToxicFlaskSmokeOverride : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
-            return lateInstantiation && (entity.type == ProjectileID.ToxicCloud || entity.type == ProjectileID.ToxicCloud2 || entity.type == ProjectileID.ToxicCloud3) 
-                && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ToxicFlaskToggle;
-        }
-
-        int timer = 0;
-        public override bool PreAI(Projectile projectile)
-        {
-            
-            timer++;
-            return base.PreAI(projectile);
-        }
-
-
-
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, -300f);
-            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-
-            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity * 0.08f, projectile.rotation, TexOrigin, projectile.scale * 3f, SpriteEffects.None);
-
-            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
-
-            return true;
-
-        }
-
-    }
-
 }

@@ -23,33 +23,13 @@ using VFXPlus.Content.VFXTest;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class MeteorStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.MeteorStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class MeteorStaffShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Meteor1) || (entity.type == ProjectileID.Meteor2) || (entity.type == ProjectileID.Meteor3);
+            return lateInstantiation && (entity.type == ProjectileID.Meteor1) || (entity.type == ProjectileID.Meteor2) || (entity.type == ProjectileID.Meteor3) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MeteorStaffToggle;
         }
 
         float drawRotation = 0f;
@@ -156,7 +136,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawVertexTrail(false);
                 DrawPixelTrail(projectile, false);
@@ -413,15 +393,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return false;
             return base.PreKill(projectile, timeLeft);
         }
-
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
 
     }
 

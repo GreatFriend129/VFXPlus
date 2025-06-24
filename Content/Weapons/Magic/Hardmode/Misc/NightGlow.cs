@@ -15,31 +15,27 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
-using static tModPorter.ProgressUpdate;
 using VFXPLus.Common;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
-using System.Timers;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
     
-    public class Nightglow : GlobalItem 
+    public class NightglowOverride : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.FairyQueenMagicItem);
+            return lateInstatiation && (item.type == ItemID.FairyQueenMagicItem) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NightglowToggle;
         }
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
             //Item use behavior is in Player.cs
             //Shoutouts to pointPoisition being misspelled in that lmao
             #region vanillaBehavior
@@ -91,7 +87,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
     {
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.FairyQueenMagicItemShot);
+            return lateInstantiation && (entity.type == ProjectileID.FairyQueenMagicItemShot) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.NightglowToggle;
         }
         public override bool InstancePerEntity => true;
 
@@ -130,7 +126,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 0, postSlowPower: 0.89f, velToBeginShrink: 10f, fadePower: 0.89f, shouldFadeColor: false);
             }
 
-            //Rhe nightglow proj spawns a burst of dust when timeLeft is 238, so this is a little hack to prevent that from happening
+            //The nightglow proj spawns a burst of dust when timeLeft is 238, so this is a little hack to prevent that from happening while not affecting anything
             if (projectile.timeLeft == 238)
                 projectile.timeLeft--;
             if (!hasDoneTimeLeftBoost && projectile.timeLeft == 230)
@@ -184,7 +180,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             //Star
-            Texture2D spike = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value; //Spike and Fire Spike look cool
+            Texture2D spike = CommonTextures.CrispStarPMA.Value; //Spike and Fire Spike look cool
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
 
@@ -254,105 +250,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         }
 
     }
-
-    public class NightglowPulseVFX : ModProjectile
-    {
-        public override string Texture => "Terraria/Images/Projectile_0";
-
-        //Safety Checks
-        public override bool? CanDamage() => false;
-        public override bool? CanCutTiles() => false;
-
-        public override void SetDefaults()
-        {
-            Projectile.width = Projectile.height = 16;
-            Projectile.ignoreWater = true;
-            Projectile.hostile = false;
-            Projectile.friendly = false;
-            Projectile.tileCollide = false;
-
-            Projectile.timeLeft = 2400;
-        }
-
-        int timer = 0;
-
-
-        public override void AI()
-        {
-
-            timer++;
-        }
-
-        float overallScale = 1f;
-        float overallAlpha = 0f;
-        public override bool PreDraw(ref Color lightColor)
-        {
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
-            {
-                DrawPortal(true);
-            });
-            DrawPortal(false);
-
-            return false;
-        }
-
-        Effect myEffect = null;
-        public void DrawPortal(bool giveUp)
-        {
-            if (giveUp)
-                return;
-
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaSwirl").Value;
-            Texture2D orb2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/zFadeCirclePMA").Value;
-
-
-            //
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-
-            float scale1 = 0.85f;
-            float scale2 = 1.6f;
-            float scale3 = 2.5f;
-            float scale = 0.55f;
-
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RainbowSigil", AssetRequestMode.ImmediateLoad).Value;
-
-            float rotA = (float)Main.timeForVisualEffects * -0.05f;
-
-            myEffect.Parameters["rotation"].SetValue(rotA);
-            myEffect.Parameters["rainbowRotation"].SetValue(rotA * 0.5f);
-            myEffect.Parameters["intensity"].SetValue(1f);
-            myEffect.Parameters["fadeStrength"].SetValue(0f);
-
-            //Main.EntitySpriteDraw(orb, drawPos, null, Color.Black * 0.5f, (float)Main.timeForVisualEffects * 0.02f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
-
-
-            Main.EntitySpriteDraw(orb, drawPos, null, Color.Black, (float)Main.timeForVisualEffects * -0.00f, orb.Size() / 2f, scale1 * scale, SpriteEffects.FlipVertically);
-            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Black, (float)Main.timeForVisualEffects * -0.00f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.FlipVertically);
-
-            //Main.EntitySpriteDraw(orb, drawPos, null, Color.Black, (float)Main.timeForVisualEffects * 0.05f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Black, (float)Main.timeForVisualEffects * 0.02f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-
-            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Black, (float)Main.timeForVisualEffects * -0.00f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.FlipVertically);
-
-
-            //Main.EntitySpriteDraw(orb2, drawPos + new Vector2(0f, 0f), null, Color.White, (float)Main.timeForVisualEffects * -0.01f, orb2.Size() / 2f, scale3 * scale * sineScale2 * 1f, SpriteEffects.None);
-
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-        }
-    }
-
     public class NightglowPulseVFX2 : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
@@ -443,10 +340,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 1f, MathHelper.PiOver2 + rot * -0.45f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
             Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 0.75f, MathHelper.PiOver2 + rot * -0.18f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
             Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 0.525f, MathHelper.PiOver2 +rot * 0.09f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
-
-            //Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 1f, MathHelper.PiOver2 + (float)Main.timeForVisualEffects * 0.15f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 0.75f, MathHelper.PiOver2 + (float)Main.timeForVisualEffects * 0.06f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            //Main.EntitySpriteDraw(orb, originPoint, null, rainbow with { A = 0 } * 0.525f, MathHelper.PiOver2 + (float)Main.timeForVisualEffects * -0.03f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
         }
     }
 }

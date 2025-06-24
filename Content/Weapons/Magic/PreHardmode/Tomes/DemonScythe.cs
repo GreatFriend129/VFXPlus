@@ -75,6 +75,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             float progress = Math.Clamp(timer / 50f, 0f, 1f);
             fadeInAlpha = MathHelper.Lerp(0f, 1f, progress);
 
+            float timeForPopInAnim = 30;
+            float animProgress = Math.Clamp((timer + 5) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 2f));
+
             timer++;
 
 
@@ -107,8 +112,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         float fadeInAlpha = 0f;
 
+        private BlendState _multiplyBlendState = null;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
+        float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D pixelSwirl = CommonTextures.PixelSwirl.Value;
@@ -122,41 +130,32 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
 
-            Color newPurple = new Color(61, 2, 92);
-            Color darkPurple = new Color(42, 2, 82);
+            Color newPurple = new Color(61, 2, 92) * 1f;
+            Color darkPurple = new Color(42, 2, 82) * 4f;
 
-
-            //Pixel Swirl
-            Main.EntitySpriteDraw(pixelSwirl, drawPos, null, darkPurple with { A = 0 } * fadeInAlpha * 1.5f, projectile.rotation, pixelSwirl.Size() / 2f, projectile.scale * 0.75f, SpriteEffects.None);
-
-            //Main tex
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
+            //Glow
+            Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/SoftGlow64").Value;
+            Main.EntitySpriteDraw(Orb, drawPos, null, darkPurple with { A = 0 } * 0.25f, projectile.rotation, Orb.Size() / 2, projectile.scale * 1.15f, 0);
 
 
             //Star
             Vector2 starPos = drawPos;
+            float starScale = MathHelper.Lerp(1.5f, 0f, Easings.easeOutCirc(fadeInAlpha)) * projectile.scale * 0.75f;
 
-            float starScale = MathHelper.Lerp(1.5f, 0f, Easings.easeOutQuad(fadeInAlpha)) * projectile.scale;
-
-            Main.EntitySpriteDraw(star, starPos, null, darkPurple with { A = 0 } * 2f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 1.4f, SpriteEffects.None);
-            Main.EntitySpriteDraw(star, starPos, null, Color.MediumPurple with { A = 0 } * 1.25f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 0.65f, SpriteEffects.None);
+            Main.EntitySpriteDraw(star, starPos, null, newPurple with { A = 0 } * 2f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 1.4f, SpriteEffects.None);
+            Main.EntitySpriteDraw(star, starPos, null, Color.White with { A = 0 } * 0.85f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 0.65f, SpriteEffects.None);
 
             //Border
-            for (int i = 0; i < 4; i++)
+            for (int num163 = 0; num163 < 4; num163++)
             {
-                float dist = MathHelper.Lerp(60f, 4f, fadeInAlpha);
-                float scale = MathHelper.Lerp(2.2f, 1.1f, Easings.easeInBack(fadeInAlpha)); //2.25
-                float alpha = Easings.easeInCubic(fadeInAlpha);
-
-                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-
-                Main.EntitySpriteDraw(vanillaTex, drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.03f * projectile.direction), sourceRectangle,
-                    newPurple with { A = 0 } * alpha * 1.25f, projectile.rotation, TexOrigin, projectile.scale * scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(vanillaTex, drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 2f, null, darkPurple with { A = 0 }, projectile.rotation, TexOrigin,
+                    projectile.scale * overallScale, 0f);
             }
 
+            //Main tex
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * overallScale, SpriteEffects.None);
 
             return false;
-
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -180,12 +179,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             }
 
             return false;
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)

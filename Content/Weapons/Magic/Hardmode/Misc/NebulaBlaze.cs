@@ -72,13 +72,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             int trailCount = 22; //16
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 4 == 0 && Main.rand.NextBool(2))
             {
@@ -280,7 +280,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float overallAlpha = 0f;
         float overallScale = 0f; 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             trail1.gradientTime = (float)Main.timeForVisualEffects * 0.02f;
@@ -343,7 +343,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
             
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            if (previousRotations != null && previousPositions != null)
             {
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
@@ -352,7 +352,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                     Color col = Color.Pink * progress * projectile.Opacity * overallAlpha;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                     Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f, //0.5f
                             previousRotations[i], TexOrigin, size, se);
