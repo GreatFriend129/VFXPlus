@@ -60,11 +60,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 d.fadeIn = 50;
             }
 
-            float timeForPopInAnim = 50;
-            float animProgress = Math.Clamp((timer + 5) / timeForPopInAnim, 0f, 1f);
-
-            //overallAlpha = 0.2f + MathHelper.Lerp(0f, 0.8f, Easings.easeInOutBack(animProgress, 1f, 1f));
-
             starPower = Math.Clamp(MathHelper.Lerp(starPower, 1.25f, 0.02f), 0f, 1f);
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.03f), 0f, 1f);
 
@@ -138,19 +133,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                Trail(projectile, true);
                 NewTrail(projectile, false);
             });
-
-            Trail(projectile, true);
-            NewTrail(projectile, true);
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
             //Star
             if (starPower < 1)
             {
-                Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
+                Texture2D star = CommonTextures.RainbowRod.Value;
 
                 float dir = projectile.velocity.X > 0 ? 1 : -1;
 
@@ -188,67 +179,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return false;
         }
 
-        public void Trail(Projectile projectile, bool returnImmediately)
-        {
-            if (returnImmediately)
-                return;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-            //Star
-            if (starPower < 1)
-            {
-                Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-
-                float dir = projectile.velocity.X > 0 ? 1 : -1;
-
-                float starRotation = MathHelper.Lerp(0f, MathHelper.Pi * 2f * dir, Easings.easeInOutQuad(starPower)) + projectile.rotation;
-                float starScale = Easings.easeOutQuint(1f - starPower) * projectile.scale * 1.25f;
-
-                Vector2 starScaleVec2 = new Vector2(1f, 0.5f) * starScale;
-
-
-                Main.EntitySpriteDraw(star, drawPos, null, Color.SkyBlue with { A = 0 } * starPower, starRotation, star.Size() / 2f, starScaleVec2, SpriteEffects.None);
-                Main.EntitySpriteDraw(star, drawPos, null, Color.SkyBlue with { A = 0 } * starPower, starRotation, star.Size() / 2f, starScaleVec2 * 0.65f, SpriteEffects.None);
-
-                Main.EntitySpriteDraw(star, drawPos, null, Color.SkyBlue with { A = 0 } * starPower, starRotation + MathHelper.PiOver2, star.Size() / 2f, starScaleVec2, SpriteEffects.None);
-                Main.EntitySpriteDraw(star, drawPos, null, Color.SkyBlue with { A = 0 } * starPower, starRotation + MathHelper.PiOver2, star.Size() / 2f, starScaleVec2 * 0.65f, SpriteEffects.None);
-            }
-
-            //Orb
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
-            Vector2 vec2Scale = new Vector2(0.85f, 0.55f) * overallAlpha;
-
-            //Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * 0.1f, projectile.velocity.ToRotation(), orb.Size() / 2f, 2f * overallAlpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, Color.LightSkyBlue with { A = 0 } * 1f, projectile.velocity.ToRotation(), orb.Size() / 2f, vec2Scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * 1f, projectile.velocity.ToRotation(), orb.Size() / 2f, vec2Scale * 0.5f, SpriteEffects.None);
-
-
-            Texture2D Ghost = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Staves/SpectreAssets/lostsoul").Value;
-
-            Vector2 mainVec2Scale = new Vector2(1f, overallAlpha);
-
-            //AfterImage
-            for (int i = 0; i < previousRotations.Count; i += 2)
-            {
-                float progress = (float)i / previousRotations.Count;
-
-                float size = (0.5f + (progress * 0.5f)) * projectile.scale;
-
-                Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.LightSkyBlue, 0.5f);
-
-                Color col = Color.Lerp(Color.DeepSkyBlue, betweenBlue, progress) * progress;
-
-                float size2 = size;
-                Main.EntitySpriteDraw(Ghost, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.5f * Easings.easeOutQuad(overallAlpha),
-                        previousRotations[i], Ghost.Size() / 2f, mainVec2Scale * size2 * drawScale, SpriteEffects.None);
-
-                Vector2 vec2ScaleLine = new Vector2(1.5f, 0.3f * overallAlpha) * size;
-
-                Main.EntitySpriteDraw(Ghost, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.35f * overallAlpha,
-                        previousRotations[i], Ghost.Size() / 2f, vec2ScaleLine * drawScale, SpriteEffects.None);
-            }
-        }
 
         float randomSineOffset = Main.rand.NextFloat(0f, 100f);
         public void NewTrail(Projectile projectile, bool returnImmediately)
@@ -283,7 +213,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Main.spriteBatch.Draw(Spike, drawPosAI, null, col with { A = 0 } * 0.75f, previousRotations[i], Spike.Size() / 2f, vec2ScaleTrail, SpriteEffects.None, 0f);
             }
         }
-
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {

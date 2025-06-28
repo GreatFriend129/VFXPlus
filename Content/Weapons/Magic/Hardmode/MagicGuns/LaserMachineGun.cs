@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 using VFXPlus.Common.Drawing;
 using static tModPorter.ProgressUpdate;
 using Terraria.Graphics.Shaders;
+using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
@@ -27,7 +28,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.LaserMachinegun);
+            return lateInstatiation && (item.type == ItemID.LaserMachinegun) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LaserMachinegunToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -48,7 +49,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.LaserMachinegun);
+            return lateInstantiation && (entity.type == ProjectileID.LaserMachinegun) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LaserMachinegunToggle;
         }
 
         int timer = 0;
@@ -57,13 +58,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             
             int trailCount = 10;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             #region vanilla code dear god
 
@@ -234,7 +235,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             //Glowmask is Glow_35
@@ -253,21 +254,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Main.EntitySpriteDraw(Tex, drawPos + new Vector2(0f, 0f), sourceRectangle, lightColor, rot, TexOrigin, projectile.scale, se);
 
 
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.SkyBlue with { A = 0 } * Easings.easeInCubic(progress);
-                    Color col2 = Color.DodgerBlue with { A = 0 } * progress;
+                Color col = Color.SkyBlue with { A = 0 } * Easings.easeInCubic(progress);
+                Color col2 = Color.DodgerBlue with { A = 0 } * progress;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(GlowMask, AfterImagePos, sourceRectangle, col * 0.8f,
-                          previousRotations[i], TexOrigin, projectile.scale, SpriteEffects.None);
-                }
-
+                Main.EntitySpriteDraw(GlowMask, AfterImagePos, sourceRectangle, col * 0.8f,
+                      previousRotations[i], TexOrigin, projectile.scale, SpriteEffects.None);
             }
 
 
@@ -282,47 +279,47 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.LaserMachinegunLaser);
+            return lateInstantiation && (entity.type == ProjectileID.LaserMachinegunLaser) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LaserMachinegunToggle;
         }
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
 
-            if (timer % 3 == 0 && projectile.ai[1] == 0)
+            if (timer % 2 == 0 && projectile.ai[1] == 0)
             {
                 int trailCount = 30;
                 previousRotations.Add(projectile.rotation);
-                previousPostions.Add(projectile.Center);
+                previousPositions.Add(projectile.Center);
 
                 if (previousRotations.Count > trailCount)
                     previousRotations.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
 
 
                 bool addInBetween = true;
                 if (addInBetween)
                 {
                     previousRotations.Add(projectile.rotation);
-                    previousPostions.Add(projectile.Center + projectile.velocity * 0.5f);
+                    previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
 
                     if (previousRotations.Count > trailCount)
                         previousRotations.RemoveAt(0);
 
-                    if (previousPostions.Count > trailCount)
-                        previousPostions.RemoveAt(0);
+                    if (previousPositions.Count > trailCount)
+                        previousPositions.RemoveAt(0);
                 }
             }
             else if (projectile.ai[1] == 1)
             {
                 if (timer % 1 == 0)
                 {
-                    if (previousPostions.Count > 0)
+                    if (previousPositions.Count > 0)
                     {
                         previousRotations.RemoveAt(0);
-                        previousPostions.RemoveAt(0);
+                        previousPositions.RemoveAt(0);
                     }
                 }
             }
@@ -343,10 +340,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawLaserShot(projectile);
             });
@@ -359,61 +356,72 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public void DrawLaserShot(Projectile projectile)
         {
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D line2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 220; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+
+                float easedProg = Easings.easeInCirc(progress);
+
+                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.15f;
+
+                float size = Easings.easeOutSine(1f * progress) * projectile.scale + sineScale;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                float colPower = easedProg;
+
+
+                Color newBlue = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.85f);
+
+                Color newCol = newBlue;//Color.Lerp(Color.White, newBlue, progress);
+                Color newCol2 = Color.DodgerBlue * 1.5f;
+
+
+                Vector2 lineScale = new Vector2(2.25f, 0.3f + 0.4f * progress * 1.75f);
+                Vector2 lineScale2 = new Vector2(2.25f, 0.15f + 0.2f * progress * 1.25f);
+
+                //Black
+                //Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * progress * progress * progress,
+                //    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+
+                //Main
+                Main.EntitySpriteDraw(line2, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress,
+                    projectile.velocity.ToRotation(), line2.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
+
+                if (progress == 0)
                 {
-                    float progress = (float)i / previousRotations.Count;
-
-                    float easedProg = Easings.easeInCirc(progress);
-
-                    float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.15f;
-
-                    float size = Easings.easeOutSine(1f * progress) * projectile.scale + sineScale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    float colPower = easedProg;
-
-
-                    Color newBlue = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.85f);
-
-                    Color newCol = newBlue;//Color.Lerp(Color.White, newBlue, progress);
-                    Color newCol2 = Color.DodgerBlue * 1.5f;
-
-
-                    Vector2 lineScale = new Vector2(2.25f, 0.3f + 0.4f * progress); 
-                    Vector2 lineScale2 = new Vector2(2.25f, 0.15f + 0.2f * progress);
-
-                    //Black
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * progress * progress * progress, 
-                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
-                    
-                    //Main
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress * progress,
+                    Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress,
                         projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
-
-                    if (progress == 0)
-                    {
-                        Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress * progress,
-                            projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
-                    }
-
-                    //White
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * progress * progress * progress,
-                        projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
                 }
 
-                Vector2 lineScaleA = new Vector2(2.25f, 0.3f + 0.4f);
-                Vector2 lineScale2A = new Vector2(2.25f, 0.15f + 0.2f);
-                //Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.DeepSkyBlue with { A = 0 }, projectile.velocity.ToRotation(), line.Size() / 2f, lineScaleA * projectile.scale, SpriteEffects.None);
-                //Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2A * projectile.scale, SpriteEffects.None);
+                //White
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * progress * progress,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+            }
 
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Color color = Main.hslToRgb((timer * 0.01f + projectile.ai[1]) % 1f, 1f, 0.4f, 0);
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Vector2 vec2Scale = new Vector2(1f, 0.8f * progress) * projectile.scale * 0.75f;
+                Vector2 vec2Scale2 = new Vector2(1f, 0.4f * progress) * projectile.scale * 0.75f;
+
+                Main.EntitySpriteDraw(line, AfterImagePos, null, color with { A = 0 },
+                       previousRotations[i], line.Size() / 2f, vec2Scale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 1f * progress,
+                       previousRotations[i], line.Size() / 2f, vec2Scale2, SpriteEffects.None);
 
             }
+
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -446,36 +454,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
             Collision.HitTiles(projectile.position, projectile.velocity, projectile.width, projectile.height);
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
-            //SoundEngine.PlaySound(style, projectile.Center);
+            
             SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.25f, Pitch = 1f, PitchVariance = 0.25f, MaxInstances = -1 }, projectile.Center);
 
 
             projectile.Kill();
 
 
-
-            //SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.75f, Pitch = 1f, PitchVariance = 0.25f }, projectile.Center);
-
             for (int i = 0; i < 2; i++)
             {
-                if (previousPostions.Count >= 1)
+                if (previousPositions.Count >= 1)
                 {
-                    int toRemove = previousPostions.Count - 1;
-                    previousPostions.RemoveAt(toRemove);
+                    int toRemove = previousPositions.Count - 1;
+                    previousPositions.RemoveAt(toRemove);
                     previousRotations.RemoveAt(toRemove);
                 }
             }
             
             
-            //projectile.Center += oldVelocity.SafeNormalize(Vector2.UnitX) * -5;
-
             return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.Vilethorn);
+            return lateInstatiation && (item.type == ItemID.Vilethorn) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -49,7 +49,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornBase);
+            return lateInstantiation && (entity.type == ProjectileID.VilethornBase) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle;
         }
 
 
@@ -58,12 +58,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
-            {
-                //int vfx = Projectile.NewProjectile(null, projectile.Center, projectile.velocity, ModContent.ProjectileType<VilethornVFX>(), 0, 0);
-                //(Main.projectile[vfx].ModProjectile as VilethornVFX).parent = projectile.whoAmI;
-            }
-            
             if (timer == 8)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
@@ -74,9 +68,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
                 SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
                 SoundEngine.PlaySound(style2, projectile.Center);
-
-                //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_156") with { Volume = 0.15f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                //SoundEngine.PlaySound(style4, projectile.Center);
             }
 
 
@@ -100,34 +91,21 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 10; i++)
                 {
                     float myAlpha = projectile.Opacity * alpha;
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                        new Color(61, 2, 92) with { A = 0 } * 0.85f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
-
-
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
 
             return false;            
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
     }
 
     public class VilethornTipShotOverride : GlobalProjectile
@@ -136,7 +114,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornTip);
+            return lateInstantiation && (entity.type == ProjectileID.VilethornTip) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle;
         }
 
 
@@ -145,12 +123,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
-            {
-                //int vfx = Projectile.NewProjectile(null, projectile.Center, projectile.velocity, ModContent.ProjectileType<VilethornVFX>(), 0, 0);
-                //(Main.projectile[vfx].ModProjectile as VilethornVFX).parent = projectile.whoAmI;
-            }
-
             if (timer == 8)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
@@ -184,18 +156,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    //Vector2 offset = new Vector2(4f, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                    //Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * parentProj.direction);
-                    //float myAlpha = parentProj.Opacity * alpha;
-
                     float myAlpha = projectile.Opacity * alpha;
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 1f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                        new Color(61, 2, 92) with { A = 0 } * 0.85f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
@@ -203,19 +171,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
             return false;
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-
-            //return false;
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
     }
 
 

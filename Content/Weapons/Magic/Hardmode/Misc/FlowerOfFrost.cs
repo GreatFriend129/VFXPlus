@@ -21,35 +21,13 @@ using System.Reflection.Metadata;
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 {
-    
-    public class FlowerOfFrost : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.FlowerofFrost);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-
-            return true;
-        }
-
-    }
     public class FlowerOfFrostShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BallofFrost);
+            return lateInstantiation && (entity.type == ProjectileID.BallofFrost) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.FlowerOfFrostToggle;
         }
 
         Vector2 Vec2Scale
@@ -70,15 +48,15 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 20;
+            int trailCount = 15;
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 2 == 0)
             {
@@ -92,25 +70,14 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             if (timer % 2 == 0 && timer > 10)
             {
                 Vector2 dustPos = projectile.Center;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.35f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.25f;
 
 
                 Color dustCol = Color.SkyBlue;
                 float dustScale = Main.rand.NextFloat(0.4f, 0.7f) * 0.9f;
 
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.7f, Scale: dustScale);
+                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.6f, Scale: dustScale);
                 smoke.alpha = 2;
-            }
-
-            if (timer % 4 == 0) //4
-            {
-                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<HighResSmoke>(), newColor: Color.LightSkyBlue, Scale: Main.rand.NextFloat(0.25f, 0.5f));
-                Main.dust[d].velocity += projectile.velocity * 0.25f;
-                Main.dust[d].velocity *= 0.45f;
-
-                HighResSmokeBehavior hrsb = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.5f); //0.5
-                hrsb.isPixelated = true;
-                Main.dust[d].customData = hrsb;
             }
 
             //Based off of coralite mod slime emperor 
@@ -264,7 +231,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         float bounceIntensity = 1f;
         float justBouncedPower = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -277,7 +244,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Vector2 finalDrawScale = Vec2Scale * projectile.scale;
 
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawPixelTrail(projectile);
             });
@@ -305,40 +272,40 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public void DrawPixelTrail(Projectile projectile)
         {
-            Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D AfterImage = CommonTextures.Flare.Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 finalDrawScale = Vec2Scale * projectile.scale;
 
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count - 1; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    if (progress != 1)
-                    {
-                        Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, Easings.easeInCirc(progress));
+                Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, Easings.easeInCirc(progress));
 
-                        float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
+                float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
-                        Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
 
-                        Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
-                        Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
+                //Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
+                //Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
 
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
-                            previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
+                float XScale = Math.Clamp(1f * size2, 0.55f, 2f);
+                if (i == previousRotations.Count - 1)
+                    XScale = 0.5f;
 
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
-                               previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
+                Vector2 newVec2 = new Vector2(XScale, 0.42f * size2);
+                Vector2 newVec22 = new Vector2(XScale, 0.11f * size2);
 
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
-                               previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
-                    }
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
+                    previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
 
-                }
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
+                       previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.65f * progress,
+                       previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
 
             }
 
@@ -346,8 +313,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             #region drawGlorb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Color orbCol3 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.4f) * 0.375f * true_alpha;
-            Color orbCol2 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.95f) * 0.525f * true_alpha;
+            Color orbCol3 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.85f) * 0.375f * true_alpha;
+            Color orbCol2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f) * 0.525f * true_alpha;
 
             float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.2f;
             float sineScale2 = MathF.Cos((float)Main.timeForVisualEffects * 0.22f + 0.32578f) * 0.15f;
@@ -357,8 +324,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.55f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.55f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
 
 
             #endregion
@@ -366,6 +333,36 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
+
+            for (int i = 0; i < 4 + Main.rand.Next(1, 6); i++)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
+                Vector2 spawnOffset = Main.rand.NextVector2Circular(3f, 3f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center + spawnOffset, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.75f, 1f),
+                    newColor: Color.SkyBlue, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
+
+                p.velocity -= projectile.velocity * 0.15f;
+            }
+
+            #region vanillaKill
+            SoundEngine.PlaySound(in SoundID.Item10, projectile.position);
+            int dustCount = 8; //Vanilla = 20
+            for (int num699 = 0; num699 < dustCount; num699++)
+            {
+                int num700 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, (0f - projectile.velocity.X) * 0.2f, (0f - projectile.velocity.Y) * 0.2f, 100, default(Color), 2f);
+                Main.dust[num700].noGravity = true;
+                Dust dust156 = Main.dust[num700];
+                Dust dust334 = dust156;
+                dust334.velocity *= 2f;
+                num700 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 135, (0f - projectile.velocity.X) * 0.2f, (0f - projectile.velocity.Y) * 0.2f, 100);
+                dust156 = Main.dust[num700];
+                dust334 = dust156;
+                dust334.velocity *= 2f;
+            }
+            #endregion
+
+            return false;
             return base.PreKill(projectile, timeLeft);
         }
 

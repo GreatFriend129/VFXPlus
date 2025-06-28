@@ -27,7 +27,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.MagnetSphere);
+            return lateInstatiation && (item.type == ItemID.MagnetSphere) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MagnetSphereToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -40,11 +40,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/ElectricExplode") with { Volume = 0.05f, Pitch = 0.35f, PitchVariance = 0.15f, MaxInstances = -1, };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Thunder/ElectricExplode") with { Volume = 0.05f, Pitch = 0.35f, PitchVariance = 0.15f, MaxInstances = -1, };
             SoundEngine.PlaySound(style, position);
 
-            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Item_106") with { Volume = .15f, Pitch = .5f, PitchVariance = 0.05f, MaxInstances = -1 };
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_106") with { Volume = .15f, Pitch = .5f, PitchVariance = 0.05f, MaxInstances = -1 };
             SoundEngine.PlaySound(style3, position);
 
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Thunder_0") with { Volume = .1f, Pitch = 1f, PitchVariance = .12f, };
@@ -60,7 +59,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.MagnetSphereBall);
+            return lateInstantiation && (entity.type == ProjectileID.MagnetSphereBall) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MagnetSphereToggle;
         }
 
         float overallScale = 1f;
@@ -96,21 +95,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             orbRot += 0.015f * (projectile.velocity.X > 0 ? 1 : -1);
 
             float rot = orbRot;
-            //float rot = timer * 0.04f * (projectile.velocity.X > 0 ? 1 : -1);
 
             float drawScale = projectile.scale * overallScale * 0.55f;
             float ballScale = 1f - (MathF.Sin((float)Main.timeForVisualEffects * 0.14f) * 0.06f);
 
 
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
             Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
 
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
 
-
-
-
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("Dusts", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 Main.spriteBatch.Draw(Ball, drawPos, null, Color.Black * 0.5f * overallAlpha, 0f, Ball.Size() / 2, 1.6f * drawScale, SpriteEffects.None, 0f);
 
@@ -123,7 +118,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             });
 
 
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("Dusts", () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/WaterEnergyNoise").Value);
                 myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/MagnetGrad").Value);
@@ -140,95 +135,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
 
                 Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), rot, Lightning.Size() / 2, 0.4f * drawScale * (ballScale + 0.4f), SpriteEffects.None, 0f);
-                //Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), rot * -1f, Lightning.Size() / 2, 0.4f * drawScale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
 
                 Main.spriteBatch.End();
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
                 Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             });
 
-
-
-            //ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("Dusts", () =>
-            //{
-                //DrawOrb(projectile, false);
-            //});
-
-            //DrawOrb(projectile, true);
-
             return false;
 
         }
-
-        public void DrawOrb(Projectile projectile, bool giveUp = false)
-        {
-            if (giveUp)
-                return;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-            float rot = timer * 0.04f;
-
-            float drawScale = projectile.scale * overallScale * 0.55f; 
-            float ballScale = 1f - ((float)Math.Sin((float)timer * 0.03f) * 0.12f);
-
-
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
-
-
-            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
-
-            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/WaterEnergyNoise").Value);
-            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/MagnetGrad").Value);
-            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
-            myEffect.Parameters["flowSpeed"].SetValue(1f);
-            myEffect.Parameters["distortStrength"].SetValue(0.1f);
-            myEffect.Parameters["uTime"].SetValue(timer * 0.015f);
-
-            myEffect.Parameters["vignetteSize"].SetValue(0.2f);
-            myEffect.Parameters["vignetteBlend"].SetValue(1f);
-            myEffect.Parameters["colorIntensity"].SetValue(1.75f);
-
-            Main.spriteBatch.Draw(Ball, drawPos, null, Color.Black * 1f, 0f, Ball.Size() / 2, 1.5f * drawScale, SpriteEffects.None, 0f);
-
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-            Color col = new Color(0, 210, 138) with { A = 0 };
-            Color col2 = new Color(0, 240, 145) with { A = 0 };
-
-            Main.spriteBatch.Draw(Ball, drawPos, null, Color.White with { A = 0 }, 0f, Ball.Size() / 2, 1.05f * drawScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.7f, rot, Ball.Size() / 2, 1.35f * drawScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Ball, drawPos, null, col2 * 0.3f, rot, Ball.Size() / 2, 2.4f * drawScale, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
-
-            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), rot, Lightning.Size() / 2, 0.4f * drawScale * (ballScale + 0.4f), SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), rot * -1f, Lightning.Size() / 2, 0.4f * drawScale * 0.7f * (ballScale + 0.4f), SpriteEffects.None, 0f);
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-        }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
     public class MagnetSphereLightningOverride : GlobalProjectile
@@ -237,7 +152,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.MagnetSphereBolt);
+            return lateInstantiation && (entity.type == ProjectileID.MagnetSphereBolt) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.MagnetSphereToggle;
         }
 
         Vector2 startPoint = Vector2.Zero;
@@ -297,9 +212,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         {
             if (timer == 0)
             {
-                //startPoint = Projectile.Center;
-                //endPoint = Projectile.Center + new Vector2(100f, 0f);//.RotatedByRandom(0f) * Main.rand.NextFloat(0.9f, 1.1f);
-
                 direction = (endPoint - Projectile.Center).ToRotation();
 
                 Dust p2 = Dust.NewDustPerfect(endPoint, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Aquamarine, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.3f);
@@ -314,10 +226,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 SoundStyle style5 = new SoundStyle("Terraria/Sounds/Custom/dd2_lightning_bug_zap_" + soundVar) with { Volume = 0.45f, Pitch = 0.51f, PitchVariance = 0.15f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style5, endPoint);
 
-                SoundStyle stylea = new SoundStyle("AerovelenceMod/Sounds/Effects/lightning_flash_01") with { Volume = 0.12f, Pitch = 1f, PitchVariance = 0.2f, MaxInstances = -1 };
+                SoundStyle stylea = new SoundStyle("VFXPlus/Sounds/Effects/Thunder/lightning_flash_01") with { Volume = 0.12f, Pitch = 1f, PitchVariance = 0.2f, MaxInstances = -1 };
                 SoundEngine.PlaySound(stylea, endPoint);
-
-
             }
 
             Projectile.spriteDirection = direction.ToRotationVector2().X > 0 ? 1 : -1;
@@ -375,7 +285,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 //Do dust
                 //Dust from orb
-                for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++) //4 //2,2
+                for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++) 
                 {
                     Vector2 vel = Main.rand.NextVector2Circular(5f, 5f) * 1f;
                     vel += trailRotations[0].ToRotationVector2() * 9f;
@@ -387,7 +297,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 }
 
                 //End dust
-                for (int i = 0; i < 4 + Main.rand.Next(0, 2); i++) //4 //2,2
+                for (int i = 0; i < 4 + Main.rand.Next(0, 2); i++)
                 {
                     Vector2 vel = Main.rand.NextVector2Circular(7f, 7f) * 1f;
 
@@ -427,7 +337,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (trailPositions.Count == 0)
                 return false;
 
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
+            Texture2D flare = CommonTextures.CrispStarPMA.Value;
 
 
             Vector2 startPos = trailPositions[0] - Main.screenPosition;
@@ -443,7 +353,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             Vector2 vec2Scale = new Vector2(1f, 0.85f) * 1.5f * elboost;
 
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 Main.EntitySpriteDraw(flare, startPos, null, Color.Aquamarine with { A = 0 }, startRot, flare.Size() / 2f, vec2Scale * 0.5f, SpriteEffects.None);
                 Main.EntitySpriteDraw(flare, startPos, null, Color.White with { A = 0 }, startRot, flare.Size() / 2f, vec2Scale * 0.25f, SpriteEffects.None);
@@ -495,10 +405,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             float dist = (endPoint - startPoint).Length();
             float repValue = dist / 400f;
             myEffect.Parameters["reps"].SetValue(repValue * 0.8f);
-            //myEffect.Parameters["reps"].SetValue(0.8f);
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.02f); //timer * 0.02
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.02f);
 
             //UnderLayer
             Color col = new Color(0, 190, 138) with { A = 0 };

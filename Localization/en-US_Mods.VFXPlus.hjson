@@ -192,6 +192,21 @@ Configs: {
 			Label: "[i:3457] Magic Weapons [i:3457]"
 			Tooltip: ""
 		}
+
+		TestToggle: {
+			Label: Test Toggle
+			Tooltip: ""
+		}
+
+		TT: {
+			Label: T T
+			Tooltip: ""
+		}
+
+		SubConfigTest: {
+			Label: Sub Config Test
+			Tooltip: ""
+		}
 	}
 
 	MagicToggles: {
@@ -546,19 +561,21 @@ Configs: {
 		}
 
 		BeeGunToggle: {
-			Label: Bee Gun Toggle
-			Tooltip: ""
+			Label: "[i:1121] Bee Gun"
+			Tooltip: Only impacts the VFX of the gun itself, not all bees
 		}
 
 		BetsysWrathToggle: {
-			Label: Betsys Wrath Toggle
+			Label: "[i:3870] Betsy's Wrath"
 			Tooltip: ""
 		}
 
 		NightglowToggle: {
-			Label: Nightglow Toggle
+			Label: "[i:4952] Nightglow"
 			Tooltip: ""
 		}
+
+		DisplayName: Magic Toggles
 	}
 
 	MiscCustomization: {
@@ -566,6 +583,36 @@ Configs: {
 
 		LastPrismPrideColor: {
 			Label: Last Prism Pride Color
+			Tooltip: ""
+		}
+	}
+
+	TestToggle: {
+		Tooltip: ""
+		Headers.TEST: T E S T Header
+
+		TestToggleBool: {
+			Label: Test Toggle Bool
+			Tooltip: ""
+		}
+
+		TestToggleBoolNoRR: {
+			Label: Test Toggle Bool No R R
+			Tooltip: ""
+		}
+
+		boost: {
+			Label: boost
+			Tooltip: ""
+		}
+
+		percent: {
+			Label: percent
+			Tooltip: ""
+		}
+
+		str: {
+			Label: str
 			Tooltip: ""
 		}
 	}

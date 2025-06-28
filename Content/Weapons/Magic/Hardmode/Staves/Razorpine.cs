@@ -21,49 +21,13 @@ using Terraria.Utilities.Terraria.Utilities;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class Razorpine : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.Razorpine);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            /*
-            //Dust
-            for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
-            {
-                Vector2 dustPos = position + velocity.SafeNormalize(Vector2.UnitX) * 25;
-                Dust dp = Dust.NewDustPerfect(dustPos, DustID.JungleGrass,
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(6, 9),
-                    Scale: Main.rand.NextFloat(0.90f, 1.1f) * 1f);
-
-                dp.alpha = 100;
-                dp.noGravity = true;
-                dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    1f, 0.5f); //80
-
-            }
-            */
-            return true;
-        }
-
-    }
     public class RazorpineShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.PineNeedleFriendly);
+            return lateInstantiation && (entity.type == ProjectileID.PineNeedleFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RazorpineToggle;
         }
 
         int vfxProjIndex = -1;
@@ -128,6 +92,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).isAttached = false;
                 (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).stuckInPower = 1f;
+                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).justHitPower = 1.65f;
 
                 Main.projectile[vfxProjIndex].Center += projectile.velocity;
             }
@@ -147,15 +112,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             base.OnHitNPC(projectile, target, hit, damageDone);
         }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
     //We want the vfx to extend past the lifetime of the projectile, so we duct tape a new projectile to the razorpine shot that handles vfx
@@ -196,16 +152,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float fadeInProg = Math.Clamp(timer / 15f, 0f, 1f);
             fadeInScale = Easings.easeOutCubic(fadeInProg);
 
-            ///float timeForPopInAnim = 22;
-            ///float animProgress = Math.Clamp((timer + 8) / timeForPopInAnim, 0f, 1f);
-            ///fadeInScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 3f));
 
+            stuckInPower = MathHelper.Clamp(stuckInPower - 0.06f, 0f, 1f);
+            justHitPower = Math.Clamp(MathHelper.Lerp(justHitPower, 0.15f, 0.13f), 1f, 1.15f);
 
-            stuckInPower = MathHelper.Clamp(stuckInPower - 0.04f, 0f, 1f);
-            //stuckInPower = Math.Clamp(MathHelper.Lerp(stuckInPower, -0.5f, 0.05f), 0f, 1f);
-
-            if (!isAttached && stuckInPower <= 0.15f)
-                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.09f), 0f, 1f);
+            if (!isAttached && stuckInTimer > 12)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.06f), 0f, 1f);
 
             if (overallAlpha == 0f)
                 Projectile.active = false;
@@ -216,22 +168,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     previousPositions.RemoveAt(0);
                 if (previousRotations.Count > 0)
                     previousRotations.RemoveAt(0);
-
-                overallScale = 0.8f + (Easings.easeInSine(stuckInPower) * 0.4f);
-
-                overallAlpha = Math.Clamp(overallAlpha, 0f, 0.8f);
             }
 
             if (stuckInNPC)
             {
                 if (Main.npc[npcWeAreStuckIn].active == true)
-                {
                     Projectile.Center = Main.npc[npcWeAreStuckIn].Center + relativePosition;
-                }
                 else
-                {
                     Projectile.active = false;
-                }
             }
 
 
@@ -240,6 +184,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             timer++;
         }
 
+        public float justHitPower = 0f;
 
         float overallAlpha = 1f;
         float overallScale = 1f;
@@ -250,32 +195,29 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Texture2D vanillaTex = TextureAssets.Projectile[ProjectileID.PineNeedleFriendly].Value;
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;// + Main.rand.NextVector2Circular(3f, 3f) * stuckInPower;
-            Vector2 TexOrigin = vanillaTex.Size() / 2f;
+            Vector2 TexOrigin = new Vector2(vanillaTex.Width / 2f, 0f); //vanillaTex.Size() / 2f; //
 
-            Vector2 vec2Scale = new Vector2(0.25f + (fadeInScale * 0.75f * overallAlpha), 1f) * Projectile.scale * overallScale;
+            Vector2 originOffset = new Vector2(vanillaTex.Height / 2f, 0f).RotatedBy(Projectile.rotation - MathHelper.PiOver2);
+            drawPos += originOffset;
+
+            Vector2 vec2Scale = new Vector2(0.25f + (fadeInScale * 0.75f * overallAlpha), 1f) * Projectile.scale * overallScale * justHitPower;
 
             //After-Image
-            if (previousRotations != null && previousPositions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Vector2 vec2Scale2 = new Vector2(progress, 1f) * Projectile.scale;
+                Vector2 vec2Scale2 = new Vector2(progress, 1f) * Projectile.scale;
 
-                    Color colw = Color.DarkGreen * Easings.easeOutSine(progress) * overallAlpha;
+                Color colw = Color.DarkGreen * Easings.easeOutSine(progress) * overallAlpha;
 
-                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw with { A = 0 } * 0.75f,
-                            previousRotations[i], TexOrigin, vec2Scale2 * overallScale, SpriteEffects.None);
-                }
-
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw with { A = 0 } * 0.75f,
+                        previousRotations[i], TexOrigin, vec2Scale2 * overallScale, SpriteEffects.None);
             }
 
-            float rotBonus = MathF.Cos(stuckInPower * MathHelper.TwoPi * 4f) * 0.4f * Easings.easeInSine(stuckInPower);
-
-            //float rotBonus = Main.rand.NextFloat(-0.75f, 0.75f) * stuckInPower;// Easings.easeInCubic(stuckInPower);
+            float rotBonus = MathF.Cos(stuckInPower * MathHelper.TwoPi * 2f) * 0.3f * Easings.easeInSine(stuckInPower); //0.4
 
             int layers = isAttached ? 6 : 5;
             for (int i = 0; i < layers; i++)

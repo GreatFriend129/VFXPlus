@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
+using static tModPorter.ProgressUpdate;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -75,16 +76,29 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
+            //Orb
+            Color purp = new Color(105, 63, 191);
+
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Color col1 = new Color(105, 63, 191) * 1f;
+            Color col2 = new Color(77, 43, 130) * 1f;
+            Color col3 = new Color(52, 21, 101) * 1f;
+
+            float scale1 = 0.85f;
+            float scale2 = 1.6f;
+            float scale3 = 2.5f;
+            float scale = 0.25f * totalScale;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, col1 with { A = 0 } * totalAlpha * 0.3f, 0f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, col2 with { A = 0 } * totalAlpha * 0.3f, 0f, orb.Size() / 2f, scale2 * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, col3 with { A = 0 } * totalAlpha * 0.3f, 0f, orb.Size() / 2f, scale3 * scale, SpriteEffects.None);
+
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
-                float size = (0.75f + (progress * 0.25f)) * projectile.scale;
 
-                Color col = Color.Lerp(Color.Purple, Color.MediumPurple, progress) * progress * totalAlpha;// Color.LightGoldenrodYellow * progress * projectile.Opacity;
-                                                                                                           // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
-
-                float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+                Color col = Color.Lerp(Color.Purple, Color.MediumPurple, progress) * progress * totalAlpha;
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 

@@ -23,22 +23,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.BubbleGun);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
+            return lateInstatiation && (item.type == ItemID.BubbleGun) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BubbleGunToggle;
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/JuniorShot") with { Volume = .18f, Pitch = .4f, PitchVariance = .25f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(style, position);
-
-            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_154") with { Volume = 0.5f, Pitch = .55f, PitchVariance = .25f, MaxInstances = -1 }; 
-            //SoundEngine.PlaySound(style2, position);
 
             for (int k = 0; k < 7; k++)
             {
@@ -52,8 +41,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     newColor: Color.White, Scale: Main.rand.NextFloat(0.25f, 0.4f) * 3f);
 
                 d.noGravity = true;
-
-                //d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(colorFadePower: 0.88f);
             }
 
 
@@ -67,7 +54,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Bubble);
+            return lateInstantiation && (entity.type == ProjectileID.Bubble) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BubbleGunToggle;
         }
 
         int timer = 0;
@@ -84,11 +71,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             else
                 projectile.rotation -= projectile.velocity.Length() * 0.02f;
 
-            trueAlpha = 0.1f + Math.Clamp(MathHelper.Lerp(trueAlpha, 1.5f, 0.12f), 0f, 1f) * 0.9f;
+            if (timer > 1)
+                trueAlpha = Math.Clamp(MathHelper.Lerp(trueAlpha, 1.5f, 0.12f), 0f, 1f);
 
             float progress = Math.Clamp((timer + 5) / 20f, 0f, 1f); //timer / 50
             trueScale = 0.2f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 2f)) * 0.8f;
-
 
             timer++;
             return base.PreAI(projectile);
@@ -101,21 +88,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;// + drawPosOffset;
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            SpriteEffects se = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            SpriteEffects se = projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
+            //Bloomball
+            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Main.EntitySpriteDraw(Ball, drawPos + new Vector2(0f, 0f), null, Color.Aqua with { A = 0 } * 0.12f * trueAlpha, projectile.rotation, Ball.Size() / 2f, projectile.scale * 0.4f * trueScale, 0);
 
-            float easeProgress = projectile.velocity.Length() / initialVel.Length();
-            float bubbleScale = trueScale * projectile.scale;
 
-            //OverrGlow (starts bigger than bubble)
-            float glowScale = MathHelper.Lerp(2f, 1f, Easings.easeInOutCubic(1f - easeProgress));
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.SkyBlue with { A = 0 } * trueAlpha * 0.15f * (1f - easeProgress), projectile.rotation, TexOrigin, bubbleScale * glowScale, se);
-
-            //Normal Bubble
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * trueAlpha * 0.8f, projectile.rotation, TexOrigin, bubbleScale, se);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * 1f * trueAlpha, projectile.rotation, TexOrigin, projectile.scale * trueScale, se);
+            float glowscale = (float)(Math.Sin(Main.GlobalTimeWrappedHourly * 6f) / 5f + 1f) * 1.15f;
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.DarkSeaGreen with { A = 0 } * 0.07f * trueAlpha, projectile.rotation, TexOrigin, projectile.scale * glowscale * trueScale, se);
 
             return false;
         }
@@ -148,20 +133,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             return base.PreKill(projectile, timeLeft);
         }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 
 }

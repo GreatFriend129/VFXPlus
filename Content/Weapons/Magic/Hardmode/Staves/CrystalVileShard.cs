@@ -22,34 +22,13 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class CrystalVileShard : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.Vilethorn);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-
-            return true;
-        }
-
-    }
     public class CrystalVileShardBaseOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.CrystalVileShardShaft);
+            return lateInstantiation && (entity.type == ProjectileID.CrystalVileShardShaft) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrystalVileShardToggle;
         }
 
 
@@ -58,7 +37,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            
             if (timer == 0 && projectile.ai[1] % 1 == 0)
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
@@ -69,7 +47,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 //Both death_2 and death_0 sound really cool (slot machine vibes)
                 //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_wither_beast_death_2") with { Volume = 1f, Pitch = pitch2, MaxInstances = -1 };
 
-                SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_crystal_cart_impact_" + soundID) with { Volume = 0.8f, Pitch = pitch2, MaxInstances = -1 }; 
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_crystal_cart_impact_" + soundID) with { Volume = 0.5f, Pitch = pitch2, MaxInstances = -1 }; 
                 SoundEngine.PlaySound(style, projectile.Center);
             }
 
@@ -82,7 +60,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (scale == 1f)
                 alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
 
-            if (timer == 3) //10
+            if (timer == 3)
             {
                 for (int i = 0; i < 3 + Main.rand.Next(1, 3); i++)
                 {
@@ -109,7 +87,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -124,17 +102,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             return false;            
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
     }
 
     public class CrystalVileShardTipShotOverride : GlobalProjectile
@@ -143,7 +110,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.CrystalVileShardHead);
+            return lateInstantiation && (entity.type == ProjectileID.CrystalVileShardHead) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.FlowerOfFrostToggle;
         }
 
 
@@ -172,8 +139,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                     Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowStarSharp>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
                         newColor: col * 0.5f, Scale: Main.rand.NextFloat(0.15f, 0.3f) * projectile.scale * 3f);
-
-                    //p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
                 }
             }
 
@@ -188,7 +153,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -203,18 +168,5 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
             return false;
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-
-            //return false;
-            return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
     }
 }

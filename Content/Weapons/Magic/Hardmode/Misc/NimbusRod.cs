@@ -15,6 +15,7 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -39,13 +40,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 bonus = i == 0 ? Vector2.Zero : projectile.velocity * 0.5f;
 
                 previousRotations.Add(projectile.rotation);
-                previousPostions.Add(projectile.Center + bonus);
+                previousPositions.Add(projectile.Center + bonus);
 
                 if (previousRotations.Count > trailCount)
                     previousRotations.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
             }
             
 
@@ -72,7 +73,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         float drawScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -82,22 +83,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, progress) * progress * projectile.Opacity;
+                Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, progress) * progress * projectile.Opacity;
 
-                    float size2 = 0.5f + (progress * 0.5f) * projectile.scale * drawScale;
+                float size2 = 0.5f + (progress * 0.5f) * projectile.scale * drawScale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-                }
-
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
             }
 
             //Border
@@ -107,6 +104,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
                     Color.DodgerBlue with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * drawScale, SpriteEffects.None);
             }
+
+            //Glorb
+            Texture2D Glow = CommonTextures.feather_circle128PMA.Value;
+
+            Color orbCol1 = Color.SkyBlue * 0.75f;
+            Color orbCol2 = Color.DeepSkyBlue * 0.525f;
+            Color orbCol3 = Color.DodgerBlue * 0.375f;
+
+            float scale1 = 0.75f * drawScale;
+            float scale2 = 1.6f * drawScale;
+            float scale3 = 2.5f * drawScale;
+
+            //Main.EntitySpriteDraw(Glow, drawPos, null, orbCol1 with { A = 0 } * 0.35f, 0f, Glow.Size() / 2f, projectile.scale * scale1 * 0.55f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.35f, 0f, Glow.Size() / 2f, projectile.scale * scale2 * 0.3f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.35f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.3f, SpriteEffects.None);
+
 
             //Main
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
@@ -165,16 +178,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float drawScale = 1f;
         float drawAlpha = 1f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             //Orb Bloom
-            Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
+            Texture2D glorb = CommonTextures.feather_circle128PMA.Value;
 
             Main.EntitySpriteDraw(glorb, projectile.Center - Main.screenPosition, null, Color.DodgerBlue with { A = 0 } * projectile.Opacity * 0.25f, 
-                projectile.rotation, glorb.Size() / 2f, new Vector2(1.15f, 0.5f) * projectile.scale * 2f, SpriteEffects.None);
-
-
+                projectile.rotation, glorb.Size() / 2f, new Vector2(1.05f, 0.5f) * projectile.scale, SpriteEffects.None);
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;

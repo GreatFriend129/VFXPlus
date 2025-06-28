@@ -313,7 +313,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float num = 1f;
             float lerpValue = Utils.GetLerpValue(0f, 0.4f, 1f - progress, clamped: true);
             num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-            return MathHelper.Lerp(0f, 70, Easings.easeInCirc(num)) * Easings.easeInQuad(true_width) * 0.85f; //100 | 25 -- 75 25
+            return MathHelper.Lerp(0f, 70f, Easings.easeInCirc(num)) * Easings.easeInQuad(true_width) * 0.85f; //100 | 25 -- 75 25
         }
 
         public void AddTendrilPosition(Vector2 position, float rotation)

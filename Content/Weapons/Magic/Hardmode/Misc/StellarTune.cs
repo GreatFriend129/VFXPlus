@@ -6,16 +6,10 @@ using Terraria.ModLoader;
 using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using VFXPlus.Common.Drawing;
 using Terraria.GameContent.Drawing;
 
 
@@ -61,13 +55,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             int trailCount = 34;
             previousVelRots.Add(currentRot);
-            previousPostions.Add(previousPosition);
+            previousPositions.Add(previousPosition);
 
             if (previousVelRots.Count > trailCount)
                 previousVelRots.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             #region dust
             float velPower = (projectile.Center - previousPosition).Length();
@@ -117,7 +111,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float pulseIntensity = 0f;
         float currentRot = 0f;
         public List<float> previousVelRots = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             CerobaStyleDraw(projectile);
@@ -162,7 +156,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             #region after image
-            if (previousVelRots != null && previousPostions != null)
+            if (previousVelRots != null && previousPositions != null)
             {
                 for (int i = 0; i < previousVelRots.Count; i++)
                 {
@@ -176,12 +170,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                     float size2 = (1f - (progress * 0.15f)) * projectile.scale;
 
-                    Main.EntitySpriteDraw(FireBallPixel, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 1.15f * thisAlpha * colVal,
+                    Main.EntitySpriteDraw(FireBallPixel, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 1.15f * thisAlpha * colVal,
                             previousVelRots[i] + MathHelper.PiOver2, FireBallPixel.Size() / 2f, size2, SpriteEffects.None);
 
                     Vector2 vec2Scale = new Vector2(0.25f, 1.15f) * size;
 
-                    Main.EntitySpriteDraw(FireBall, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 1.25f * thisAlpha * colVal,
+                    Main.EntitySpriteDraw(FireBall, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 1.25f * thisAlpha * colVal,
                             previousVelRots[i] + MathHelper.PiOver2, FireBall.Size() / 2f, vec2Scale * 1.5f, SpriteEffects.None);
                 }
 
@@ -245,13 +239,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
             }
 
-            if (previousVelRots != null && previousPostions != null)
+            if (previousVelRots != null && previousPositions != null)
             {
                 for (int i = 0; i < previousVelRots.Count; i += 1)
                 {
-                    if (i % 6 == 0 && i > previousPostions.Count * 0.55f)
+                    if (i % 6 == 0 && i > previousPositions.Count * 0.55f)
                     {
-                        int a = Dust.NewDust(previousPostions[i], 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.HotPink, Scale: 0.3f);
+                        int a = Dust.NewDust(previousPositions[i], 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.HotPink, Scale: 0.3f);
                         Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
                         Main.dust[a].velocity *= 0.5f;
                         Main.dust[a].velocity += previousVelRots[i].ToRotationVector2() * 5f;

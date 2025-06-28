@@ -20,35 +20,13 @@ using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class CrystalSerpent : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.CrystalSerpent);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            
-
-            return true;
-        }
-
-    }
     public class CrystalSerpentShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.CrystalPulse);
+            return lateInstantiation && (entity.type == ProjectileID.CrystalPulse) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrystalSerpentToggle;
         }
 
         int timer = 0;
@@ -56,31 +34,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             int trailCount = 20; //40 | 15
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             bool addInBetween = false;
             if (addInBetween)
             {
                 previousRotations.Add(projectile.velocity.ToRotation());
-                previousPostions.Add(projectile.Center + projectile.velocity * 0.5f);
+                previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
 
                 if (previousRotations.Count > trailCount)
                     previousRotations.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
             }
-
-            //New Dust
-            //Vector2 dustPos = projectile.Center + new Vector2(0f, 100f) + Main.rand.NextVector2Circular(5f, 5f);
-            //Dust wow2 = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), projectile.velocity * 0.5f, newColor: Color.HotPink, Scale: 0.7f);
-            //wow2.alpha = 2;
 
             Color inBetween = Color.Lerp(Color.HotPink, Color.DeepPink, 0.5f);
 
@@ -93,10 +66,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Dust star2 = Dust.NewDustPerfect(dustPo2s2 + projectile.velocity * 0.5f, ModContent.DustType<GlowPixelCross>(), projectile.velocity * 0.2f, newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.2f, 0.31f));
             star2.alpha = 2;
             star2.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.5f, shouldFadeColor: false, velToBeginShrink: 0.65f);
-
-            //Vector2 dustPos2 = projectile.Center + new Vector2(0f, -200f) + Main.rand.NextVector2Circular(15f, 15f);
-            //Dust wow = Dust.NewDustPerfect(dustPos2, ModContent.DustType<MuraLineBasic>(), projectile.velocity * -0.5f, newColor: Color.DeepPink, Scale: 0.25f);
-            //wow.alpha = 10;
 
             if (timer % 1 == 0 && timer > 3)
             {
@@ -143,16 +112,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             #endregion
             timer++;
             return false;
-            //return base.PreAI(projectile);
         }
 
         float fadeInAlpha = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 Draw(projectile);
             });
@@ -168,8 +136,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2 scale = new Vector2(1.15f, 1f) * projectile.scale * 0.45f;
 
 
-            //Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, Color.Black * 0.15f, drawRot, TexOrigin, scale * 0.7f, SpriteEffects.None, 0f);
-
             Color col1 = Color.DeepPink;
             Color col2 = Color.HotPink;
 
@@ -178,67 +144,36 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.75f, 0.75f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.3f, SpriteEffects.None, 0f);
 
             return false;
-            //
-            Texture2D star = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
-
-            float dir = projectile.velocity.X > 0 ? 1 : -1;
-
-            float starRotation = projectile.velocity.ToRotation() + MathHelper.Lerp(0f, MathHelper.Pi * 2f * dir, Easings.easeInOutQuad(fadeInAlpha));
-            float starScale = Easings.easeOutCirc(1f - fadeInAlpha) * projectile.scale * 1.25f;
-
-            if (fadeInAlpha != 1f)
-            {
-                Main.EntitySpriteDraw(star, drawPos, null, Color.DeepPink with { A = 0 } * fadeInAlpha * 2f, starRotation, star.Size() / 2f, starScale, SpriteEffects.None);
-                Main.EntitySpriteDraw(star, drawPos, null, Color.White with { A = 0 } * fadeInAlpha * 2f, starRotation, star.Size() / 2f, starScale * 0.5f, SpriteEffects.None);
-
-                //Main.EntitySpriteDraw(star, drawPos, null, Color.HotPink with { A = 0 } * fadeInAlpha * 2f, starRotation + MathHelper.PiOver2, star.Size() / 2f, starScale, SpriteEffects.None);
-                //Main.EntitySpriteDraw(star, drawPos, null, Color.White with { A = 0 } * fadeInAlpha * 2f, starRotation + MathHelper.PiOver2, star.Size() / 2f, starScale * 0.5f, SpriteEffects.None);
-            }
-
-            return false;
         }
 
         public void Draw(Projectile projectile)
         {
-            //Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
             Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/FireBallBlur").Value;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
+                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f);
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f);
 
-                    float startScale = projectile.scale + sineScale;
+                float startScale = projectile.scale + sineScale;
 
-                    Color col = Color.Lerp(Color.HotPink * 1.25f, Color.DeepPink, 1f);
+                Color col = Color.Lerp(Color.HotPink * 1.25f, Color.DeepPink, 1f);
 
-                    float easedFadeValue = progress * progress;
+                float easedFadeValue = progress * progress;
 
 
-                    Vector2 lineScale = new Vector2(0.75f, 0.5f + 0.4f * progress); //
-                    Vector2 lineScale2 = new Vector2(0.75f, 0.2f + 0.1f * progress); //0.1f 0.2f
+                Vector2 fireBallScale = new Vector2(1f, 1f) * 0.5f;
+                Vector2 fireBallScale2 = new Vector2(0.5f, 1f) * 0.5f;
 
-                    Vector2 fireBallScale = new Vector2(1f, 1f) * 0.5f;// new Vector2(0.35f + 0.4f * progress, 0.35f);
-                    Vector2 fireBallScale2 = new Vector2(0.5f, 1f) * 0.5f; //new Vector2(0.18f + 0.05f * progress, 0.35f);
+                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.8f * easedFadeValue,
+                    previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, fireBallScale * startScale, SpriteEffects.None);
 
-                    //Black
-                    //Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.4f * easedFadeValue,
-                    //projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
-
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 0.8f * easedFadeValue,
-                        previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, fireBallScale * startScale, SpriteEffects.None);
-
-
-                    Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.65f * easedFadeValue,
-                        previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, fireBallScale2 * startScale, SpriteEffects.None);
-
-                }
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.65f * easedFadeValue,
+                    previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, fireBallScale2 * startScale, SpriteEffects.None);
 
             }
 
@@ -246,20 +181,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            //Use for arcanum
-            for (int i = 220; i < 22; i++) //16
-            {
-                Color col1 = Color.Lerp(Color.HotPink, Color.DeepPink, 0.35f);
-
-                float progress = (float)i / 21;
-                Color col = Color.Lerp(Color.Black, col1, progress);
-
-                //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f,
-                    newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 1f); //12 28
-            }
-
             for (int i = 0; i < 8 + Main.rand.Next(0, 9); i++)
             {
 
@@ -272,8 +193,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     dust.velocity *= 0.5f;
 
                 dust.scale *= 2f;
-
-                //dust.fadeIn = Main.rand.NextFloat(0.25f, 0.9f);
                 dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 1f);
             }
 
@@ -300,13 +219,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             return false;
-            //return true;
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
@@ -315,8 +227,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
-
-
     }
 
     public class CrystalSerpentShardOverride : GlobalProjectile
@@ -325,7 +235,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.CrystalPulse2);
+            return lateInstantiation && (entity.type == ProjectileID.CrystalPulse2) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.CrystalSerpentToggle;
         }
 
         float drawAlpha = 1f;
@@ -334,36 +244,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             int trailCount = 20; //20
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center + projectile.velocity);
+            previousPositions.Add(projectile.Center + projectile.velocity);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
-
-            
-            Vector2 dustVel = projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
-
-            Color purp = Color.HotPink;
-
-            GlowPixelAltBehavior dustBehavior = new GlowPixelAltBehavior();
-            dustBehavior.base_fadeOutPower = 0.91f;
-            dustBehavior.base_timeToKill = 30; //30
-
-            //Dust c = Dust.NewDustPerfect(projectile.Center + projectile.velocity * 0.5f, ModContent.DustType<GlowPixelAlts>(), dustVel.RotatedByRandom(0.25f), 0, Color.HotPink, 0.53f);
-            //c.alpha = 2;
-            //c.noLight = true;
-            //c.customData = dustBehavior;
-
-            if (Main.rand.NextBool() && false)
-            {
-                Dust a = Dust.NewDustPerfect(projectile.Center + projectile.velocity * 0.5f, ModContent.DustType<GlowPixelRise>(), dustVel.RotatedByRandom(0.5f), 0, Color.HotPink, 0.33f);
-                a.alpha = 2;
-                a.noLight = true;
-                a.customData = dustBehavior;
-
-            }
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
             
             timer++;
 
@@ -410,19 +297,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             #endregion
 
             return false;
-            return base.PreAI(projectile);
         }
 
 
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawPixelTrail(projectile);
-                //DrawVertexTrail(false);
             });
 
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
@@ -435,9 +320,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float drawRot = projectile.velocity.ToRotation();
             Vector2 scale = new Vector2(0.75f, 1.45f) * projectile.scale * 0.85f;
 
-
-            //Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, Color.Black * 0.15f, drawRot, TexOrigin, scale * 0.7f, SpriteEffects.None, 0f);
-
             Color col1 = Color.DeepPink;
             Color col2 = Color.HotPink;
 
@@ -445,55 +327,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(1.25f, 1.25f), null, col1 with { A = 0 }, drawRot, TexOrigin, scale * 0.55f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.75f, 0.75f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.3f, SpriteEffects.None, 0f);
 
-
             return false;
-
         }
 
         public void DrawPixelTrail(Projectile projectile)
         {
-            Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-            float finalDrawScale = 1f * projectile.scale;
-
+            Texture2D AfterImage = CommonTextures.Flare.Value;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count - 1; i++)
             {
-                for (int i = 0; i < previousRotations.Count - 1; i++)
+                float progress = (float)i / previousRotations.Count;
+
+                if (progress != 1)
                 {
-                    float progress = (float)i / previousRotations.Count;
+                    Color col = Color.Lerp(Color.DeepPink, Color.HotPink, Easings.easeInCirc(progress));
 
-                    if (progress != 1)
-                    {
-                        Color orangeToUse = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
+                    float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
-                        //Color col = Color.Lerp(Color.OrangeRed, orangeToUse, Easings.easeInCirc(progress));
-                        Color col = Color.Lerp(Color.DeepPink, Color.HotPink, Easings.easeInCirc(progress));
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
 
-                        float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
+                    Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
+                    Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
 
-                        Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
+                        previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
 
-                        Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
-                        Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
+                           previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
 
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
-                            previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
-
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
-                               previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
-
-                        Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
-                               previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
-                    }
-
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
+                           previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
                 }
 
             }
-
-            //TODO try giving orbs randomshake
-            //TODO try giving orbs sine wave X and Y shit (quash abnd stretch)
 
             //Glorb
             #region drawGlorb
@@ -516,63 +383,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             #endregion
         }
-
-
-        Effect myEffect = null;
-        public void DrawVertexTrail(bool giveUp)
-        {
-            if (giveUp)
-                return;
-
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value;
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-            Color StripColor(float progress) => Color.White * (progress * progress * progress);
-            float StripWidth(float progress) => 30f * Easings.easeOutQuad(progress);// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
-
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.08f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            //vertexStrip.DrawTrail();
-
-            //Over layer
-            Color inbetween = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
-            myEffect.Parameters["ColorOne"].SetValue(inbetween.ToVector3() * 5f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.85f);
-            myEffect.Parameters["glowIntensity"].SetValue(2f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            vertexStrip.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-        }
-
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             SoundEngine.PlaySound(in SoundID.Item118, projectile.Center);
 
             for (int i = 0; i < Main.rand.Next(4, 9); i++)
             {
-
                 float velMult = Main.rand.NextFloat(1.5f, 3f);
                 Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
                 Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), randomStart, newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.55f, 1f));

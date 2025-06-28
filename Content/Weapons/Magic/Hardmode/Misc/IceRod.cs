@@ -34,10 +34,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = 0.45f, Pitch = .25f, PitchVariance = 0.1f, MaxInstances = 1 };
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_43") with { Volume = 0.45f, Pitch = .25f, PitchVariance = 0.1f, MaxInstances = 1 };
             SoundEngine.PlaySound(style4, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_20") with { Volume = 0.3f, Pitch = .45f, PitchVariance = 0.15f, MaxInstances = 1 };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_20") with { Volume = 0.3f, Pitch = .45f, PitchVariance = 0.15f, MaxInstances = 1 };
             SoundEngine.PlaySound(style2, player.Center);
 
             return true;
@@ -58,13 +58,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             int trailCount = 7;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             int mod2 = projectile.velocity.Length() > 0 ? 2 : 7;
             if (timer % mod2 == 0 && Main.rand.NextBool())
@@ -87,7 +87,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Color col = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.3f);
 
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), vel, newColor: col * 1f, Scale: Main.rand.NextFloat(0.25f, 0.5f));
-                d.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.2f); //0.5f
+                d.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.15f); //0.5f
                 d.velocity += projectile.velocity * 0.2f;
             }
 
@@ -377,7 +377,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         float justBecameTilePower = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -387,7 +387,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null && projectile.velocity.Length() > 0)
+            if (projectile.velocity.Length() > 0)
             {
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
@@ -397,13 +397,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                     float size2 = (1f + (progress * 0.25f)) * projectile.scale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                     Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.25f, //0.5f
                             previousRotations[i], TexOrigin, size2, SpriteEffects.None);
 
                 }
-
             }
 
             for (int i = 0; i < 4; i++)
@@ -432,7 +431,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            
             for (int i = 0; i < 9 + Main.rand.Next(1, 6); i++)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
@@ -462,20 +460,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
     }
 
-
-    //This is literally just to change the sound
+    //This is literally just to change the sound lol
     public class MagicalIceBlockOverride : GlobalTile
     {
         public override bool KillSound(int i, int j, int type, bool fail)
         {
-            if (type == TileID.MagicalIceBlock)
-            {
+            if (type == TileID.MagicalIceBlock && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.IceRodToggle)
                 return false;
-            }
 
             return base.KillSound(i, j, type, fail);
         }
-
     }
 
 }

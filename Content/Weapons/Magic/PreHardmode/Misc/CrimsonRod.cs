@@ -107,22 +107,18 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Color moreCrimson = new Color(250, 90, 125);
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Red, moreCrimson, progress) * progress * projectile.Opacity;
+                Color col = Color.Lerp(Color.Red, moreCrimson, progress) * progress * projectile.Opacity;
 
-                    float size2 = 0.5f + (progress * 0.5f) * projectile.scale * drawScale;
+                float size2 = 0.5f + (progress * 0.5f) * projectile.scale * drawScale;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
 
             }
 
@@ -133,6 +129,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
                     moreCrimson with { A = 0 } * 0.5f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.1f * drawScale, SpriteEffects.None);
             }
+
+            //Glorb
+            Texture2D Glow = CommonTextures.feather_circle128PMA.Value;
+
+            Color orbCol1 = Color.SkyBlue * 0.75f;
+            Color orbCol2 = Color.Crimson * 0.525f;
+            Color orbCol3 = Color.DarkRed * 0.375f;
+
+            float scale1 = 0.75f * drawScale;
+            float scale2 = 1.6f * drawScale;
+            float scale3 = 2.5f * drawScale;
+
+            //Main.EntitySpriteDraw(Glow, drawPos, null, orbCol1 with { A = 0 } * 0.35f, 0f, Glow.Size() / 2f, projectile.scale * scale1 * 0.55f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.6f, 0f, Glow.Size() / 2f, projectile.scale * scale2 * 0.35f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.6f, 0f, Glow.Size() / 2f, projectile.scale * scale3 * 0.35f, SpriteEffects.None);
+
 
             //Main
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
@@ -195,10 +207,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             //Orb Bloom
-            Texture2D glorb = CommonTextures.PartiGlowPMA.Value; //ParitGlow
+            Texture2D glorb = CommonTextures.feather_circle128PMA.Value;
 
-            Main.EntitySpriteDraw(glorb, projectile.Center - Main.screenPosition, null, Color.Crimson with { A = 0 } * projectile.Opacity * 0.25f, 
-                projectile.rotation, glorb.Size() / 2f, new Vector2(1.15f, 0.5f) * projectile.scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(glorb, projectile.Center - Main.screenPosition, null, Color.DarkRed with { A = 0 } * projectile.Opacity * 0.4f,
+                projectile.rotation, glorb.Size() / 2f, new Vector2(1.05f, 0.5f) * projectile.scale, SpriteEffects.None);
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;

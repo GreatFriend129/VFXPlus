@@ -1,9 +1,5 @@
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Terraria.ModLoader.Config;
-using SteelSeries.GameSense;
 
 namespace VFXPlus
 {
@@ -25,142 +21,143 @@ namespace VFXPlus
         [Header("Staves")]
 
         #region PreHM Staves
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool WandOfSparkingToggle;
+        [DefaultValue(true)]
+        public bool WandOfSparkingToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool WandOfFrostingToggle;
+        [DefaultValue(true)]
+        public bool WandOfFrostingToggle = true;
 
         #region Gem Staves
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool AmethystStaffToggle;
+        [DefaultValue(true)]
+        public bool AmethystStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool TopazStaffToggle;
+        [DefaultValue(true)]
+        public bool TopazStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool SapphireStaffToggle;
+        [DefaultValue(true)]
+        public bool SapphireStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool EmeraldStaffToggle;
+        [DefaultValue(true)]
+        public bool EmeraldStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool RubyStaffToggle;
+        [DefaultValue(true)]
+        public bool RubyStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool AmberStaffToggle;
+        [DefaultValue(true)]
+        public bool AmberStaffToggle = true;
 
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool DiamondStaffToggle;
+        [DefaultValue(true)]
+        public bool DiamondStaffToggle = true;
         #endregion
 
-        [DefaultValue(true)]
+        
         [ReloadRequired]
-        public bool ThunderZapperToggle;
+        [DefaultValue(true)]
+        public bool ThunderZapperToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool VilethornToggle;
+        public bool VilethornToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool AquaScepter;
+        public bool AquaScepter = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool WeatherPain;
+        public bool WeatherPain = true;
 
         #endregion
 
         #region Hardmode Staves
-        [DefaultValue(true)]
         [ReloadRequired]
-        public bool SkyFractureToggle;
+        [DefaultValue(true)]
+        public bool SkyFractureToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool CrystalSerpentToggle;
+        public bool CrystalSerpentToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool FrostStaffToggle;
+        public bool FrostStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool PoisonStaffToggle;
+        public bool PoisonStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool MeteorStaffToggle;
+        public bool MeteorStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool CrystalVileShardToggle;
+        public bool CrystalVileShardToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ClingerStaffToggle;
+        public bool ClingerStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LifeDrainToggle;
+        public bool LifeDrainToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool UnholyTridentToggle;
+        public bool UnholyTridentToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool TomeOfInfiniteWisdomToggle;
+        public bool TomeOfInfiniteWisdomToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool NettleBurstToggle;
+        public bool NettleBurstToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool VenomStaffToggle;
+        public bool VenomStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool SpecterStaffToggle;
+        public bool SpecterStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ShadowbeamStaffToggle;
+        public bool ShadowbeamStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool InfernoForkToggle;
+        public bool InfernoForkToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BatScepterToggle;
+        public bool BatScepterToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BlizzardStaffToggle;
+        public bool BlizzardStaffToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool RazorpineToggle;
+        public bool RazorpineToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool StaffOfEarthToggle;
+        public bool StaffOfEarthToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BetsysWrathToggle;
+        public bool BetsysWrathToggle = true;
         #endregion
 
         //-----------------------------------------------------------
@@ -169,49 +166,49 @@ namespace VFXPlus
         #region PreHM Magic Guns
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool SpaceGunToggle;
+        public bool SpaceGunToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ZapinatorToggle;
+        public bool ZapinatorToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BeeGunToggle;
+        public bool BeeGunToggle = true;
         #endregion
 
         #region Hardmode Magic Guns
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LaserRifleToggle;
+        public bool LaserRifleToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool WaspGunToggle;
+        public bool WaspGunToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LeafBlowerToggle;
+        public bool LeafBlowerToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool RainbowGunToggle;
+        public bool RainbowGunToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool HeatRayToggle;
+        public bool HeatRayToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LaserMachinegunToggle;
+        public bool LaserMachinegunToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ChargedBlasterCannonToggle;
+        public bool ChargedBlasterCannonToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BubbleGunToggle;
+        public bool BubbleGunToggle = true;
         #endregion
 
         //-----------------------------------------------------------
@@ -220,41 +217,41 @@ namespace VFXPlus
         #region PreHM Tomes
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool WaterboltToggle;
+        public bool WaterboltToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BookOfSkullsToggle;
+        public bool BookOfSkullsToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool DemonScytheToggle;
+        public bool DemonScytheToggle = true;
         #endregion
 
         #region Hardmode Tomes
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool CrystalStormToggle;
+        public bool CrystalStormToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool CursedFlamesToggle;
+        public bool CursedFlamesToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool GoldenShowerToggle;
+        public bool GoldenShowerToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool MagnetSphereToggle;
+        public bool MagnetSphereToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool RazorbladeTyphoonToggle;
+        public bool RazorbladeTyphoonToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LunarFlareToggle;
+        public bool LunarFlareToggle = true;
         #endregion
 
         //-----------------------------------------------------------
@@ -263,71 +260,71 @@ namespace VFXPlus
         #region Misc
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool CrimsonRodToggle;
+        public bool CrimsonRodToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool NimbusRodToggle;
+        public bool NimbusRodToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool FlowerOfFireToggle;
+        public bool FlowerOfFireToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool FlowerOfFrostToggle;
+        public bool FlowerOfFrostToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ShadowflameHexDollToggle;
+        public bool ShadowflameHexDollToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool MagicDaggerToggle;
+        public bool MagicDaggerToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool MedusaHeadToggle;
+        public bool MedusaHeadToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool IceRodToggle;
+        public bool IceRodToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool SpiritFlameToggle;
+        public bool SpiritFlameToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool BloodThornToggle;
+        public bool BloodThornToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool MagicHarpToggle;
+        public bool MagicHarpToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool ToxicFlaskToggle;
+        public bool ToxicFlaskToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool NightglowToggle;
+        public bool NightglowToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool StellarTuneToggle;
+        public bool StellarTuneToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool NebulaArcanumToggle;
+        public bool NebulaArcanumToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool NebulaBlazeToggleToggle;
+        public bool NebulaBlazeToggleToggle = true;
 
         [DefaultValue(true)]
         [ReloadRequired]
-        public bool LastPrismToggle;
+        public bool LastPrismToggle = true;
 
         #endregion
     }

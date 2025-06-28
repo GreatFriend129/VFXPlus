@@ -105,15 +105,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     MovementVector = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2) * 20f //30
 
                 };
-                ParticleOrchestraSettings particleSettings2 = new()
-                {
-                    PositionInWorld = projectile.Center,
-                    MovementVector = Main.rand.NextVector2CircularEdge(10f, 10f)
 
-                };
 
                 ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings);
-                //ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings2);
 
                 //Circle Pulses
                 float randomStart = Main.rand.NextFloat(0f, 1f);
@@ -190,21 +184,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             return lateInstantiation && (entity.type == ProjectileID.RainbowBack) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RainbowGunToggle;
         }
 
-        public override bool PreAI(Projectile projectile)
-        {
-            return base.PreAI(projectile);
-        }
-
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             return false;
         }
-
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            return base.PreKill(projectile, timeLeft);
-        }
-
     }
 
     // 1 projectile exists for each time the gun is shot (stores points from RainbowGunFront travel path)
@@ -290,13 +273,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                         Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<GlowPixelCross>(), vel * 1f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1f) * 0.35f);
                         d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(velToBeginShrink: 3f, fadePower: 0.93f, shouldFadeColor: false);
-
-                        //Dust d = Dust.NewDustPerfect(pos + offset, ModContent.DustType<LineSpark>(), vel * 1.5f, newColor: rainbow * 1f, Scale: Main.rand.NextFloat(0.5f, 1.5f) * 0.5f);
-                        //d.noLight = false;
-                        //if (shouldFade)
-                        //    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.9f, postShrinkPower: 0.92f, timeToStartShrink: 10, killEarlyTime: 100, XScale: 0.4f, YScale: 0.25f, shouldFadeColor: true, colorFadePower: 0.92f);
-                        //else
-                        //    d.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.97f, killEarlyTime: 10, XScale: 0.5f, YScale: 0.2f, shouldFadeColor: true);
                     }
                 }
             }
@@ -336,8 +312,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Color rainbow = Main.hslToRgb((timer * 0.03f + rainbowOffset) % 1f, 1f, 0.75f, 0) * 0.75f * ease1;
 
             #region Portal
-            Texture2D portal = Mod.Assets.Request<Texture2D>("Assets/Pixel/RainbowRod").Value;
-            Texture2D bloom = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D portal = CommonTextures.RainbowRod.Value;
+            Texture2D bloom = CommonTextures.feather_circle128PMA.Value;
 
             float sinScale = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.03f) * 0.2f;
 
@@ -425,17 +401,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
             myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
-            myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background  |95 | 3f looks very goozma
-
-            //myEffect.Parameters["sampleTexture1"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/ThinGlowLine").Value);
-            //myEffect.Parameters["sampleTexture2"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value);
-            //myEffect.Parameters["sampleTexture3"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value);
-            //myEffect.Parameters["sampleTexture4"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Trail5Loop").Value); //smokeTrail4_512
+            myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
 
             myEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.ThinGlowLine.Value);
             myEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.spark_06.Value);
             myEffect.Parameters["sampleTexture3"].SetValue(CommonTextures.Extra_196_Black.Value);
-            myEffect.Parameters["sampleTexture4"].SetValue(CommonTextures.Trail5Loop.Value); //smokeTrail4_512
+            myEffect.Parameters["sampleTexture4"].SetValue(CommonTextures.Trail5Loop.Value);
 
             myEffect.Parameters["grad1Speed"].SetValue(2f / 3f);
             myEffect.Parameters["grad2Speed"].SetValue(2f / 3f);
@@ -445,10 +416,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["tex1Mult"].SetValue(1.25f);
             myEffect.Parameters["tex2Mult"].SetValue(1.5f);
             myEffect.Parameters["tex3Mult"].SetValue(1.15f);
-            myEffect.Parameters["tex4Mult"].SetValue(2.5f); //1.5
+            myEffect.Parameters["tex4Mult"].SetValue(2.5f);
             myEffect.Parameters["totalMult"].SetValue(1f);
-            //myEffect.Parameters["totalMult"].SetValue(1.05f); // 10f looks cool and void-y
-
 
             //We want the number of repititions to be relative to the number of points
             float repValue = 0.05f * l_positions.Count;
@@ -458,7 +427,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["tex3reps"].SetValue(1f * repValue);
             myEffect.Parameters["tex4reps"].SetValue(0.25f * repValue);
 
-            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.015f); //-0.05
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * -0.015f);
 
         }
 
