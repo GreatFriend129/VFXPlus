@@ -1022,7 +1022,7 @@ namespace VFXPlus.Content.VFXTest
             trail1.trailMaxLength = 265;
             trail1.timesToDraw = 1;
             trail1.shouldSmooth = false;
-            trail1.pinch = false;
+            trail1.pinchHead = false;
 
             trail1.pinchAmount = 0.5f;
 

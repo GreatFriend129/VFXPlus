@@ -231,6 +231,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             }
 
         }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+
+            return false;
+            return base.PreKill(projectile, timeLeft);
+        }
     }
 
     public class LunarExplosionAnim : ModProjectile

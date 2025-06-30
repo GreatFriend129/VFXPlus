@@ -39,7 +39,10 @@ namespace VFXPlus.Common
 
         public bool shouldScrollColor = true;
 
-        public bool pinch = false;
+        public bool pinchHead = false;
+
+        public bool pinchTail = true;
+
 
         public float pinchAmount = 0.2f;
 
@@ -51,6 +54,7 @@ namespace VFXPlus.Common
 
         //Want to use when pixelizing
         public bool useEffectMatrix = false;
+
         //------------------
         public int trailPointLimit = 60;
 
@@ -101,33 +105,40 @@ namespace VFXPlus.Common
 
         public virtual float WidthFunction(float progress)
         {
-            if (!pinch)
+            if (!pinchHead)
             {
-                float num = 1f;
-                float lerpValue = Utils.GetLerpValue(0f, 0.4f, progress, clamped: true);
-                num *= 1f - (1f - lerpValue) * (1f - lerpValue);
-                return MathHelper.Lerp(0f, trailWidth, num) * 1f; // 0.3f 
+                if (pinchTail)
+                {
+                    float num = 1f;
+                    float lerpValue = Utils.GetLerpValue(0f, 0.4f, progress, clamped: true);
+                    num *= 1f - (1f - lerpValue) * (1f - lerpValue);
+                    return MathHelper.Lerp(0f, trailWidth, num) * 1f;
+                }
+                else
+                    return trailWidth;
             }
-
-            else
+            else 
             {
-                if (progress < 0.5f)
+                //TODO make sure these aren't backwards
+                if (progress < 0.5f && pinchTail)
                 {
                     float num = 1f;
                     float lerpValue = Utils.GetLerpValue(0f, pinchAmount, progress, clamped: true);
                     num *= 1f - (1f - lerpValue) * (1f - lerpValue);
                     return MathHelper.Lerp(0f, trailWidth, num) * 1f;
                 }
-                else if (progress >= 0.5)
+                else if (progress < 0.5f)
+                    return trailWidth;
+                else if (progress >= 0.5 && pinchHead)
                 {
                     float num = 1f;
                     float lerpValue = Utils.GetLerpValue(0f, pinchAmount, 1 - progress, clamped: true);
                     num *= 1f - (1f - lerpValue) * (1f - lerpValue);
                     return MathHelper.Lerp(0f, trailWidth, num) * 1f;
                 }
+                else
+                    return trailWidth;
             }
-
-            return 0;
         }
 
         public virtual Color ColorFunction(float progress)

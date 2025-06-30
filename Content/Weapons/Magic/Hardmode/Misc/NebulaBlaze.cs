@@ -112,7 +112,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail1.trailMaxLength = 250;
             trail1.timesToDraw = 2;
             trail1.shouldSmooth = false;
-            trail1.pinch = true;
+            trail1.pinchHead = true;
             trail1.useEffectMatrix = true;
 
             trail1.trailColor = thisPink;
@@ -132,7 +132,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail2.trailMaxLength = 250;
             trail2.timesToDraw = 2;
             trail2.shouldSmooth = false;
-            trail2.pinch = true;
+            trail2.pinchHead = true;
             trail2.useEffectMatrix = true;
 
             float OffsetAmount2 = 20f * MathF.Sin((float)timer / 30 * projectile.extraUpdates);
@@ -614,7 +614,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail1.trailMaxLength = 250;
             trail1.timesToDraw = 2;
             trail1.shouldSmooth = false;
-            trail1.pinch = true;
+            trail1.pinchHead = true;
             trail1.useEffectMatrix = true;
 
             trail1.trailColor = thisBlue;
@@ -634,7 +634,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             trail2.trailMaxLength = 250;
             trail2.timesToDraw = 2;
             trail2.shouldSmooth = false;
-            trail2.pinch = true;
+            trail2.pinchHead = true;
             trail2.useEffectMatrix = true;
 
             float OffsetAmount2 = 25f * MathF.Sin((float)timer / 35 * projectile.extraUpdates);

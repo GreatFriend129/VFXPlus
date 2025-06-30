@@ -134,7 +134,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             trail1.trailMaxLength = 200 * overallAlpha;
             trail1.timesToDraw = 2;
             trail1.shouldSmooth = false;
-            trail1.pinch = true;
+            trail1.pinchHead = true;
             trail1.useEffectMatrix = true;
 
             trail1.trailColor = thisBlue;

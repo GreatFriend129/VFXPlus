@@ -59,7 +59,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             trail1.trailMaxLength = 300f * trailLengthOffset;
             trail1.timesToDraw = 1;
             trail1.shouldSmooth = false;
-            trail1.pinch = false;
+            trail1.pinchHead = false;
             
             trail1.gradient = true;
             trail1.gradientTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/BrightEosGrad").Value;

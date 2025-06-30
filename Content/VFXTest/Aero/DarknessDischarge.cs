@@ -93,7 +93,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             trail1.trailWidth = 20;
             trail1.trailMaxLength = 700;
             trail1.timesToDraw = 1;
-            trail1.pinch = true;
+            trail1.pinchHead = true;
             trail1.shouldSmooth = true;
 
             trail1.trailTime = timer * 0.01f;
@@ -108,7 +108,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             trail2.trailWidth = 60;
             trail2.trailMaxLength = 700;
             trail2.timesToDraw = 2;
-            trail2.pinch = true;
+            trail2.pinchHead = true;
             trail2.shouldSmooth = true;
 
             trail2.gradient = true;

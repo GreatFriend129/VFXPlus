@@ -23,7 +23,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.UnholyTrident);
+            return lateInstatiation && (item.type == ItemID.UnholyTrident) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.UnholyTridentToggle;
         }
 
         public override void SetDefaults(Item entity)
@@ -36,7 +36,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             for (int i = 0; i < 3 + Main.rand.Next(2); i++)
             {
-                
                 Vector2 v = Main.rand.NextVector2Circular(1.5f, 1.5f);
                 Dust sa = Dust.NewDustPerfect(player.Center + v + velocity.SafeNormalize(Vector2.UnitX) * 40f, ModContent.DustType<GlowPixelCross>(), 
                     velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.9f) * Main.rand.NextFloat(1f, 4f), 0,
@@ -49,8 +48,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Dust sa2 = Dust.NewDustPerfect(player.Center + v2 + velocity.SafeNormalize(Vector2.UnitX) * 45f, ModContent.DustType<MuraLineBasic>(),
                     velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1.1f) * Main.rand.NextFloat(1.5f, 6f), 255,
                     new Color(42, 2, 82) * 3f, Main.rand.NextFloat(0.25f, 0.65f) * 0.75f);
-
-
             }
 
 
@@ -64,7 +61,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.UnholyTridentFriendly);
+            return lateInstantiation && (entity.type == ProjectileID.UnholyTridentFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.UnholyTridentToggle;
         }
 
         int timer = 0;
@@ -72,15 +69,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             //TODO: cleanup
             
-            int trailCount = 8; ///12
+            int trailCount = 16; //8
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 4 == 0 && Main.rand.NextBool() && timer > 8)
             {
@@ -102,7 +99,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             //Looks cool, but makes the weapon a little messy, maybe use this for shadowflame knife and/or bow?
-            if (timer % 1 == 0 && false)
+            if (timer % 1 == 0)
             {
                 Vector2 posOffset = Main.rand.NextVector2Circular(2f, 2f);
                 Vector2 initVel = Main.rand.NextVector2Circular(1.25f, 1.25f);
@@ -123,20 +120,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            /*
-            if (timer % 4 == 0 && Main.rand.NextBool() && false)
-            {
-                Dust grass = Dust.NewDustPerfect(projectile.Center, DustID.JungleGrass, Main.rand.NextVector2Circular(2, 2), 0, Scale: 0.9f);
-                grass.velocity += projectile.velocity;
-                grass.noGravity = true;
-                grass.alpha = 50;
-            }
-            */
-
             float fadeInTime = Math.Clamp((timer + 5f) / 15f, 0f, 1f);
             fadeInAlpha = Easings.easeInCirc(fadeInTime);
 
             timer++;
+
+            projectile.velocity.Y += 0.5f;
 
             #region vanillaAI
             if (projectile.localAI[1] < 15f)
@@ -184,7 +173,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         float fadeInAlpha = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -193,41 +182,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            //After-Image
-            if (previousRotations != null && previousPostions != null)
-            {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-
-                    Color col = Color.White * progress;
-                    // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
-
-                    float size2 = (1f + (progress * 0.25f)) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f * progress, //0.5f
-                            previousRotations[i], TexOrigin, size2 * fadeInAlpha, SpriteEffects.None);
-
-
-                    if (i > 1)
-                    {
-                        float middleProg = (float)(i - 1) / previousPostions.Count;
-                        Vector2 vec2Scale = new Vector2(0.5f, 0.5f) * size * fadeInAlpha;
-                        Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.White with { A = 0 } * 0.85f * middleProg,
-                            previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
-                    }
-
-                }
-
-
-
-            }
+            DrawTrail(projectile, false);
 
             //Border
-            for (int i = 0; i < 3; i++)
+            for (int i = 220; i < 3; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
                     Color.Purple with { A = 0 } * 0.9f, projectile.rotation, TexOrigin, projectile.scale * 1.05f * fadeInAlpha, SpriteEffects.None);
@@ -235,8 +193,70 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
 
             //MainTex
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * fadeInAlpha, SpriteEffects.None);
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * fadeInAlpha, SpriteEffects.None);
             return false;
+
+        }
+
+        private BlendState _multiplyBlendState = null;
+        public void DrawTrail(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Main.spriteBatch.End();
+
+            if (_multiplyBlendState == null)
+            {
+                _ = BlendState.AlphaBlend;
+                _ = BlendState.Additive;
+                _multiplyBlendState = new BlendState
+                {
+                    ColorBlendFunction = BlendFunction.ReverseSubtract,
+                    ColorDestinationBlend = Blend.One,
+                    ColorSourceBlend = Blend.SourceAlpha,
+                    AlphaBlendFunction = BlendFunction.ReverseSubtract,
+                    AlphaDestinationBlend = Blend.One,
+                    AlphaSourceBlend = Blend.SourceAlpha
+                };
+            }
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, _multiplyBlendState, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+
+
+            Color thisPurple = new Color(0, 38, 0) * 4f;
+            //After-Image
+            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+
+            Color color = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
+
+            float overallWidth = 1f + ((float)Math.Sin(Main.timeForVisualEffects * 0.06f) * 0.15f);
+
+            //Trail
+            for (int i = 0; i < previousPositions.Count; i++)
+            {
+                float progress = (float)i / previousPositions.Count;
+
+                Vector2 trailPos = previousPositions[i] - Main.screenPosition;
+
+                //float trailAlpha = progress * progress * projectile.Opacity;
+
+                //Start End
+                Color trailColor = thisPurple;// Color.Lerp(color, Color.DodgerBlue, Easings.easeOutSine(1f - progress));
+
+                Vector2 trailScaleThick = new Vector2(0.5f, 0.2f + Easings.easeInSine(progress) * 0.45f) * fadeInAlpha;
+                Vector2 trailScaleThin = new Vector2(trailScaleThick.X, trailScaleThick.Y * 0.55f);
+
+                trailScaleThick.Y *= overallWidth;
+
+                Main.EntitySpriteDraw(flare, trailPos, null, trailColor, previousRotations[i] - MathHelper.PiOver4,
+                    flare.Size() / 2f, trailScaleThick, 0);
+
+                //Main.EntitySpriteDraw(flare, trailPos, null, Color.White with { A = 0 }, previousRotations[i], 
+                //flare.Size() / 2f, trailScaleThin, 0);
+            }
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
         }
 
