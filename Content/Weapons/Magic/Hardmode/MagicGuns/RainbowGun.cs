@@ -392,10 +392,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         }
         public void ShaderParams()
         {
-            float fadeOut = shouldFade ? Math.Clamp(Easings.easeInQuad(true_alpha), 0.15f, 1f) : true_alpha;
-
-            //Color rainbow = Main.hslToRgb((timer * 0.01f + rainbowOffset) % 1f, 1f, 0.72f, 0) * 0.75f * fadeOut; //0.6 gives a fucking amazing orange
-
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);

@@ -7,19 +7,10 @@ using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using Terraria.GameContent.Drawing;
 using VFXPlus.Common.Drawing;
-using Terraria.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using System.Runtime.InteropServices.JavaScript;
-using static tModPorter.ProgressUpdate;
+using VFXPlus.Common.Utilities;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -36,7 +27,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {            
-            int trailCount = 30; //40
+            int trailCount = 30;
             previousRotations.Add(projectile.velocity.ToRotation());
             previousPositions.Add(projectile.Center);
 
@@ -125,10 +116,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float drawScale = 0.65f;
 
         float starPower = 0f;
-        public float overallAlpha = 0f;
-        Effect myEffect = null;
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPositions = new List<Vector2>();
+        float overallAlpha = 0f;
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -196,7 +186,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * 1f, projectile.velocity.ToRotation(), orb.Size() / 2f, vec2Scale * 0.5f, SpriteEffects.None);
 
 
-            Texture2D Spike = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D Spike = CommonTextures.SoulSpike.Value;
 
             float sinWidth = 1f + (float)(Math.Sin(randomSineOffset + Main.timeForVisualEffects * 0.25f) * 0.15f);
 
@@ -221,7 +211,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 pos = previousPositions[i];
                 Vector2 velRot = previousRotations[i].ToRotationVector2();
 
-                if (i % 2 == 0)
+                if (i % 3 == 0)
                 {
                     Color col = Main.rand.NextBool() ? Color.White : Color.SkyBlue;
 
@@ -232,6 +222,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 }
 
             }
+
+            for (int i = 0; i < 6 + Main.rand.Next(0, 2); i++)
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 3.5f);
+                Color col = Main.rand.NextBool() ? Color.White : Color.SkyBlue;
+
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelFast>(), dustVel, Alpha: 100, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.45f));
+            }
+
             return base.PreKill(projectile, timeLeft);
         }
     }

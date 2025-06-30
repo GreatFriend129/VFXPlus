@@ -19,33 +19,13 @@ using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class ShadowbeamStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.ShadowbeamStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            return true;
-        }
-
-    }
     public class ShadowbeamStaffShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.ShadowBeamFriendly);
+            return lateInstantiation && (entity.type == ProjectileID.ShadowBeamFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ShadowbeamStaffToggle;
         }
 
         int vfxIndex = -1;
@@ -164,18 +144,29 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
             //Add node
             AddNewNode(projectile);
 
-            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.3f);
+            Color purple = new Color(61, 2, 92);
+
+            Color dustCol = purple;
+
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: dustCol, Scale: 1.3f);
             d1.rotation = 0f + oldVelocity.ToRotation();
             d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.3f);
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: dustCol, Scale: 1.3f);
             d2.rotation = MathHelper.PiOver4 + oldVelocity.ToRotation();
             d2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.9f, shouldFadeColor: false);
+
+
+            SoftGlowDustBehavior sgdb = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 20, 
+                overallAlpha: 0.5f, DrawWhiteCore: true, 1f, 1f);
+
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: dustCol, Scale: 0.13f);
+            softGlow.customData = sgdb;
+
+            //Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStarVFX>(), 0, 0, Main.myPlayer);
 
             return base.OnTileCollide(projectile, oldVelocity);
         }
@@ -184,7 +175,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             if (vfxIndex == -1)
             {
-                Main.NewText("vfxIndex is -1");
+                Main.NewText("vfxIndex is -1 | I don't know how this would ever happen");
                 return;
             }
 
@@ -291,7 +282,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             if (nodes.Count <= 0) return false;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("OverPlayers", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -382,11 +373,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             #endregion
         }
-
-        public void DrawNodeStar(ShadowbeamNode node, bool isFirst = false)
-        {
-
-        }
     }
 
 
@@ -402,6 +388,80 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             tail = end;
 
             rot = (end - start).ToRotation();
+        }
+    }
+
+    public class ShadowbeamStarVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        //Safety Checks
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.tileCollide = false;
+
+            Projectile.timeLeft = 2400;
+        }
+
+        int timer = 0;
+
+        public override void AI()
+        {
+            float fadeInTime = Math.Clamp((float)(timer + 8) / 22f, 0f, 1f);
+            overallScale = Easings.easeInBack(fadeInTime);
+
+            if (fadeInTime == 1f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.12f), 0f, 1f);
+
+            if (overallAlpha == 0f)
+                Projectile.active = false;
+
+            //Projectile.spriteDirection = Projectile.velocity.X > 0 ? -1 : 1;
+
+            timer++;
+        }
+
+        float overallScale = 1f;
+        float overallAlpha = 1f;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
+            {
+                DrawPortal(false);
+            });
+            DrawPortal(true);
+
+            return false;
+        }
+
+        public void DrawPortal(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D Flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value; 
+            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
+
+            Vector2 originPoint = Projectile.Center - Main.screenPosition;
+
+            int dir = Projectile.spriteDirection;
+
+            Color purple = Color.Purple;
+
+
+            float rot = (float)Main.timeForVisualEffects * 0.1f * Projectile.spriteDirection;
+
+            float starScale = (1f - overallScale) * 0.75f;
+
+            Main.spriteBatch.Draw(Flare, originPoint, null, purple with { A = 0 } * 2f, rot, Flare.Size() / 2, starScale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flare, originPoint, null, Color.White with { A = 0 }, rot, Flare.Size() / 2, starScale * 0.65f, SpriteEffects.None, 0f);
         }
     }
 

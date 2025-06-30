@@ -23,7 +23,7 @@ using Terraria.Graphics;
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 {
     
-    public class MagnetSphere : GlobalItem 
+    public class MagnetSphereItemOverride : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
@@ -399,9 +399,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             #region Shader
 
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
             float dist = (endPoint - startPoint).Length();
             float repValue = dist / 400f;
             myEffect.Parameters["reps"].SetValue(repValue * 0.8f);
@@ -440,6 +437,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
     }
 
+    //Unused just looks cool
     public class JuttedLightning : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";

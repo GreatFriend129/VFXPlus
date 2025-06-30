@@ -229,8 +229,8 @@ namespace VFXPlus
         #endregion
 
         #region Hardmode Tomes
-        [DefaultValue(true)]
-        [ReloadRequired]
+        //[ReloadRequired]
+        [DefaultValue(true)] //TODO
         public bool CrystalStormToggle = true;
 
         [DefaultValue(true)]

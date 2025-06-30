@@ -61,8 +61,44 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_flameburst_tower_shot_2") with { Pitch = -.48f, PitchVariance = 0f };
-            SoundEngine.PlaySound(style, player.Center);
+            //Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStarVFX>(), 0, 0, Main.myPlayer);
+
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 2, 0.8f, 0.8f);
+
+            Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
+
+            Dust d1 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: between * 0.25f);
+            d1.customData = cpb2;
+            d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
+
+            Dust d2 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: between * 0.25f);
+            d2.customData = cpb2;
+            d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+
+            for (int i = 0; i < 13 + Main.rand.Next(0, 6); i++) //2 //0,3
+            {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2.5f, 10f);
+
+                //Vector2 vel = Main.rand.NextVector2Circular(5f, 5f) * 2f;
+
+                Dust dp = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<ElectricSparkGlow>(), vel, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.5f);
+
+                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.98f, FadeVelPower: 0.92f, Pixelize: true, XScale: 1f, YScale: 0.75f); //0.91
+
+                if (i < 8)
+                    esb.randomVelRotatePower = 1f; //1f
+                dp.customData = esb;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2.5f, 7f);
+                Color middleBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f + Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Dust gd = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.15f, 0.4f));
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.3f, timeBeforeSlow: 5,
+                    preSlowPower: 0.94f, postSlowPower: 0.90f, velToBeginShrink: 1f, fadePower: 0.92f, shouldFadeColor: false);
+            }
 
             return false;
 

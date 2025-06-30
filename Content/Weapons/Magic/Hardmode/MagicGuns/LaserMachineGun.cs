@@ -199,15 +199,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             Vector2 offsetPos = projectile.velocity.SafeNormalize(Vector2.UnitX) * 5f + projectile.Center;
 
-            Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * 2.5f; //3f
-            Dust d = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel, newColor: Color.DodgerBlue);
-            //d.scale = 0.15f;
+            Color ringCol = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.45f);
+
+            Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * 2f; //2.5
+            Dust d = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel, newColor: ringCol * 0.5f);
+            d.scale = 0.03f;
             CirclePulseBehavior b = new CirclePulseBehavior(0.25f, true, 1, 0.4f, 0.8f);
             b.drawLayer = "Dusts";
             d.customData = b;
 
-            Dust d2 = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel * 1.2f, newColor: Color.DodgerBlue);
+            Dust d2 = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), vel * 1f, newColor: ringCol * 0.5f);
             CirclePulseBehavior b2 = new CirclePulseBehavior(0.25f, true, 1, 0.2f, 0.4f);
+            d.scale = 0.03f;
             b2.drawLayer = "Dusts";
             d2.customData = b2;
 
@@ -216,21 +219,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             {
                 Vector2 offsetPos2 = projectile.velocity.SafeNormalize(Vector2.UnitX) * 10f + projectile.Center;
 
-                Dust dp = Dust.NewDustPerfect(offsetPos2, ModContent.DustType<LineSpark>(),
+                Dust dp = Dust.NewDustPerfect(offsetPos2, ModContent.DustType<PixelatedLineSpark>(),
                     vel.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.35f, 0.35f)) * Main.rand.Next(7, 18),
-                    newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.45f, 0.6f) * 0.45f); //35
+                    newColor: Color.DodgerBlue * 1f, Scale: Main.rand.NextFloat(0.45f, 0.6f) * 0.5f); //35
 
                 dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                    1f, 0.5f);
+                    1f, 0.55f);
 
             }
-
-            //SoundEngine.PlaySound(SoundID.Item91 with { Volume = 0.75f, Pitch = 0.25f }, projectile.Center);
-
-            //SoundStyle style = new SoundStyle("Terraria/Sounds/Research_3") with { Volume = 0.3f, Pitch = .65f, PitchVariance = .2f };
-            //SoundEngine.PlaySound(style, projectile.Center);
-            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_158") with { Volume = 0.4f, Pitch = .5f, PitchVariance = 0.15f };
-            //SoundEngine.PlaySound(style2, projectile.Center);
         }
 
 
@@ -259,7 +255,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 float progress = (float)i / previousRotations.Count;
 
                 Color col = Color.SkyBlue with { A = 0 } * Easings.easeInCubic(progress);
-                Color col2 = Color.DodgerBlue with { A = 0 } * progress;
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
@@ -286,7 +281,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public override bool PreAI(Projectile projectile)
         {
 
-            if (timer % 2 == 0 && projectile.ai[1] == 0)
+            if (projectile.ai[1] == 0) //If we haven't tileCollided
             {
                 int trailCount = 30;
                 previousRotations.Add(projectile.rotation);
@@ -299,7 +294,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     previousPositions.RemoveAt(0);
 
 
-                bool addInBetween = true;
+                bool addInBetween = false;
                 if (addInBetween)
                 {
                     previousRotations.Add(projectile.rotation);
@@ -312,25 +307,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                         previousPositions.RemoveAt(0);
                 }
             }
-            else if (projectile.ai[1] == 1)
-            {
-                if (timer % 1 == 0)
-                {
-                    if (previousPositions.Count > 0)
-                    {
-                        previousRotations.RemoveAt(0);
-                        previousPositions.RemoveAt(0);
-                    }
-                }
-            }
-            
-            if (timer % 5 == 0 && timer > 6 && projectile.ai[1] != 1 && Main.rand.NextBool(2))
-            {
-                Vector2 dustVel = Main.rand.NextVector2Circular(3f, 3f);
+    
 
-                Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: Color.DeepSkyBlue * 0.75f, Scale: Main.rand.NextFloat(0.15f, 0.25f) * 1.75f);
-                da.velocity += projectile.velocity.RotatedByRandom(0.2f) * 0.65f;
-                da.alpha = 12;
+            if (timer % 2 == 0 && Main.rand.NextBool(8) && projectile.ai[1] != 1)
+            {
+                Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
+                dustVel += projectile.velocity * 0.55f;
+
+                Color dustCol = Color.DodgerBlue;
+                float dustScale = Main.rand.NextFloat(0.6f, 0.7f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: dustCol, Scale: dustScale);
+                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 0, postSlowPower: 0.89f, velToBeginShrink: 10f, fadePower: 0.89f, shouldFadeColor: false);
             }
 
 
@@ -356,37 +344,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public void DrawLaserShot(Projectile projectile)
         {
+            if (projectile.ai[1] == 1)
+                return;
+            
             Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
             Texture2D line2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
 
+            Vector2 posOffset = new Vector2(-15f, 0f).RotatedBy(projectile.velocity.ToRotation());
+
             //After-Image
-            for (int i = 220; i < previousRotations.Count; i++)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
-                float easedProg = Easings.easeInCirc(progress);
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
 
-                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.15f;
+                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.55f);
 
-                float size = Easings.easeOutSine(1f * progress) * projectile.scale + sineScale;
-
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
-
-                float colPower = easedProg;
-
-
-                Color newBlue = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.85f);
-
-                Color newCol = newBlue;//Color.Lerp(Color.White, newBlue, progress);
-                Color newCol2 = Color.DodgerBlue * 1.5f;
-
-
-                Vector2 lineScale = new Vector2(2.25f, 0.3f + 0.4f * progress * 1.75f);
-                Vector2 lineScale2 = new Vector2(2.25f, 0.15f + 0.2f * progress * 1.25f);
-
-                //Black
-                //Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * progress * progress * progress,
-                //    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.75f);
+                Vector2 lineScale2 = new Vector2(1.85f, 0.15f + 0.2f * progress * 1f * 0.75f); //1.25
 
                 //Main
                 Main.EntitySpriteDraw(line2, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress,
@@ -402,34 +378,27 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * progress * progress,
                     projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
             }
-
-            for (int i = 0; i < previousRotations.Count; i++)
-            {
-                float progress = (float)i / previousRotations.Count;
-
-                Color color = Main.hslToRgb((timer * 0.01f + projectile.ai[1]) % 1f, 1f, 0.4f, 0);
-
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
-
-                Vector2 vec2Scale = new Vector2(1f, 0.8f * progress) * projectile.scale * 0.75f;
-                Vector2 vec2Scale2 = new Vector2(1f, 0.4f * progress) * projectile.scale * 0.75f;
-
-                Main.EntitySpriteDraw(line, AfterImagePos, null, color with { A = 0 },
-                       previousRotations[i], line.Size() / 2f, vec2Scale, SpriteEffects.None);
-
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 1f * progress,
-                       previousRotations[i], line.Size() / 2f, vec2Scale2, SpriteEffects.None);
-
-            }
-
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            for (int i = 0; i < Main.rand.Next(2, 6); i++)
+            return false;
+        }
+
+        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
+        {
+            Collision.HitTiles(projectile.position, projectile.velocity, projectile.width, projectile.height);
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_10") with { Volume = 0.1f, Pitch = 1f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, projectile.Center);
+
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Volume = 0.15f, Pitch = -.7f, PitchVariance = .3f, MaxInstances = 1 };
+            SoundEngine.PlaySound(style2, projectile.Center);
+
+            for (int i = 0; i < Main.rand.Next(3, 8); i++)
             {
 
-                float velMult = Main.rand.NextFloat(1.5f, 3f);
+                float velMult = Main.rand.NextFloat(2f, 3.5f);
                 Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
                 Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), randomStart, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.55f, 1f));
 
@@ -442,37 +411,52 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.9f, velToBeginShrink: 3f, colorFadePower: 1f);
             }
 
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DeepSkyBlue, Scale: 0.08f);
-
-            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
+            SoftGlowDustBehavior sgdb = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
                 overallAlpha: 0.10f, DrawWhiteCore: true, 1f, 1f);
 
-            return false;
-            //return base.PreKill(projectile, timeLeft);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue * 0.35f, Scale: 0.08f);
+            softGlow.customData = sgdb;
+
+            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.14f);
+            softGlow2.customData = sgdb;
+
+            return base.OnTileCollide(projectile, oldVelocity);
         }
 
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            Collision.HitTiles(projectile.position, projectile.velocity, projectile.width, projectile.height);
-            
-            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.25f, Pitch = 1f, PitchVariance = 0.25f, MaxInstances = -1 }, projectile.Center);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_10") with { Volume = 0.1f, Pitch = 1f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, projectile.Center);
 
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Volume = 0.15f, Pitch = -.7f, PitchVariance = .3f, MaxInstances = 1 };
+            SoundEngine.PlaySound(style2, projectile.Center);
 
-            projectile.Kill();
-
-
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < Main.rand.Next(3, 8); i++)
             {
-                if (previousPositions.Count >= 1)
-                {
-                    int toRemove = previousPositions.Count - 1;
-                    previousPositions.RemoveAt(toRemove);
-                    previousRotations.RemoveAt(toRemove);
-                }
+
+                float velMult = Main.rand.NextFloat(2f, 3.5f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), randomStart, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.55f, 1f));
+
+                if (dust.scale > 0.9f)
+                    dust.velocity *= 0.5f;
+
+                dust.scale *= 0.9f;
+
+                dust.fadeIn = Main.rand.NextFloat(0.25f, 1f);
+                dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.9f, velToBeginShrink: 3f, colorFadePower: 1f);
             }
-            
-            
-            return base.OnTileCollide(projectile, oldVelocity);
+
+            SoftGlowDustBehavior sgdb = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
+                overallAlpha: 0.10f, DrawWhiteCore: true, 1f, 1f);
+
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue * 0.35f, Scale: 0.08f);
+            softGlow.customData = sgdb;
+
+            Dust softGlow2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DodgerBlue, Scale: 0.14f);
+            softGlow2.customData = sgdb;
+
+            base.OnHitNPC(projectile, target, hit, damageDone);
         }
     }
 }
