@@ -29,7 +29,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return lateInstantiation && (entity.type == ProjectileID.BoulderStaffOfEarth) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.StaffOfEarthToggle;
         }
 
-        BaseTrailInfo trail1 = new BaseTrailInfo();
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -73,46 +72,23 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 p.velocity += projectile.velocity * 0.25f;
             }
 
-            #region trail
-            int trueTrailWidth = (int)(100f * fadeInAlpha * projectile.scale); //20
-
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value;
-            trail1.trailPointLimit = 90;
-            trail1.trailWidth = trueTrailWidth * 0;
-            trail1.trailMaxLength = 130 * projectile.scale; //65
-            trail1.timesToDraw = 2;
-            trail1.shouldSmooth = false;
-            trail1.pinchHead = false;
-            trail1.pinchTail = false;
-            trail1.useEffectMatrix = true;
-
-            trail1.trailColor = Color.OrangeRed;// Color.Lerp(Color.OrangeRed, Color.Orange, 0.8f);
-
-            trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + projectile.velocity;
-            trail1.TrailLogic();
-            #endregion
-
             float fadeInTime = Math.Clamp((timer + 10f) / 15f, 0f, 1f);
             fadeInAlpha = Easings.easeInCirc(fadeInTime);
+
+            float animProgress = Math.Clamp((timer + 5f) / 30f, 0f, 1f);
+            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
 
             timer++;
 
             return base.PreAI(projectile);
         }
 
+        float overallScale = 0f;
         float fadeInAlpha = 0f;
-        public List<float> previousVelRots = new List<float>();
-        public List<Vector2> previousPositions = new List<Vector2>();
+        List<float> previousVelRots = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            trail1.trailTime = (float)Main.timeForVisualEffects * 0.03f;
-
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
-            {
-                trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
-            });
-
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawAfterImage(projectile, false);
@@ -137,19 +113,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 float dist = 3f + (i * 0.4f);
 
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(dist, dist), sourceRectangle,
-                    col1 with { A = 0 } * opacity * borderAlpha, projectile.rotation, TexOrigin, projectile.scale * scale * fadeInAlpha, SpriteEffects.None);
+                    col1 with { A = 0 } * opacity * borderAlpha, projectile.rotation, TexOrigin, projectile.scale * scale * overallScale, SpriteEffects.None);
             }
 
             //MainTex
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * fadeInAlpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor, projectile.rotation, TexOrigin, projectile.scale * overallScale, SpriteEffects.None);
 
             //Glowmask
             Texture2D GlowMask = TextureAssets.GlowMask[252].Value;
-            Main.EntitySpriteDraw(GlowMask, drawPos, null, Color.White, projectile.rotation, GlowMask.Size() / 2f, projectile.scale * fadeInAlpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(GlowMask, drawPos, null, Color.White, projectile.rotation, GlowMask.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
 
             for (int k = 0; k < 1; k++)
             {
-                Main.EntitySpriteDraw(GlowMask, drawPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 }, projectile.rotation, GlowMask.Size() / 2f, projectile.scale * fadeInAlpha, SpriteEffects.None);
+                Main.EntitySpriteDraw(GlowMask, drawPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 }, projectile.rotation, GlowMask.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
             }
             return false;
 
@@ -173,7 +149,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.SkyBlue with { A = 0 } * 0.5f * Easings.easeInSine(progress) * progress, //0.5f
-                        previousVelRots[i], TexOrigin, size2 * fadeInAlpha, SpriteEffects.None);
+                        previousVelRots[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
 
             }
 
@@ -185,18 +161,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Vector2 offset1 = Vector2.Zero;
 
-                //offset1 += Main.rand.NextVector2Circular(5f * projectile.scale, 5f * projectile.scale) * fadeInAlpha * projectile.scale;
+                float randOff = Main.rand.NextFloat(-5f, 5f) * projectile.scale * progress;
+                offset1 += new Vector2(0f, randOff).RotatedBy(previousVelRots[i]) * fadeInAlpha * projectile.scale;
 
 
                 Vector2 flarePos = previousPositions[i] - Main.screenPosition;
 
                 Color col = Color.Lerp(Color.OrangeRed, between2, Easings.easeOutSine(progress));
 
-                Vector2 lineScale = new Vector2(0.75f, 1.5f * progress) * fadeInAlpha * projectile.scale;
-                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.35f * Easings.easeInSine(progress),
+                Vector2 lineScale = new Vector2(0.75f, 1.5f * progress) * overallScale * projectile.scale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.5f * Easings.easeInSine(progress),
                     previousVelRots[i], line.Size() / 2f, lineScale, SpriteEffects.None);
 
-                Vector2 innerScale = new Vector2(0.75f, 1.5f * 0.25f * progress) * fadeInAlpha * projectile.scale;
+                Vector2 innerScale = new Vector2(0.75f, 1.5f * 0.25f * progress) * overallScale * projectile.scale;
                 Main.EntitySpriteDraw(line, flarePos + offset1, null, Color.LightYellow with { A = 0 } * 0.25f * Easings.easeInSine(progress),
                     previousVelRots[i], line.Size() / 2f, innerScale, SpriteEffects.None);
             }

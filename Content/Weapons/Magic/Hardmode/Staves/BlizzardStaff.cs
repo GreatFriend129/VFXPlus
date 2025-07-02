@@ -19,27 +19,6 @@ using System.Reflection.Metadata;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    
-    public class BlizzardStaff : GlobalItem 
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.BlizzardStaff);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f }; //Turn item sound off
-            base.SetDefaults(entity); 
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            
-            return true;
-        }
-
-    }
 
     public class BlizzardStaffShotOverride : GlobalProjectile
     {
@@ -47,25 +26,24 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Blizzard);
+            return lateInstantiation && (entity.type == ProjectileID.Blizzard) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.BlizzardStaffToggle;
         }
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 11; //7 | 14
-
+            int trailCount = 11;
 
             if (timer % 1 == 0)
             {
                 previousRotations.Add(projectile.rotation);
-                previousPostions.Add(projectile.Center);
+                previousPositions.Add(projectile.Center);
 
                 if (previousRotations.Count > trailCount)
                     previousRotations.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
 
                 if (timer % 4 == 0 && Main.rand.NextBool())
                 {
@@ -79,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 if (timer % 2 == 0 && false)
                 {
                     Vector2 vel2 = Main.rand.NextVector2Circular(1.5f, 1.5f);
-                    Color col2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
+                    Color col2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.25f);
 
                     Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), vel2, newColor: col2 * 1f, Scale: Main.rand.NextFloat(0.25f, 0.5f));
                     d2.customData = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.12f); //0.5f
@@ -92,7 +70,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (timer < 7)
             {
                 Vector2 vel2 = Main.rand.NextVector2Circular(1.5f, 1.5f);
-                Color col2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
+                Color col2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.25f);
 
                 Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), vel2, newColor: col2 * 0.75f, Scale: Main.rand.NextFloat(0.3f, 0.65f));
                 d2.velocity += projectile.velocity.RotatedByRandom(0.75f) * 0.7f;
@@ -138,8 +116,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
 
         float drawScale = 1f;
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -149,30 +127,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+                float size = (0.75f + (progress * 0.25f)) * projectile.scale;
+
+                Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, progress) * progress * projectile.Opacity * 0.5f;
+
+                //float size2 = (1f + (progress * 0.25f)) * projectile.scale;
+                float size2 = 0.8f + (progress * 0.2f) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f,
+                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
+
+                if (i > 5) //2
                 {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-
-                    Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, progress) * progress * projectile.Opacity * 0.5f;
-
-                    //float size2 = (1f + (progress * 0.25f)) * projectile.scale;
-                    float size2 = 0.8f + (progress * 0.2f) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f,
-                            previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
-                    if (i > 5) //2
-                    {
-                        Vector2 vec2Scale = new Vector2(0.2f, 1.5f) * size;
-                        Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.LightSkyBlue with { A = 0 } * 0.25f * progress * 0.5f,
-                            previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
-                    }
-
+                    Vector2 vec2Scale = new Vector2(0.2f, 1.5f) * size;
+                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.LightSkyBlue with { A = 0 } * 0.25f * progress * 0.5f,
+                        previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
                 }
 
             }
@@ -226,7 +200,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
 
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                    newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
+                    newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.15f, 0.35f) * projectile.scale);
 
                 p.velocity += projectile.velocity * 0.15f;
             }
@@ -242,18 +216,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             return false;
             //return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
         }
 
     }

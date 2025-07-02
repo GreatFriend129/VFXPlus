@@ -55,8 +55,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         float drawScale = 0f;
         float outerAlpha = 0f;
         float starPower = 0f;
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPositions = new List<Vector2>();
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -116,7 +116,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 float cosOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.077f) * 0.1f;
 
                 float startScale = sinOff * drawScale;
-                float endScale = 7f * cosOff * drawScale;
+                float endScale = 7f * cosOff * Easings.easeOutQuad(drawScale);
 
                 float scale = 1f;
 
@@ -425,19 +425,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         int timer = 0;
         public override bool PreAI(Projectile projectile)
-        {
-            //return true;
-            
-            int trailCount = 20;
-            previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center);
-
-            if (previousRotations.Count > trailCount)
-                previousRotations.RemoveAt(0);
-
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
-
+        {            
             timer++;
 
             #region vanilla code
@@ -524,8 +512,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return base.PreAI(projectile);
         }
 
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
@@ -546,52 +532,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.75f, 0.75f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.3f, SpriteEffects.None, 0f);
 
             return false;
-        }
-
-        Effect myEffect = null;
-        public void DrawVertexTrail(bool giveUp)
-        {
-            if (giveUp)
-                return;
-
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value;
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPostions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-            Color StripColor(float progress) => Color.White * (progress * progress * progress);
-            float StripWidth(float progress) => 30f * Easings.easeOutQuad(progress);// * MathF.Sqrt(Utils.GetLerpValue(0f, 0.1f, progress, true));
-
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.08f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 0.15f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            vertexStrip.DrawTrail();
-
-            //Over layer
-            myEffect.Parameters["ColorOne"].SetValue(Color.OrangeRed.ToVector3() * 10f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.5f);
-            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
     }
@@ -807,7 +747,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return lateInstantiation && (entity.type == ProjectileID.NebulaArcanumExplosionShot);
         }
 
-        int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
             return base.PreAI(projectile);
