@@ -28,7 +28,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.ApprenticeStaffT3);
+            return lateInstatiation && (item.type == ItemID.ApprenticeStaffT3) && false;
         }
 
         public override void SetDefaults(Item entity)
@@ -49,7 +49,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && entity.type == ProjectileID.ApprenticeStaffT3Shot;
+            return lateInstantiation && entity.type == ProjectileID.ApprenticeStaffT3Shot && false;
         }
 
 

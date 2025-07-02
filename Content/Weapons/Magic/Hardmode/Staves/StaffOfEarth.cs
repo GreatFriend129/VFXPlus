@@ -16,6 +16,7 @@ using Terraria.GameContent;
 using System.Threading;
 using Terraria.GameContent.Drawing;
 using VFXPlus.Common.Drawing;
+using static Terraria.ModLoader.PlayerDrawLayer;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -135,8 +136,27 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             if (giveUp)
                 return;
+
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Vector2 originPoint = projectile.Center - Main.screenPosition;
+
+            Color[] cols = { Color.Gold * 0.75f, Color.Orange * 0.525f, Color.OrangeRed * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
+
+            float orbRot = projectile.rotation - MathHelper.PiOver4;
+            float orbAlpha = 0.5f;
+            float orbScale = 0.45f * overallScale;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.25f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.2f;
+
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
@@ -169,12 +189,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Color col = Color.Lerp(Color.OrangeRed, between2, Easings.easeOutSine(progress));
 
-                Vector2 lineScale = new Vector2(0.75f, 1.5f * progress) * overallScale * projectile.scale;
-                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.5f * Easings.easeInSine(progress),
+                Vector2 lineScale = new Vector2(0.75f, 1.4f * progress) * overallScale * projectile.scale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.45f * Easings.easeInSine(progress),
                     previousVelRots[i], line.Size() / 2f, lineScale, SpriteEffects.None);
 
-                Vector2 innerScale = new Vector2(0.75f, 1.5f * 0.25f * progress) * overallScale * projectile.scale;
-                Main.EntitySpriteDraw(line, flarePos + offset1, null, Color.LightYellow with { A = 0 } * 0.25f * Easings.easeInSine(progress),
+                Vector2 innerScale = new Vector2(0.75f, 1.4f * 0.25f * progress) * overallScale * projectile.scale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, Color.LightYellow with { A = 0 } * 0.22f * Easings.easeInSine(progress),
                     previousVelRots[i], line.Size() / 2f, innerScale, SpriteEffects.None);
             }
         }
@@ -182,6 +202,40 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
+            Color betweenCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.95f);
+            for (int i = 220; i < 13 + Main.rand.Next(0, 7); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1.75f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: betweenCol, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.65f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.96f, timeBeforeSlow: 2, postSlowPower: 0.92f, velToBeginShrink: 1f, fadePower: 0.93f, shouldFadeColor: false);
+            }
+
+            for (int i = 0; i < 8 + Main.rand.Next(0, 5); i++)
+            {
+                Vector2 vel = Main.rand.NextVector2Unit() * Main.rand.NextFloat(2f, 6f);
+
+                //Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel,
+                    newColor: betweenCol, Scale: Main.rand.NextFloat(0.5f, 0.65f));
+
+                p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 2, preSlowPower: 0.96f, postSlowPower: 0.88f,
+                    velToBeginShrink: 1.5f, fadePower: 0.89f, shouldFadeColor: false);
+            }
+
+            Color smokeCol = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
+            for (int i = 0; i < 12; i++) //16
+            {
+                float progress = (float)i / 11;
+                Color col = Color.Lerp(Color.Black, smokeCol, Easings.easeOutQuad(progress));
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3f) * 2f,
+                    newColor: col with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.35f) * 1f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.35f);
+            }
 
             return true;
         }
@@ -190,19 +244,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timeSinceLastTileCollide = -1;
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
-            //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
             int shockwaveCount = 7;
-            if (oldVelocity.Length() > 7)
+            if (oldVelocity.Length() > 7 && Math.Abs(oldVelocity.Y) > 1f)
             {
-                Projectile.NewProjectile(null, projectile.Center, Vector2.UnitX, ModContent.ProjectileType<GraydeeTileShockwave>(), 0, 0, Main.player[projectile.owner].whoAmI, 0, shockwaveCount);
-                Projectile.NewProjectile(null, projectile.Center, Vector2.UnitX * -1, ModContent.ProjectileType<GraydeeTileShockwave>(), 0, 0, Main.player[projectile.owner].whoAmI, 0, -shockwaveCount);
+                //Projectile.NewProjectile(null, projectile.Center, Vector2.UnitX, ModContent.ProjectileType<GraydeeTileShockwave>(), 0, 0, Main.player[projectile.owner].whoAmI, 0, shockwaveCount);
+                //Projectile.NewProjectile(null, projectile.Center, Vector2.UnitX * -1, ModContent.ProjectileType<GraydeeTileShockwave>(), 0, 0, Main.player[projectile.owner].whoAmI, 0, -shockwaveCount);
 
+                Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.35f);
 
                 for (int i = 0; i < 4 + oldVelocity.Length(); i++) //16
                 {
                     float progress = (float)i / 31;
-                    Color col = Color.Lerp(Color.Black, Color.Orange, Easings.easeOutQuad(progress));
+                    Color col = Color.Lerp(Color.Black, between, Easings.easeOutQuad(progress));
 
                     Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3f) * 2.65f,
                         newColor: col with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1.5f);

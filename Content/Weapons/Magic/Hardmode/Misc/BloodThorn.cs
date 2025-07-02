@@ -15,6 +15,7 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using Terraria.GameContent.UI.BigProgressBar;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -34,7 +35,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            Vector2 dustStartPos = player.Center + new Vector2(13f * player.direction, -18f);
+            Vector2 dustStartPos = player.MountedCenter + new Vector2(13f * player.direction, -18f);
             for (int i = 0; i < 5 + Main.rand.Next(1, 5); i++)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
@@ -75,6 +76,24 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
 
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Color[] cols = { Color.DarkRed * 0.75f, Color.DarkRed * 0.525f, Color.DarkRed * 0.375f };
+            float[] scales = { 1.15f, 1.6f, 2.5f };
+
+            float orbRot = projectile.rotation + MathHelper.PiOver2;
+            float orbAlpha = 0.2f;
+            Vector2 orbScale = new Vector2(0.4f, 1.25f) * 1f * projectile.scale;
+            Vector2 orbOrigin = orb.Size() / 2f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+
+
             //Border
             for (int i = 0; i < 4; i++)
             {
@@ -88,9 +107,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle, 
-                    col with { A = 0 } * 0.35f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
+                    col with { A = 0 } * 0.4f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1f, SpriteEffects.None);
             }
-            
+
+            //ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            //{
+            for (int num163 = 220; num163 < 4; num163++)
+            {
+                Vector2 offset = projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 4f;
+
+                Main.EntitySpriteDraw(vanillaTex, drawPos + offset + Main.rand.NextVector2Circular(1f, 1f), sourceRectangle,
+                    Color.Red with { A = 0 } * projectile.Opacity * 0.2f, projectile.rotation, TexOrigin, projectile.scale, 0f);
+            }
+            //});
+
             return true;
 
         }

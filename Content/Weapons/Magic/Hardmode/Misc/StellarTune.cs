@@ -71,14 +71,31 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             if (timer % 3 == 0 && Main.rand.NextBool(5) && timer > 3)
             {
-                Vector2 vel = Main.rand.NextVector2Circular(7f, 7f);
-                Dust de = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowFlare>(), vel, newColor: Color.HotPink, Scale: 0.6f);
+                Color betweenCol = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
 
+                //Vector2 vel = Main.rand.NextVector2Circular(7f, 7f);
+                //Dust de = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowFlare>(), vel, newColor: Color.Lerp(Color.HotPink, Color.Pink, 0.5f), Scale: 0.6f);
+                //de.customData = new GlowFlareBehavior(0.5f, 2.5f, 2f);
 
-                Dust dust57 = de;
+                //Dust dust57 = de;
+                //Dust dust212 = dust57;
+                //dust212.velocity *= 0.45f;
+                //dust57 = de;
+                //dust212 = dust57;
+                //dust212.velocity += currentRot.ToRotationVector2() * 6f;
+
+                //Color betweenCol = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+                Vector2 randomStart = Main.rand.NextVector2Circular(2f, 2f) * 1.75f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), randomStart, newColor: betweenCol, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.3f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GSSBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 2, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.94f, shouldFadeColor: false);
+
+                Dust dust57 = dust;
                 Dust dust212 = dust57;
                 dust212.velocity *= 0.45f;
-                dust57 = de;
+                dust57 = dust;
                 dust212 = dust57;
                 dust212.velocity += currentRot.ToRotationVector2() * 6f;
 
@@ -346,18 +363,30 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
                 overallAlpha: 0.11f, DrawWhiteCore: false, 1f, 1f);
 
+            Color betweenCol = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+            for (int i = 0; i < 7 + Main.rand.Next(0, 5); i++)
+            {
+                Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : betweenCol;
+
+                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1.75f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.65f);
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GSSBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 2, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+            }
 
             //Impact
-            for (int i = 0; i < 8; i++)
+            for (int i = 220; i < 8; i++)
             {
                 Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1.5f;
                 Vector2 randomStartOffsetPos = projectile.Center + Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
 
                 Color col = Main.rand.NextBool(2) ? Color.DarkGoldenrod : Color.HotPink;
 
-                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowFlare>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1.35f);
+                Dust dust = Dust.NewDustPerfect(randomStartOffsetPos, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f) * 1.35f);
 
-                dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
+                //dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
             }
 
             for (int i = 0; i < previousVelRots.Count; i += 1)
