@@ -101,7 +101,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             pulseIntensity = Math.Clamp(MathHelper.Lerp(pulseIntensity, -0.25f, 0.03f), 0f, 2f);
-            alpha = Math.Clamp(MathHelper.Lerp(alpha, 1.5f, 0.08f), 0f, 1f); //0.06
+            alpha = Math.Clamp(MathHelper.Lerp(alpha, 3f, 0.08f), 0f, 1f); //0.06
 
             //alpha = 1f;
 
@@ -144,88 +144,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             #region vanillaDraw
             Color color = new Color(255, 255, 255, lightColor.A - projectile.alpha);
-            Vector2 vector = projectile.velocity;
-            Color color2 = Color.Blue * 0.1f;
-            Vector2 spinningpoint = new Vector2(0f, -4f);
-            float num = 0f;
-            float t = vector.Length();
-            float num2 = Utils.GetLerpValue(3f, 5f, t, clamped: true);
-            bool flag = true;
-            if (projectile.type == 856 || projectile.type == 857)
-            {
-                vector = projectile.position - projectile.oldPos[1];
-                float num3 = vector.Length();
-                if (num3 == 0f)
-                {
-                    vector = Vector2.UnitY;
-                }
-                else
-                {
-                    vector *= 5f / num3;
-                }
-                Vector2 origin = new Vector2(projectile.ai[0], projectile.ai[1]);
-                Vector2 center = Main.player[projectile.owner].Center;
-                float lerpValue = Utils.GetLerpValue(0f, 120f, origin.Distance(center), clamped: true);
-                float num4 = 90f;
-                if (projectile.type == 857)
-                {
-                    num4 = 60f;
-                    flag = false;
-                }
-                float lerpValue2 = Utils.GetLerpValue(num4, num4 * (5f / 6f), projectile.localAI[0], clamped: true);
-                float lerpValue3 = Utils.GetLerpValue(0f, 120f, projectile.Center.Distance(center), clamped: true);
-                lerpValue *= lerpValue3;
-                lerpValue2 *= Utils.GetLerpValue(0f, 15f, projectile.localAI[0], clamped: true);
-                color2 = Color.HotPink * 0.15f * (lerpValue2 * lerpValue);
-                if (projectile.type == 857)
-                {
-                    color2 = projectile.GetFirstFractalColor() * 0.15f * (lerpValue2 * lerpValue);
-                }
-                spinningpoint = new Vector2(0f, -2f);
-                float lerpValue4 = Utils.GetLerpValue(num4, num4 * (2f / 3f), projectile.localAI[0], clamped: true);
-                lerpValue4 *= Utils.GetLerpValue(0f, 20f, projectile.localAI[0], clamped: true);
-                num = -0.3f * (1f - lerpValue4);
-                num += -1f * Utils.GetLerpValue(15f, 0f, projectile.localAI[0], clamped: true);
-                num *= lerpValue;
-                num2 = lerpValue2 * lerpValue;
-            } //TRUE
-            Vector2 vector5 = projectile.Center + vector;
-            Texture2D value = TextureAssets.Projectile[projectile.type].Value;
-            _ = new Rectangle(0, 0, value.Width, value.Height).Size() / 2f;
-            Texture2D value2 = CommonTextures.FireBallBlur.Value;// TextureAssets.Extra[91].Value;
-            Rectangle value3 = value2.Frame();
-            Vector2 origin2 = new Vector2((float)value3.Width / 2f, 10f);
-            _ = Color.Cyan * 0.5f * num2;
-            Vector2 vector2 = new Vector2(0f, projectile.gfxOffY);
-            float num5 = (float)Main.timeForVisualEffects / 60f;
-            Vector2 vector3 = vector5 + vector * 0.5f;
-            Color color3 = Color.White * 0.5f * num2;
-            color3.A = 0;
-            Color color4 = color2 * num2;
-            color4.A = 0;
-            Color color5 = color2 * num2;
-            color5.A = 0;
-            Color color6 = color2 * num2;
-            color6.A = 0;
-            float num6 = vector.ToRotation();
-            //Main.EntitySpriteDraw(value2, vector3 - Main.screenPosition + vector2 + spinningpoint.RotatedBy((float)Math.PI * 2f * num5), value3, color4 * alpha, num6 + (float)Math.PI / 2f, origin2, 1.5f + num, SpriteEffects.None);
-            //Main.EntitySpriteDraw(value2, vector3 - Main.screenPosition + vector2 + spinningpoint.RotatedBy((float)Math.PI * 2f * num5 + (float)Math.PI * 2f / 3f), value3, color5 * alpha, num6 + (float)Math.PI / 2f, origin2, 1.1f + num, SpriteEffects.None);
-            //Main.EntitySpriteDraw(value2, vector3 - Main.screenPosition + vector2 + spinningpoint.RotatedBy((float)Math.PI * 2f * num5 + 4.18879032f), value3, color6 * alpha, num6 + (float)Math.PI / 2f, origin2, 1.3f + num, SpriteEffects.None);
-            //^ Outer fireballs
-            
-            Vector2 vector4 = vector5 - vector * 0.5f;
-            for (float num7 = 0f; num7 < 1f; num7 += 0.5f) //draw white inner fireball
-            {
-                float num8 = num5 % 0.5f / 0.5f;
-                num8 = (num8 + num7) % 1f;
-                float num9 = num8 * 2f;
-                if (num9 > 1f)
-                {
-                    num9 = 2f - num9;
-                }
-                //Main.EntitySpriteDraw(value2, vector4 - Main.screenPosition + vector2, value3, color3 * num9 * alpha, num6 + (float)Math.PI / 2f, origin2, 0.3f + num8 * 0.5f, SpriteEffects.None);
-            }
-            if (flag) //Draw normal star
+
+            if (true) //Draw normal star
             {
                 float rotation = projectile.rotation + projectile.localAI[1];
                 _ = (float)Main.timeForVisualEffects / 240f;
@@ -278,17 +198,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float scale1 = 0.75f;
             float scale2 = 1.6f;
             float scale3 = 2.5f;
+            Vector2 orbScale = new Vector2(0.75f, 1f) * projectile.scale * 0.55f * easedStarScale;
 
-            Main.EntitySpriteDraw(Glow, pos, null, orbCol1 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, projectile.scale * scale1 * 0.55f * easedStarScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, pos, null, orbCol2 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, projectile.scale * scale2 * 0.55f * easedStarScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, pos, null, orbCol3 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, projectile.scale * scale3 * 0.55f * easedStarScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, pos + off * 0.35f, null, orbCol1 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, orbScale * scale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, pos + off * 0.35f, null, orbCol2 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, orbScale * scale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, pos + off * 0.35f, null, orbCol3 with { A = 0 } * alpha * 0.45f, rot, Glow.Size() / 2f, orbScale * scale3, SpriteEffects.None);
 
 
             float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity);
 
 
             #region after image
-            for (int i = 0; i < previousVelRots.Count; i++)
+            for (int i = 0; i < previousVelRots.Count; i += 2)
             {
                 float progress = (float)i / previousVelRots.Count;
 
@@ -313,9 +234,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 v2scale = new Vector2(1.25f, 1f);
 
             //black
-            Main.EntitySpriteDraw(FireBallPixel, pos + off + Main.rand.NextVector2Circular(2f, 2f), null, Color.Black * thisAlpha * 0.5f, rot, FireBallPixel.Size() / 2f, projectile.scale * v2scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(FireBallPixel, pos + off + Main.rand.NextVector2Circular(2f, 2f), null, Color.DeepPink * thisAlpha * 0.15f, rot, FireBallPixel.Size() / 2f, projectile.scale * v2scale, SpriteEffects.None);
             Main.EntitySpriteDraw(FireBall, pos + off + Main.rand.NextVector2Circular(2f, 2f), null, Color.DeepPink with { A = 0 } * thisAlpha, rot, FireBall.Size() / 2f, projectile.scale * v2scale, SpriteEffects.None);
 
+            #region vanillaDraw
             Color color = new Color(255, 255, 255, Color.White.A - projectile.alpha);
             Vector2 vector = projectile.velocity;
             Color color2 = Color.Blue * 0.1f;
@@ -324,7 +246,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float t = vector.Length();
             float num2 = Utils.GetLerpValue(3f, 5f, t, clamped: true);
             bool flag = true;
-            if (projectile.type == 856 || projectile.type == 857)
+            if (projectile.type == 856 || projectile.type == 857) //TRUE
             {
                 vector = projectile.position - projectile.oldPos[1];
                 float num3 = vector.Length();
@@ -361,11 +283,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 num += -1f * Utils.GetLerpValue(15f, 0f, projectile.localAI[0], clamped: true);
                 num *= lerpValue;
                 num2 = lerpValue2 * lerpValue;
-            } //TRUE
+            } 
             Vector2 vector5 = projectile.Center + vector;
             Texture2D value = TextureAssets.Projectile[projectile.type].Value;
             _ = new Rectangle(0, 0, value.Width, value.Height).Size() / 2f;
-            Texture2D value2 = CommonTextures.FireBallBlur.Value;// TextureAssets.Extra[91].Value;
+            Texture2D value2 = CommonTextures.FireBallBlur.Value;// 
             Rectangle value3 = value2.Frame();
             Vector2 origin2 = new Vector2((float)value3.Width / 2f, 10f);
             _ = Color.Cyan * 0.5f * num2;
@@ -399,6 +321,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 }
                 Main.EntitySpriteDraw(value2, vector4 - Main.screenPosition + vector2, value3, color3 * num9 * alpha, num6 + (float)Math.PI / 2f, origin2, 0.3f + num8 * 0.5f, SpriteEffects.None);
             }
+            #endregion
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

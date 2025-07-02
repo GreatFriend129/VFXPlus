@@ -48,6 +48,180 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             timer++;
 
+            #region vanillaAI
+            projectile.ai[0]++;
+            int num1003 = 0;
+            if (projectile.velocity.Length() <= 4f)
+            {
+                num1003 = 1;
+            }
+            projectile.alpha -= 15;
+            if (projectile.alpha < 0)
+            {
+                projectile.alpha = 0;
+            }
+            switch (num1003)
+            {
+                case 0:
+                    projectile.rotation -= (float)Math.PI / 30f;
+                    if (Main.rand.Next(3) == 0)
+                    {
+                        if (Main.rand.Next(2) == 0 && false)
+                        {
+                            //Pink
+                            Vector2 vector56 = Vector2.UnitY.RotatedByRandom(6.2831854820251465);
+                            Dust dust197 = Main.dust[Dust.NewDust(projectile.Center - vector56 * 30f, 0, 0, Utils.SelectRandom<int>(Main.rand, 86, 90))];
+                            dust197.noGravity = true;
+                            dust197.position = projectile.Center - vector56 * Main.rand.Next(10, 21);
+                            dust197.velocity = vector56.RotatedBy(1.5707963705062866) * 6f;
+                            dust197.scale = 0.5f + Main.rand.NextFloat();
+                            dust197.fadeIn = 0.5f;
+                            dust197.customData = projectile;
+                        }
+                        else
+                        {
+                            //Black
+                            Vector2 vector58 = Vector2.UnitY.RotatedByRandom(6.2831854820251465);
+                            Dust dust198 = Main.dust[Dust.NewDust(projectile.Center - vector58 * 30f, 0, 0, DustID.Granite)];
+                            dust198.noGravity = true;
+                            dust198.position = projectile.Center - vector58 * 30f;
+                            dust198.velocity = vector58.RotatedBy(-1.5707963705062866) * 3f;
+                            dust198.scale = 0.5f + Main.rand.NextFloat();
+                            dust198.fadeIn = 0.5f;
+                            dust198.customData = projectile;
+                        }
+                    }
+                    if (projectile.ai[0] >= 30f)
+                    {
+                        projectile.velocity *= 0.98f;
+                        projectile.scale += 0.00744680827f;
+                        if (projectile.scale > 1.3f)
+                        {
+                            projectile.scale = 1.3f;
+                        }
+                        projectile.rotation -= (float)Math.PI / 180f;
+                    }
+                    if (projectile.velocity.Length() < 4.1f)
+                    {
+                        projectile.velocity.Normalize();
+                        projectile.velocity *= 4f;
+                        projectile.ai[0] = 0f;
+                    }
+                    break;
+                case 1:
+                    {
+                        projectile.rotation -= (float)Math.PI / 30f;
+                        for (int num1004 = 0; num1004 < 1; num1004++)
+                        {
+                            if (Main.rand.Next(2) == 0)
+                            {
+                                //Vector2 vector51 = Vector2.UnitY.RotatedByRandom(6.2831854820251465);
+                                //Dust dust195 = Main.dust[Dust.NewDust(projectile.Center - vector51 * 30f, 0, 0, 86)];
+                                //dust195.noGravity = true;
+                                //dust195.position = projectile.Center - vector51 * Main.rand.Next(10, 21);
+                                //dust195.velocity = vector51.RotatedBy(1.5707963705062866) * 6f;
+                                //dust195.scale = 0.9f + Main.rand.NextFloat();
+                                //dust195.fadeIn = 0.5f;
+                                //dust195.customData = projectile;
+                                //vector51 = Vector2.UnitY.RotatedByRandom(6.2831854820251465);
+                                //dust195 = Main.dust[Dust.NewDust(projectile.Center - vector51 * 30f, 0, 0, 90)];
+                                //dust195.noGravity = true;
+                                //dust195.position = projectile.Center - vector51 * Main.rand.Next(10, 21);
+                                //dust195.velocity = vector51.RotatedBy(1.5707963705062866) * 6f;
+                                //dust195.scale = 0.9f + Main.rand.NextFloat();
+                                //dust195.fadeIn = 0.5f;
+                                //dust195.customData = projectile;
+                                //dust195.color = Color.Crimson;
+                            }
+                            else
+                            {
+                                Vector2 vector52 = Vector2.UnitY.RotatedByRandom(6.2831854820251465);
+                                Dust dust196 = Main.dust[Dust.NewDust(projectile.Center - vector52 * 30f, 0, 0, 240)];
+                                dust196.noGravity = true;
+                                dust196.position = projectile.Center - vector52 * Main.rand.Next(20, 31);
+                                dust196.velocity = vector52.RotatedBy(-1.5707963705062866) * 5f;
+                                dust196.scale = 0.7f + Main.rand.NextFloat();
+                                dust196.fadeIn = 0.5f;
+                                dust196.customData = projectile;
+                            }
+                        }
+                        if (projectile.ai[0] % 30f == 0f && projectile.ai[0] < 241f && Main.myPlayer == projectile.owner)
+                        {
+                            Vector2 vector53 = Vector2.UnitY.RotatedByRandom(6.2831854820251465) * 12f;
+                            Projectile.NewProjectile(projectile.GetSource_FromThis(), projectile.Center.X, projectile.Center.Y, vector53.X, vector53.Y, 618, projectile.damage / 2, 0f, projectile.owner, 0f, projectile.whoAmI);
+                        }
+                        Vector2 vector54 = projectile.Center;
+                        float num1005 = 800f;
+                        bool flag53 = false;
+                        int num1006 = 0;
+                        if (projectile.ai[1] == 0f)
+                        {
+                            for (int num1007 = 0; num1007 < 200; num1007++)
+                            {
+                                if (Main.npc[num1007].CanBeChasedBy(projectile))
+                                {
+                                    Vector2 center10 = Main.npc[num1007].Center;
+                                    if (projectile.Distance(center10) < num1005 && Collision.CanHit(new Vector2(projectile.position.X + (float)(projectile.width / 2), projectile.position.Y + (float)(projectile.height / 2)), 1, 1, Main.npc[num1007].position, Main.npc[num1007].width, Main.npc[num1007].height))
+                                    {
+                                        num1005 = projectile.Distance(center10);
+                                        vector54 = center10;
+                                        flag53 = true;
+                                        num1006 = num1007;
+                                    }
+                                }
+                            }
+                            if (flag53)
+                            {
+                                if (projectile.ai[1] != (float)(num1006 + 1))
+                                {
+                                    projectile.netUpdate = true;
+                                }
+                                projectile.ai[1] = num1006 + 1;
+                            }
+                            flag53 = false;
+                        }
+                        if (projectile.ai[1] != 0f)
+                        {
+                            int num1008 = (int)(projectile.ai[1] - 1f);
+                            if (Main.npc[num1008].active && Main.npc[num1008].CanBeChasedBy(projectile, ignoreDontTakeDamage: true) && projectile.Distance(Main.npc[num1008].Center) < 1000f)
+                            {
+                                flag53 = true;
+                                vector54 = Main.npc[num1008].Center;
+                            }
+                        }
+                        if (!projectile.friendly)
+                        {
+                            flag53 = false;
+                        }
+                        if (flag53)
+                        {
+                            float num1009 = 4f;
+                            int num1011 = 8;
+                            Vector2 vector55 = new Vector2(projectile.position.X + (float)projectile.width * 0.5f, projectile.position.Y + (float)projectile.height * 0.5f);
+                            float num1012 = vector54.X - vector55.X;
+                            float num1013 = vector54.Y - vector55.Y;
+                            float num1014 = (float)Math.Sqrt(num1012 * num1012 + num1013 * num1013);
+                            float num1015 = num1014;
+                            num1014 = num1009 / num1014;
+                            num1012 *= num1014;
+                            num1013 *= num1014;
+                            projectile.velocity.X = (projectile.velocity.X * (float)(num1011 - 1) + num1012) / (float)num1011;
+                            projectile.velocity.Y = (projectile.velocity.Y * (float)(num1011 - 1) + num1013) / (float)num1011;
+                        }
+                        break;
+                    }
+            }
+            if (projectile.alpha < 150)
+            {
+                Lighting.AddLight(projectile.Center, 0.7f, 0.2f, 0.6f);
+            }
+            if (projectile.ai[0] >= 600f)
+            {
+                projectile.Kill();
+            }
+            #endregion
+
+            return false;
             return base.PreAI(projectile);
         }
 
@@ -248,22 +422,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Color darkPurple = new Color(42, 2, 82);
             Color purple3 = new Color(121, 7, 179);
 
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 16; i++)
             {
-                float prog = (float)i / 25f;
+                float prog = (float)i / 16f;
 
                 float proggg = Main.rand.NextFloat();
-                Color col = Color.Lerp(Color.Purple * 2f, Color.Black * 0.75f, proggg);
+                Color col = Color.Lerp(Color.Purple * 2f, Color.Black * 0.75f, prog);
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 3f) * 2.75f,
-                    newColor: col * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
+                if (proggg < 0.25f)
+                    col = col with { A = 0 };
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 2.6f) * 2.75f,
+                    newColor: col * Easings.easeOutCubic(prog), Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
                 d.customData = new MediumSmokeBehavior(Main.rand.Next(15, 25), 0.93f, 0.01f, 0.9f); //12 28
 
             }
 
             for (int i = 0; i < 17 + Main.rand.Next(0, 6); i++)
             {
-                Color col = Main.rand.NextBool() ? Color.Purple * 2f : Color.Purple * 2f;
+                Color col = Main.rand.NextBool() ? Color.Purple * 2f : purple3 * 1.5f;
 
 
                 float velMult = Main.rand.NextFloat(3f, 9f);
@@ -278,7 +455,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             for (int i = 0; i < 7 + Main.rand.Next(0, 5); i++)
             {
-                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 2f;
+                Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 2f;
                 Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: purple3 * 2f, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.65f);
 
                 dust.noLight = false;
@@ -291,13 +468,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 overallAlpha: 0.18f, DrawWhiteCore: true, 1f, 1f);
 
             CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.8f, 0.8f);
+            Color ringCol = Color.Lerp(purple3, Color.Purple, 0.25f);
 
-            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: purple3 * 1.5f);
+            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
             d1.scale = 0.04f;
             d1.customData = cpb2;
             d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: purple3 * 1.5f);
+            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
             d2.customData = cpb2;
             d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
@@ -663,7 +841,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public void DrawPixelTrail(Projectile projectile)
         {
-            Texture2D AfterImage = CommonTextures.Flare.Value;
+            Texture2D AfterImage = CommonTextures.SoulSpike.Value;
 
             bool isRed = projectile.ai[0] == 90;
 
@@ -693,10 +871,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     Vector2 newVec2 = new Vector2(0.5f, 0.35f) * size2;
                     Vector2 newVec22 = new Vector2(0.5f, 0.10f) * size2;
 
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
-                        previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
+                    //Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
+                    //    previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
 
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f * progress,
                            previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
 
                     Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
