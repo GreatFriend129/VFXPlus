@@ -46,7 +46,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     previousPositions.RemoveAt(0);
             }
 
-            float timeForPopInAnim = 180;
+            float timeForPopInAnim = 160;
             float animProgress = Math.Clamp((timer + 30) / timeForPopInAnim, 0f, 1f);
 
             drawScale = 0.25f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1f)) * 0.75f;
@@ -181,24 +181,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             //Orb
             //Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/FireBallBlur").Value;
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
             Vector2 originPoint = projectile.Center - Main.screenPosition;
 
             Color col1 = Color.White * 0.75f;
             Color col2 = Color.SkyBlue * 0.525f * 0.75f;
-            Color col3 = Color.Aqua * 0.375f * 0.75f;
+            Color col3 = Color.Lerp(Color.Aquamarine, Color.Aqua, 0.5f) * 0.375f * 0.75f;
 
             float scale1 = 0.85f;
             float scale2 = 1.6f;
             float scale3 = 2.5f;
-            float scale = 1.25f;
+            float scale = 0.85f;
+            float orbAlpha = 0.5f;
 
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 }, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 }, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 }, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.5f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
 
 
             Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //Flare
@@ -223,19 +224,53 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Main.EntitySpriteDraw(line, AfterImagePos + offset, null, col with { A = 0 } * 0.85f * progress * 1f,
                     previousRotations[i], line.Size() / 2f, lineScale * 1.25f * 1.5f, SpriteEffects.None);
 
-
                 Main.EntitySpriteDraw(line, AfterImagePos + offset, null, Color.White with { A = 0 } * 0.85f * progress * 1f,
                     previousRotations[i], line.Size() / 2f, innerScale * 1.5f, SpriteEffects.None);
-
-
             }
 
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-
+            //The only thing the LunarFlare projectile does is spawn dust/gores, so we can safely return false without impacting functionality 
             return false;
+            /* vanillaKill for reference
+            bool flag2 = WorldGen.SolidTile(Framing.GetTileSafely((int)base.position.X / 16, (int)base.position.Y / 16));
+			for (int num69 = 0; num69 < 4; num69++)
+			{
+				Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 31, 0f, 0f, 100, default(Color), 1.5f);
+			}
+			for (int num70 = 0; num70 < 4; num70++)
+			{
+				int num71 = Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 229, 0f, 0f, 0, default(Color), 2.5f);
+				Main.dust[num71].noGravity = true;
+				Dust dust118 = Main.dust[num71];
+				Dust dust334 = dust118;
+				dust334.velocity *= 3f;
+				if (flag2)
+				{
+					Main.dust[num71].noLight = true;
+				}
+				num71 = Dust.NewDust(new Vector2(base.position.X, base.position.Y), base.width, base.height, 229, 0f, 0f, 100, default(Color), 1.5f);
+				dust118 = Main.dust[num71];
+				dust334 = dust118;
+				dust334.velocity *= 2f;
+				Main.dust[num71].noGravity = true;
+				if (flag2)
+				{
+					Main.dust[num71].noLight = true;
+				}
+			}
+			for (int num72 = 0; num72 < 1; num72++)
+			{
+				int num73 = Gore.NewGore(base.position + new Vector2((float)(base.width * Main.rand.Next(100)) / 100f, (float)(base.height * Main.rand.Next(100)) / 100f) - Vector2.One * 10f, default(Vector2), Main.rand.Next(61, 64));
+				Gore gore32 = Main.gore[num73];
+				Gore gore64 = gore32;
+				gore64.velocity *= 0.3f;
+				Main.gore[num73].velocity.X += (float)Main.rand.Next(-10, 11) * 0.05f;
+				Main.gore[num73].velocity.Y += (float)Main.rand.Next(-10, 11) * 0.05f;
+			}
+            */
             return base.PreKill(projectile, timeLeft);
         }
     }

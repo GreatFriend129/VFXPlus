@@ -15,41 +15,21 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using Terraria.GameContent.Drawing;
+using VFXPlus.Common.Drawing;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-
-    public class StaffOfEarth : GlobalItem
-    {
-        public override bool AppliesToEntity(Item item, bool lateInstatiation)
-        {
-            return lateInstatiation && (item.type == ItemID.StaffofEarth);
-        }
-
-        public override void SetDefaults(Item entity)
-        {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
-            base.SetDefaults(entity);
-        }
-
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
-            
-
-            return true;
-        }
-
-    }
     public class StaffOfEarthShotOverride : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.BoulderStaffOfEarth);
+            return lateInstantiation && (entity.type == ProjectileID.BoulderStaffOfEarth) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.StaffOfEarthToggle;
         }
 
+        BaseTrailInfo trail1 = new BaseTrailInfo();
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -68,27 +48,50 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             
             if (timer % 1 == 0)
             {
-                int trailCount = 25; //15 | 25
+                int trailCount = 25; //25
                 previousVelRots.Add(projectile.velocity.ToRotation());
-                previousPostions.Add(projectile.Center);
+                previousPositions.Add(projectile.Center);
 
                 if (previousVelRots.Count > trailCount)
                     previousVelRots.RemoveAt(0);
 
-                if (previousPostions.Count > trailCount)
-                    previousPostions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
             }
 
 
             if (timer % 2 == 0 && Main.rand.NextBool(2) && timer > 8 && projectile.velocity.Length() > 3f)
             {
+                Color dustCol = Color.Lerp(Color.Orange, Color.OrangeRed, 0.35f);
+
                 Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(),
                     projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.5f, 0.5f)) * Main.rand.NextFloat(2f, 4f),
-                    newColor: Color.Orange, Scale: Main.rand.NextFloat(0.15f, 0.25f) * 1.35f);
+                    newColor: dustCol, Scale: Main.rand.NextFloat(0.15f, 0.25f) * 1.75f);
+
+                p.customData = DustBehaviorUtil.AssignBehavior_PGOBase(velToBeginShrink: 4f);
 
                 p.velocity += projectile.velocity * 0.25f;
             }
 
+            #region trail
+            int trueTrailWidth = (int)(100f * fadeInAlpha * projectile.scale); //20
+
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value;
+            trail1.trailPointLimit = 90;
+            trail1.trailWidth = trueTrailWidth * 0;
+            trail1.trailMaxLength = 130 * projectile.scale; //65
+            trail1.timesToDraw = 2;
+            trail1.shouldSmooth = false;
+            trail1.pinchHead = false;
+            trail1.pinchTail = false;
+            trail1.useEffectMatrix = true;
+
+            trail1.trailColor = Color.OrangeRed;// Color.Lerp(Color.OrangeRed, Color.Orange, 0.8f);
+
+            trail1.trailRot = projectile.velocity.ToRotation();
+            trail1.trailPos = projectile.Center + projectile.velocity;
+            trail1.TrailLogic();
+            #endregion
 
             float fadeInTime = Math.Clamp((timer + 10f) / 15f, 0f, 1f);
             fadeInAlpha = Easings.easeInCirc(fadeInTime);
@@ -100,9 +103,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         float fadeInAlpha = 0f;
         public List<float> previousVelRots = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            trail1.trailTime = (float)Main.timeForVisualEffects * 0.03f;
+
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+            });
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawAfterImage(projectile, false);
+            });
+            DrawAfterImage(projectile, true);
+
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -111,44 +127,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Color col1 = Color.Lerp(Color.SkyBlue, Color.White, 0.2f);
 
-            //After-Image
-            if (previousVelRots != null && previousPostions != null)
-            {
-                for (int i = 0; i < previousVelRots.Count; i++)
-                {
-                    float progress = (float)i / previousVelRots.Count;
-                    float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-
-                    Color col = Color.White * progress;
-                    // Color.Lerp(Color.Gold, Color.LightGoldenrodYellow, progress) * progress * projectile.Opacity;
-
-                    float size2 = 1f * Easings.easeInOutSine(progress) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col1 with { A = 0 } * 1f * Easings.easeInSine(progress) * progress, //0.5f
-                            previousVelRots[i], TexOrigin, size2 * fadeInAlpha, SpriteEffects.None);
-
-
-                    if (i > 1)
-                    {
-                        Vector2 vec2Scale = new Vector2(1f, 0.15f + 0.15f * progress) * size * fadeInAlpha;
-                        Main.EntitySpriteDraw(vanillaTex, AfterImagePos + Main.rand.NextVector2Circular(12f, 12f) * (1f - progress), sourceRectangle, Color.LightSkyBlue with { A = 0 } * 0.85f * progress * progress,
-                            previousVelRots[i], TexOrigin, vec2Scale, SpriteEffects.None);
-                    }
-
-                }
-
-
-
-            }
-
             float velVal = projectile.velocity.Length() * 0.2f;
             float borderAlpha = Math.Clamp(velVal, 0.5f, 1f);
             //Border
             for (int i = 0; i < 6; i++)
             {
-                float scale = 1.05f + (i * 0.12f);
+                float scale = 1.05f + (i * 0.1f);
                 float opacity = Math.Clamp(0.7f - (0.09f * i), 0.05f, 1f);
                 float dist = 3f + (i * 0.4f);
 
@@ -171,6 +155,54 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         }
 
+        public void DrawAfterImage(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
+            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+
+            for (int i = 0; i < previousVelRots.Count; i++)
+            {
+                float progress = (float)i / previousVelRots.Count;
+
+                float size2 = 1f * Easings.easeOutCirc(progress) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.SkyBlue with { A = 0 } * 0.5f * Easings.easeInSine(progress) * progress, //0.5f
+                        previousVelRots[i], TexOrigin, size2 * fadeInAlpha, SpriteEffects.None);
+
+            }
+
+            Texture2D line = CommonTextures.SoulSpike.Value;
+            Color between2 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.85f);
+            for (int i = 0; i < previousPositions.Count; i++)
+            {
+                float progress = (float)i / (float)previousPositions.Count;
+
+                Vector2 offset1 = Vector2.Zero;
+
+                //offset1 += Main.rand.NextVector2Circular(5f * projectile.scale, 5f * projectile.scale) * fadeInAlpha * projectile.scale;
+
+
+                Vector2 flarePos = previousPositions[i] - Main.screenPosition;
+
+                Color col = Color.Lerp(Color.OrangeRed, between2, Easings.easeOutSine(progress));
+
+                Vector2 lineScale = new Vector2(0.75f, 1.5f * progress) * fadeInAlpha * projectile.scale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, col with { A = 0 } * 0.35f * Easings.easeInSine(progress),
+                    previousVelRots[i], line.Size() / 2f, lineScale, SpriteEffects.None);
+
+                Vector2 innerScale = new Vector2(0.75f, 1.5f * 0.25f * progress) * fadeInAlpha * projectile.scale;
+                Main.EntitySpriteDraw(line, flarePos + offset1, null, Color.LightYellow with { A = 0 } * 0.25f * Easings.easeInSine(progress),
+                    previousVelRots[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+            }
+        }
+
+
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
 
@@ -183,7 +215,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             //Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
-            int shockwaveCount = 9;
+            int shockwaveCount = 7;
             if (oldVelocity.Length() > 7)
             {
                 Projectile.NewProjectile(null, projectile.Center, Vector2.UnitX, ModContent.ProjectileType<GraydeeTileShockwave>(), 0, 0, Main.player[projectile.owner].whoAmI, 0, shockwaveCount);

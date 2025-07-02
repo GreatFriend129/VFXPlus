@@ -38,7 +38,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 spawnPos = position + velocity.SafeNormalize(Vector2.UnitX) * 28f;
 
             //Smoke
-            Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
+            Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.45f);
             for (int i = 0; i < 15; i++)
             {
                 float prog = (float)i / 15f;
@@ -47,7 +47,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                 Dust d = Dust.NewDustPerfect(position, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.25f, 1.5f) * 1f,
                     newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f); //GlowPixelAlts looks interesting too
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5, 0.92f, 0.01f, 0.1f); //12 28
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5, 0.92f, 0.01f, 0.12f); //12 28
 
                 d.velocity += velocity * 0.45f * (prog);
             }
@@ -60,6 +60,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SoundEngine.PlaySound(styla, player.Center);
 
             return true;
+        }
+
+        public override Vector2? HoldoutOffset(int type)
+        {
+            return new Vector2(0f, 1f);
+            return base.HoldoutOffset(type);
         }
 
     }
@@ -78,7 +84,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             if (vfxIndex == -1)
             {
-                Vector2 offset = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 25f;
+                Vector2 offset = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 29f; //25
                 int p = Projectile.NewProjectile(null, offset, Vector2.Zero, ModContent.ProjectileType<HeatRayVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
                 vfxIndex = p;
@@ -102,6 +108,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             timer++;
 
+            return false;
             return base.PreAI(projectile);
         }
 
@@ -147,6 +154,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 if (sa.velocity.Y > 0)
                     sa.velocity.Y *= -1;
             }
+
+            //Smoke
+            Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
+            for (int i = 0; i < 15; i++)
+            {
+                float prog = (float)i / 15f;
+
+                Color col = Color.Lerp(colBetween, Color.Black, 1f - prog);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 2.5f) * 1f,
+                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f); //GlowPixelAlts looks interesting too
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5, 0.92f, 0.01f, 0.15f); //12 28
+
+                //d.velocity += projectile.oldVelocity * -0.5f * (prog);
+            }
+
 
             if (vfxIndex != -1)
                 (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;
@@ -210,6 +233,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             if (timer == 100 || true_width <= 0.07f)
                 Projectile.active = false;
 
+            if (timer != 0)
+            {
+                DelegateMethods.v3_1 = Color.Orange.ToVector3() * 0.7f * Projectile.scale * Easings.easeOutCirc(true_width);
+                Utils.PlotTileLine(startPos, endPos, 15f * Easings.easeOutCirc(true_width), DelegateMethods.CastLight);
+            }
+
+
             timer++;
         }
 
@@ -242,7 +272,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             Color StripColor(float progress) => Color.White * true_alpha;
             float StripWidth(float progress) => 18f * true_width;
-            float StripWidth2(float progress) => 50f * true_width;
+            float StripWidth2(float progress) => 45f * true_width;
 
             VertexStrip vertexStrip = new VertexStrip();
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -265,7 +295,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
 
             //UnderLayer
-            Color underCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.25f);
+            Color underCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.4f);
             myEffect.Parameters["ColorOne"].SetValue(underCol.ToVector3() * 3f * true_alpha);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
@@ -304,14 +334,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 startStarPos = startPos - Main.screenPosition;
             Main.EntitySpriteDraw(portal, startStarPos + Main.rand.NextVector2Circular(1f, 1f), null, inBetweenOrange with { A = 0 } * true_alpha * 1.15f, rot, portal.Size() / 2, starOuterScale * 2f, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, startStarPos + Main.rand.NextVector2Circular(2f, 2f), null, inBetweenOrange with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1.75f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, startStarPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, startStarPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1.15f, SpriteEffects.None);
 
 
             //End star
             Vector2 endStarPos = endPos - Main.screenPosition;
             Main.EntitySpriteDraw(portal, endStarPos + Main.rand.NextVector2Circular(1f, 1f), null, inBetweenOrange with { A = 0 } * true_alpha * 1.15f, rot, portal.Size() / 2, starOuterScale * 2f, SpriteEffects.None);
             Main.EntitySpriteDraw(portal, endStarPos + Main.rand.NextVector2Circular(2f, 2f), null, inBetweenOrange with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1.75f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, endStarPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, endStarPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.White with { A = 0 } * true_alpha, rot, portal.Size() / 2, starOuterScale * 1.15f, SpriteEffects.None);
 
 
             #endregion

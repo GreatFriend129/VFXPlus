@@ -119,7 +119,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (timer < 2)
                 return false;
 
-            return true;
+            return false;
         }
 
         public void CerobaStyleDraw(Projectile projectile)
@@ -239,20 +239,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 dust.customData = new GlowFlareBehavior(0.4f, 2.5f);
             }
 
-            if (previousVelRots != null && previousPositions != null)
+            for (int i = 0; i < previousVelRots.Count; i += 1)
             {
-                for (int i = 0; i < previousVelRots.Count; i += 1)
+                if (i % 6 == 0 && i > previousPositions.Count * 0.55f)
                 {
-                    if (i % 6 == 0 && i > previousPositions.Count * 0.55f)
-                    {
-                        int a = Dust.NewDust(previousPositions[i], 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.HotPink, Scale: 0.3f);
-                        Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
-                        Main.dust[a].velocity *= 0.5f;
-                        Main.dust[a].velocity += previousVelRots[i].ToRotationVector2() * 5f;
+                    int a = Dust.NewDust(previousPositions[i], 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.HotPink, Scale: 0.3f);
+                    Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);
+                    Main.dust[a].velocity *= 0.5f;
+                    Main.dust[a].velocity += previousVelRots[i].ToRotationVector2() * 5f;
 
-                    }
                 }
-
             }
 
             return false;
