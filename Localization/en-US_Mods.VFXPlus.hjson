@@ -153,6 +153,7 @@ Projectiles: {
 	MadisonVFX.DisplayName: Madison V F X
 	MadisonVFXOld.DisplayName: Madison V F X Old
 	ShadowbeamStarVFX.DisplayName: Shadowbeam Star V F X
+	PopStar.DisplayName: Pop Star
 }
 
 Configs: {

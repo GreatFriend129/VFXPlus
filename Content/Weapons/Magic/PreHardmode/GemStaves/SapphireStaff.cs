@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Interfaces;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 
 
@@ -71,17 +72,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
         {
             projectile.rotation = projectile.velocity.ToRotation();
 
+            projectile.velocity *= 1.02f;
+            projectile.velocity.Y += 0.3f;
+
             #region trail info
             //Trail1 info dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/LintyTrail").Value;
-            trail1.trailColor = Color.DodgerBlue * fadeInAlpha * 0.7f;
+            trail1.trailColor = Color.DeepSkyBlue * fadeInAlpha * 0.55f;
             trail1.trailPointLimit = 15;
-            trail1.trailWidth = (int)(8f * projectile.scale);
-            trail1.trailMaxLength = 120;
+            trail1.trailWidth = (int)(5f * projectile.scale * overallScale); //8f
+            trail1.trailMaxLength = 320; //120
+            trail1.timesToDraw = 2;
 
             trail1.trailTime = timer * 0.05f;
             trail1.trailRot = projectile.velocity.ToRotation();
             trail1.trailPos = projectile.Center + projectile.velocity;
+            trail1.useEffectMatrix = true;
             trail1.TrailLogic();
             #endregion
 
@@ -99,15 +105,28 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             Lighting.AddLight(projectile.Center, Color.DodgerBlue.ToVector3() * 0.8f * fadeInAlpha);
 
             fadeInAlpha = Math.Clamp(MathHelper.Lerp(fadeInAlpha, 1.25f, 0.04f), 0f, 1f);
+
+
+            float timeForPopInAnim = 35; //37
+            float animProgress = Math.Clamp((timer + 11) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1f;
+
             timer++;
             return false;
         }
 
-        public void DrawAdditive(SpriteBatch sb) { trail1.TrailDrawing(sb, false); }
+        public void DrawAdditive(SpriteBatch sb) { /*trail1.TrailDrawing(sb, false);*/ }
 
+        public float overallScale = 0f;
         float fadeInAlpha = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                trail1.TrailDrawing(Main.spriteBatch, true);
+            });
+
             Texture2D fireball = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/PreHardmode/GemStaves/Fireballs/SapphireFireball").Value;
             Texture2D glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlorbPMA3").Value;
             Texture2D star = CommonTextures.RainbowRod.Value;
@@ -122,8 +141,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             SpriteEffects se = projectile.velocity.X > 0f ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
 
-            Main.EntitySpriteDraw(glorb, drawPos, null, Color.DeepSkyBlue with { A = 0 } * fadeInAlpha * 0.5f, projectile.rotation, glorb.Size() / 2, new Vector2(projectile.scale, projectile.scale * 0.5f) * 1f, SpriteEffects.None);
-            Main.EntitySpriteDraw(fireball, drawPos, sourceRectangle, Color.White * fadeInAlpha, projectile.rotation, origin, projectile.scale, se);
+            Main.EntitySpriteDraw(glorb, drawPos, null, Color.DeepSkyBlue with { A = 0 } * fadeInAlpha * 0.5f, projectile.rotation, glorb.Size() / 2, new Vector2(projectile.scale, projectile.scale * 0.5f) * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(fireball, drawPos, sourceRectangle, Color.White * fadeInAlpha, projectile.rotation, origin, projectile.scale * overallScale, se);
 
             //Star 
             Vector2 starDrawPos = drawPos + projectile.rotation.ToRotationVector2() * 10f * projectile.scale;
@@ -131,7 +150,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
             float dir = projectile.velocity.X > 0 ? 1 : -1;
 
             float starRotation = MathHelper.Lerp(0f, MathHelper.Pi * 3f * dir, Easings.easeOutQuad(fadeInAlpha)) + ((float)Main.timeForVisualEffects * 0.05f * dir);
-            float starScale = Easings.easeOutQuint(1f - fadeInAlpha) * projectile.scale * 1f;
+            float starScale = Easings.easeOutQuint(1f - fadeInAlpha) * projectile.scale * overallScale;
 
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.DodgerBlue with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale, se);
             Main.EntitySpriteDraw(star, starDrawPos, null, Color.White with { A = 0 } * fadeInAlpha, starRotation, star.Size() / 2f, starScale * 0.5f, se);
@@ -170,6 +189,15 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves
 
             SoundStyle style = new SoundStyle("Terraria/Sounds/Item_118") with { Volume = 1f, Pitch = .2f, PitchVariance = .2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
+
+
+            //Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
+            //Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 0.35f);
+            
+            //FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.15f, timeToKill: 120, OverallAlpha: 0.75f);
+            //fgb.DrawWhiteCore = false;
+            //d1.customData = fgb;
+
 
             return false;
         }

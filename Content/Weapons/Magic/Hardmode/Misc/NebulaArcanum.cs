@@ -225,12 +225,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return base.PreAI(projectile);
         }
 
-        float drawRotation = 0f;
         float drawScale = 0f;
         float outerAlpha = 0f;
         float starPower = 0f;
-        List<float> previousRotations = new List<float>();
-        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>

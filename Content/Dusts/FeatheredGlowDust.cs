@@ -20,9 +20,9 @@ using Steamworks;
 
 namespace VFXPlus.Content.Dusts
 {
-	public class SoftGlowDust : ModDust
+	public class FeatheredGlowDust : ModDust
 	{
-		public override string Texture => "VFXPlus/Assets/Orbs/SoftGlow";
+		public override string Texture => "VFXPlus/Assets/Orbs/feather_circle128PMA";
 
 		public override void OnSpawn(Dust dust)
 		{
@@ -41,14 +41,13 @@ namespace VFXPlus.Content.Dusts
 
 			if (dust.customData != null)
 			{
-				if (dust.customData is SoftGlowDustBehavior behavior)
+				if (dust.customData is FeatheredGlowBehavior behavior)
 				{
-                    if (dust.fadeIn > behavior.base_timeToStartFade)
-                        dust.alpha = (int)(dust.alpha * behavior.base_fadeSpeed);
+                    if (dust.fadeIn > behavior.base_timeToChangeAlpha)
+                        dust.alpha = (int)(dust.alpha * behavior.base_alphaChangeSpeed);
 
 					if (dust.fadeIn > behavior.base_timeToChangeScale)
-						dust.scale *= behavior.base_sizeChangeSpeed;
-
+						dust.scale *= behavior.base_scaleChangeSpeed;
 
                     if (dust.scale <= 0.03f || dust.alpha <= 30)
                         dust.active = false;
@@ -87,48 +86,62 @@ namespace VFXPlus.Content.Dusts
 
             if (dust.customData != null)
 			{
-				if (dust.customData is SoftGlowDustBehavior behavior)
+				if (dust.customData is FeatheredGlowBehavior behavior)
 				{
-					if (behavior.useFeatheredCirc)
-						tex = CommonTextures.feather_circle128PMA.Value;
-
 					Vector2 scale = behavior.Vector2DrawScale * dust.scale;
 
-                    Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 } * behavior.overallAlpha * (dust.alpha / 255f), dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
+                    //Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 } * behavior.overallAlpha * (dust.alpha / 255f), dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
                     Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 } * behavior.overallAlpha * (dust.alpha / 255f), dust.rotation, tex.Size() / 2f, scale * 1f, SpriteEffects.None, 0f);
 
                     if (behavior.DrawWhiteCore)
-						Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 } * behavior.overallAlpha * 0.75f, dust.rotation, tex.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0f);
+						Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 } * behavior.overallAlpha, dust.rotation, tex.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0f);
 				}
 			}
             else
             {
 				Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, dust.color with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 1f, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 0.65f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(tex, dust.position - Main.screenPosition, null, White with { A = 0 }, dust.rotation, tex.Size() / 2f, dust.scale * 0.5f, SpriteEffects.None, 0f);
             }
             return false;
 		}
 
 	}
 
-	public class SoftGlowDustBehavior
+	public class FeatheredGlowBehavior
 	{
-		public bool useFeatheredCirc = false;
-
-		public bool DrawWhiteCore = false;
+		public bool DrawWhiteCore = true;
+		
+		
 		public Vector2 Vector2DrawScale = new Vector2(1f, 1f);
         public float overallAlpha = 1f;
 
 
-        public float base_timeToStartFade = 5;
-		public float base_timeToChangeScale = 5;
-		public float base_fadeSpeed = 0.95f;
-		public int base_timeToKill = 60;
+        public float base_alphaChangeSpeed = 0.95f;
+        public float base_timeToChangeAlpha = 4;
 
-		//Over 1 for grow, under 1 for shrink
-		public float base_sizeChangeSpeed = 0.95f;
+        //Over 1 for grow, under 1 for shrink
+        public float base_scaleChangeSpeed = 0.95f;
+        public float base_timeToChangeScale = 2;
+
+		public int base_timeToKill = 30;
 
 
-	}
+
+        public FeatheredGlowBehavior(float AlphaChangeSpeed = 0.95f, int timeToChangeAlpha = 4, float ScaleChangeSpeed = 0.95f, int timeToChangeScale = 2, 
+			int timeToKill = 30, float OverallAlpha = 1f, float XScale = 1f, float YScale = 1f)
+        {
+            base_alphaChangeSpeed = AlphaChangeSpeed;
+			base_timeToChangeAlpha = timeToChangeAlpha;
+
+			base_scaleChangeSpeed = ScaleChangeSpeed;
+			base_timeToChangeScale = timeToChangeScale;
+
+			base_timeToKill = timeToKill;
+
+			overallAlpha = OverallAlpha;
+            Vector2DrawScale = new Vector2(XScale, YScale);
+        }
+
+    }
 
 }
