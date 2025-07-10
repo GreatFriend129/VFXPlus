@@ -20,7 +20,7 @@ using VFXPlus.Content.Projectiles;
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 {
     
-    public class SpaceGun : GlobalItem 
+    public class SpaceGunItemOverride : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
@@ -29,33 +29,62 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
         public override void SetDefaults(Item entity)
         {
-            //TODO: Adjust HoldoutOffset to better match having 1f item scale instead of 0.8f
-            entity.scale = 1f;
+            entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
-
-        public override Vector2? HoldoutOffset(int type)
-        {
-            return new Vector2(-2f, 0f);
-
-            return base.HoldoutOffset(type);
-        }
-
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicRecoilProj>(), 0, 0, player.whoAmI);
+
+            if (Main.projectile[gun].ModProjectile is BasicRecoilProj held)
+            {
+                held.SetProjInfo(
+                    GunID: ItemID.SpaceGun,
+                    AnimTime: 22,
+                    NormalXOffset: 18f,
+                    DestXOffset: 8f,
+                    YRecoilAmount: 0.05f,
+                    HoldOffset: new Vector2(0f, 2f)
+                    );
+
+                //held.compositeArmAlwaysFull = true;
+                held.timeToStartFade = 3;
+            }
+
 
             Color betweenGreen = Color.Lerp(Color.LawnGreen, Color.Green, 0.75f);
             //Dust
-            for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++) //2 //0,3
+            for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++)
             {
-                Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 30f;
-                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(2f, 8.5f);
+                Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 26f;
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(3.2f, 8.5f);
 
                 Dust dp = Dust.NewDustPerfect(pos + vel, ModContent.DustType<MuraLineBasic>(), vel, newColor: betweenGreen, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.6f);
                 dp.alpha = 10 + Main.rand.Next(-2, 5);
 
-                dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.94f, 0.97f));
+                dp.customData = new MuraLineBehavior(new Vector2(0.65f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.92f, 0.96f));
             }
+
+            for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
+                Dust dust = Dust.NewDustPerfect(position + velocity.SafeNormalize(Vector2.UnitX) * 30f, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.Green, Scale: Main.rand.NextFloat(0.25f, 0.3f) * 1.15f);
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 0, postSlowPower: 0.89f,
+                    velToBeginShrink: 10f, fadePower: 0.93f, shouldFadeColor: false);
+
+                dust.velocity += velocity.SafeNormalize(Vector2.UnitX) * 6f;
+            }
+
+
+            Vector2 offsetPos = position + velocity.SafeNormalize(Vector2.UnitX) * 15f;
+
+            Vector2 ringVel = velocity.SafeNormalize(Vector2.UnitX) * 2f; //2.5
+            Dust d = Dust.NewDustPerfect(offsetPos, ModContent.DustType<CirclePulse>(), ringVel, newColor: betweenGreen * 0.75f);
+            d.scale = 0.025f;
+            CirclePulseBehavior b = new CirclePulseBehavior(0.05f, true, 2, 0.2f, 0.35f);
+            b.drawLayer = "OverPlayers";
+            d.customData = b;
 
             return true;
         }
@@ -72,14 +101,28 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer > 2 && timer % 5 == 0 && Main.rand.NextBool())
+            Color between = Color.Lerp(Color.Green, Color.LawnGreen, 0.35f);
+
+            if (timer > 2 && timer % 7 == 0 && Main.rand.NextBool(2))
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Color.Green, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.45f);
-                d.alpha = 2;
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: between, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.45f);
                 d.velocity += projectile.velocity.RotatedByRandom(0.1f) * 0.55f;
                 d.velocity *= 0.35f;
+            }
+
+
+            if (timer % 7 == 0 && Main.rand.NextBool(2) && timer > 2)
+            {
+                Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
+                dustVel += projectile.velocity * 0.55f;
+
+                float dustScale = Main.rand.NextFloat(0.5f, 0.6f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: between, Scale: dustScale);
+                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 0, postSlowPower: 0.89f, velToBeginShrink: 10f, fadePower: 0.89f, shouldFadeColor: false);
+                d.rotation = Main.rand.NextFloat(6.28f);
             }
 
             float timeForPopInAnim = 75;

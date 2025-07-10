@@ -172,34 +172,10 @@ namespace VFXPlus.Common.Drawing
                     {
                         switch (p.type)
                         {
-                            case ProjectileID.AmethystBolt:
-                                if (p.TryGetGlobalProjectile(out AmethystStaffShotOverride globalAS))
-                                    globalAS.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.TopazBolt:
-                                if (p.TryGetGlobalProjectile(out TopazStaffShotOverride globalTS))
-                                    globalTS.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.SapphireBolt:
-                                if (p.TryGetGlobalProjectile(out SapphireStaffShotOverride globalSS))
-                                    globalSS.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.EmeraldBolt:
-                                if (p.TryGetGlobalProjectile(out EmeraldStaffShotOverride globalES))
-                                    globalES.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.AmberBolt:
-                                if (p.TryGetGlobalProjectile(out AmberStaffShotOverride globalARS))
-                                    globalARS.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.RubyBolt:
-                                if (p.TryGetGlobalProjectile(out RubyStaffShotOverride globalRS))
-                                    globalRS.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.DiamondBolt:
-                                if (p.TryGetGlobalProjectile(out DiamondStaffShotOverride globalDS))
-                                    globalDS.DrawAdditive(Main.spriteBatch);
-                                break;
+                            //case ProjectileID.DiamondBolt:
+                            //    if (p.TryGetGlobalProjectile(out DiamondStaffShotOverride globalDS))
+                            //        globalDS.DrawAdditive(Main.spriteBatch);
+                            //    break;
                         }
                     }
                     //

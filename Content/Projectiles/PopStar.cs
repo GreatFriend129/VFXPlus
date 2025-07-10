@@ -106,10 +106,6 @@ namespace VFXPlus.Content.Projectiles
 
             if (useCircleTex)
             {
-                Color[] cols = { Color.Pink * 0.75f, Color.HotPink * 0.525f, Color.DeepPink * 0.375f };
-                float[] scales = { 1.15f, 1.6f, 2.5f };
-
-                float orbRot = Projectile.rotation + MathHelper.PiOver2;
                 float orbAlpha = 0.2f;
                 float orbScale = 0.3f * Projectile.scale * scale;
                 Vector2 orbOrigin = orb.Size() / 2f;
@@ -117,9 +113,8 @@ namespace VFXPlus.Content.Projectiles
                 float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
                 float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-                //Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
-                Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
-                //Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos, null, Color.DeepPink with { A = 0 } * orbAlpha, 0f, orbOrigin, orbScale * sineScale2, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * orbAlpha, 0f, orbOrigin, orbScale * 0.5f * sineScale1, SpriteEffects.None);
             }
 
             Vector2 origin = new Vector2(Spike.Width / 2f, Spike.Height / 2f);

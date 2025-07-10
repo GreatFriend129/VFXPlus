@@ -62,17 +62,17 @@ namespace VFXPlus.Content
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            //Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
-            //Dust d1 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 0.35f);
+            Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
+            Dust d1 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 0.35f);
 
-            //FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.15f, timeToKill: 120, OverallAlpha: 0.75f);
-            //fgb.DrawWhiteCore = true;
-            //d1.customData = fgb;
+            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.15f, timeToKill: 120, OverallAlpha: 0.75f);
+            fgb.DrawWhiteCore = true;
+            d1.customData = fgb;
 
-            Vector2 off = Main.rand.NextVector2Circular(75f, 75f);
-            int starFX = Projectile.NewProjectile(null, Main.MouseWorld + off, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
-            Main.projectile[starFX].scale = 0.75f;
-            Main.projectile[starFX].rotation = Main.rand.NextFloat(6.28f);
+            //Vector2 off = Main.rand.NextVector2Circular(75f, 75f);
+            //int starFX = Projectile.NewProjectile(null, Main.MouseWorld + off, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
+            //Main.projectile[starFX].scale = 0.75f;
+            //Main.projectile[starFX].rotation = Main.rand.NextFloat(6.28f);
 
             //(Main.projectile[barrier].ModProjectile as WindBarrier).center = player.Center;
 

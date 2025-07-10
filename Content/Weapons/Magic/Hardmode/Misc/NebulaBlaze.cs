@@ -106,7 +106,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 trueTrailWidth = 0;
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value; //EvenThinnerGlowLine == Really clean
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/EvenThinnerGlowLine").Value; //EvenThinnerGlowLine == Really clean
             trail1.trailPointLimit = 90;
             trail1.trailWidth = trueTrailWidth;
             trail1.trailMaxLength = 250;
