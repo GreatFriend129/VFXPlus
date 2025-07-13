@@ -216,4 +216,110 @@ namespace VFXPlus.Content.VFXTest
     }
 
 
+    public class SyctheTest : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 16;
+            Projectile.height = 16;
+
+            Projectile.hostile = false;
+            Projectile.friendly = true;
+            Projectile.tileCollide = false;
+
+            Projectile.timeLeft = 1900;
+            Projectile.penetrate = -1;
+        }
+
+        int timer = 0;
+        public override void AI()
+        {
+            Projectile.Opacity = 1f;
+
+
+            timer++;
+        }
+
+        public float overallAlpha = 1f;
+        public float overallScale = 1f;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawShit(true);
+            });
+            DrawShit(false);
+
+            return false;
+        }
+        public void DrawShit(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);
+            Color purple3 = new Color(121, 7, 179);
+
+            Projectile proj = Projectile;
+
+            Asset<Texture2D> asset = TextureAssets.Projectile[ProjectileID.TrueNightsEdge];
+            Rectangle rectangle = asset.Frame(1, 4);
+            Vector2 origin = rectangle.Size() / 2f;
+            float num = proj.scale * 1.1f * overallScale * 1f;
+            SpriteEffects effects = ((!(proj.ai[0] >= 0f)) ? SpriteEffects.FlipVertically : SpriteEffects.None);
+            float num6 = 0.975f;
+            float fromValue = Lighting.GetColor(proj.Center.ToTileCoordinates()).ToVector3().Length() / (float)Math.Sqrt(3.0);
+            fromValue = Utils.Remap(fromValue, 0.2f, 1f, 0f, 1f);
+            float num7 = MathHelper.Min(0.15f + fromValue * 0.85f, Utils.Remap(proj.localAI[0], 30f, 96f, 1f, 0f));
+            _ = proj.Size / 2f;
+            float num8 = 2f;
+            for (float num9 = num8; num9 >= 0f; num9 -= 1f)
+            {
+                if (true || !(proj.oldPos[(int)num9] == Vector2.Zero))
+                {
+                    Vector2 vector = proj.Center - proj.velocity * 0.5f * num9;
+                    float num10 = (float)Main.timeForVisualEffects * 0.22f;// proj.oldRot[(int)num9] + proj.ai[0] * ((float)Math.PI * 2f) * 0.1f * (0f - num9);
+                    Vector2 position = vector - Main.screenPosition;
+                    float num11 = 1f - num9 / num8;
+                    float num12 = proj.Opacity * num11 * num11 * 0.85f;
+                    Color color = new Color(80, 160, 50, 120);
+                    Main.spriteBatch.Draw(asset.Value, position, rectangle, color * num7 * num12, num10 + proj.ai[0] * ((float)Math.PI / 4f) * -1f, origin, num * num6, effects, 0f);
+                    Color color2 = new Color(155, 255, 100);
+                    Color color3 = Color.White * num12 * 0.5f;
+                    color3.A = (byte)((float)(int)color3.A * (1f - num7));
+                    Color color4 = color3 * num7 * 0.5f;
+                    color4.G = (byte)((float)(int)color4.G * num7);
+                    color4.R = (byte)((float)(int)color4.R * (0.25f + num7 * 0.75f));
+                    float num13 = 3f;
+                    for (float num2 = (float)Math.PI * -2f + (float)Math.PI * 2f / num13; num2 < 0f; num2 += (float)Math.PI * 2f / num13)
+                    {
+                        float num3 = Utils.Remap(num2, (float)Math.PI * -2f, 0f, 0f, 0.5f);
+                        Main.spriteBatch.Draw(asset.Value, position, rectangle, color4 * 0.15f * num3, num10 + proj.ai[0] * 0.01f + num2, origin, num, effects, 0f);
+                        Main.spriteBatch.Draw(asset.Value, position, rectangle, new Color(200, 255, 0) * fromValue * num12 * num3, num10 + num2, origin, num * 0.8f, effects, 0f);
+                        Main.spriteBatch.Draw(asset.Value, position, rectangle, color2 * fromValue * num12 * MathHelper.Lerp(0.05f, 0.4f, fromValue) * num3, num10 + num2, origin, num * num6, effects, 0f);
+                        Main.spriteBatch.Draw(asset.Value, position, asset.Frame(1, 4, 0, 3), Color.White * MathHelper.Lerp(0.05f, 0.5f, fromValue) * num12 * num3, num10 + num2, origin, num, effects, 0f);
+                    }
+                    Main.spriteBatch.Draw(asset.Value, position, rectangle, color4 * 0.15f, num10 + proj.ai[0] * 0.01f, origin, num, effects, 0f);
+                    Main.spriteBatch.Draw(asset.Value, position, rectangle, new Color(200, 255, 0) * num7 * num12, num10, origin, num * 0.8f, effects, 0f);
+                    Main.spriteBatch.Draw(asset.Value, position, rectangle, color2 * fromValue * num12 * MathHelper.Lerp(0.05f, 0.4f, num7), num10, origin, num * num6, effects, 0f);
+                    Main.spriteBatch.Draw(asset.Value, position, asset.Frame(1, 4, 0, 3), Color.White * MathHelper.Lerp(0.05f, 0.5f, num7) * num12, num10, origin, num, effects, 0f);
+                }
+            }
+            float num4 = 1f - proj.localAI[0] * 1f / 80f;
+            if (num4 < 0.5f)
+            {
+                num4 = 0.5f;
+            }
+            Vector2 drawpos = proj.Center - Main.screenPosition + (proj.rotation + 0.471238941f * proj.ai[0]).ToRotationVector2() * ((float)asset.Width() * 0.5f - 4f) * num * num4;
+            float num5 = MathHelper.Min(num7, MathHelper.Lerp(1f, fromValue, Utils.Remap(proj.localAI[0], 0f, 80f, 0f, 1f)));
+            //Main.DrawPrettyStarSparkle(proj.Opacity, SpriteEffects.None, drawpos, new Color(255, 255, 255, 0) * proj.Opacity * 0.5f * num5, new Color(150, 255, 100) * num5, proj.Opacity, 0f, 1f, 1f, 2f, (float)Math.PI / 4f, new Vector2(2f, 2f), Vector2.One);
+
+        }
+
+
+    }
+
 }

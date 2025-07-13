@@ -233,9 +233,9 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             for (int i = 0; i < Main.maxNPCs; i++)
             {
-                if (Main.npc[i].active && Main.npc[i].type == ModContent.NPCType<FeatheredFoe>())
+                if (Main.npc[i].active && Main.npc[i].type == ModContent.NPCType<FeatheredFoeBoss>())
                 {
-                    if (Main.npc[i].ModNPC is FeatheredFoe ff)
+                    if (Main.npc[i].ModNPC is FeatheredFoeBoss ff)
                     {
                         bgPulsePower = ff.bgPulsePower;
                     }

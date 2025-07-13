@@ -65,6 +65,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             if (timer == 0)
             {
+                //Orbiting feather border
                 int featherCount = 12;
                 for (int i = 0; i < featherCount; i++)
                 {
@@ -83,6 +84,32 @@ namespace VFXPlus.Content.FeatheredFoe
                             bof.orbitDir = startDir;
                         }
                     }
+                }
+
+                //Inner feathers
+                int innerFeatherCount = 0; //12
+                for (int i = 0; i < innerFeatherCount; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)innerFeatherCount) * i;
+
+                    for (int j = 0; j < 7; j++)
+                    {
+                        if (j != 3 && j != 6 && j != 9)
+                        {
+                            int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                            if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                            {
+                                bof.ParentProj = Projectile.whoAmI;
+                                bof.orbitSpeed = 0.03f; //0.04
+                                bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
+                                bof.orbitDistance = 150f + (85f * j); //270
+                                bof.orbitDir = startDir;
+                            }
+                        }
+
+                    }
+
                 }
             }
 
@@ -182,6 +209,17 @@ namespace VFXPlus.Content.FeatheredFoe
                     scale = scale * 1.15f;
             }
 
+
+            Color between2 = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.35f);
+            Color between3 = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.35f);
+
+            //Ring
+            Texture2D Ring = Mod.Assets.Request<Texture2D>("Assets/Orbs/circle_02black").Value;
+            Main.EntitySpriteDraw(Ring, drawPos, null, between2 with { A = 0 } * overallScale * 0.1f * sinOff, Projectile.rotation, Ring.Size() / 2f, 5.65f, SpriteEffects.None);
+
+            //Texture2D Ring = Mod.Assets.Request<Texture2D>("Assets/Orbs/zFadeCircleBlack").Value;
+            //Main.EntitySpriteDraw(Ring, drawPos, null, between2 with { A = 0 } * overallScale * 0.1f, Projectile.rotation, Ring.Size() / 2f, 4f, SpriteEffects.None);
+            //Main.EntitySpriteDraw(Ring, drawPos, null, between2 with { A = 0 } * overallScale * 0.1f, Projectile.rotation + MathHelper.Pi, Ring.Size() / 2f, 4f, SpriteEffects.None);
         }
 
         public void GoddamnMonsoonCirc2(int count = 50)
@@ -248,7 +286,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
             FastRandom r = new("mule".GetHashCode());
-            float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.5f; //1.75f
 
             float minRange = 140f; //240f
             float maxRange = 920f; //920

@@ -38,6 +38,24 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Vector2 dustVel = projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
             Color orangeToUse = Color.Lerp(Color.Orange, Color.OrangeRed, 0.8f);
 
+            if (timer % 1 == 0 && timer > 5 && false)
+            {
+                Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.75f);
+
+
+                //Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.8f) * 0f,
+                    //newColor: between with { A = 55 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.3f);
+                //d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 10), 0.98f, 0.01f, 0.35f); //12 28
+                //d.rotation = Main.rand.NextFloat(6.28f);
+                //d.velocity += projectile.velocity * -0.1f;
+
+                Dust d2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity * 0.5f, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.8f) * 0f,
+                    newColor: between with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.3f);
+                d2.customData = new MediumSmokeBehavior(Main.rand.Next(12, 24), 0.95f, 0.01f, 0.15f); //12 28
+                d2.rotation = Main.rand.NextFloat(6.28f);
+                d2.velocity += projectile.velocity * -0.1f;
+            }
+
             GlowPixelAltBehavior dustBehavior = new GlowPixelAltBehavior();
             dustBehavior.base_fadeOutPower = 0.91f;
             dustBehavior.base_timeToKill = 30;

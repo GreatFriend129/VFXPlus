@@ -333,6 +333,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             Color colA = new Color(75, 242, 24); //More green
             Color colB = new Color(84, 76, 90); //More yellow
 
+            Color darkerCursedGreen = new Color(69, 219, 39);
+
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
@@ -363,44 +365,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
                        previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * progress,
                        previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
-
-                if (progress != 1 && false)
-                {
-                    /*
-                    Color col = Color.Lerp(colA, Color.GreenYellow, Easings.easeInCirc(progress));
-
-                    float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
-
-                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
-
-                    Vector2 newVec2 = new Vector2(1f, 0.5f) * size2;
-                    Vector2 newVec22 = new Vector2(1f, 0.13f) * size2;
-
-                    if (i == previousRotations.Count - 1)
-                        newVec2.X = 0.6f;
-
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
-                        previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
-
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
-                           previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
-
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
-                           previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
-                    */
-                }
-
             }
 
 
-            //Glorb
+            //str8 up glorbing it rn
             #region drawGlorb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Color orbCol2 = Color.Lerp(colA, Color.GreenYellow, 0.20f) * 0.375f * true_alpha;
-            Color orbCol3 = Color.Lerp(colA, Color.GreenYellow, 0.6f) * 0.525f * true_alpha;
+            Color orbCol2 = Color.Lerp(darkerCursedGreen, Color.GreenYellow, 0.20f) * 0.375f * true_alpha;
+            Color orbCol3 = Color.Lerp(darkerCursedGreen, Color.GreenYellow, 0.6f) * 0.525f * true_alpha;
 
             float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.2f;
             float sineScale2 = MathF.Cos((float)Main.timeForVisualEffects * 0.22f + 0.32578f) * 0.15f;
@@ -411,7 +386,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.45f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.45f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.45f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.15f * true_alpha, SpriteEffects.None);
 
 
             #endregion

@@ -30,7 +30,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 6;
+            int trailCount = 6; //6
             previousRotations.Add(projectile.rotation);
             previousPositions.Add(projectile.Center);
 
@@ -50,19 +50,43 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 p.velocity += projectile.velocity * 0.2f;
             }
 
+            float fadeInTime = Math.Clamp((timer + 10f) / 25f, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.15f);
 
             timer++;
 
             return base.PreAI(projectile);
         }
 
+        float overallAlpha = 1f;
+        float overallScale = 1f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+
+            Color[] cols = { Color.Yellow * 0.75f, Color.Gold * 0.525f, Color.Orange * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
+
+            float orbRot = projectile.rotation + MathHelper.PiOver2;
+            float orbAlpha = 0.1f;
+            Vector2 orbScale = new Vector2(0.15f, 0.1f) * overallScale * 1.25f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+
+
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
@@ -78,7 +102,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
-                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
+                        previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None); //0.5f
 
             }
 
@@ -87,10 +111,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.Gold with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f, SpriteEffects.None);
+                    Color.Gold with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * overallScale, SpriteEffects.None);
             return false;
 
         }

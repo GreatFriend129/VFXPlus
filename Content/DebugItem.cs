@@ -31,6 +31,7 @@ using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
 using VFXPlus.Common;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.QueenBee;
 
 
 namespace VFXPlus.Content
@@ -56,18 +57,34 @@ namespace VFXPlus.Content
             Item.noUseGraphic = true;
             Item.noMelee = true;
             Item.autoReuse = true;
-
         }
-
+        public override bool AltFunctionUse(Player player) => true;
+        
+        
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
-            Dust d1 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 0.35f);
+            if (player.altFunctionUse == 2)
+            {
+                Vector2 pos = Main.MouseWorld;
+                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
+                return false;
+            }
 
-            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.15f, timeToKill: 120, OverallAlpha: 0.75f);
-            fgb.DrawWhiteCore = true;
-            d1.customData = fgb;
+            for (int iaa = -3; iaa < 4; iaa++)
+            {
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * -10f;
+                float curvePower = iaa * 0.009f;
+
+                int curveFeather = Projectile.NewProjectile(null, Main.MouseWorld, vel, ModContent.ProjectileType<CurvingFeather>(), 1, 0, Main.myPlayer);
+
+                if (Main.projectile[curveFeather].ModProjectile is CurvingFeather cf)
+                {
+                    cf.curveValue = curvePower;
+                }
+
+            }
+
 
             //Vector2 off = Main.rand.NextVector2Circular(75f, 75f);
             //int starFX = Projectile.NewProjectile(null, Main.MouseWorld + off, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);

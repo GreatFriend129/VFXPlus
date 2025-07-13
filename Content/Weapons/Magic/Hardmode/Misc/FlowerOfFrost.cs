@@ -313,8 +313,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             #region drawGlorb
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            Color orbCol3 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.85f) * 0.375f * true_alpha;
-            Color orbCol2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f) * 0.525f * true_alpha;
+            Color orbCol3 = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 1f) * 0.375f * true_alpha;
+            Color orbCol2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.55f) * 0.525f * true_alpha;
 
             float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.2f;
             float sineScale2 = MathF.Cos((float)Main.timeForVisualEffects * 0.22f + 0.32578f) * 0.15f;
@@ -325,7 +325,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
             Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.55f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.55f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.17f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.55f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.15f * true_alpha, SpriteEffects.None);
 
 
             #endregion

@@ -70,13 +70,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             int trailCount = 60;
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 2 == 0 && timer > 3 && Main.rand.NextBool(2))
             {
@@ -101,6 +101,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 dust212 = dust57;
                 dust212.velocity += projectile.velocity * 0.5f;
             }
+
+            if (projectile.scale <= 0.35f)
+            {
+                float fadeVal = Utils.GetLerpValue(0f, 0.35f, projectile.scale, true);
+                overallAlpha = Easings.easeOutCirc(fadeVal);
+            }
+
 
             timer++;
 
@@ -129,8 +136,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             return false;
         }
 
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {            
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -152,18 +162,20 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
                 float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
-                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition + Main.rand.NextVector2Circular(6f, 6f); //3f
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(6f, 6f); //3f
 
                 float startScale = projectile.ai[2] + sineScale;
 
                 Color between = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f);
                 Color col = Color.Lerp(between, Color.MediumBlue, 1f - progress);
 
-                float easedFadeValue = progress * progress;
+                float easedFadeValue = progress * progress * overallAlpha;
 
 
-                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
-                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
+                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress);
+                lineScale.Y *= overallScale;
+                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress);
+                lineScale2.Y *= overallScale;
 
                 //Black
                 Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * easedFadeValue,
@@ -176,7 +188,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 //White
                 Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * easedFadeValue,
                     previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
             }
 
         }
@@ -185,10 +196,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             int i = 0;
-            foreach (Vector2 pos in previousPostions)
+            foreach (Vector2 pos in previousPositions)
             {
                 i++;
-                if (i % 3 == 0 && i > previousPostions.Count * 0.4f)
+                if (i % 3 == 0 && i > previousPositions.Count * 0.4f)
                 {
                     int a = Dust.NewDust(pos, 0, 0, ModContent.DustType<GlowFlare>(), 0, 0, newColor: Color.DodgerBlue, Scale: 0.4f);
                     Main.dust[a].customData = new GlowFlareBehavior(0.4f, 2.5f, 1f);

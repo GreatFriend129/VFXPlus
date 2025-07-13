@@ -23,7 +23,7 @@ using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
-    public partial class FeatheredFoe : ModNPC
+    public partial class FeatheredFoeBoss : ModNPC
     {
         Texture2D NPCTexture => (Texture2D)ModContent.Request<Texture2D>(AssetDirectory + "FeatheredFoe");
         Texture2D BorderTexture => (Texture2D)ModContent.Request<Texture2D>(AssetDirectory + "FeatheredFoeBorder");

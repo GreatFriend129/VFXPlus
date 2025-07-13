@@ -15,12 +15,15 @@ using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
+using Terraria.Physics;
+using Terraria.Graphics;
+using Terraria.Modules;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 {
     
-    public class CrystalStorm : GlobalItem 
+    public class CrystalStormItemOverride : GlobalItem 
     {
         public override bool InstancePerEntity => true;
 
@@ -64,15 +67,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (timer == 0)
                 isBlue = Main.rand.NextBool();
 
-
-            Color col = isBlue ? Color.DeepSkyBlue : Color.DeepPink;
+            Color col = isBlue ? Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f) : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
 
             #region trail info
             //Trail1 info dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value;
             trail1.trailColor = col * 0.7f; //0.7
             trail1.trailPointLimit = 120;
-            trail1.trailWidth = (int)(15f * projectile.scale * overallScale); //15
+            trail1.trailWidth = (int)(10f * projectile.scale * overallScale); //15
             trail1.trailMaxLength = 120; //120
             //trail1.useEffectMatrix = true; //For pixelization
             trail1.shouldSmooth = false;
@@ -177,15 +179,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public BaseTrailInfo trail1 = new BaseTrailInfo();
 
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
         float fadeInPower = 0f;
         float overallAlpha = 0f;
         float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            //ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
-            //{
-            //    trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
-            //});
             trail1.TrailDrawing(Main.spriteBatch);
 
             Color colToUse = isBlue ? Color.DeepSkyBlue : Color.DeepPink;
@@ -194,7 +195,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             
             Texture2D GlowTex = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Tomes/CrystalShardWhiteGlow").Value;
             Texture2D SoftGlow = CommonTextures.SoftGlow64.Value;
-            Texture2D Star = CommonTextures.CrispStarPMA.Value;
+            Texture2D Star = CommonTextures.RainbowRod.Value;
 
             Texture2D BlueTex = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Tomes/CrystalShardBlue").Value;
             Texture2D PinkTex = Mod.Assets.Request<Texture2D>("Content/Weapons/Magic/Hardmode/Tomes/CrystalShardPink").Value;
@@ -225,16 +226,111 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             }
 
             //Under Glows
-            Main.EntitySpriteDraw(SoftGlow, DrawPos, null, colToUse with { A = 0 } * 0.1f, projectile.rotation, SoftGlow.Size() / 2f, projectile.scale * 0.45f * overallScale, SpriteEffects.None);
+            Color softGlowCol = (isBlue ? colToUse : Color.HotPink);
+            Main.EntitySpriteDraw(SoftGlow, DrawPos, null, softGlowCol with { A = 0 } * 0.1f, projectile.rotation, SoftGlow.Size() / 2f, projectile.scale * 0.45f * overallScale, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(GlowTex, DrawPos, null, colToUse with { A = 0 } * 0.75f, projectile.rotation, GlowTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(GlowTex, DrawPos, null, colToUse with { A = 0 }, projectile.rotation, GlowTex.Size() / 2f, projectile.scale * 0.5f * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(GlowTex, DrawPos, null, colToUse with { A = 0 } * 0.5f, projectile.rotation, GlowTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(GlowTex, DrawPos, null, colToUse with { A = 0 } * 0.66f, projectile.rotation, GlowTex.Size() / 2f, projectile.scale * 0.5f * overallScale, SpriteEffects.None);
 
 
             //Main Tex
             Main.EntitySpriteDraw(TexToUse, DrawPos, null, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale, SpriteEffects.None);
 
             return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawVertexTrail(bool giveUp)
+        {
+            if (giveUp || false)
+                return;
+
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value; //
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
+
+            Color StripColor(float progress) => Color.White * (progress * progress * progress * progress);
+            float StripWidth(float progress) => Math.Clamp(30f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.25f; //30
+            float StripWidth2(float progress) => Math.Clamp(90f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.5f; //90
+
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            VertexStrip vertexStrip2 = new VertexStrip();
+            vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f); //timer * 0.02
+            myEffect.Parameters["reps"].SetValue(1f);
+
+            Color innerCol = Color.Lerp(Color.HotPink, Color.Pink, 0f);
+            Color outerCol = Color.DeepPink;
+
+
+            if (isBlue)
+            {
+                outerCol = Color.DodgerBlue;
+                innerCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
+            }
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["ColorOne"].SetValue(innerCol.ToVector3() * 1f);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip2.DrawTrail();
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(outerCol.ToVector3() * 1);
+            myEffect.Parameters["glowThreshold"].SetValue(0.55f);
+            myEffect.Parameters["glowIntensity"].SetValue(2f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            #region this shit is gorgeous
+            /*
+            Color StripColor(float progress) => Color.White * Easings.easeInSine(progress);
+            float StripWidth(float progress) => Math.Clamp(120f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f;
+            float StripWidth2(float progress) => Math.Clamp(75f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f; //75
+
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            VertexStrip vertexStrip2 = new VertexStrip();
+            vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f); //timer * 0.02
+            myEffect.Parameters["reps"].SetValue(1f);
+
+            //UnderLayer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2.5f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStrip2.DrawTrail();
+
+            //Over layer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            */
+            #endregion
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

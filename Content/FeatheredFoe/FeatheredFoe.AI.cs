@@ -14,10 +14,11 @@ using VFXPlus.Common;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPLus.Common;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
-    public partial class FeatheredFoe : ModNPC
+    public partial class FeatheredFoeBoss : ModNPC
     {
         Vector2 basicAttackPoint = Vector2.Zero;
         public void BasicAttack()
@@ -1112,7 +1113,7 @@ namespace VFXPlus.Content.FeatheredFoe
         Vector2 storedTornadoSpawnPos = Vector2.Zero;
         public void MadisonTornado()
         {
-            int timeBeforeSpawnNados = 45; //100
+            int timeBeforeSpawnNados = 85; //45
             int timeSpawnNados = 1000000;
 
             //How many nados above and below player to spawn
@@ -1146,18 +1147,19 @@ namespace VFXPlus.Content.FeatheredFoe
                     (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.1f;
                     Main.projectile[pulse].scale = 6f;
 
+                    float randYOff = 45;// Main.rand.NextFloat(-distanceBetweenNados / 2f, distanceBetweenNados / 2f);
                     for (int i = 0; i < 1 + (nadoDoubleCount * 2); i++)
                     {
                         int randir = madisonSide;// Main.rand.NextBool() ? 1 : -1;
                         
                         //if (i % 2 == 0)
-                            madisonSide *= -1;
+                        madisonSide *= -1;
 
                         Vector2 startPos = storedTornadoSpawnPos + new Vector2(0f, -distanceBetweenNados * (spawnUp ? 1f : -1f)) * nadoDoubleCount;
 
                         float yVal = nadoSpawnCount * distanceBetweenNados * (spawnUp ? 1f : -1f);
 
-                        int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(100f * randir, yVal), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
+                        int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(100f * randir, yVal + randYOff), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
                         (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = randir;
 
                         nadoSpawnCount++;
@@ -1186,18 +1188,55 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
+        Vector2 storedMaelstromPos = Vector2.Zero;
+        Projectile maelstromProjectileInstance = null;
         public void Maelstrom()
         {
-            NPC.velocity = Vector2.Zero;
 
             if (timer == 0)
             {
+                NPC.velocity = Vector2.Zero;
+
+
                 int swirl = Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<FFMaelstrom>(), 0, 0, Main.myPlayer);
+                maelstromProjectileInstance = Main.projectile[swirl];
+
+
+                int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 30;
+                (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 1f;
+                Main.projectile[pulse].scale = 9f;
+
                 //(Main.projectile[nado].ModProjectile as MadisonTornado).startDir = Main.rand.NextBool() ? 1 : -1;
             }
 
-            
+            Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toPlayer * 8f, 0.05f); //5 0.02
 
+            maelstromProjectileInstance.Center = NPC.Center + NPC.velocity;
+
+
+            if (timer % 80 == 0 && false)
+            {
+                for (int iaa = -3; iaa < 4; iaa++)
+                {
+                    Vector2 vel = toPlayer.RotatedBy(iaa * MathHelper.PiOver4 * 1f) * 10f;
+
+                    float curvePower = iaa * 0.015f; //0.02
+
+                    int curveFeather = Projectile.NewProjectile(null, NPC.Center, vel, ModContent.ProjectileType<CurvingFeather>(), 2, 0, Main.myPlayer);
+
+                    if (Main.projectile[curveFeather].ModProjectile is CurvingFeather cf)
+                    {
+                        cf.curveValue = curvePower;
+                        cf.accelTime = (int)(50); //36
+                    }
+
+                    Main.projectile[curveFeather].hostile = true;
+                    Main.projectile[curveFeather].extraUpdates = 0; //2
+
+                }
+            }
         }
 
 

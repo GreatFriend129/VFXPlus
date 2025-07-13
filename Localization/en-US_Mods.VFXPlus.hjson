@@ -154,6 +154,7 @@ Projectiles: {
 	MadisonVFXOld.DisplayName: Madison V F X Old
 	ShadowbeamStarVFX.DisplayName: Shadowbeam Star V F X
 	PopStar.DisplayName: Pop Star
+	SyctheTest.DisplayName: Sycthe Test
 }
 
 Configs: {
@@ -623,4 +624,5 @@ Configs: {
 NPCs: {
 	FeatheredFoe.DisplayName: Feathered Foe
 	ReduxQueenBee.DisplayName: Redux Queen Bee
+	FeatheredFoeBoss.DisplayName: Feathered Foe Boss
 }

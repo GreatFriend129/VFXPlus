@@ -52,11 +52,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
         //Max vel after we start accelerating
-        public float postAccelMaxVel = 28;
+        public float postAccelMaxVel = 21;
 
         //Max vel before we start accelerating
-        public float maxVel = 18f;
-        public int timeForVelShift = 60;
+        public float maxVel = 14f; //18f
+        public int timeForVelShift = 70;// 60
 
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPostions = new List<Vector2>();
@@ -87,7 +87,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Vector2 goalVel = new Vector2(-maxVel * startDir, 0f);
             float timeForMovement = timeForVelShift;
             float timeProgress = Math.Clamp((float)timer / timeForMovement, 0f, 1f);
-            Projectile.velocity = Vector2.Lerp(initialVel, goalVel, timeProgress);
+            Projectile.velocity = Vector2.Lerp(initialVel, goalVel, Easings.easeInOutSine(timeProgress));
 
             if (timer > timeForVelShift * 1.05f)
             {

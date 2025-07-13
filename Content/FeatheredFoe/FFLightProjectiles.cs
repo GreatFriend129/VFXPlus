@@ -750,7 +750,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.friendly = false;
 
             Projectile.tileCollide = false;
-            Projectile.timeLeft = 2170;
+            Projectile.timeLeft = 222170;
         }
 
         public Vector2 originalDir = Vector2.Zero;
@@ -773,6 +773,9 @@ namespace VFXPlus.Content.FeatheredFoe
             }
             Projectile parentProj = Main.projectile[ParentProj];
 
+            if (parentProj.active == false)
+                Projectile.Kill();
+
             //Projectile.velocity = Vector2.Zero;
 
             Vector2 vecdir = originalDir.SafeNormalize(Vector2.UnitX);
@@ -784,7 +787,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             Projectile.rotation = orbitVector.ToRotation() + MathHelper.PiOver2 * orbitDir;
 
-            int trailCount = 10;
+            int trailCount = 10; //10
             previousRotations.Add(Projectile.rotation);
             previousPostions.Add(Projectile.Center - parentProj.Center);
 

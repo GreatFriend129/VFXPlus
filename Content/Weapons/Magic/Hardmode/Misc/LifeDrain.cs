@@ -35,9 +35,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
 
-            for (int i = 0; i < 22; i++) //16
+            for (int i = 0; i < 10; i++) //16
             {
-                float progress = (float)i / 21;
+                float progress = (float)i / 9;
                 Color col = Color.Lerp(Color.Black, Color.Red, progress);
 
                 //Color.Lerp(Color.Black, Color.Orange, Main.rand.NextFloat())
@@ -156,24 +156,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
-            Vector2 originPoint = Projectile.Center - Main.screenPosition;
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Color col1 = Color.Crimson * 0.75f; //Gold
-            Color col2 = Color.Crimson * 0.525f;
-            Color col3 = Color.Red * 0.375f;
+            Color[] cols = { Color.Red * 0.75f, Color.Red * 0.525f, Color.DarkRed * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
 
-            float scale1 = 0.85f;
-            float scale2 = 1.6f;
-            float scale3 = 2.5f;
-            float scale = drawScale * Projectile.scale * 2.6f;
+            float orbAlpha = 0.15f * drawScale;
+            float orbScale = drawAlpha * Projectile.scale * 2f;
+            Vector2 orbOrigin = orb.Size() / 2f;
 
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * drawAlpha * 0.25f, 0f, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * drawAlpha * 0.25f, 0f, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * drawAlpha * 0.3f, 0f, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, 0f, orbOrigin, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, 0f, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, 0f, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
@@ -189,9 +187,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
 
             FastRandom r = new("Penis".GetHashCode());
-            float speedTime = Main.GlobalTimeWrappedHourly * 0.75f * Projectile.spriteDirection; //2f
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.1f * Projectile.spriteDirection; //0.75
 
-            float minRange = 25f * drawScale; //25
+            float minRange = 35f * drawScale; //25
             float maxRange = 105f * drawScale;// Easings.easeInOutBack(drawScale, 0f, 3f);
             for (int i = 0; i < count; i++)
             {
@@ -201,7 +199,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 Texture2D texture = Tex;
                 Rectangle frame = texture.Bounds;
-                Vector2 scale = new Vector2(0.33f, 0.6f) * 0.4f;
+                Vector2 scale = new Vector2(0.26f, 0.55f) * 0.4f; //0.33 0.6
                 float rotation = 3.14f / 2f;
                 Vector2 origin = frame.Size() / 2f;
                 float speed = NextFloatFastRandom(r, 0.8f, 4f);
@@ -217,11 +215,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 drawPosition += Main.rand.NextVector2Circular(2f, 2f);
 
 
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.Red with { A = 0 } * drawAlpha * 0.55f, randomRot + rotation, origin,
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.Red with { A = 0 } * drawAlpha * 1f, randomRot + rotation, origin,
                     new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 6.5f * drawScale * 1f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White with { A = 0 } * 0.5f * drawAlpha * 0.65f, randomRot + rotation, origin,
-                    new Vector2(scale.X * scaleWave, scale.Y * scaleWave) * 3.25f * drawScale * 1f, SpriteEffects.None);
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White with { A = 0 } * 0.35f * drawAlpha, randomRot + rotation, origin,
+                    new Vector2(scale.X * scaleWave, scale.Y * scaleWave) * 3.85f * drawScale * 1f, SpriteEffects.None);
             }
         }
 

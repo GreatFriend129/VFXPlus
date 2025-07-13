@@ -16,7 +16,7 @@ using Terraria.ModLoader;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
-    public partial class FeatheredFoe : ModNPC
+    public partial class FeatheredFoeBoss : ModNPC
     {
         public const string AssetDirectory = "VFXPlus/Content/FeatheredFoe/Assets/";
         public override string Texture => "Terraria/Images/Projectile_0";
@@ -91,26 +91,26 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Dive;
+            CurrentAttack = FeatheredFoeState.Maelstrom;
 
             switch (CurrentAttack)
             {
                 case FeatheredFoeState.BasicAttack:
                     BasicAttack();
                     break;
-                case FeatheredFoeState.SwoopFeatherBehind:
+                case FeatheredFoeState.SwoopFeatherBehind: //Nothing
                     SwoopFeatherBehind();
                     break;
-                case FeatheredFoeState.TriSpin:
+                case FeatheredFoeState.TriSpin: //GOOD
                     TriSpin();
                     break;
-                case FeatheredFoeState.MartletOrbitFeather:
+                case FeatheredFoeState.MartletOrbitFeather: //WIP
                     MartletOrbitFeather();
                     break;
-                case FeatheredFoeState.CircleBurstFeather:
+                case FeatheredFoeState.CircleBurstFeather: //Forked burst
                     CircleBurstFeather();
                     break;
-                case FeatheredFoeState.SwirlFeather:
+                case FeatheredFoeState.SwirlFeather: //Nothing
                     SwirlFeather();
                     break;
                 case FeatheredFoeState.CornerTravelShot:
