@@ -1,4 +1,4 @@
 # VFXPlus
-Terraria mod that redoes vanilla VFX while keeping functionality the same
+Terraria mod that remakes vanilla VFX while keeping functionality the same
 
-ligma balls
+This is not my magnum opus
