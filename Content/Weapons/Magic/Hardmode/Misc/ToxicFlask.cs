@@ -90,8 +90,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.Aqua with { A = 0 } * 0.18f, 0f, orb.Size() / 2f, 0.35f * drawScale, SpriteEffects.None);
+
+
+
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
@@ -114,13 +120,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Border
             for (int i = 0; i < 4; i++)
             {
-                float dist = 2.5f;
+                float dist = 2f;
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle,
-                    Color.Aqua with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale * 1.05f * drawScale, SpriteEffects.None);
+                    Color.Aqua with { A = 0 }, projectile.rotation, TexOrigin, projectile.scale * 1f * drawScale, SpriteEffects.None);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);

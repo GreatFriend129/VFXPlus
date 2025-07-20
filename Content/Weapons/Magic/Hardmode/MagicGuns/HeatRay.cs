@@ -263,7 +263,70 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public void DrawTrail()
         {
             #region shaderPrep
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EnergyTex").Value; //|spark_06 | Extra_196_Black
+            /*
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/s06sBloom").Value; //|spark_06 | Extra_196_Black
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value;
+
+            Vector2[] pos_arr = { startPos, endPos };
+            float[] rot_arr = { Projectile.rotation, Projectile.rotation };
+
+
+            Color StripColor(float progress) => Color.White * true_alpha;
+            float StripWidth(float progress) => 25f * true_width * 0.8f;
+            float StripWidth2(float progress) => 90f * true_width * 0.8f;
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            VertexStrip vertexStrip2 = new VertexStrip();
+            vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
+            #endregion
+
+            #region Shader
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            float dist = (startPos - endPos).Length();
+            float repValue = dist / 400f;
+            myEffect.Parameters["reps"].SetValue(repValue);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.03f); //timer * 0.02
+            
+            //UnderLaye
+            Color inBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+
+            Color dark = new Color(35, 35, 35);
+            myEffect.Parameters["ColorOne"].SetValue(dark.ToVector3());
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip2.DrawTrail();
+
+
+            myEffect.Parameters["ColorOne"].SetValue(inBetween.ToVector3() * 3f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip2.DrawTrail();
+
+            Color lerpCol = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0.35f);
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.White.ToVector3());
+            myEffect.Parameters["glowThreshold"].SetValue(0.7f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            */
+            #endregion
+            
+            //Old
+            
+            #region shaderPrep
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinnerGlowTrail").Value; //|spark_06 | Extra_196_Black
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
 
             Vector2[] pos_arr = { startPos, endPos };
@@ -272,7 +335,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             Color StripColor(float progress) => Color.White * true_alpha;
             float StripWidth(float progress) => 18f * true_width;
-            float StripWidth2(float progress) => 45f * true_width;
+            float StripWidth2(float progress) => 40f * true_width;
 
             VertexStrip vertexStrip = new VertexStrip();
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -295,7 +358,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
 
             //UnderLayer
-            Color underCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.4f);
+            Color underCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.3f);
             myEffect.Parameters["ColorOne"].SetValue(underCol.ToVector3() * 3f * true_alpha);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
@@ -304,15 +367,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             //Over layer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.White.ToVector3() * 5f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
-            myEffect.Parameters["glowIntensity"].SetValue(2.2f); //2.25
+            myEffect.Parameters["ColorOne"].SetValue(Color.White.ToVector3());
+            //myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
+            //myEffect.Parameters["glowIntensity"].SetValue(2.2f); //2.25
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
+
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
 
             #endregion
+            
         }
 
         public void DrawStar()

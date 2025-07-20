@@ -63,10 +63,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 previousPositions.RemoveAt(0);
 
 
-            float timeForPopInAnim = 21;
-            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
+            float timeForPopInAnim = 28;
+            float animProgress = Math.Clamp((timer + 8) / timeForPopInAnim, 0f, 1f);
 
-            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1f)) * 1f;
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.5f)) * 1f;
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.09f), 0f, 1f);
 
             int timeForBloomGrowAnim = 28;

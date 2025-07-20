@@ -292,7 +292,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 float progress = (float)i / (float)previousPositions.Count;
 
-                Vector2 offset1 = Main.rand.NextVector2Circular(6.5f * trueScale, 6.5f * trueScale * progress).RotatedBy(projectile.rotation - MathHelper.PiOver4) * overallScale;
+                Vector2 offset1 = Main.rand.NextVector2Circular(3.5f * trueScale, 3.5f * trueScale * progress).RotatedBy(projectile.rotation - MathHelper.PiOver4) * overallScale;
 
 
                 Vector2 flarePos = previousPositions[i] - Main.screenPosition;

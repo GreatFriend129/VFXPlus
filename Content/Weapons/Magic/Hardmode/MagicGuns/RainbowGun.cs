@@ -395,7 +395,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
-            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
+            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGradLoop").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
             myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
 
@@ -409,11 +409,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["grad3Speed"].SetValue(3.1f / 3f);
             myEffect.Parameters["grad4Speed"].SetValue(2.3f / 3f);
 
-            myEffect.Parameters["tex1Mult"].SetValue(1.25f);
-            myEffect.Parameters["tex2Mult"].SetValue(1.5f);
-            myEffect.Parameters["tex3Mult"].SetValue(1.15f);
-            myEffect.Parameters["tex4Mult"].SetValue(2.5f);
-            myEffect.Parameters["totalMult"].SetValue(1f);
+            myEffect.Parameters["tex1Mult"].SetValue(1.5f);
+            myEffect.Parameters["tex2Mult"].SetValue(1f);
+            myEffect.Parameters["tex3Mult"].SetValue(1f);
+            myEffect.Parameters["tex4Mult"].SetValue(2f);
+            myEffect.Parameters["totalMult"].SetValue(1.25f);
 
             //We want the number of repititions to be relative to the number of points
             float repValue = 0.05f * l_positions.Count;

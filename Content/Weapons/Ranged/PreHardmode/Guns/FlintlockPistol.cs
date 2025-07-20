@@ -98,13 +98,17 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             }
 
             //Sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0.15f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style, position);
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0.2f, Pitch = .9f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, position);
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0.15f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style, position);
+            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0.2f, Pitch = .9f, PitchVariance = .25f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, position);
 
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .2f, Pitch = 1f, PitchVariance = 0.1f };
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .6f, Pitch = 1f, PitchVariance = 0.1f };
             SoundEngine.PlaySound(style4, position);
+
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperShotA") with { Volume = .10f, Pitch = .25f, PitchVariance = 0.1f };
+            SoundEngine.PlaySound(style, position);
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

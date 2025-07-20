@@ -45,18 +45,19 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.Handgun,
                     AnimTime: 14,
-                    NormalXOffset: 20f,
-                    DestXOffset: 12f,
+                    NormalXOffset: 17f,
+                    DestXOffset: 9f,
                     YRecoilAmount: 0.18f,
-                    HoldOffset: new Vector2(0f, 4f),//4
-                    TipPos: new Vector2(25, -8f),
-                    StarPos: new Vector2(23, -8f)
+                    HoldOffset: new Vector2(-3f, 3f),//4
+                    TipPos: new Vector2(22, -8f),
+                    StarPos: new Vector2(20, -8f)
                     );
             }
+            Main.projectile[gun].scale = 0.9f;
 
             //Explosion
             int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(40f, -3f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 0f);
+            Vector2 muzzlePos = position + new Vector2(37f, -4f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 0f);
 
             for (int i = 0; i < 6; i++) //16
             {
@@ -95,15 +96,14 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             }
 
             //Sound
-            //Sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0.05f, Pitch = .65f, PitchVariance = 0.2f, MaxInstances = 1 };
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .25f, Pitch = 0.5f, PitchVariance = 0.15f }; //1f P
+            SoundEngine.PlaySound(style4, position);
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperShotA") with { Volume = .01f, Pitch = -1f, PitchVariance = 0.1f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, position);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0.23f, Pitch = .8f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, position);
-
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .24f, Pitch = 0.95f, PitchVariance = 0.1f };
-            SoundEngine.PlaySound(style4, position);
+            SoundStyle style5 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = .45f, Pitch = -0.25f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style5, position);
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

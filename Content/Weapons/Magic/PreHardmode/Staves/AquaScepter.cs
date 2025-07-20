@@ -41,10 +41,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/CommonWaterFallLight00") with { Volume = .1f, Pitch = .2f, PitchVariance = .2f, MaxInstances = 1 }; 
             SoundEngine.PlaySound(style2, player.Center);
 
+            Vector2 dustPos = position + velocity.SafeNormalize(Vector2.UnitX) * 35f;
             Color col = Color.Lerp(Color.Blue, Color.DodgerBlue, 0.75f);
             for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
             {
-                Dust dp = Dust.NewDustPerfect(position + velocity * 2, ModContent.DustType<GlowFlare>(),
+
+                Dust dp = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowFlare>(),
                     velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.Next(5, 16),
                     newColor: col, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.5f);
             }

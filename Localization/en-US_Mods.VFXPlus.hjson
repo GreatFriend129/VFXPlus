@@ -155,6 +155,10 @@ Projectiles: {
 	ShadowbeamStarVFX.DisplayName: Shadowbeam Star V F X
 	PopStar.DisplayName: Pop Star
 	SyctheTest.DisplayName: Sycthe Test
+	WindTrail.DisplayName: Wind Trail
+	WindPulseTest.DisplayName: Wind Pulse Test
+	FFWindOrb2.DisplayName: F F Wind Orb2
+	RelativeToProjFeather.DisplayName: Relative To Proj Feather
 }
 
 Configs: {

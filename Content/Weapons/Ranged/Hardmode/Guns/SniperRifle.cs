@@ -38,20 +38,31 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle style1 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperShotA") with { Volume = 0.5f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = 1 };
+            SoundEngine.PlaySound(style1, player.Center);
+
+            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SinperShotB") with { Volume = 0.5f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style2, player.Center);
+
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/shotgun-firing-3-14483") with { Volume = .3f, Pitch = -.25f, PitchVariance = 0.15f };
+            SoundEngine.PlaySound(style3, player.Center);
+
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
             {
                 held.SetProjInfo(
                     GunID: ItemID.SniperRifle,
-                    AnimTime: 26,
+                    AnimTime: 20,
                     NormalXOffset: 24f,
                     DestXOffset: 8f,
-                    YRecoilAmount: 0.3f,
+                    YRecoilAmount: 0.2f,
                     HoldOffset: new Vector2(0f, -1f),
                     TipPos: new Vector2(43f, -3f),
                     StarPos: new Vector2(40f, -3f)
                     );
+
+                held.isShotgun = true;
             }
 
             //Explosion

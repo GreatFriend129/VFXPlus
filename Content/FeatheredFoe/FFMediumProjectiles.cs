@@ -59,20 +59,20 @@ namespace VFXPlus.Content.FeatheredFoe
         public int timeForVelShift = 70;// 60
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override void AI()
         {
             Projectile.scale = 1.15f;
             
             int trailCount = 14; //7
             previousRotations.Add(Projectile.rotation);
-            previousPostions.Add(Projectile.Center);
+            previousPositions.Add(Projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             //AlphaScale
             float timeForPopInAnim = 30;
@@ -200,7 +200,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 float size2 = (0.5f + (progress * 0.75f)) * Projectile.scale * scale;
 
-                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Main.EntitySpriteDraw(Tex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.15f,
                         previousRotations[i], TexOrigin, size2, se);
@@ -303,7 +303,6 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
     }
-
     public class TornadoTest : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
@@ -578,12 +577,9 @@ namespace VFXPlus.Content.FeatheredFoe
         }
     }
 
-
     public class FFWindOrb : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
-
-
 
         public override void SetDefaults()
         {
@@ -600,10 +596,6 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.timeLeft = 22900;
 
         }
-        public override Color? GetAlpha(Color lightColor)
-        {
-            return new Color(255 - Projectile.alpha, 255 - Projectile.alpha, 255 - Projectile.alpha, 255 - Projectile.alpha);
-        }
 
         float animProgress = 0;
         float overallAlpha = 0f;
@@ -615,7 +607,7 @@ namespace VFXPlus.Content.FeatheredFoe
         public float additionAmount = 0.1f;
 
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override void AI()
         {
             if (timer == 0)
@@ -641,13 +633,13 @@ namespace VFXPlus.Content.FeatheredFoe
             
             int trailCount = 7; //5
             previousRotations.Add(Projectile.rotation);
-            previousPostions.Add(Projectile.Center);
+            previousPositions.Add(Projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             Projectile.rotation -= 0.25f;
 
@@ -675,7 +667,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 GoddamnMonsoonCirc(50); //460 | 50 | 10
 
@@ -738,18 +730,17 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        public void GoddamnMonsoonCirc2(int count = 50)
+        public void GoddamnMonsoonCirc(int count = 50)
         {
             //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
-            //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
-            Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value;
+            Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value; //PixelSwirl
             Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
 
-            FastRandom r = new(Main.player[Projectile.owner].name.GetHashCode());
-            float speedTime = Main.GlobalTimeWrappedHourly * 2f;
+            FastRandom r = new("mule".GetHashCode());
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
 
             float minRange = 40f; //40f | 240 920 for full screen
-            float maxRange = 1120f; //120
+            float maxRange = 270f; //120
             for (int i = 0; i < count; i++)
             {
 
@@ -781,18 +772,177 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 Vector2 drawPosition = Projectile.Center + new Vector2(1f, 0f).RotatedBy(randomRot) * ringDistance;
 
-                //Vector2 drawPosition = Projectile.Center + new Vector2(xWave * waveDistance, NextFloatF(r, -20f, 14f) + yOffset * yDir); //-20 14 | -120
 
-                //float prog = (float)i / (float)count - 1f;
-                //Color col = Main.hslToRgb((prog + timer * 0.005f) % 1f, 1f, 0.7f, 0);
-
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.Aquamarine with { A = 0 }, randomRot + rotation + MathHelper.PiOver2, origin,
-    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
-
-                //Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, Color.White, randomRot + rotation + MathHelper.PiOver2, origin,
-                //new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
+                Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.32f);
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f, randomRot + rotation + MathHelper.PiOver2, origin, 
+                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
 
             }
+        }
+
+        public float NextFloatFastRandom(FastRandom random, float min, float max)
+        {
+            return min + random.NextFloat() * (max - min);
+        }
+
+    }
+    public class FFWindOrb2 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 64;
+            Projectile.height = 64;
+
+
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = false;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float animProgress = 0;
+        float overallAlpha = 0f;
+        float overallScale = 0f;
+
+        int timer = 0;
+        public int advancer = 0;
+        public int startDir = 1;
+        public float additionAmount = 0.1f;
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override void AI()
+        {
+            if (timer == 0)
+            {
+                int featherCount = 8;
+                for (int i = 0; i < featherCount; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount) * i;
+
+                    float dir = Projectile.velocity.ToRotation();
+                    Vector2 goalPos = new Vector2(350, 0f).RotatedBy(rot).RotatedBy(dir);
+                    Vector2 spawnPos = Projectile.Center + goalPos + dir.ToRotationVector2() * -300f;
+
+                    int a = Projectile.NewProjectile(null, spawnPos, Vector2.Zero, ModContent.ProjectileType<RelativeToProjFeather>(), 1, 1);
+
+
+
+                    if (Main.projectile[a].ModProjectile is RelativeToProjFeather rtpf)
+                    {
+                        rtpf.ParentProj = Projectile.whoAmI;
+                        rtpf.goalPos = goalPos;
+                    }
+                }
+
+            }
+
+            if (timer < 60)
+                Projectile.velocity *= 1.02f;
+
+            int trailCount = 7; //5
+            previousRotations.Add(Projectile.rotation);
+            previousPositions.Add(Projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            Projectile.rotation -= 0.25f;
+
+            if (timer % 1 == 0)
+            {
+                float scale = 1.4f;
+
+                SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 3f, 0.92f);
+
+                Vector2 random = Main.rand.NextVector2CircularEdge(40f, 40f) * Main.rand.NextFloat(1f, 5f);
+
+                Vector2 vel = random.RotatedBy(MathHelper.PiOver2).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * Main.rand.NextFloat(4f, 14f) * 0.25f;
+
+                Dust star = Dust.NewDustPerfect(Projectile.Center + random, ModContent.DustType<SmallSmoke>(), vel, newColor: Color.White, Scale: scale);
+                star.customData = ssb;
+            }
+
+            float timeForPopInAnim = 35; //37
+            float animProgress = Math.Clamp((timer + 13) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 0.75f)) * 1f;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                GoddamnMonsoonCirc(50); //460 | 50 | 10
+
+                DrawVanillaSwirl2(true);
+            });
+
+            DrawVanillaSwirl2(false);
+
+            return false;
+        }
+
+        public void DrawVanillaSwirl2(bool giveUp = true)
+        {
+            if (giveUp) return;
+
+            Texture2D Swirl = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaSwirl").Value; //FireSpot goes kinda crazy| same with PixelSwirl
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            float rot = Projectile.rotation;
+            Vector2 origin = Swirl.Size() / 2f;
+
+            float sinOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.2f;
+            float cosOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.077f) * 0.1f;
+
+            float startScale = sinOff;
+            float endScale = 6f * cosOff;
+
+            float scale = 1f;
+
+
+            Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.1f, 0f, Orb.Size() / 2f, endScale * 1f * overallScale, SpriteEffects.FlipHorizontally);
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.35f, 0f, Orb.Size() / 2f, endScale * 0.15f * overallScale, SpriteEffects.FlipHorizontally);
+
+            for (int i = 0; i < 12; i++) //18
+            {
+                float prog = 1f - ((float)i / 12f);
+
+                //prog = Easings.easeOutSine(prog);
+
+                //End Color <--> Start color
+                Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
+                Color col = Color.Lerp(between * 1f, Color.LightSkyBlue, Easings.easeOutSine(prog));
+
+
+                float alpha = prog;
+                float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
+                float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
+
+                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
+
+                //8
+                if (i >= 8)
+                    scale = scale * 1.25f;
+                else
+                    scale = scale * 1.15f;
+            }
+
         }
 
         public void GoddamnMonsoonCirc(int count = 50)
@@ -839,7 +989,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
                 Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.32f);
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f, randomRot + rotation + MathHelper.PiOver2, origin, 
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f, randomRot + rotation + MathHelper.PiOver2, origin,
                     new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
 
             }
@@ -951,5 +1101,4 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
     }
-
 }

@@ -85,6 +85,9 @@ namespace VFXPlus.Content.Projectiles
         //Which muzzle flash texture to use
         int muzzleFlashNum = 1;
 
+
+        float pullBackRotOffsetAmount = 1f;
+
         int timer = 0;
         public override void AI()
         {
@@ -202,6 +205,34 @@ namespace VFXPlus.Content.Projectiles
             else
                 Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.None, GunDirection.ToRotation() - MathHelper.PiOver2);
 
+
+            float totalProgress = ((float)timer / (float)Player.itemAnimationMax);
+            bool doPullClickAnim = (totalProgress >= 0.4f && totalProgress <= 0.57f);
+            if (gunID == ItemID.QuadBarrelShotgun && doPullClickAnim)
+            {
+
+                float armRot = GunDirection.ToRotation() - MathHelper.PiOver2;
+                armRot += (-0.25f * pullBackRotOffsetAmount) * Player.direction;
+
+                float pullProg = Utils.GetLerpValue(0.4f, 0.57f, totalProgress, true); //0.6, 0.8f
+                pullProg = Easings.easeOutQuad(pullProg);
+
+                if (pullProg > 0.75f)
+                    Player.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.None, armRot);
+                else if (pullProg > 0.5f)
+                    Player.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.Quarter, armRot);
+                else if (pullProg > 0.25f)
+                    Player.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.ThreeQuarters, armRot);
+                else
+                    Player.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.Full, armRot);
+
+                pullBackRotOffsetAmount = Math.Clamp(MathHelper.Lerp(pullBackRotOffsetAmount, 2.5f, 0.22f), 0f, 1f);
+            }
+            else
+                pullBackRotOffsetAmount = Math.Clamp(MathHelper.Lerp(pullBackRotOffsetAmount, -0.75f, 0.12f), 0f, 1f);
+
+
+
             #endregion
 
             Player.heldProj = Projectile.whoAmI;
@@ -233,6 +264,11 @@ namespace VFXPlus.Content.Projectiles
 
             Vector2 heldOffset = new Vector2(HoldoutOffset.X, HoldoutOffset.Y * Player.direction).RotatedBy(Projectile.rotation);         
             Vector2 drawPos = Projectile.Center - Main.screenPosition + new Vector2(0f, Player.gfxOffY) + heldOffset;
+
+
+            if (gunID != ItemID.OnyxBlaster)
+                Main.spriteBatch.Draw(Texture, drawPos, null, lightColor, Projectile.rotation, Texture.Size() / 2, Projectile.scale, mySE, 0f);
+
 
             Color between = Color.Lerp(Color.Orange, Color.OrangeRed, 0.75f);
             Color[] colors = { between, Color.OrangeRed, Color.Orange, Color.White };
@@ -306,9 +342,6 @@ namespace VFXPlus.Content.Projectiles
             Main.spriteBatch.Draw(Flash, starPos, null, colors[1] with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.4f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.3f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.2f, SpriteEffects.None, 0f);
-
-            if (gunID != ItemID.OnyxBlaster)
-                Main.spriteBatch.Draw(Texture, drawPos, null, lightColor, Projectile.rotation, Texture.Size() / 2, Projectile.scale, mySE, 0f);
 
 
             //Glowmask for OnyxBlaster

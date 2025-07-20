@@ -1,21 +1,13 @@
 using Microsoft.Xna.Framework;
-using System;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.GameContent.ItemDropRules;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
-using Terraria.Graphics;
-using ReLogic.Content;
-using Microsoft.CodeAnalysis;
+using Terraria;
+using Terraria.Audio;
+using Terraria.ModLoader;
+using VFXPlus.Common;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
-using VFXPlus.Common;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using Microsoft.Build.Evaluation;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -1045,4 +1037,127 @@ namespace VFXPlus.Content.FeatheredFoe
             base.OnKill(timeLeft);
         }
     }
+
+    public class RelativeToProjFeather : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+        int timer = 0;
+        public int advancer = 0;
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 10;
+            Projectile.ignoreWater = false;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = false;
+            Projectile.timeLeft = 222170;
+        }
+
+        public Vector2 goalPos = Vector2.Zero;
+
+        public int ParentProj = -1;
+        public bool isAttacthed = true;
+
+        float drawAlpha = 0f;
+        float drawScale = 0f;
+        public override void AI()
+        {
+            if (ParentProj == -1)
+            {
+                Main.NewText("Nope!");
+                Projectile.active = false;
+                return;
+            }
+            Projectile parentProj = Main.projectile[ParentProj];
+
+            if (parentProj.active == false)
+                Projectile.Kill();
+
+            //Projectile.velocity = Vector2.Zero;
+
+
+            float lerpToPointProg = Math.Clamp((float)timer / 80f, 0f, 1f);
+            Projectile.Center = Vector2.Lerp(Projectile.Center, parentProj.Center + goalPos, lerpToPointProg) + parentProj.velocity;
+
+
+            Projectile.rotation = parentProj.velocity.ToRotation();
+
+            int trailCount = 10; //10
+            previousRotations.Add(Projectile.rotation);
+            previousPositions.Add(Projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            drawAlpha = Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.09f), 0f, 1f);
+            drawScale = Math.Clamp(MathHelper.Lerp(drawScale, 1.25f, 0.09f), 0f, 1f);
+
+            timer++;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (timer <= 0) return false;
+            Texture2D Feather = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
+            Texture2D FeatherGray = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FeatherGray").Value;
+            Texture2D FeatherWhite = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FeatherWhite").Value;
+
+            #region after image
+            for (int i = 0; i < previousRotations.Count - 1; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Vector2 afterImagePos = previousPositions[i] - Main.screenPosition;
+
+                float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
+
+                Color betweenBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
+                Color col = Color.Lerp(Color.DodgerBlue, betweenBlue, progress) * progress;
+
+                float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
+                Main.EntitySpriteDraw(FeatherGray, afterImagePos, null, col with { A = 0 } * 0.55f * drawAlpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, size2 * drawScale, SpriteEffects.None);
+
+                Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
+
+                Main.EntitySpriteDraw(FeatherWhite, afterImagePos, null, col with { A = 0 } * 0.85f * drawAlpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, vec2Scale * drawScale, SpriteEffects.None);
+            }
+            #endregion
+
+            Color outerCol = Color.DeepSkyBlue with { A = 0 } * 0.5f;
+            for (int i = 0; i < 3; i++)
+            {
+                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), null, outerCol * drawAlpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * 1.05f * drawScale, SpriteEffects.None);
+            }
+
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor * drawAlpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * drawScale, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.4f * drawAlpha, Projectile.rotation, Feather.Size() / 2f, Projectile.scale * drawScale, SpriteEffects.None);
+
+
+            return false;
+        }
+
+        public override void OnKill(int timeLeft)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(1.5f, 1.5f) * 1f;
+                Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: new Color(40, 125, 255), Scale: Main.rand.NextFloat(0.35f, 0.45f));
+                dust.velocity += Projectile.velocity * 0.25f;
+
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);
+            }
+
+        }
+    }
+
 }

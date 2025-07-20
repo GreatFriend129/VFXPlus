@@ -71,7 +71,7 @@ namespace VFXPlus.Content
                 return false;
             }
 
-            for (int iaa = -3; iaa < 4; iaa++)
+            for (int iaa = -3; iaa < -224; iaa++)
             {
                 Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * -10f;
                 float curvePower = iaa * 0.009f;
@@ -85,6 +85,12 @@ namespace VFXPlus.Content
 
             }
 
+            Vector2 velAAA = new Vector2(8f, 0f);
+            int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(2f, 8f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);
+            (Main.projectile[are].ModProjectile as FFWindOrb2).startDir = -1;
+
+
+            //int windFX = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulseTest>(), 0, 0, Main.myPlayer);
 
             //Vector2 off = Main.rand.NextVector2Circular(75f, 75f);
             //int starFX = Projectile.NewProjectile(null, Main.MouseWorld + off, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);

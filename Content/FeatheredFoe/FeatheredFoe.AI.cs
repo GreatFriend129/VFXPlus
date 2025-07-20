@@ -1211,7 +1211,7 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
             Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
-            NPC.velocity = Vector2.Lerp(NPC.velocity, toPlayer * 8f, 0.05f); //5 0.02
+            NPC.velocity = Vector2.Lerp(NPC.velocity, toPlayer * 5f, 0.02f); //5 0.02
 
             maelstromProjectileInstance.Center = NPC.Center + NPC.velocity;
 

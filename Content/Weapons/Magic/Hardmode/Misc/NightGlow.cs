@@ -164,7 +164,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 float progress = (float)i / previousRotations.Count;
 
-                Color color = Main.hslToRgb((timer * 0.01f + projectile.ai[1]) % 1f, 1f, 0.4f, 0);
+                Color color = Main.hslToRgb((timer * 0.01f + projectile.ai[1] + (progress * 0.05f)) % 1f, 1f, 0.4f, 0);
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
@@ -243,8 +243,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 d.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.1f, timeBeforeSlow: 0, postSlowPower: 0.92f, velToBeginShrink: 10f, fadePower: fadePower, colorFadePower: 1f);
             }
 
-            SoundEngine.PlaySound(SoundID.Item10, projectile.Center);
+            //SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.25f, Pitch = 0.15f, PitchVariance = 0.2f, MaxInstances = -1}, projectile.Center);
 
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/star_impact_01") with { Volume = 0.03f, Pitch = 0.5f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style2, projectile.Center);
 
             return false;
         }
