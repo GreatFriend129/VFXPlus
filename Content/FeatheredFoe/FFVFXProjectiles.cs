@@ -1260,7 +1260,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //String toAsset = "Assets/Orbs/whiteFireEyeA";
 
-            String toAsset = "Assets/Orbs/circle_02"; //circle_05
+            String toAsset = "Assets/Orbs/bigCircle2"; //circle_05
 
             //if (special) toAsset = "Assets/Orbs/ElectricPopC";
 
@@ -1277,8 +1277,8 @@ namespace VFXPlus.Content.FeatheredFoe
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
 
             myEffect.Parameters["flowSpeed"].SetValue(0.3f);
-            myEffect.Parameters["vignetteSize"].SetValue(1f);
-            myEffect.Parameters["vignetteBlend"].SetValue(0.8f);
+            myEffect.Parameters["vignetteSize"].SetValue(0.05f);
+            myEffect.Parameters["vignetteBlend"].SetValue(1f);
             myEffect.Parameters["distortStrength"].SetValue(0.06f);
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.01f);
             myEffect.Parameters["colorIntensity"].SetValue(alpha * 0.5f * intensity);

@@ -45,18 +45,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.Uzi,
                     AnimTime: 7,
-                    NormalXOffset: 20f,
-                    DestXOffset: 14f,
+                    NormalXOffset: 20f - 9f,
+                    DestXOffset: 16f - 9f,
                     YRecoilAmount: 0.1f,
-                    HoldOffset: new Vector2(0f, 6f),
-                    TipPos: new Vector2(28, -10f),
-                    StarPos: new Vector2(25, -10f)
+                    HoldOffset: new Vector2(0f, 4f),
+                    TipPos: new Vector2(28 - 4f, -7f),
+                    StarPos: new Vector2(25 - 4f, -7f)
                     );
             }
+            Main.projectile[gun].scale = 0.8f;//
 
             //Explosion
             int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(42f, -4f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 0f);
+            Vector2 muzzlePos = position + new Vector2(42f - 11f, -4f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 0f);
 
             //Vector2 muzzlePos = position + velocity.SafeNormalize(Vector2.UnitX) * 50f;
             for (int i = 0; i < 5; i++) //16
@@ -79,7 +80,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Dust softGlow = Dust.NewDustPerfect(muzzlePos, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Orange, Scale: 0.1f);
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-                overallAlpha: 0.1f, DrawWhiteCore: true, 1f, 1f);
+                overallAlpha: 0.05f, DrawWhiteCore: true, 1f, 1f);
 
             for (int i = 0; i < 2 + Main.rand.Next(0, 2); i++)
             {
@@ -96,14 +97,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             }
 
             //Sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0.05f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style, position);
+            float volumeMult = 0.65f;
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0.15f, Pitch = .8f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, position);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.35f * volumeMult, Pitch = 0.15f + 0.25f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .2f, Pitch = 1f, PitchVariance = 0.25f };
-            SoundEngine.PlaySound(style4, position);
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = 0.5f * volumeMult, Pitch = -0.2f + 0.25f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style2, player.Center);
+
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

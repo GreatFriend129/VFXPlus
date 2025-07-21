@@ -31,15 +31,21 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 1f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
 
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Shotgun2") with { Volume = 0.75f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, position);
+
+
+            int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
             {

@@ -168,7 +168,7 @@ namespace VFXPlus.Content.Projectiles
 
             float Xprog = Utils.GetLerpValue(goalX, baseX, XOffset, true);
 
-            if (Xprog > 0.75f)
+            if (Xprog > 0.75f || true)
                 Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, GunDirection.ToRotation() - MathHelper.PiOver2);
             else if (Xprog > 0.5f)
                 Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.ThreeQuarters, GunDirection.ToRotation() - MathHelper.PiOver2);
@@ -243,7 +243,7 @@ namespace VFXPlus.Content.Projectiles
 
             Main.spriteBatch.Draw(MuzzleFlash, muzzleFlashPos, null, Color.White * easedMuzzleFlashAlpha * 1f, Projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, mySE, 0f);
 
-            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos, null, colors[0] with { A = 0 } * (1f * bonusPower), Projectile.rotation, muzzleFlashOrigin, 1.5f * (1f - bonusPower), mySE, 0f);
+            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos, null, colors[0] with { A = 0 } * (1f * bonusPower), Projectile.rotation, muzzleFlashOrigin, 1.5f * (1f - bonusPower) * Projectile.scale, mySE, 0f);
 
 
             //Star on tip of gun
@@ -255,9 +255,9 @@ namespace VFXPlus.Content.Projectiles
 
             float starRot = (float)Main.timeForVisualEffects * 0.15f * Player.direction;
 
-            Main.spriteBatch.Draw(Flash, starPos, null, colors[1] with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.4f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.3f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.2f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, colors[1] with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.4f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.3f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 0 } * 0.75f * bonusPower, starRot, Flash.Size() / 2, 0.2f * Projectile.scale, SpriteEffects.None, 0f);
 
             return false;
         }

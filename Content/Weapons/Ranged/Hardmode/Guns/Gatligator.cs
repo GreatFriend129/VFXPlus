@@ -37,7 +37,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {            
+        {
+            float volumeMult = 0.5f;
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.35f * volumeMult, Pitch = 0.3f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
+
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RapidShot2") with { Volume = 0.35f * volumeMult, Pitch = 0.15f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style3, player.Center);
+
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_41") with { Volume = 0.15f * volumeMult, Pitch = -.1f, PitchVariance = .1f, };
+            SoundEngine.PlaySound(style4, player.Center);
+
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
@@ -99,14 +110,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
 
             //Sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style, position);
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0f, Pitch = .80f, PitchVariance = 0.2f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style, position);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0f, Pitch = .8f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, position);
+            //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0f, Pitch = .8f, PitchVariance = .25f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, position);
 
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .18f, Pitch = 1f, PitchVariance = 0.25f };
-            SoundEngine.PlaySound(style4, position);
+            //SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .18f, Pitch = 1f, PitchVariance = 0.25f };
+            //SoundEngine.PlaySound(style4, position);
 
             return true;
         }

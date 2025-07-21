@@ -38,14 +38,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style1 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperShotA") with { Volume = 0.5f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style1, player.Center);
+            float overallVol = 0.75f;
 
-            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SinperShotB") with { Volume = 0.5f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = 1 };
-            //SoundEngine.PlaySound(style2, player.Center);
+            SoundStyle style33 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperFinal2") { Volume = 1f * overallVol, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style33, position);
 
-            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/shotgun-firing-3-14483") with { Volume = .3f, Pitch = -.25f, PitchVariance = 0.15f };
-            SoundEngine.PlaySound(style3, player.Center);
+            SoundStyle style1 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/shotgun-firing-3-14483") with { Volume = 0.1f * overallVol, Pitch = -0.2f, };
+            SoundEngine.PlaySound(style1, position);
+
+
+            SoundStyle style22 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Volume = 0.50f * overallVol, Pitch = -0.2f, PitchVariance = 0.05f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style22, position);
+
 
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 

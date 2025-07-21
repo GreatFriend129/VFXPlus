@@ -97,15 +97,16 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 dust.velocity += velocity.SafeNormalize(Vector2.UnitX) * 2f;
             }
 
+
             //Sound
-            SoundStyle style1 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Pitch = .9f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.35f };
-            SoundEngine.PlaySound(style1, position);
+            //SoundStyle style1 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Pitch = .9f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.25f };
+            //SoundEngine.PlaySound(style1, position);
 
-            SoundStyle style2 = SoundID.Item110 with { Volume = 0.35f, PitchVariance = 0.15f, Pitch = 0.25f };
-            SoundEngine.PlaySound(style2, position);
+            //SoundStyle style2 = SoundID.Item110 with { Volume = 0.35f, PitchVariance = 0.15f, Pitch = 0.25f };
+            //SoundEngine.PlaySound(style2, position);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .4f, Pitch = 1f, PitchVariance = 0.1f };
-            SoundEngine.PlaySound(style, position);
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .4f, Pitch = 1f, PitchVariance = 0.1f };
+            //SoundEngine.PlaySound(style, position);
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

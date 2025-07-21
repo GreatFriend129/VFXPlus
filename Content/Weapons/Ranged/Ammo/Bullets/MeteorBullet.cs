@@ -104,6 +104,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
+                //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
+                if (projectile.active == false)
+                    totalAlpha = 0f;
+
                 float easedJustHitPower = Easings.easeOutCirc(1f - justTileCollidePower);
 
                 Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
@@ -129,6 +133,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
+                //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
+                if (projectile.active == false)
+                    totalAlpha = 0f;
+
                 float easedJustHitPower = Easings.easeOutCirc(1f - justTileCollidePower);
 
                 Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
