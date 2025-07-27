@@ -381,8 +381,8 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/WaterEnergyNoise").Value); //foam_mask_bloom
-            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/ThunderGrad").Value);
+            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value); //foam_mask_bloom
+            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/BrighterPinkGrad").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/sparkNoiseloop").Value);
             myEffect.Parameters["flowSpeed"].SetValue(1f);
             myEffect.Parameters["distortStrength"].SetValue(0.06f);
@@ -390,13 +390,13 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             myEffect.Parameters["vignetteSize"].SetValue(1f);
             myEffect.Parameters["vignetteBlend"].SetValue(0.8f);
-            myEffect.Parameters["colorIntensity"].SetValue(2f * overallAlpha);
+            myEffect.Parameters["colorIntensity"].SetValue(1f * overallAlpha);
 
-            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/circle_05").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            float scale = overallScale * Projectile.scale * 0.65f;
+            float scale = overallScale * Projectile.scale * 0.45f;
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);

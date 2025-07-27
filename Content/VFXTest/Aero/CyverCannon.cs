@@ -884,19 +884,23 @@ namespace VFXPlus.Content.VFXTest.Aero
         {
             return new AfterParent(PlayerDrawLayers.HeldItem);
         }
-        public float timeJustHeld = 0f;
+        public float barFadeIn = 0f;
         protected override void Draw(ref PlayerDrawSet drawInfo)
         {
             Player Player = drawInfo.drawPlayer;
 
             if (Player.HeldItem.type != ModContent.ItemType<CyverCannon>())
+            {
+                barFadeIn = 0f;
                 return;
+            }
 
+            barFadeIn = Math.Clamp(MathHelper.Lerp(barFadeIn, 1.1f, 0.03f), 0f, 1f);
 
             //Ensures that this isn't drawn multiple times if the player has an afterimage
             if (drawInfo.shadow == 0f)
             {
-                Vector2 drawPos = Player.MountedCenter - Main.screenPosition - new Vector2(0, -34f - Player.gfxOffY);
+                Vector2 drawPos = Player.MountedCenter - Main.screenPosition - new Vector2(0, -34f - Player.gfxOffY) + new Vector2(0f, -30f * (1f - barFadeIn));
 
                 Texture2D BarTex = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/UI/CyverCannonBar").Value;
                 Texture2D BarBorder = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/UI/CyverCannonBarBorderGlow").Value;
@@ -930,19 +934,21 @@ namespace VFXPlus.Content.VFXTest.Aero
                     drawInfo.DrawDataCache.Add(Border);
                 }
 
+                Vector2 barVec2Scale = new Vector2(1f * barFadeIn, 1f) * bonusScale;
+
                 //Border
                 if (fillPercent >= 1f)
                 {
                     float sineAlpha = (float)(Math.Sin(Main.timeForVisualEffects * 0.1f)) * 0.15f;
 
                     DrawData Border = new DrawData(BarBorder, new Vector2((int)drawPos.X, (int)drawPos.Y), null, 
-                        Color.HotPink with { A = 0 } * (0.2f + sineAlpha), 0f, BarBorder.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                        Color.HotPink with { A = 0 } * (0.2f + sineAlpha) * barFadeIn, 0f, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None);
                     drawInfo.DrawDataCache.Add(Border);
                 }
 
                 //BaseBar
                 DrawData Bar = new DrawData(BarTex, new Vector2((int)drawPos.X, (int)drawPos.Y), null, 
-                    Color.White, 0f, BarTex.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                    Color.White * barFadeIn, 0f, BarTex.Size() / 2f, barVec2Scale, SpriteEffects.None);
                 drawInfo.DrawDataCache.Add(Bar);
 
 
@@ -963,18 +969,19 @@ namespace VFXPlus.Content.VFXTest.Aero
                 Color fillColor = Color.Lerp(betweenPink, Color.White, justShotPower);
 
                 Vector2 fillScale = new Vector2(1f, 1f + justShotPower * 0.2f);
+                fillScale.X *= barFadeIn;
 
                 for (int i = 0; i < 4; i++)
                 {
                     Vector2 randPos = drawPos + Main.rand.NextVector2Circular(1.5f, 1.5f);
 
                     DrawData FillUnder = new DrawData(BarFill, new Vector2((int)randPos.X, (int)randPos.Y), fillFrame,
-                        fillColor with { A = 0 } * 0.25f, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                        fillColor with { A = 0 } * 0.25f * barFadeIn, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
                     drawInfo.DrawDataCache.Add(FillUnder);
                 }
 
                 DrawData Fill = new DrawData(BarFill, new Vector2((int)drawPos.X, (int)drawPos.Y), fillFrame, 
-                    fillColor with { A = 0 } * 1f, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                    fillColor with { A = 0 } * 1f * barFadeIn, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
                 drawInfo.DrawDataCache.Add(Fill);
 
 

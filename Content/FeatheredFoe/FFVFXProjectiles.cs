@@ -1022,6 +1022,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (giveUp)
                 return;
 
+            /*
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
 
@@ -1086,11 +1087,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-
+            */
             ////////////////////////////////
             ///*/
             //Good shit two
-            /*
+            
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
 
@@ -1139,7 +1140,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     toReturn = 1f;// Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 40f * 0.75f; //50
+                return toReturn * overallScale * 40f * 0.75f; //50
             }
 
 
@@ -1174,7 +1175,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
 
-            */
+            
         }
 
     }

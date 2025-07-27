@@ -44,15 +44,15 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                     GunID: item.type,
                     AnimTime: 22,
                     NormalXOffset: 20f,
-                    DestXOffset: 1f,
+                    DestXOffset: 4f, //1f
                     YRecoilAmount: 0.2f,
-                    HoldOffset: new Vector2(0f, 3f)
+                    HoldOffset: new Vector2(0f, 2f)
                     );
 
                 //held.compositeArmAlwaysFull = true;
                 held.timeToStartFade = 3;
             }
-
+            Main.projectile[gun].scale = 0.9f;
 
             //Dust
             for (int i = 0; i < 4 + Main.rand.Next(0, 3); i++)

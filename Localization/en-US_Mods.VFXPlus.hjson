@@ -63,6 +63,11 @@ Items: {
 		DisplayName: Luncent Beam
 		Tooltip: ""
 	}
+
+	Oblivion: {
+		DisplayName: Oblivion
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -159,6 +164,9 @@ Projectiles: {
 	WindPulseTest.DisplayName: Wind Pulse Test
 	FFWindOrb2.DisplayName: F F Wind Orb2
 	RelativeToProjFeather.DisplayName: Relative To Proj Feather
+	OblivionFinaleSwing.DisplayName: Oblivion Finale Swing
+	OblivionHeldProjectile.DisplayName: Oblivion Held Projectile
+	OblivionExplosionPulse.DisplayName: Oblivion Explosion Pulse
 }
 
 Configs: {

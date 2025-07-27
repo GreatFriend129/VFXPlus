@@ -52,7 +52,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 500 + trailRandomLengthOffset; //500 + 
-            trail1.trailWidth = (int)(35 * totalAlpha * totalScale); //20
+            trail1.trailWidth = (int)(30 * totalAlpha * totalScale); //20
             trail1.trailMaxLength = 1000 + trailRandomLengthOffset; //500
 
             trail1.shouldSmooth = false;
@@ -61,7 +61,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailColor = trailCol * totalAlpha * 0.7f;
             trail1.timesToDraw = 2;
             trail1.useEffectMatrix = true;
-
+            trail1.pinchHead = timer > 50;
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
             trail1.trailRot = projectile.velocity.ToRotation();
@@ -96,8 +96,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 // 1.35f, 0.5f); //80
             }
 
-            //Quickly fade in
-            totalAlpha = Math.Clamp(MathHelper.Lerp(totalAlpha, 1.5f, 0.1f), 0f, 1f); //1.15
+            //Quickly fade in 
+            totalAlpha = Math.Clamp(MathHelper.Lerp(totalAlpha, 1.5f, 0.05f), 0f, 1f); //1.15
 
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 4) / timeForPopInAnim, 0f, 1f);

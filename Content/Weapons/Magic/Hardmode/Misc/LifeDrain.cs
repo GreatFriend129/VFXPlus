@@ -79,8 +79,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         {
             if (firstHit)
             {
-                SoundStyle style23 = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/cleaver_hit_06") with { Pitch = 0.1f, PitchVariance = .2f, Volume = 0.03f, MaxInstances = -1 };
-                SoundEngine.PlaySound(style23, projectile.Center);
+                //this is bad
+                //SoundStyle style23 = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/cleaver_hit_06") with { Pitch = 0.1f, PitchVariance = .2f, Volume = 0.03f, MaxInstances = -1 };
+                //SoundEngine.PlaySound(style23, projectile.Center);
 
                 firstHit = false;
             }
