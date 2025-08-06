@@ -31,8 +31,8 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
 
             Item.useStyle = ItemUseStyleID.Swing;
             Item.useTime = 13; 
-            Item.useAnimation = 23; //26
-            Item.reuseDelay = 30;
+            Item.useAnimation = 26; //26
+            //Item.reuseDelay = 30;
 
             Item.UseSound = SoundID.Item152;
             Item.noMelee = true;
@@ -78,7 +78,7 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
             Projectile.extraUpdates = 1;
             Projectile.penetrate = -1;
 
-            Projectile.WhipSettings.Segments = 10; //12
+            Projectile.WhipSettings.Segments = 14; //10
             Projectile.WhipSettings.RangeMultiplier = 1.45f;
         }
 
@@ -105,7 +105,7 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
             Timer++;
 
             float swingTime = owner.itemAnimationMax * Projectile.MaxUpdates;
-            if (Timer >= swingTime || owner.itemAnimation * 2 <= 0)
+            if (Timer >= swingTime || owner.itemAnimation * 4 <= 0)
             {
                 Projectile.Kill();
                 return;
@@ -281,16 +281,17 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
             {
                 // These two values are set to suit this projectile's sprite, but won't necessarily work for your own.
                 // You can change them if they don't!
-                Rectangle frame = new Rectangle(0, 0, 10, 26); 
-                Vector2 origin = new Vector2(5, 8);
+                Rectangle frame = new Rectangle(0, 0, 22, 32); //BasePart Dimensions
+                Vector2 origin = new Vector2(11, 10);
                 float scale = 1;
 
                 // These statements determine what part of the spritesheet to draw for the current segment.
                 // They can also be changed to suit your sprite.
                 if (i == list.Count - 2)
                 {
-                    frame.Y = 74;
-                    frame.Height = 18;
+                    frame.Y = 80; //Starting y of whip tip
+                    frame.Height = 14; //Height of whip tip
+                    origin.Y = 7;
 
                     // For a more impactful look, this scales the tip of the whip up when fully extended, and down when curled up.
                     Projectile.GetWhipSettings(Projectile, out float timeToFlyOut, out int _, out float _);
@@ -299,18 +300,21 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
                 }
                 else if (i > 10)
                 {
-                    frame.Y = 58;
-                    frame.Height = 16;
+                    frame.Y = 64; //Height of third whip chain
+                    frame.Height = 14;
+                    origin.Y = 7;
                 }
                 else if (i > 5)
                 {
-                    frame.Y = 42;
-                    frame.Height = 16;
+                    frame.Y = 48; //Height of second whip chain
+                    frame.Height = 14;
+                    origin.Y = 7;
                 }
                 else if (i > 0)
                 {
-                    frame.Y = 26;
-                    frame.Height = 16;
+                    frame.Y = 32; //Height of first whip chain
+                    frame.Height = 14;
+                    origin.Y = 7;
                 }
 
                 Vector2 element = list[i];
@@ -324,7 +328,7 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
                     Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.1f, flip, 0);
                 }
 
-                Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
+                Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(1.5f, 1.5f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
 
                 Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
 
@@ -464,7 +468,7 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
 
                 Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color * 0.75f, rotation, origin, scale, SpriteEffects.None, 0);
 
-                Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), frame, Color.DeepSkyBlue with { A = 0 }, rotation, origin, scale2, SpriteEffects.None, 0);
+                Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), frame, Color.DeepSkyBlue with { A = 0 }, rotation, origin, scale2, SpriteEffects.None, 0);
 
 
                 pos += diff;

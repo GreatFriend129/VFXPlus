@@ -86,80 +86,28 @@ namespace VFXPlus.Content
 
             }
 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Tech/MagicImpactLong") with { Pitch = 0f, PitchVariance = .14f, };
+            SoundEngine.PlaySound(style, Main.MouseWorld);
+
+            player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 22;
+
+            FlashSystem.SetCAFlashEffect(0.15f, 35, 1f, 0.85f, true);
+
+            int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<OblivionExplosionPulse>(), 0, 0, Main.myPlayer);
+
             Vector2 impactCenter = Main.MouseWorld;
 
             Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
-            Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 1f);
+            Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 3f);
 
-            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.35f);
+            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.5f);
             fgb.DrawWhiteCore = true;
             d11.customData = fgb;
-
-
-            //Impact Dust
-            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.6f);
-            Color betweenPink2 = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
-
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 3, 0.8f, 0.8f);
-
-            Dust d1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f);
-            d1.fadeIn = 0.1f;
-
-            Dust d2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f);
-            d2.fadeIn = 0.1f;
-
-            int sparkCount = 3;
-            for (int i = 220; i < sparkCount + Main.rand.Next(0, 3); i++) //2 //0,3
-            {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(3f, 10f);
-
-                Dust dp = Dust.NewDustPerfect(impactCenter, ModContent.DustType<ElectricSparkGlow>(), vel, newColor: betweenPink2, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 2.5f);
-
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.94f, FadeScalePower: 0.95f, FadeVelPower: 0.92f, Pixelize: true,
-                    XScale: 1f, YScale: 0.75f, UnderGlowPower: 2f, WhiteLayerPower: 0.5f); //0.91
-
-                if (i < sparkCount - 2)
-                    esb.randomVelRotatePower = 1f;
-                dp.customData = esb;
-            }
-
-            int crossCount = 8;
-            for (int i = 220; i < crossCount; i++)
-            {
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2.5f, 7f);
-                Color middleBlue = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f + Main.rand.NextFloat(-0.15f, 0.15f));
-
-                Dust gd = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.25f, 0.55f));
-                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5,
-                    preSlowPower: 0.94f, postSlowPower: 0.92f, velToBeginShrink: 1.5f, fadePower: 0.92f, shouldFadeColor: false);
-            }
-
-            float fxRot = (impactCenter - player.Center).ToRotation();
-
-            //Dust star1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.DeepPink, Scale: 2.25f);
-            //Dust star2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.LightPink, Scale: 1.15f);
-            //star1.rotation = star2.rotation = fxRot;
-
-            //star1.customData = star2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.88f);
 
             //Vector2 velAAA = new Vector2(8f, 0f);
             //int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(8f, 2f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);
             //(Main.projectile[are].ModProjectile as FFWindOrb2).startDir = -1;
 
-
-            int windFX = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
-            Main.projectile[windFX].rotation = Main.rand.NextFloat(6.28f);
-
-            //Vector2 off = Main.rand.NextVector2Circular(75f, 75f);
-            //int starFX = Projectile.NewProjectile(null, Main.MouseWorld + off, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
-            //Main.projectile[starFX].scale = 0.75f;
-            //Main.projectile[starFX].rotation = Main.rand.NextFloat(6.28f);
-
-            //(Main.projectile[barrier].ModProjectile as WindBarrier).center = player.Center;
 
 
             return false;

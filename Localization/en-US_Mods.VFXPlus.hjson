@@ -68,6 +68,11 @@ Items: {
 		DisplayName: Oblivion
 		Tooltip: ""
 	}
+
+	TrojanForce: {
+		DisplayName: Trojan Force
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -167,6 +172,7 @@ Projectiles: {
 	OblivionFinaleSwing.DisplayName: Oblivion Finale Swing
 	OblivionHeldProjectile.DisplayName: Oblivion Held Projectile
 	OblivionExplosionPulse.DisplayName: Oblivion Explosion Pulse
+	TrojanForceWhipProj.DisplayName: Trojan Force Whip Proj
 }
 
 Configs: {

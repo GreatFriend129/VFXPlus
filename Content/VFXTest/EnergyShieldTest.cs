@@ -184,7 +184,7 @@ namespace VFXPlus.Content.VFXTest
            }
 
            Projectile.velocity.X = Vector2.Lerp(startingVel, startingVel.SafeNormalize(Vector2.UnitX), Easings.easeOutQuad(easingProgress)).X;
-           easingProgress = Math.Clamp(easingProgress + 0.04f, 0f, 1f);
+           easingProgress = Math.Clamp(easingProgress + 0.03f, 0f, 1f); //.04
 
            if (Easings.easeOutQuad(easingProgress) <= 0.8f)
            {
@@ -209,27 +209,29 @@ namespace VFXPlus.Content.VFXTest
        public override bool PreDraw(ref Color lightColor)
        {
            Player myPlayer = Main.player[Projectile.owner];
-           Texture2D Flash = (Texture2D)ModContent.Request<Texture2D>("AerovelenceMod/Content/Items/Weapons/Flares/muzzle_05");
+           Texture2D Flash = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Assets/Smoke/spark_01_clear");
 
             float rot = (dashDirection == 0f ? -MathHelper.PiOver2 : MathHelper.PiOver2);
            float alpha = 1f - Easings.easeOutCirc(easingProgress);
 
-            Vector2 vec2Scale = new Vector2(1f, 1f);// new Vector2(1f - ((1f - alpha) * 0.5f), 0.25f + (alpha * 0.5f)) * 0.5f;
-           Vector2 origin = new Vector2(0f, Flash.Height / 2f);
+            Vector2 vec2Scale = new Vector2(1f, 1f) * 1.5f;// new Vector2(1f - ((1f - alpha) * 0.5f), 0.25f + (alpha * 0.5f)) * 0.5f;
+           Vector2 origin = new Vector2(Flash.Width / 2f, Flash.Height / 2f);
 
-           Vector2 off = dashDirection == 0f ? new Vector2(-120f, 0f) : new Vector2(120f, 0f);
+           Vector2 off = dashDirection == 0f ? new Vector2(-320f, 0f) : new Vector2(320f, 0f);
+
+            Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);
 
            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/GlowMisc", AssetRequestMode.ImmediateLoad).Value;
-           myEffect.Parameters["uColor"].SetValue(Color.DeepPink.ToVector3() * alpha * 3f);
-           myEffect.Parameters["uTime"].SetValue(2);
-           myEffect.Parameters["uOpacity"].SetValue(0.4f); //0.6
-           myEffect.Parameters["uSaturation"].SetValue(1.2f);
+           myEffect.Parameters["uColor"].SetValue(between.ToVector3() * Easings.easeOutCubic(alpha) * 2f);
+           myEffect.Parameters["uTime"].SetValue(0);
+           myEffect.Parameters["uOpacity"].SetValue(0.75f); //0.6
+           myEffect.Parameters["uSaturation"].SetValue(0.5f);
 
            Main.spriteBatch.End();
            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
            Main.spriteBatch.Draw(Flash, myPlayer.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f) + off, null, Color.HotPink * alpha, rot, origin, vec2Scale, SpriteEffects.None, 0f);
-           Main.spriteBatch.Draw(Flash, myPlayer.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f) + off, null, Color.HotPink * alpha, rot, origin, vec2Scale, SpriteEffects.FlipHorizontally, 0f);
+           //Main.spriteBatch.Draw(Flash, myPlayer.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f) + off, null, Color.HotPink * alpha, rot, origin, vec2Scale, SpriteEffects.FlipHorizontally, 0f);
 
 
            Main.spriteBatch.End();

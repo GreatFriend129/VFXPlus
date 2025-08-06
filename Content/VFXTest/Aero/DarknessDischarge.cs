@@ -87,7 +87,7 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             #region trailInfo
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("AerovelenceMod/Assets/EnergyTex").Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/EnergyTex").Value;
             trail1.trailColor = Color.White * 1f;
             trail1.trailPointLimit = 400;
             trail1.trailWidth = 20;
@@ -102,17 +102,17 @@ namespace VFXPlus.Content.VFXTest.Aero
             trail1.TrailLogic();
 
             //Trail2 Info Dump
-            trail2.trailTexture = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Extra_196_Black").Value;
+            trail2.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/LavaTrailBloom").Value;
             trail2.trailColor = Color.Wheat;
             trail2.trailPointLimit = 400;
-            trail2.trailWidth = 60;
+            trail2.trailWidth = 30;
             trail2.trailMaxLength = 700;
             trail2.timesToDraw = 2;
             trail2.pinchHead = true;
             trail2.shouldSmooth = true;
 
             trail2.gradient = true;
-            trail2.gradientTexture = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Gradients/CyverGrad2").Value;
+            trail2.gradientTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/CyverGrad2").Value;
             trail2.shouldScrollColor = true;
             trail2.gradientTime = timer * 0.015f;
 
@@ -136,13 +136,19 @@ namespace VFXPlus.Content.VFXTest.Aero
         float overallScale = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+                trail2.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
+            });
+
             return false;
         }
 
         public void DrawAdditive(SpriteBatch sb)
         {
-            trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
-            trail2.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
+            //trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
+            //trail2.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
         }
     }
 

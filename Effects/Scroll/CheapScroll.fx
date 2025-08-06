@@ -47,7 +47,7 @@ float4 CheapScrollPixel(float4 screenspace : TEXCOORD0) : COLOR0
     //float stretchY2 = (UV.y * 0.5f) + 0.25f;
     
     float4 col1 = tex2D(samplerTex1, float2(frac(uv.x * tex1reps + (time1Mult * uTime)), uv.y)) * float4(1, 1, 1, 0);
-    float4 col2 = tex2D(samplerTex2, float2(frac(uv.x * tex1reps + (time2Mult * uTime)), uv.y)) * float4(1, 1, 1, 0);
+    float4 col2 = tex2D(samplerTex2, float2(frac(uv.x * tex2reps + (time2Mult * uTime)), uv.y)) * float4(1, 1, 1, 0);
 
     col1 *= Color1 * Color1Mult;
     col2 *= Color2 * Color2Mult;

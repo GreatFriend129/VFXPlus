@@ -22,6 +22,7 @@ using VFXPlus.Common.Interfaces;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System.Runtime.Intrinsics.X86;
 using static tModPorter.ProgressUpdate;
+using VFXPlus.Content.Projectiles;
 
 
 namespace VFXPlus.Content.VFXTest.Aero.Oblivion
@@ -52,15 +53,42 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
         public override bool AltFunctionUse(Player player) => true;
 
+        public override bool CanUseItem(Player player)
+        {
+            if (player.altFunctionUse == 2)
+            {
+                if (Main.player[player.whoAmI].GetModPlayer<OblivionBarPlayer>().barProgress < 1f)
+                    return false;
+            }
+
+            return base.CanUseItem(player);
+        }
+
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            tick = !tick;
-
             if (player.altFunctionUse == 2)
-                type = ModContent.ProjectileType<OblivionFinaleSwing>();
+            {
+                Main.player[player.whoAmI].GetModPlayer<OblivionBarPlayer>().barProgress = 0f;
+                Main.player[player.whoAmI].GetModPlayer<OblivionBarPlayer>().barVisualProgress = 1f;
 
-            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, (tick ? 1 : 0));
+                Main.player[player.whoAmI].GetModPlayer<OblivionBarPlayer>().decreaseBar = true;
+            }
+            else
+            {
+                tick = !tick;
+
+                if (player.GetModPlayer<OblivionBarPlayer>().decreaseBar)
+                    type = ModContent.ProjectileType<OblivionFinaleSwing>();
+
+
+                Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, (tick ? 1 : 0));
+            }
+
             return false;
+        }
+
+        public override void HoldItem(Player player)
+        {
         }
 
     }
@@ -95,6 +123,8 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
             return shouldDamage;
         }
 
+        bool hasHitEnemy = false;
+        int timeSinceEnemyHit = 0;
         bool playedSound = false;
         public override void AI()
         {
@@ -109,11 +139,23 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
             if (getProgress(easingProgress) >= 0.3f && !playedSound)
             {
-                SoundEngine.PlaySound(SoundID.Item71 with { Pitch = -0.35f, PitchVariance = 0.15f, Volume = 0.65f }, Projectile.Center);
-                SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing with { Volume = 0.7f, Pitch = 0.5f, PitchVariance = 0.1f }, Projectile.Center);
+                //SoundEngine.PlaySound(SoundID.Item71 with { Pitch = -0.35f, PitchVariance = 0.15f, Volume = 0.65f }, Projectile.Center);
+                //SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing with { Volume = 0.7f, Pitch = 0.5f, PitchVariance = 0.1f }, Projectile.Center);
 
-                SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/GGS/Swing_Sword_Sharp_M_a") with { Pitch = -.82f, PitchVariance = .16f, Volume = 0.10f };
-                SoundEngine.PlaySound(style, Projectile.Center);
+                //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/GGS/Swing_Sword_Sharp_M_a") with { Pitch = -.82f, PitchVariance = .16f, Volume = 0.10f };
+                //SoundEngine.PlaySound(style, Projectile.Center);
+
+                SoundStyle styleaa = new SoundStyle("VFXPlus/Sounds/Effects/Tech/ShittySword2") with { Volume = 0.45f, Pitch = 0f, PitchVariance = 0.15f }; 
+                SoundEngine.PlaySound(styleaa, Projectile.Center);
+
+
+                //SoundEngine.PlaySound(SoundID.Item71 with { Pitch = -0.35f, PitchVariance = 0.15f, Volume = 0.55f }, Projectile.Center);
+                //SoundEngine.PlaySound(SoundID.DD2_MonkStaffSwing with { Volume = 0.7f, Pitch = 0.25f, PitchVariance = 0.1f }, Projectile.Center);
+
+                //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/GGS/Swing_Sword_Sharp_M_a") with { Pitch = -.82f, PitchVariance = .16f, Volume = 0.10f };
+                //SoundEngine.PlaySound(style, Projectile.Center);
+
+
                 playedSound = true;
             }
 
@@ -137,6 +179,9 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
                 d.customData = DustBehaviorUtil.AssignBehavior_PGOBase(postSlowPower: 0.9f, velToBeginShrink: 2.5f, fadePower: 0.9f);
             }
 
+            if (hasHitEnemy)
+                timeSinceEnemyHit++;
+
             justHitTime--;
         }
 
@@ -146,6 +191,7 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
         {
             Texture2D Texture = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/Oblivion/Oblivion").Value;
             Texture2D Glowmask = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/Oblivion/OblivionHeldProj_Glow").Value;
+            Texture2D GlowmaskWhite = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/Oblivion/OblivionHeldProj_GlowWhite").Value;
             Texture2D White = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/Oblivion/OblivionWhite").Value;
 
             float progBoost = (float)Math.Sin(getProgress(easingProgress) * Math.PI);
@@ -179,6 +225,9 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
             Main.spriteBatch.Draw(Texture, drawPos, null, lightColor, Projectile.rotation + rotationOffset, origin, Projectile.scale + scaleBoost, effects, 0f);
             Main.spriteBatch.Draw(Glowmask, drawPos, null, Color.White, Projectile.rotation + rotationOffset, origin, Projectile.scale + scaleBoost, effects, 0f);
+
+            if (justHitTime > 0)
+                Main.spriteBatch.Draw(GlowmaskWhite, drawPos, null, Color.White with { A = 0 }, Projectile.rotation + rotationOffset, origin, Projectile.scale + scaleBoost, effects, 0f);
 
             return false;
         }
@@ -245,112 +294,85 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
             Vector2 impactCenter = target.Center;
 
-            //Impact Dust
-            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
-            Color betweenPink2 = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
-
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 2, 0.8f, 0.8f);
-
-            Dust d1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f);
-
-            Dust d2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f);
-
-            int sparkCount = 5;
-            for (int i = 0; i < sparkCount + Main.rand.Next(0, 6); i++) //2 //0,3
+            timeSinceEnemyHit = 0;
+            if (!hasHitEnemy)
             {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(3f, 10f);
+                hasHitEnemy = true;
 
-                Dust dp = Dust.NewDustPerfect(impactCenter, ModContent.DustType<ElectricSparkGlow>(), vel, newColor: betweenPink2, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.5f);
+                #region Dust
+                Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
+                Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 1.25f);
 
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.98f, FadeVelPower: 0.92f, Pixelize: true,
-                    XScale: 1f, YScale: 0.75f, UnderGlowPower: 2f, WhiteLayerPower: 0.15f); //0.91
+                FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.5f);
+                fgb.DrawWhiteCore = true;
+                d11.customData = fgb;
 
-                if (i < 0)
-                    esb.randomVelRotatePower = 1f;
-                dp.customData = esb;
+
+                //Impact Dust
+                Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.6f);
+                Color betweenPink2 = Color.Lerp(Color.DeepPink, Color.HotPink, 1f);
+
+                CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 3, 0.8f, 0.8f);
+
+                Dust d1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
+                d1.customData = cpb2;
+                d1.velocity = new Vector2(-0.01f, 0f);
+                d1.fadeIn = 0.5f;
+
+                Dust d2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink2 * 0.25f);
+                d2.customData = cpb2;
+                d2.velocity = new Vector2(0.01f, 0f);
+                d2.fadeIn = 0.5f;
+
+
+                int crossCount = 6;
+                for (int i = 0; i < crossCount; i++)
+                {
+                    float dir = (MathHelper.TwoPi / (float)crossCount) * i;
+
+                    Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 7f);
+                    dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                    Color middleBlue = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f + Main.rand.NextFloat(-0.15f, 0.15f));
+
+                    Dust gd = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                    gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5,
+                        preSlowPower: 0.94f, postSlowPower: 0.9f, velToBeginShrink: 1.5f, fadePower: 0.92f, shouldFadeColor: false);
+                }
+
+                int pgoCount = 7;
+                for (int i = 0; i < pgoCount; i++)
+                {
+                    float dir = (MathHelper.TwoPi / (float)pgoCount) * i;
+
+                    Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<PixelGlowOrb>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.55f, 0.8f));
+                    d.velocity = dir.ToRotationVector2() * Main.rand.NextFloat(0.5f, 6f);
+                    d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-0.2f, 0.2f));
+
+                    d.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.04f, timeBeforeSlow: 4, postSlowPower: 0.89f, velToBeginShrink: 1f, fadePower: 0.8f, colorFadePower: 1f, glowIntensity: 0.4f);
+                }
+
+                int windFX = Projectile.NewProjectile(null, impactCenter, Vector2.Zero, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
+                #endregion
+
+
+                //SoundEngine.PlaySound(SoundID.Item94 with { Volume = 0.35f, Pitch = 0.5f, PitchVariance = 0.4f }, target.Center);
+
+                SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/ElectricExplode") with { Volume = 0.018f, Pitch = 0.3f, PitchVariance = 0.1f, MaxInstances = 1, };
+                SoundEngine.PlaySound(style, target.Center);
+
+                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/MagicPunch") with { Volume = 0.65f, Pitch = -0.1f, PitchVariance = .1f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style3, target.Center);
+
+                if (Main.player[Projectile.owner].GetModPlayer<OblivionBarPlayer>().barProgress < 1f)
+                {
+                    Main.player[Projectile.owner].GetModPlayer<OblivionBarPlayer>().barProgress += 0.1f;
+                    Main.player[Projectile.owner].GetModPlayer<OblivionBarPlayer>().justShotPower = 1f;
+                }
             }
 
-            int crossCount = 11;
-            for (int i = 0; i < crossCount; i++)
-            {
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2.5f, 7f);
-                Color middleBlue = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f + Main.rand.NextFloat(-0.15f, 0.15f));
+            
 
-                Dust gd = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.25f, 0.55f));
-                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.3f, timeBeforeSlow: 5,
-                    preSlowPower: 0.94f, postSlowPower: 0.90f, velToBeginShrink: 1f, fadePower: 0.92f, shouldFadeColor: false);
-            }
-
-            float fxRot = (impactCenter - Main.player[Projectile.owner].Center).ToRotation();
-
-            Dust star1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.DeepPink, Scale: 2.25f);
-            Dust star2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.LightPink, Scale: 1.15f);
-            star1.rotation = star2.rotation = fxRot;
-
-            star1.customData = star2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.88f);
-
-            Projectile.NewProjectile(Projectile.GetSource_FromThis(), impactCenter, Vector2.Zero, ModContent.ProjectileType<GaussExplosionVFX>(), 0, 0);
-
-            /*
-            for (int i = 0; i < 7 + Main.rand.Next(0, 5); i++)
-            {
-
-                Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<PixelGlowOrb>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.65f, 0.9f));
-                d.velocity = orthToSwing * Main.rand.NextFloat(0.5f, 4f);
-                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-2.05f, 2.05f));
-
-                //d.customData = AssignBehavior_PGOBase(rotPower: 0.04f, timeBeforeSlow: 5, postSlowPower: 0.89f, velToBeginShrink: 1f, fadePower: 0.8f, colorFadePower: 1f, glowIntensity: 0.4f);
-
-                //StarDustDrawInfo info = new StarDustDrawInfo(true, false, true, true, false, 1f);
-                //d.customData = AssignBehavior_GSSBase(rotPower: 0.04f, timeBeforeSlow: 5, postSlowPower: 0.89f, velToBeginShrink: 1f, fadePower: 0.8f, shouldFadeColor: false, sdci: info);
-
-            }
-
-            for (int i = 0; i < 7; i++)
-            {
-
-                //Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<RoaParticle>(), newColor: Color.DeepPink, Scale: 0.55f + Main.rand.NextFloat(-0.2f, 0.2f));
-                //d.velocity = orthToSwing * Main.rand.NextFloat(1f, 5f);
-                //d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-1.05f, 1.05f));
-
-                Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<MuraLineBasic>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.3f, 0.45f));
-                d.velocity = orthToSwing * Main.rand.NextFloat(2f, 6f);
-                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-0.5f, 0.5f));
-                d.alpha = 10 + Main.rand.Next(-5, 5);
-
-            }
-
-            SoundEngine.PlaySound(SoundID.Item94 with { Volume = 0.35f, Pitch = 0.4f, PitchVariance = 0.4f }, target.Center);
-
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/ElectricExplode") with { Volume = 0.18f, Pitch = 0.45f, PitchVariance = 0.1f, MaxInstances = -1, };
-            SoundEngine.PlaySound(style, Projectile.Center);
-
-            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
-
-            float fxRot = (target.Center - Main.player[Projectile.owner].Center).ToRotation();
-
-            Dust star1 = Dust.NewDustPerfect(target.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.DeepPink, Scale: 2.25f);
-            Dust star2 = Dust.NewDustPerfect(target.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.White, Scale: 1.5f);
-            star1.rotation = star2.rotation = fxRot;
-
-            star1.customData = star2.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.88f);
-
-
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 3, 0.8f, 0.8f);
-
-            Dust d1 = Dust.NewDustPerfect(target.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.35f);
-            d1.scale = 0.2f;
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(fxRot);
-
-            Dust d2 = Dust.NewDustPerfect(target.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.35f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f).RotatedBy(fxRot);
-            */
         }
 
 
@@ -358,9 +380,9 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
             Vector2 start = Main.player[Projectile.owner].MountedCenter;
-            Vector2 end = start + currentAngle.ToRotationVector2() * ((Projectile.Size.Length() * 1.2f) * Projectile.scale);
+            Vector2 end = start + currentAngle.ToRotationVector2() * ((Projectile.Size.Length() * 1.25f) * Projectile.scale); //1.2f
             float collisionPoint = 0f;
-            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start, end, 15f * Projectile.scale, ref collisionPoint);
+            return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start, end, 15f * Projectile.scale, ref collisionPoint); //15f
         }
 
         public override float getProgress(float x)
@@ -447,12 +469,14 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
             return shouldDamage;
         }
 
+        bool hasHitEnemy = false;
+        int timeSinceHitEnemy = 0;
         bool playedSound = false;
         public override void AI()
         {
             SwingHalfAngle = 190;
             easingAdditionAmount = 0.024f / Projectile.extraUpdates;
-            frameToStartSwing = 12 * Projectile.extraUpdates; //8
+            frameToStartSwing = 12 * Projectile.extraUpdates; //12
             timeAfterEnd = 1 * Projectile.extraUpdates;
             startingProgress = 0.005f; //0.01
             offset = 55;
@@ -489,6 +513,10 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
                 }
 
             }
+            else
+            {
+                player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 22;
+            }
 
 
             if (timer == 2)
@@ -518,15 +546,24 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
             //Sound
             if (getProgress(easingProgress) >= 0.3f && !playedSound)
             {
-                Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 18;
+                Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower += 18;
 
-                SoundStyle style = new SoundStyle("Terraria/Sounds/NPC_Killed_56") with { Volume = 0.25f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
-                SoundEngine.PlaySound(style, Projectile.Center);
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/NPC_Killed_55") with { Volume = 0.25f, Pitch = 0.65f, PitchVariance = .15f, MaxInstances = -1 };
-                SoundEngine.PlaySound(style2, Projectile.Center);
+                //SoundStyle style = new SoundStyle("Terraria/Sounds/NPC_Killed_56") with { Volume = 0.25f, Pitch = 1f, PitchVariance = .11f, MaxInstances = -1 };
+                //SoundEngine.PlaySound(style, Projectile.Center);
+                //SoundStyle style2 = new SoundStyle("Terraria/Sounds/NPC_Killed_55") with { Volume = 0.25f, Pitch = 0.65f, PitchVariance = .15f, MaxInstances = -1 };
+                //SoundEngine.PlaySound(style2, Projectile.Center);
 
-                SoundStyle style3 = new SoundStyle("AerovelenceMod/Sounds/Effects/EvilEnergy") with { Volume = 0.4f, Pitch = 1f, PitchVariance = 0.1f, MaxInstances = -1 }; 
-                SoundEngine.PlaySound(style3, Projectile.Center);
+                //SoundStyle style3 = new SoundStyle("AerovelenceMod/Sounds/Effects/EvilEnergy") with { Volume = 0.4f, Pitch = 1f, PitchVariance = 0.1f, MaxInstances = -1 }; 
+                //SoundEngine.PlaySound(style3, Projectile.Center);
+
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Tech/ShittySword") with { Volume = 0.35f, Pitch = -0.2f, PitchVariance = 0.1f, }; 
+                SoundEngine.PlaySound(style, player.Center);
+
+                SoundStyle style22 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/UltraBlade3") with { Volume = 0.65f, Pitch = 0.25f, PitchVariance = 0.15f }; 
+                SoundEngine.PlaySound(style22, player.Center);
+
+                //SoundStyle style33 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/MagicImpactLong") with { Volume = .1f, Pitch = -0.15f, PitchVariance = .1f, };
+                //SoundEngine.PlaySound(style33, player.Center);
 
                 playedSound = true;
             }
@@ -835,35 +872,51 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
         public override void OnHitNPC(NPC target, HitInfo hit, int damageDone)
         {
             //Want less hitpause at higher attack speeds
-            justHitTime = (12 - (int)((Main.player[Projectile.owner].GetTotalAttackSpeed(DamageClass.Melee) - 1) * 12f)) * Projectile.extraUpdates; //6
+            justHitTime = (10 - (int)((Main.player[Projectile.owner].GetTotalAttackSpeed(DamageClass.Melee) - 1) * 10f)) * Projectile.extraUpdates; //8
 
-            float currentShakePower = Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower;
-            Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = currentShakePower > 1 ? Math.Clamp(currentShakePower, 13, 17) : 17;
+            Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower += 22;
 
-            Vector2 orthToSwing = (MathHelper.PiOver2 + currentAngle).ToRotationVector2() * (Projectile.ai[0] == 1 ? -1 : 1f);
-
-            for (int i = 0; i < 17 + Main.rand.Next(0, 5); i++)
+            //The dust....
+            int crossCount = 12;
+            for (int i = 2220; i < crossCount; i++)
             {
+                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
 
-                Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<PixelGlowOrb>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.65f, 0.9f));
-                d.velocity = orthToSwing * Main.rand.NextFloat(0.5f, 8f);
-                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-2.05f, 2.05f));
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 7f) * 2f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
 
-                d.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.04f, timeBeforeSlow: 5, postSlowPower: 0.89f, velToBeginShrink: 1f, fadePower: 0.8f, colorFadePower: 1f, glowIntensity: 0.4f);
+                Color middleBlue = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f + Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Dust gd = Dust.NewDustPerfect(target.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 0,
+                    preSlowPower: 0.94f, postSlowPower: 0.9f, velToBeginShrink: 2.5f, fadePower: 0.92f, shouldFadeColor: false);
             }
 
-            for (int i = 0; i < 17; i++)
+            int pgoCount = 12;
+            for (int i = 0; i < pgoCount; i++)
             {
-                Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<MuraLineBasic>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.3f, 0.45f));
-                d.velocity = orthToSwing * Main.rand.NextFloat(2f, 9f);
-                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-0.5f, 0.5f));
-                d.alpha = 10 + Main.rand.Next(-5, 5);
+                float dir = (MathHelper.TwoPi / (float)pgoCount) * i;
 
+                Dust d = Dust.NewDustPerfect(target.Center, ModContent.DustType<GlowStarSharp>(), newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.55f, 0.8f));
+                d.velocity = dir.ToRotationVector2() * Main.rand.NextFloat(0.75f, 6f) * 2f;
+                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-0.2f, 0.2f));
+
+                d.customData = DustBehaviorUtil.AssignBehavior_GSSBase(rotPower: 0.04f, timeBeforeSlow: 4, postSlowPower: 0.89f, velToBeginShrink: 1.5f, fadePower: 0.8f, colorFadePower: 1f);
             }
 
             Projectile.NewProjectile(Projectile.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<OblivionExplosionPulse>(), 0, 0);
 
-            FlashSystem.SetCAFlashEffect(0.4f, 20, 1f, 0.85f, true);
+            FlashSystem.SetCAFlashEffect(0.15f, 35, 1f, 0.85f, true);
+
+            Dust d11 = Dust.NewDustPerfect(target.Center, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: Color.DeepPink, Scale: 3f);
+
+            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.5f);
+            fgb.DrawWhiteCore = true;
+            d11.customData = fgb;
+
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Tech/CyverBurst") with { Volume = 0.6f, PitchVariance = 0.1f };
+            SoundEngine.PlaySound(style, target.Center);
         }
 
 
@@ -958,37 +1011,62 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
         float overallAlpha = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
-            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.Black * 0.5f * overallAlpha, Projectile.rotation, Ball.Size() / 2, overallScale * 0.5f, SpriteEffects.None, 0f);
-
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/ElectricPopD").Value;
-            Vector2 originPoint = Projectile.Center - Main.screenPosition;
-
-            //Pink HotPink DeepPink
-
-            Color[] cols = { Color.Pink * 0.75f, Color.HotPink * 0.525f, Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f) * 0.375f };
-            float[] scales = { 0.85f * overallScale, 1.6f * Easings.easeInSine(overallScale), 2.5f * Easings.easeInCubic(overallScale) };
-
-            float orbScale = 0.15f;
-
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-            Main.EntitySpriteDraw(orb, originPoint, null, cols[0] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * 0.05f, orb.Size() / 2f, scales[0] * orbScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, cols[1] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * 0.02f, orb.Size() / 2f, scales[1] * orbScale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, cols[2] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * -0.01f, orb.Size() / 2f, scales[2] * orbScale * sineScale2, SpriteEffects.None);
-
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
-                DrawShader(false);
+                DrawShit(false);
             });
-            DrawShader(true);
+            DrawShit(true);
 
             return false;
         }
 
+        public void DrawShit(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+
+            Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
+            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.Black * 0.5f * overallAlpha, Projectile.rotation, Ball.Size() / 2, overallScale * 0.5f, SpriteEffects.None, 0f);
+
+            #region Orb
+            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/whiteFireEye").Value;
+
+            Color[] cols = { Color.Pink * 0.75f, Color.HotPink * 0.525f, Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f) * 0.375f };
+            float[] OrbScales = { 0.85f * overallScale, 1.6f * Easings.easeInSine(overallScale), 2.5f * Easings.easeInCubic(overallScale) };
+
+            float orbScale = 0.5f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * 0.05f, orb.Size() / 2f, OrbScales[0] * orbScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * 0.02f, orb.Size() / 2f, OrbScales[1] * orbScale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * overallAlpha * 1.3f, (float)Main.timeForVisualEffects * -0.01f, orb.Size() / 2f, OrbScales[2] * orbScale * sineScale2, SpriteEffects.None);
+            #endregion
+
+            #region Flare
+            Texture2D Flare = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_4Black").Value;
+
+            float[] FlareScales = { 1f, 0.75f, 0.35f };
+            float additiveScale = overallScale * 2f;
+
+            Main.spriteBatch.Draw(Ball, drawPos, null, Color.DeepPink with { A = 0 } * 0.3f * overallAlpha, Projectile.rotation, Ball.Size() / 2, additiveScale * FlareScales[0], SpriteEffects.None, 0f);
+
+            Main.spriteBatch.Draw(Flare, drawPos, null, Color.DeepPink with { A = 0 } * overallAlpha, Projectile.rotation * 0.8f, Flare.Size() / 2, additiveScale * FlareScales[1], SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flare, drawPos, null, Color.HotPink with { A = 0 } * overallAlpha, Projectile.rotation * -0.6f, Flare.Size() / 2, additiveScale * FlareScales[1], SpriteEffects.None, 0f);
+
+            Main.spriteBatch.Draw(Flare, drawPos, null, Color.White with { A = 0 } * overallAlpha, Projectile.rotation * 0.6f, Flare.Size() / 2, additiveScale * FlareScales[2], SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flare, drawPos, null, Color.White with { A = 0 } * overallAlpha, Projectile.rotation * -0.8f, Flare.Size() / 2, additiveScale * FlareScales[2], SpriteEffects.None, 0f);
+            #endregion
+
+        }
+
         public void DrawAdditive(SpriteBatch sb)
         {
+            #region Flare
             Texture2D Flare = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_4").Value;
 
             Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
@@ -996,65 +1074,89 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
             float[] scales = { 1f, 0.75f, 0.35f };
             float additiveScale = overallScale * 2f;
 
-            Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.DeepPink * 0.3f * overallAlpha, Projectile.rotation, Ball.Size() / 2, additiveScale * scales[0], SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.DeepPink * 0.3f * overallAlpha, Projectile.rotation, Ball.Size() / 2, additiveScale * scales[0], SpriteEffects.None, 0f);
 
-            Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.DeepPink * overallAlpha, Projectile.rotation * 0.8f, Flare.Size() / 2, additiveScale * scales[1], SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.HotPink * overallAlpha, Projectile.rotation * -0.6f, Flare.Size() / 2, additiveScale * scales[1], SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.DeepPink * overallAlpha, Projectile.rotation * 0.8f, Flare.Size() / 2, additiveScale * scales[1], SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.HotPink * overallAlpha, Projectile.rotation * -0.6f, Flare.Size() / 2, additiveScale * scales[1], SpriteEffects.None, 0f);
 
-            Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White * overallAlpha, Projectile.rotation * 0.6f, Flare.Size() / 2, additiveScale * scales[2], SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White * overallAlpha, Projectile.rotation * -0.8f, Flare.Size() / 2, additiveScale * scales[2], SpriteEffects.None, 0f);
-        }
-
-        public void DrawShader(bool giveUp = false)
-        {
-            if (giveUp)
-                return;
-
-            
-            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
-
-            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value); //foam_mask_bloom
-            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/BrighterPinkGrad").Value);
-            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/sparkNoiseloop").Value);
-            myEffect.Parameters["flowSpeed"].SetValue(1f);
-            myEffect.Parameters["distortStrength"].SetValue(0.06f);
-            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.01f);
-
-            myEffect.Parameters["vignetteSize"].SetValue(1f);
-            myEffect.Parameters["vignetteBlend"].SetValue(0.8f);
-            myEffect.Parameters["colorIntensity"].SetValue(2f * overallAlpha);
-
-
-            Texture2D Flare = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_4").Value;
-
-            //Texture2D Flare2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/spiky_20fade").Value;
-
-            Texture2D Flare3 = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_4").Value;
-
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-
-            float scale = overallScale * Projectile.scale * 3f;
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
-
-            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation, Ball.Size() / 2, scale * 0.45f, SpriteEffects.None, 0f);
-
-            //Main.spriteBatch.Draw(Flare3, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation, Flare3.Size() / 2, scale * 0.6f, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Flare3, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation * -1, Flare3.Size() / 2, scale * 1f, SpriteEffects.None, 0f);
-
-            //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation + 1, Flare2.Size() / 2, scale * 0.5f, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition, null, new Color(255, 255, 255, 0), Projectile.rotation * -1 + 1, Flare2.Size() / 2, scale * 0.7f, SpriteEffects.None, 0f);
-
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            
+            //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White * overallAlpha, Projectile.rotation * 0.6f, Flare.Size() / 2, additiveScale * scales[2], SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White * overallAlpha, Projectile.rotation * -0.8f, Flare.Size() / 2, additiveScale * scales[2], SpriteEffects.None, 0f);
+            #endregion
         }
     }
 
+    //For storing information about the Oblivion's Bar
+    public class OblivionBarPlayer : ModPlayer
+    {
+        public float barProgress = 0f;
+
+        public float justShotPower = 0f;
+
+        public float barVisualProgress = 0f;
+
+        public float barFadeIn = 0f;
+
+        public bool decreaseBar = false;
+
+        public int decreaseTimer = 0;
+
+        //public override void ResetEffects() { ResetVariables(); }
+        public override void UpdateDead() { ResetVariables(); }
+        private void ResetVariables()
+        {
+            barProgress = 0f;
+            barFadeIn = 0f;
+        }
+
+        public override void PostUpdateMiscEffects() { Update(); }
+
+        private void Update()
+        {
+            if (Player.HeldItem.type != ModContent.ItemType<Oblivion>())
+                barFadeIn = 0f;
+            else
+                barFadeIn = Math.Clamp(MathHelper.Lerp(barFadeIn, 1.2f, 0.12f), 0f, 1f);
+
+            justShotPower = Math.Clamp(MathHelper.Lerp(justShotPower, -0.5f, 0.08f), 0f, 1f);
+
+            if (decreaseBar)
+            {
+                barVisualProgress = 1f - Utils.GetLerpValue(0, 450, decreaseTimer, true);
+
+                Main.NewText(barVisualProgress);
+
+                decreaseTimer++;
+
+                if (barVisualProgress == 0f)
+                {
+                    decreaseTimer = 0;
+                    decreaseBar = false;
+                }
+            }
+        }
+    }
+
+    public class OblivionBarDrawLayer : PlayerDrawLayer
+    {
+        public override Position GetDefaultPosition()
+        {
+            return new AfterParent(PlayerDrawLayers.HeldItem);
+        }
+        protected override void Draw(ref PlayerDrawSet drawInfo)
+        {
+            Player Player = drawInfo.drawPlayer;
+
+            if (Player.HeldItem.type != ModContent.ItemType<Oblivion>())
+                return;
+
+            float barProgress = Player.GetModPlayer<OblivionBarPlayer>().barProgress;
+            float barVisualProgress = Player.GetModPlayer<OblivionBarPlayer>().barVisualProgress;
+            float justShotPower = Player.GetModPlayer<OblivionBarPlayer>().justShotPower;
+            float barFadeIn = Player.GetModPlayer<OblivionBarPlayer>().barFadeIn;
+
+
+            CyverBarUtils.DrawCyverBar(drawInfo, barProgress, barVisualProgress, justShotPower, barFadeIn);
+        }
+    }
 
 }
