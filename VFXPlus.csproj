@@ -13,4 +13,11 @@
 		
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
+		<EffectFiles Include="**/*.fx" />
+	</ItemGroup>
+	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+		<Exec Command="@(EffectFiles->'&quot;./Effects/Compiler/fxc.exe&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+	</Target>
+
 </Project>
