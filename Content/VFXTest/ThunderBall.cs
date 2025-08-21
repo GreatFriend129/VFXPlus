@@ -78,7 +78,7 @@ namespace VFXPlus.Content.VFXTest
 
             //NEW VERSION
             Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/GlowBorder").Value;
-            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle").Value;
+            Texture2D Lightning = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
 
                 //ElectricRadialEffect
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
@@ -101,17 +101,18 @@ namespace VFXPlus.Content.VFXTest
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
 
-            Color col = Color.SkyBlue;
+            Color col = Color.Lerp(Color.DeepSkyBlue, Color.Aquamarine, 0.5f);
             //Main.spriteBatch.Draw(Ball, drawPos, null, Color.White, Projectile.rotation * -1, Ball.Size() / 2, 0.15f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
             //Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.8f, Projectile.rotation, Ball.Size() / 2, 0.2f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
             //Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.3f, Projectile.rotation * -1, Ball.Size() / 2, 0.3f * ballScale * 2f * Projectile.scale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.35f, Projectile.rotation * -1f, Ball.Size() / 2, 0.3f * ballScale * 1.5f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.5f, Projectile.rotation * -1f, Ball.Size() / 2, 0.3f * ballScale * 1.5f * Projectile.scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Ball, drawPos, null, col * 0.5f, Projectile.rotation * -1f, Ball.Size() / 2, 0.3f * ballScale * 1.5f * Projectile.scale, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * 1f, Lightning.Size() / 2, 0.3f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * 1f, Lightning.Size() / 2, 0.3f * Projectile.scale * (ballScale + 0.4f), SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * 1f, Lightning.Size() / 2, 0.3f * Projectile.scale * (ballScale + 0.4f) * 1.5f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Lightning, drawPos, null, new Color(255, 255, 255, 0), Projectile.rotation * 1f, Lightning.Size() / 2, 0.3f * Projectile.scale * (ballScale + 0.4f) * 1.5f, SpriteEffects.None, 0f);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
@@ -1038,12 +1039,12 @@ namespace VFXPlus.Content.VFXTest
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(true);
+                DrawTrail(false);
             });
 
-            DrawTrail(false);
+            DrawTrail(true);
 
             return false;
         }
@@ -1053,13 +1054,13 @@ namespace VFXPlus.Content.VFXTest
             if (giveUp)
                 return;
 
-            trail1.trailColor = Color.OrangeRed;
+            trail1.trailColor = Color.OrangeRed * 0.85f;
             trail1.trailWidth = 60;
             trail1.TrailDrawing(Main.spriteBatch);
             trail1.TrailDrawing(Main.spriteBatch);
 
 
-            trail1.trailColor = Color.LightGoldenrodYellow;
+            trail1.trailColor = Color.LightGoldenrodYellow * 0.85f;
             trail1.trailWidth = 28;
             trail1.TrailDrawing(Main.spriteBatch);
         }

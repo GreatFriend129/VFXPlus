@@ -91,7 +91,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Maelstrom;
+            CurrentAttack = FeatheredFoeState.Madison;
 
             switch (CurrentAttack)
             {

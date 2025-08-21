@@ -73,6 +73,11 @@ Items: {
 		DisplayName: Trojan Force
 		Tooltip: ""
 	}
+
+	CavernSword: {
+		DisplayName: Cavern Sword
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -173,6 +178,17 @@ Projectiles: {
 	OblivionHeldProjectile.DisplayName: Oblivion Held Projectile
 	OblivionExplosionPulse.DisplayName: Oblivion Explosion Pulse
 	TrojanForceWhipProj.DisplayName: Trojan Force Whip Proj
+	OblivionActivateAnimation.DisplayName: Oblivion Activate Animation
+	OblivionActivate.DisplayName: Oblivion Activate
+	CavernSwordProj.DisplayName: Cavern Sword Proj
+	CavernSwordProjAlt.DisplayName: Cavern Sword Proj Alt
+	CavernSwordWhatDoICallThis.DisplayName: Cavern Sword What Do I Call This
+	CavernSwordElecShot.DisplayName: Cavern Sword Elec Shot
+	CavernSwordElecChain.DisplayName: Cavern Sword Elec Chain
+	HoverTestThing.DisplayName: Hover Test Thing
+	WindPulseTest2.DisplayName: Wind Pulse Test2
+	WindTrail2.DisplayName: Wind Trail2
+	TrojanForceWhipProjTryAgain.DisplayName: Trojan Force Whip Proj Try Again
 }
 
 Configs: {

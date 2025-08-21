@@ -382,7 +382,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
 
             myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value); //foam_mask_bloom
-            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/BrighterPinkGrad").Value);
+            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGrad").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/sparkNoiseloop").Value);
             myEffect.Parameters["flowSpeed"].SetValue(1f);
             myEffect.Parameters["distortStrength"].SetValue(0.06f);

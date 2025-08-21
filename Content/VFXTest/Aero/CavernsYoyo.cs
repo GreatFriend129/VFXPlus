@@ -374,11 +374,11 @@ namespace VFXPlus.Content.VFXTest.Aero
                 }
             }
 
-            if (timer % 1 == 0 && timer != 0)
+            if (timer % 5 == 0 && timer != 0)
             {
                 for (int i = 1; i < trailRotations.Count - 1; i++)
                 {
-                    trailPositions[i] = originalPoints[i] + Main.rand.NextVector2Circular(10f, 10f);
+                    trailPositions[i] = originalPoints[i] + Main.rand.NextVector2CircularEdge(10f, 10f);
 
                 }
             }
@@ -444,7 +444,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Color betweenBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
 
             #region shaderPrep
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value; //|spark_06 | Extra_196_Black
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //|spark_06 | Extra_196_Black
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
 
             Vector2[] pos_arr = trailPositions.ToArray();
@@ -456,7 +456,7 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             Color StripColor(float progress) => Color.White * 1f;
             float StripWidth(float progress) => 35f * 1f * sineWidthMult * 0.5f * elboost;
-            float StripWidth2(float progress) => 80f * 1f * sineWidthMult * 0.5f * elboost;
+            float StripWidth2(float progress) => 100f * 1f * sineWidthMult * 0.5f * elboost;
 
             VertexStrip vertexStrip = new VertexStrip();
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -471,17 +471,17 @@ namespace VFXPlus.Content.VFXTest.Aero
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
             float dist = (endPoint - startPoint).Length();
-            float repValue = dist / 400f;
+            float repValue = dist / 200f;
             myEffect.Parameters["reps"].SetValue(repValue * 0.8f);
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.02f);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.05f);
 
             //UnderLayer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(betweenBlue.ToVector3() * 1f);
+            myEffect.Parameters["ColorOne"].SetValue(betweenBlue.ToVector3() * 1.5f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
 

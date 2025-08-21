@@ -26,13 +26,12 @@ namespace VFXPlus.Common
 		{
             Player Player = pds.drawPlayer;
 
-            //if (Player.HeldItem.type != ModContent.ItemType<CyverCannon>() && Player.HeldItem.type != ModContent.ItemType<Oblivion>())
-            //{
-            //    /////Player.GetModPlayer<CyverCannonPlayer>().barProgress = 0f;
-            //    return;
-            //}
+            bool drainingBar = Player.GetModPlayer<OblivionBarPlayer>().decreaseBar;
 
             //BTW we cast positions to ints because otherwise its really shaky for some reason
+
+            float barRot = 0f;
+            float barScale = 1f;
 
             //Ensures that this isn't drawn multiple times if the player has an afterimage
             if (pds.shadow == 0f)
@@ -51,7 +50,8 @@ namespace VFXPlus.Common
                     justShotPower = 1f;
                 }
 
-                float bonusScale = 1f + (Easings.easeInQuad(justShotPower) * 0.12f);
+                float bonusScale = 1f + (Easings.easeInQuad(justShotPower) * 0.12f) * (drainingBar ? 0f : 1f);
+                bonusScale *= barScale;
 
                 //Border
                 for (int i = 220; i < 3; i++)
@@ -64,7 +64,7 @@ namespace VFXPlus.Common
                     Vector2 randPos = drawPos + Main.rand.NextVector2Circular(1f, 1f);
 
                     DrawData Border = new DrawData(BarBorder, new Vector2((int)randPos.X, (int)randPos.Y), null,
-                        col with { A = 0 } * 0.2f, 0f, BarBorder.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
+                        col with { A = 0 } * 0.2f, barRot, BarBorder.Size() / 2f, 1f * bonusScale, SpriteEffects.None);
                     pds.DrawDataCache.Add(Border);
                 }
 
@@ -76,13 +76,13 @@ namespace VFXPlus.Common
                     float sineAlpha = (float)(Math.Sin(Main.timeForVisualEffects * 0.1f)) * 0.15f;
 
                     DrawData Border = new DrawData(BarBorder, new Vector2((int)drawPos.X, (int)drawPos.Y), null,
-                        Color.HotPink with { A = 0 } * (0.2f + sineAlpha) * barFadeIn, 0f, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None);
+                        Color.HotPink with { A = 0 } * (0.2f + sineAlpha) * barFadeIn, barRot, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None);
                     pds.DrawDataCache.Add(Border);
                 }
 
                 //BaseBar
                 DrawData Bar = new DrawData(BarTex, new Vector2((int)drawPos.X, (int)drawPos.Y), null,
-                    Color.White * barFadeIn, 0f, BarTex.Size() / 2f, barVec2Scale, SpriteEffects.None);
+                    Color.White * barFadeIn, barRot, BarTex.Size() / 2f, barVec2Scale, SpriteEffects.None);
                 pds.DrawDataCache.Add(Bar);
 
 
@@ -102,6 +102,10 @@ namespace VFXPlus.Common
 
                 Color fillColor = Color.Lerp(betweenPink, Color.White, justShotPower);
 
+                if (drainingBar)
+                    fillColor = Color.Lerp(betweenPink, Color.White, 0.2f + (float)Math.Sin(Main.timeForVisualEffects * 0.2f) * 0.05f);
+                    //fillColor = Color.Lerp(betweenPink, Color.HotPink, 0.55f + (float)Math.Sin(Main.timeForVisualEffects * 0.2f) * 0.08f);
+
                 Vector2 fillScale = new Vector2(1f, 1f + justShotPower * 0.2f);
                 fillScale.X *= Easings.easeInOutBack(barFadeIn, 0f, 1.5f);
 
@@ -110,12 +114,12 @@ namespace VFXPlus.Common
                     Vector2 randPos = drawPos + Main.rand.NextVector2Circular(1.5f, 1.5f);
 
                     DrawData FillUnder = new DrawData(BarFill, new Vector2((int)randPos.X, (int)randPos.Y), fillFrame,
-                        fillColor with { A = 0 } * 0.25f * barFadeIn, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                        fillColor with { A = 0 } * 0.25f * barFadeIn, barRot, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
                     pds.DrawDataCache.Add(FillUnder);
                 }
 
                 DrawData Fill = new DrawData(BarFill, new Vector2((int)drawPos.X, (int)drawPos.Y), fillFrame,
-                    fillColor with { A = 0 } * 1f * barFadeIn, 0f, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
+                    fillColor with { A = 0 } * 1f * barFadeIn, barRot, BarFill.Size() / 2f, fillScale * bonusScale, SpriteEffects.None);
                 pds.DrawDataCache.Add(Fill);
 
             }

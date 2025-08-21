@@ -33,6 +33,9 @@ using VFXPlus.Common;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest.Aero.Oblivion;
+using VFXPlus.Content.VFXTest.Aero.Sword;
+using static log4net.Appender.ColoredConsoleAppender;
+using System.Xml.Linq;
 
 
 namespace VFXPlus.Content
@@ -86,31 +89,68 @@ namespace VFXPlus.Content
 
             }
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Tech/MagicImpactLong") with { Pitch = 0f, PitchVariance = .14f, };
-            SoundEngine.PlaySound(style, Main.MouseWorld);
 
-            player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 22;
+            //0->0.5 | 0.5->1
+            int numberOfCols = 3;
+            int numberOfLerps = numberOfCols - 1;
+            Color[] cols = { Color.White, Color.Black, Color.Red };
+            float[] interpPowers = { 2f, 1f };
+            float valToTest = 0.51f;
 
-            FlashSystem.SetCAFlashEffect(0.15f, 35, 1f, 0.85f, true);
+            float power = 2;
 
-            int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<OblivionExplosionPulse>(), 0, 0, Main.myPlayer);
 
-            Vector2 impactCenter = Main.MouseWorld;
+            int gradientStartingIndex = (int)(valToTest * (cols.Length - 1));
+            float currentColorInterpolant = valToTest * (cols.Length - 1) % 1f;
+            Color gradientSubdivisionA = cols[gradientStartingIndex];
+            Color gradientSubdivisionB = cols[(gradientStartingIndex + 1) % (cols.Length - 1)];
 
-            Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
-            Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 3f);
+            //currentColorInterpolant = MathF.Pow(currentColorInterpolant, interpPowers[]);
 
-            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.5f);
-            fgb.DrawWhiteCore = true;
-            d11.customData = fgb;
+            Color toUse = Color.Lerp(gradientSubdivisionA, gradientSubdivisionB, currentColorInterpolant);
 
-            //Vector2 velAAA = new Vector2(8f, 0f);
-            //int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(8f, 2f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);
-            //(Main.projectile[are].ModProjectile as FFWindOrb2).startDir = -1;
+            Main.NewText(interpPowers[gradientStartingIndex]);
+
+            //int colIndex = (int)Math.Floor(valToTest * numberOfLerps);
+            //float colPercent = (valToTest * numberOfLerps) - colIndex;
+
+            //Main.NewText("ColIndex: " + colIndex);
+            //Main.NewText("ColPercent: " + colPercent);
+
+
+
+            //Color toUse = Color.Lerp(cols[colIndex], cols[colIndex + 1], colPercent);
+
+            Dust.NewDustPerfect(Main.MouseWorld, DustID.PortalBoltTrail, newColor: toUse);
+
+
+            /*
+            int numberOfCols = 4;
+            int numberOfLerps = numberOfCols - 1;
+            Color[] cols = { Color.Green, Color.White, Color.Black, Color.Blue };
+
+            float valToTest = 0.5f;
+
+            int colIndex = (int)Math.Floor(valToTest * numberOfLerps);
+
+            float colPercent = (valToTest * numberOfLerps) - colIndex;
+            */
+
+
+
+
+
 
 
 
             return false;
+
+
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulseTest2>(), 0, 0, Main.myPlayer);
+
+            //Vector2 velAAA = new Vector2(8f, 0f);
+            //int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(8f, 2f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);
+            //(Main.projectile[are].ModProjectile as FFWindOrb2).startDir = -1;
 
             Color purple3 = new Color(121, 7, 179);
             Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.2f);

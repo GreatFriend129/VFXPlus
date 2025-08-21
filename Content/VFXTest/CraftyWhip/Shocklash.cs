@@ -12,6 +12,7 @@ using VFXPlus.Content.Dusts;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
+using Terraria.DataStructures;
 
 namespace VFXPlus.Content.VFXTest.CraftyWhip
 {
@@ -32,7 +33,7 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
             Item.useStyle = ItemUseStyleID.Swing;
             Item.useTime = 13; 
             Item.useAnimation = 26; //26
-            //Item.reuseDelay = 30;
+            Item.reuseDelay = 30;
 
             Item.UseSound = SoundID.Item152;
             Item.noMelee = true;
@@ -47,7 +48,12 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
 				//.Register();
 		}
 
-		public override bool MeleePrefix()
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            return base.Shoot(player, source, position, velocity, type, damage, knockback);
+        }
+
+        public override bool MeleePrefix()
 		{
 			return true;
 		}
@@ -326,11 +332,18 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
                 if (i == list.Count - 2)
                 {
                     Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.1f, flip, 0);
+
+                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition , frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
+
+                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
+                }
+                else
+                {
+
+                    //Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(1.5f, 1.5f), frame, Color.SkyBlue with { A = 0 } * 0.5f, rotation, origin, scale, flip, 0);
                 }
 
-                Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(1.5f, 1.5f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
 
-                Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
 
 
                 pos += diff;
