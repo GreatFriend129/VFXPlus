@@ -88,65 +88,14 @@ namespace VFXPlus.Content
                 }
 
             }
+            
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulseTest2>(), 0, 0, Main.myPlayer);
 
-
-            //0->0.5 | 0.5->1
-            int numberOfCols = 3;
-            int numberOfLerps = numberOfCols - 1;
-            Color[] cols = { Color.White, Color.Black, Color.Red };
-            float[] interpPowers = { 2f, 1f };
-            float valToTest = 0.51f;
-
-            float power = 2;
-
-
-            int gradientStartingIndex = (int)(valToTest * (cols.Length - 1));
-            float currentColorInterpolant = valToTest * (cols.Length - 1) % 1f;
-            Color gradientSubdivisionA = cols[gradientStartingIndex];
-            Color gradientSubdivisionB = cols[(gradientStartingIndex + 1) % (cols.Length - 1)];
-
-            //currentColorInterpolant = MathF.Pow(currentColorInterpolant, interpPowers[]);
-
-            Color toUse = Color.Lerp(gradientSubdivisionA, gradientSubdivisionB, currentColorInterpolant);
-
-            Main.NewText(interpPowers[gradientStartingIndex]);
-
-            //int colIndex = (int)Math.Floor(valToTest * numberOfLerps);
-            //float colPercent = (valToTest * numberOfLerps) - colIndex;
-
-            //Main.NewText("ColIndex: " + colIndex);
-            //Main.NewText("ColPercent: " + colPercent);
-
-
-
-            //Color toUse = Color.Lerp(cols[colIndex], cols[colIndex + 1], colPercent);
-
-            Dust.NewDustPerfect(Main.MouseWorld, DustID.PortalBoltTrail, newColor: toUse);
-
-
-            /*
-            int numberOfCols = 4;
-            int numberOfLerps = numberOfCols - 1;
-            Color[] cols = { Color.Green, Color.White, Color.Black, Color.Blue };
-
-            float valToTest = 0.5f;
-
-            int colIndex = (int)Math.Floor(valToTest * numberOfLerps);
-
-            float colPercent = (valToTest * numberOfLerps) - colIndex;
-            */
-
-
-
-
-
-
+            FlashSystem.SetCAFlashEffect(0.08f, 35, 1f, 0.5f, true);
 
 
             return false;
 
-
-            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulseTest2>(), 0, 0, Main.myPlayer);
 
             //Vector2 velAAA = new Vector2(8f, 0f);
             //int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(8f, 2f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);

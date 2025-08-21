@@ -205,17 +205,17 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             Color purple3 = new Color(121, 7, 179);
 
-            Color purple4 = Color.Lerp(purple, purple3, 1f);
+            Color purple4 = Color.Lerp(purple, darkPurple, 0.75f);
 
             #region shaderPrep
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EnergyTex").Value; //|spark_06 | Extra_196_Black
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/SmokeTrail").Value; //|spark_06 | Extra_196_Black
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //Trail7 30
 
             Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
-            Color StripColor(float progress) => Color.White * (progress * progress * progress) * 0.15f * (progress > 0.99f ? 0f : 1f);
-            float StripWidth(float progress) => 100f * Easings.easeInSine(progress) * fadeInAlpha;
+            Color StripColor(float progress) => Color.White * (progress * progress * progress) * 0.25f * (progress > 0.99f ? 0f : 1f);
+            float StripWidth(float progress) => 60f * Easings.easeInSine(progress) * fadeInAlpha;
 
             VertexStrip vertexStrip = new VertexStrip();
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -235,7 +235,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             myEffect.Parameters["glowThreshold"].SetValue(0.4f);
             myEffect.Parameters["glowIntensity"].SetValue(2.5f);
             myEffect.Parameters["reps"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(purple4.ToVector3() * 1f);
+            myEffect.Parameters["ColorOne"].SetValue(purple4.ToVector3() * 3f);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
 

@@ -283,7 +283,7 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
             justHitTime = (8 - (int)((Main.player[Projectile.owner].GetTotalAttackSpeed(DamageClass.Melee) - 1) * 8f)) * Projectile.extraUpdates; //7
 
             float currentShakePower = Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower;
-            Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = currentShakePower > 1 ? Math.Clamp(currentShakePower, 3, 7) : 7;
+            Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = currentShakePower > 1 ? Math.Clamp(currentShakePower, 3, 6) : 6;
 
             Vector2 orthToSwing = (MathHelper.PiOver2 + currentAngle).ToRotationVector2() * (Projectile.ai[0] == 1 ? -1 : 1f);
 
@@ -863,7 +863,7 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
                 //Want less hitpause at higher attack speeds
                 justHitTime = (19 - (int)((Main.player[Projectile.owner].GetTotalAttackSpeed(DamageClass.Melee) - 1) * 19f)) * Projectile.extraUpdates; //10
 
-                Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower += 24;
+                Main.player[Projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower += 18;
 
                 //The dust....
                 int pgoCount = 12;
@@ -880,7 +880,7 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
                 Projectile.NewProjectile(Projectile.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<OblivionExplosionPulse>(), 0, 0);
 
-                FlashSystem.SetCAFlashEffect(0.15f, 35, 1f, 0.85f, true);
+                FlashSystem.SetCAFlashEffect(0.15f, 35, 1f, 0.25f, true);
 
                 Dust d11 = Dust.NewDustPerfect(target.Center, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: Color.DeepPink, Scale: 2.85f);
 

@@ -13,6 +13,7 @@ using VFXPlus.Content.Dusts;
 using VFXPlus.Common;
 using Terraria.Utilities.Terraria.Utilities;
 using Terraria.Utilities;
+using System.Runtime.InteropServices;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -1495,9 +1496,9 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawShit(true);
+                DrawShit(false);
             });
-            DrawShit(false);
+            DrawShit(true);
 
             return false;
         }
@@ -1516,7 +1517,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Texture2D Flare = Mod.Assets.Request<Texture2D>(toAsset).Value;
 
             float rot = ((float)Main.timeForVisualEffects * 0.02f * Projectile.ai[0]) + Projectile.rotation;
-            float scale2 = scale * 5.65f;
+            float scale2 = scale * 1.65f;
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
@@ -1613,7 +1614,7 @@ namespace VFXPlus.Content.FeatheredFoe
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawShit(false);
             });
@@ -1629,7 +1630,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //String toAsset = "Assets/Orbs/whiteFireEyeA";
 
-            String toAsset = "Assets/Smoke/spark_01"; //circle_05
+            String toAsset = "Assets/Orbs/bigCircle2"; //circle_05
 
             //if (special) toAsset = "Assets/Orbs/ElectricPopC";
 
@@ -1640,25 +1641,37 @@ namespace VFXPlus.Content.FeatheredFoe
             float scale2 = scale * 1f;
 
             if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Compiler/CustomRadialScrollBase", AssetRequestMode.ImmediateLoad).Value;
+
+            Vector3 fireCol1 = new Vector3(0.0f, 0.0f, 0.0f);
+            Vector3 fireCol2 = new Vector3(0.74f, 0.13f, 0.06f);
+            Vector3 fireCol3 = new Vector3(0.87f, 0.4f, 0.051f);
+            Vector3 fireCol4 = new Vector3(0.95f, 0.63f, 0.16f);
+            Vector3 fireCol5 = new Vector3(1.0f, 1.0f, 1.0f);
+
+            Vector3[] colors = { fireCol1, fireCol2, fireCol3, fireCol4, fireCol5 };
+            float[] powers = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+
+            myEffect.Parameters["zoom"].SetValue(0.5f);
+            myEffect.Parameters["numberOfColors"].SetValue(5);
+            myEffect.Parameters["gradColors"].SetValue(colors);
+            myEffect.Parameters["gradPowers"].SetValue(powers);
+
 
             myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value);
-            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGrad2").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
 
             myEffect.Parameters["flowSpeed"].SetValue(0.4f);
-            myEffect.Parameters["vignetteSize"].SetValue(1f);
-            myEffect.Parameters["vignetteBlend"].SetValue(0f);
             myEffect.Parameters["distortStrength"].SetValue(0.02f);
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
-            myEffect.Parameters["colorIntensity"].SetValue(alpha * 0.75f * intensity);
+            myEffect.Parameters["colorIntensity"].SetValue(alpha * 1f * intensity);
 
             //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition + new Vector2(0f, 0f), null, Color.OrangeRed with { A = 255 } * 1f, rot, Flare2.Size() / 2, scale2 * Projectile.scale * 3f, SpriteEffects.None, 0f);
             //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition + new Vector2(0f, 0f), null, Color.Orange with { A = 255 } * 1f, rot, Flare2.Size() / 2, scale2 * Projectile.scale * 1f, SpriteEffects.None, 0f);
 
 
             Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, myEffect, Main.GameViewMatrix.EffectMatrix);
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, myEffect, Main.GameViewMatrix.EffectMatrix);
 
             Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, rot, Flare.Size() / 2, scale2 * Projectile.scale, SpriteEffects.None, 0f);
             //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White, rot, Flare.Size() / 2, scale2 * Projectile.scale, SpriteEffects.None, 0f);
