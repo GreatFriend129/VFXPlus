@@ -13,11 +13,16 @@
 		
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
-		<EffectFiles Include="**/*.fx" />
+	<PropertyGroup>
+    	<FxcCompilerPath>./Effects/Compiler/fxc.exe</FxcCompilerPath>
+	</PropertyGroup>
+	<ItemGroup>
+    	<EffectFiles Include="**/*.fx" />
 	</ItemGroup>
-	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-		<Exec Command="@(EffectFiles->'&quot;./Effects/Compiler/fxc.exe&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+
+	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
+    	<!-- echo is here so it tells which file is being compiled -->
+    	<Exec Command="@(EffectFiles->'echo &quot;-----Compiling effect %(RecursiveDir)%(FileName)%(Extension)-----&quot; &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
 	</Target>
 
 </Project>
