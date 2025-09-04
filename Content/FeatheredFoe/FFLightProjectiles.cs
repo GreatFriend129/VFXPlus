@@ -1077,9 +1077,8 @@ namespace VFXPlus.Content.FeatheredFoe
             //Projectile.velocity = Vector2.Zero;
 
 
-            float lerpToPointProg = Math.Clamp((float)timer / 80f, 0f, 1f);
-            Projectile.Center = Vector2.Lerp(Projectile.Center, parentProj.Center + goalPos, lerpToPointProg) + parentProj.velocity;
-
+            float lerpToPointProg = Math.Clamp((float)(timer + 20f) / 100f, 0f, 1f);
+            Projectile.Center = Vector2.Lerp(Projectile.Center, parentProj.Center + goalPos, Easings.easeInQuad(lerpToPointProg)) + parentProj.velocity;
 
             Projectile.rotation = parentProj.velocity.ToRotation();
 
@@ -1093,8 +1092,8 @@ namespace VFXPlus.Content.FeatheredFoe
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
-            drawAlpha = Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.09f), 0f, 1f);
-            drawScale = Math.Clamp(MathHelper.Lerp(drawScale, 1.25f, 0.09f), 0f, 1f);
+            drawAlpha = Math.Clamp(MathHelper.Lerp(drawAlpha, 1.25f, 0.03f), 0f, 1f);
+            drawScale = Math.Clamp(MathHelper.Lerp(drawScale, 1.5f, 0.03f), 0f, 1f);
 
             timer++;
         }

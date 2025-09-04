@@ -1239,6 +1239,32 @@ namespace VFXPlus.Content.FeatheredFoe
             }
         }
 
+        float windOrbRecoilPower = 0f;
+        Vector2 windOrbDest = Vector2.Zero;
+        public void WindOrb()
+        {
+            float yGoal = (float)Math.Sin((float)timer * 0.03f);
+
+            windOrbDest = new Vector2(-600, -500 * yGoal) * (1f + windOrbRecoilPower);
+            BasicMovementVariant3(player.Center + windOrbDest, moveSpeed: 4f);
+
+            windOrbRecoilPower = Math.Clamp(MathHelper.Lerp(windOrbRecoilPower, -0.5f, 0.04f), 0f, 2f);
+
+            if (timer != 0 && timer % 80 == 0)
+            {
+                Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+
+                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
+
+                windOrbRecoilPower = 0.5f;
+            }
+
+            windOverlayOpacityGoal = 0.15f;
+            windOverlayRotation = 0f;
+
+            doPassiveWindParticles = true;
+            passiveWindParticleDirection = 0f;
+        }
 
         #region MovementCode
         //Based off Emode Cryogen

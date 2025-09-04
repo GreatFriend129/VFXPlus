@@ -95,7 +95,7 @@ namespace VFXPlus.Content.QueenBee
             }
 
             //Basic After-Image
-            int trailCount = 10;
+            int trailCount = 10; //10
             previousPositions.Add(NPC.Center);
             previousRotations.Add(NPC.rotation);
 

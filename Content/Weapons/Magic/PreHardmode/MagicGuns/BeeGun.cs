@@ -43,7 +43,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                     GunID: ItemID.BeeGun,
                     AnimTime: 18,
                     NormalXOffset: 22f,
-                    DestXOffset: 12f,
+                    DestXOffset: 10f,
                     YRecoilAmount: 0.1f,
                     HoldOffset: new Vector2(0f, 0f)
                     );

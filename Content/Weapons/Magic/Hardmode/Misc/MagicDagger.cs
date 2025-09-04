@@ -68,20 +68,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             //Orb
             Texture2D orb = CommonTextures.feather_circle128PMA.Value;
-
-            Color[] cols = { Color.Yellow * 0.75f, Color.Gold * 0.525f, Color.Orange * 0.375f };
-            float[] scales = { 0.85f, 1.6f, 2.5f };
-
             float orbRot = projectile.rotation + MathHelper.PiOver2;
-            float orbAlpha = 0.1f;
-            Vector2 orbScale = new Vector2(0.15f, 0.1f) * overallScale * 1.25f;
+            Vector2 orbScale = new Vector2(0.2f, 0.1f) * overallScale * 2f;
+            float sineScale = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Gold with { A = 0 } * 0.2f, orbRot, orb.Size() / 2f, orbScale * sineScale, SpriteEffects.None);
 
 
 

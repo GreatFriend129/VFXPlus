@@ -1614,7 +1614,7 @@ namespace VFXPlus.Content.FeatheredFoe
         Effect myEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 DrawShit(false);
             });
@@ -1628,57 +1628,75 @@ namespace VFXPlus.Content.FeatheredFoe
             if (giveUp)
                 return;
 
-            //String toAsset = "Assets/Orbs/whiteFireEyeA";
+            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/InfernoOrb").Value;
+            Texture2D ball2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
-            String toAsset = "Assets/Orbs/bigCircle2"; //circle_05
+            Vector2 drawPos = Projectile.Center - Main.screenPosition + new Vector2(200f, 0f);
 
-            //if (special) toAsset = "Assets/Orbs/ElectricPopC";
+            float drawScale = Projectile.scale * Easings.easeOutCirc(1f);
+            float ball2Scale = drawScale * 3f;
 
-            Texture2D Flare = Mod.Assets.Request<Texture2D>(toAsset).Value;
-            Texture2D Flare2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-
-            float rot = ((float)Main.timeForVisualEffects * 0.02f * Projectile.ai[0]) + Projectile.rotation;
-            float scale2 = scale * 1f;
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.055f) * 0.07f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.1f) * 0.07f;
+            float sineScale3 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.2f + timer * 0.05f) * 0.03f;
+            float sineColor = (float)Math.Sin(Main.timeForVisualEffects * 0.08f) * 0.2f;
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Compiler/CustomRadialScrollBase", AssetRequestMode.ImmediateLoad).Value;
-
+            #region cols
             Vector3 fireCol1 = new Vector3(0.0f, 0.0f, 0.0f);
             Vector3 fireCol2 = new Vector3(0.74f, 0.13f, 0.06f);
             Vector3 fireCol3 = new Vector3(0.87f, 0.4f, 0.051f);
             Vector3 fireCol4 = new Vector3(0.95f, 0.63f, 0.16f);
             Vector3 fireCol5 = new Vector3(1.0f, 1.0f, 1.0f);
 
-            Vector3[] colors = { fireCol1, fireCol2, fireCol3, fireCol4, fireCol5 };
-            float[] powers = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+            Vector3 elecCol1 = Color.Black.ToVector3();
+            Vector3 elecCol2 = Color.DodgerBlue.ToVector3();
+            Vector3 elecCol3 = Color.DeepSkyBlue.ToVector3();
+            Vector3 elecCol4 = Color.SkyBlue.ToVector3();
+            Vector3 elecCol5 = Color.White.ToVector3();
+            #endregion
 
-            myEffect.Parameters["zoom"].SetValue(0.5f);
+            //Vector3[] colors = { fireCol1, fireCol2, fireCol3, fireCol4, fireCol5 };
+            Vector3[] colors = { elecCol1, elecCol2, elecCol3, elecCol4, elecCol5 };
+            float[] powers = { 1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+
+            myEffect.Parameters["zoom"].SetValue(1.15f);
             myEffect.Parameters["numberOfColors"].SetValue(5);
             myEffect.Parameters["gradColors"].SetValue(colors);
             myEffect.Parameters["gradPowers"].SetValue(powers);
 
 
-            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value);
-            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Swirl").Value);
+            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/WaterEnergyNoise").Value);
+            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/noise").Value);
 
-            myEffect.Parameters["flowSpeed"].SetValue(0.4f);
-            myEffect.Parameters["distortStrength"].SetValue(0.02f);
-            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
-            myEffect.Parameters["colorIntensity"].SetValue(alpha * 1f * intensity);
+            myEffect.Parameters["flowSpeed"].SetValue(-1f);
+            myEffect.Parameters["distortStrength"].SetValue(0.05f);
+            myEffect.Parameters["uTime"].SetValue(timer * -0.01f);
+            myEffect.Parameters["colorIntensity"].SetValue(alpha * 1.25f * intensity);
 
-            //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition + new Vector2(0f, 0f), null, Color.OrangeRed with { A = 255 } * 1f, rot, Flare2.Size() / 2, scale2 * Projectile.scale * 3f, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Flare2, Projectile.Center - Main.screenPosition + new Vector2(0f, 0f), null, Color.Orange with { A = 255 } * 1f, rot, Flare2.Size() / 2, scale2 * Projectile.scale * 1f, SpriteEffects.None, 0f);
+            //Black layer | This literally shouldn't draw but if I remove it the orange balls just disappear????????????
+            //Main.spriteBatch.Draw(ball2, drawPos, null, Color.Black * 0.5f * 1f, 0f, ball2.Size() / 2, 0.45f * ball2Scale, 0f, 0f);
+            //Main.spriteBatch.Draw(ball2, drawPos, null, Color.Black * 0.75f * 1f, 0f, ball2.Size() / 2, 0.55f * ball2Scale, 0f, 0f);
 
+            //Large orange glow
+            Color betweenORED = Color.Lerp(Color.Orange, Color.OrangeRed, 0.6f + sineColor);
+            //Main.spriteBatch.Draw(ball2, drawPos, null, betweenORED with { A = 0 } * 0.2f * 1f, Projectile.rotation, ball2.Size() / 2, 1f * ball2Scale * sineScale2, SpriteEffects.None, 0f);
+
+            //Main shader
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
+
+            float rot1 = timer * 0.01f;
+            Main.spriteBatch.Draw(ball, drawPos, null, Color.Orange with { A = 0 }, rot1, ball.Size() / 2, drawScale * 0.5f * sineScale3, 0f, 0f);
 
             Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, myEffect, Main.GameViewMatrix.EffectMatrix);
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
-            Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, rot, Flare.Size() / 2, scale2 * Projectile.scale, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(Flare, Projectile.Center - Main.screenPosition, null, Color.White, rot, Flare.Size() / 2, scale2 * Projectile.scale, SpriteEffects.None, 0f);
+            //Orange Core
+            //Main.spriteBatch.Draw(ball2, drawPos, null, Color.Orange with { A = 0 } * 0.9f * 1f, 0f, ball2.Size() / 2, 0.3f * ball2Scale * sineScale1, 0f, 0f);
 
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
     }
 

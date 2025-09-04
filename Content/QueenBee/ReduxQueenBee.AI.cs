@@ -30,7 +30,7 @@ namespace VFXPlus.Content.QueenBee
 
             }
 
-            BasicMovement(player.Center + dummyGoalPos, 6f, 540f);
+            BasicMovement(player.Center + dummyGoalPos, 5f, 1240f);
 
             if (timer == 200)
             {

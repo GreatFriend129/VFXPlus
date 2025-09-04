@@ -189,6 +189,14 @@ Projectiles: {
 	WindPulseTest2.DisplayName: Wind Pulse Test2
 	WindTrail2.DisplayName: Wind Trail2
 	TrojanForceWhipProjTryAgain.DisplayName: Trojan Force Whip Proj Try Again
+	InfernoForkVFXImOld.DisplayName: Inferno Fork V F X Im Old
+	BeeDrawingTest.DisplayName: Bee Drawing Test
+	StingerTest.DisplayName: Stinger Test
+	SmokeTest.DisplayName: Smoke Test
+	SmokeTest2.DisplayName: Smoke Test2
+	SmokeTest3.DisplayName: Smoke Test3
+	SmokeTest4.DisplayName: Smoke Test4
+	SmokeTest5.DisplayName: Smoke Test5
 }
 
 Configs: {

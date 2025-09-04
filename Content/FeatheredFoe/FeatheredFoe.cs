@@ -38,6 +38,7 @@ namespace VFXPlus.Content.FeatheredFoe
             OffscreenDash = 11,
             Madison = 12,
             Maelstrom = 13,
+            WindOrb = 14,
         }
 
         private FeatheredFoeState CurrentAttack
@@ -91,7 +92,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Madison;
+            CurrentAttack = FeatheredFoeState.Maelstrom;
 
             switch (CurrentAttack)
             {
@@ -101,7 +102,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.SwoopFeatherBehind: //Nothing
                     SwoopFeatherBehind();
                     break;
-                case FeatheredFoeState.TriSpin: //GOOD
+                case FeatheredFoeState.TriSpin: //GOOD | Easyish to hit
                     TriSpin();
                     break;
                 case FeatheredFoeState.MartletOrbitFeather: //WIP
@@ -113,23 +114,26 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.SwirlFeather: //Nothing
                     SwirlFeather();
                     break;
-                case FeatheredFoeState.CornerTravelShot:
+                case FeatheredFoeState.CornerTravelShot: //hardish to hit
                     CornerTravelShot();
                     break;
-                case FeatheredFoeState.Dive:
+                case FeatheredFoeState.Dive: //hardish to hit
                     Dive();
                     break;
-                case FeatheredFoeState.UmbrellaRain:
+                case FeatheredFoeState.UmbrellaRain: //very easy to hit
                     UmbrellaRain();
                     break;
-                case FeatheredFoeState.OffscreenDash:
+                case FeatheredFoeState.OffscreenDash: //impossible to hit
                     OffscreenDash();
                     break;
-                case FeatheredFoeState.Madison:
+                case FeatheredFoeState.Madison: //very easy to hit
                     MadisonTornado();
                     break;
                 case FeatheredFoeState.Maelstrom:
                     Maelstrom();
+                    break;
+                case FeatheredFoeState.WindOrb:
+                    WindOrb();
                     break;
             }
 

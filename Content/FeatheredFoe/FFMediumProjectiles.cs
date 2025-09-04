@@ -612,7 +612,7 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             if (timer == 0)
             {
-                int featherCount = 4;
+                int featherCount = 3;
                 for (int i = 0; i < featherCount; i++)
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount) * i;
@@ -622,9 +622,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.02f; //0.04
+                        bof.orbitSpeed = 0.1f; //0.04
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
-                        bof.orbitDistance = 230f; //270
+                        bof.orbitDistance = 200f; //230
                         bof.orbitDir = startDir;
                     }
                 }
@@ -740,7 +740,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
 
             float minRange = 40f; //40f | 240 920 for full screen
-            float maxRange = 270f; //120
+            float maxRange = 200f; //250
             for (int i = 0; i < count; i++)
             {
 
@@ -806,19 +806,33 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        float animProgress = 0;
+        public float endVel = 2f;// 10f
+
         float overallAlpha = 0f;
         float overallScale = 0f;
 
         int timer = 0;
-        public int advancer = 0;
-        public int startDir = 1;
-        public float additionAmount = 0.1f;
 
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
         public override void AI()
         {
+            if (timer == 0)
+                Projectile.ai[0] = Projectile.velocity.ToRotation();
+
+
+            float timeForVelFadeIn = 1f;
+            float velFadeInProg = Math.Clamp((float)timer / timeForVelFadeIn, 0f, 1f);
+
+            //Main.NewText(Projectile.velocity.ToRotation(), Projectile.ai[0]);
+
+            Projectile.velocity = Projectile.ai[0].ToRotationVector2() * (endVel);
+
+            if (endVel < 16f)
+            {
+                endVel *= 1.05f;
+            }
+
             if (timer == 0)
             {
                 int featherCount = 8;
@@ -826,9 +840,9 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount) * i;
 
-                    float dir = Projectile.velocity.ToRotation();
-                    Vector2 goalPos = new Vector2(350, 0f).RotatedBy(rot).RotatedBy(dir);
-                    Vector2 spawnPos = Projectile.Center + goalPos + dir.ToRotationVector2() * -300f;
+                    float dir = Projectile.ai[0];
+                    Vector2 goalPos = new Vector2(325, 0f).RotatedBy(rot).RotatedBy(dir); //350
+                    Vector2 spawnPos = Projectile.Center + goalPos + dir.ToRotationVector2() * -500f; //-300
 
                     int a = Projectile.NewProjectile(null, spawnPos, Vector2.Zero, ModContent.ProjectileType<RelativeToProjFeather>(), 1, 1);
 
@@ -843,9 +857,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
             }
 
-            if (timer < 60)
-                Projectile.velocity *= 1.02f;
-
             int trailCount = 7; //5
             previousRotations.Add(Projectile.rotation);
             previousPositions.Add(Projectile.Center);
@@ -856,7 +867,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
-            Projectile.rotation -= 0.25f;
+            //Projectile.rotation -= 0.25f;
 
             if (timer % 1 == 0)
             {
@@ -877,6 +888,10 @@ namespace VFXPlus.Content.FeatheredFoe
 
             overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 0.75f)) * 1f;
 
+            float animProgress2 = Math.Clamp((float)timer / 45f, 0f, 1f);
+            Projectile.rotation = MathHelper.Lerp(-2f * (Projectile.velocity.X > 0 ? 1 : -1), 0f, Easings.easeOutQuart(animProgress2));
+
+
             timer++;
         }
 
@@ -886,10 +901,10 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 GoddamnMonsoonCirc(50); //460 | 50 | 10
 
-                DrawVanillaSwirl2(true);
+                DrawVanillaSwirl2(false);
             });
 
-            DrawVanillaSwirl2(false);
+            DrawVanillaSwirl2(true);
 
             return false;
         }
@@ -931,10 +946,10 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
                 float alpha = prog;
-                float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
+                float newRot = rot +(float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
                 float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
 
-                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
+                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, rot + newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
 
                 //8
                 if (i >= 8)
@@ -956,7 +971,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             float minRange = 40f; //40f | 240 920 for full screen
             float maxRange = 270f; //120
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count * overallScale; i++)
             {
 
                 Texture2D texture;
@@ -989,7 +1004,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
                 Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.32f);
-                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f, randomRot + rotation + MathHelper.PiOver2, origin,
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f * overallScale, randomRot + rotation + MathHelper.PiOver2, origin,
                     new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
 
             }

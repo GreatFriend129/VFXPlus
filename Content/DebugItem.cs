@@ -88,18 +88,50 @@ namespace VFXPlus.Content
                 }
 
             }
-            
-            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<WindPulseTest2>(), 0, 0, Main.myPlayer);
 
-            FlashSystem.SetCAFlashEffect(0.08f, 35, 1f, 0.5f, true);
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, Main.myPlayer);
+            //int windFX3 = Projectile.NewProjectile(null, player.Center + new Vector2(-200f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFXImOld>(), 0, 0, Main.myPlayer);
 
+            //FlashSystem.SetCAFlashEffect(0.08f, 35, 1f, 0.5f, true);
+
+
+            //return false;
+
+
+            float gap = 22.5f;
+            for (int i = 220; i < 20; i++)
+            {
+                Vector2 spawnPos = player.Center + new Vector2(0f, gap * i);
+                Vector2 vel = new Vector2(7f, 0f);// * Main.rand.NextFloat(0.98f, 1.02f);
+                int are2 = Projectile.NewProjectile(null, spawnPos, vel, ModContent.ProjectileType<BeeDrawingTest>(), 10, 0, player.whoAmI);
+                Main.projectile[are2].scale = 1.125f;
+            }
+
+            Vector2 velAAA = new Vector2(8f, 0f);
+            //int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
+
+            for (int i = 0; i < 7; i++)
+            {
+                float prog = (float)i / 5f;
+
+                //if (i == 0)
+                //    i = 200;
+
+                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
+
+                float velMult = Main.rand.NextFloat(1f, 6f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult);
+                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -10f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
+                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, randomStart * 4f, ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
+
+                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
+                
+                Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
+                Main.projectile[smoke].scale = 0.2f;// * Main.rand.NextFloat(0.5f, 1f);
+                Main.projectile[smoke].velocity *= 0.35f;
+            }
 
             return false;
-
-
-            //Vector2 velAAA = new Vector2(8f, 0f);
-            //int are = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(8f, 2f) * 0.5f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0, player.whoAmI);
-            //(Main.projectile[are].ModProjectile as FFWindOrb2).startDir = -1;
 
             Color purple3 = new Color(121, 7, 179);
             Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.2f);

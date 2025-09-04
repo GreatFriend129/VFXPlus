@@ -29,21 +29,22 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
         public override void SetDefaults(Item entity)
         {
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
-        {
+            {
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicRecoilProj>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicRecoilProj held)
             {
                 held.SetProjInfo(
                     GunID: ItemID.SpaceGun,
-                    AnimTime: 22,
+                    AnimTime: 18,
                     NormalXOffset: 18f,
-                    DestXOffset: 8f,
-                    YRecoilAmount: 0.05f,
+                    DestXOffset: 3f, //6
+                    YRecoilAmount: 0.08f,
                     HoldOffset: new Vector2(0f, 2f)
                     );
 
@@ -59,10 +60,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                 Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 26f;
                 Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(3.2f, 8.5f);
 
-                Dust dp = Dust.NewDustPerfect(pos + vel, ModContent.DustType<MuraLineBasic>(), vel, newColor: betweenGreen, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.6f);
+                Dust dp = Dust.NewDustPerfect(pos + vel, ModContent.DustType<MuraLineBasic>(), vel * 1.5f, newColor: betweenGreen, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.6f);
                 dp.alpha = 10 + Main.rand.Next(-2, 5);
 
-                dp.customData = new MuraLineBehavior(new Vector2(0.65f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.92f, 0.96f));
+                dp.customData = new MuraLineBehavior(new Vector2(0.65f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.84f, 0.88f));
             }
 
             for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++)
@@ -85,6 +86,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             CirclePulseBehavior b = new CirclePulseBehavior(0.05f, true, 2, 0.2f, 0.35f);
             b.drawLayer = "OverPlayers";
             d.customData = b;
+
+
+            //Literally doing this just to fix the max instances
+            SoundEngine.PlaySound(SoundID.Item157 with { MaxInstances = 0 }, player.Center);
 
             return true;
         }
@@ -192,7 +197,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
             //Electric hit sound
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_53") with { Volume = .06f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/NPC_Hit_53") with { Volume = .05f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
             //Hit dust
@@ -200,12 +205,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             {
                 for (int i = 0; i < 3 + Main.rand.Next(0, 4); i++) //2 //0,3
                 {
-                    Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.NextFloat(2f, 10f);
+                    Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.25f, 0.25f)) * -Main.rand.NextFloat(4f, 10f);
 
-                    Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel, newColor: Color.LimeGreen, Scale: Main.rand.NextFloat(0.35f, 0.65f) * 0.65f);
+                    Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel * 2f, newColor: Color.LimeGreen, Scale: Main.rand.NextFloat(0.35f, 0.65f) * 0.65f);
                     dp.alpha = 10 + Main.rand.Next(-2, 5);
 
-                    dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.94f, 0.97f));
+                    dp.customData = new MuraLineBehavior(new Vector2(1f, 1f), VelFadeSpeed: Main.rand.NextFloat(0.84f, 0.88f));
                 }
             }
 
@@ -226,7 +231,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         {
             Collision.HitTiles(projectile.position + oldVelocity, oldVelocity, projectile.width, projectile.height);
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Pitch = -.7f, PitchVariance = .25f, MaxInstances = 1, Volume = 0.35f };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Volume = 0.35f, Pitch = -.7f, PitchVariance = .25f, MaxInstances = -1  };
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.OnTileCollide(projectile, oldVelocity);
