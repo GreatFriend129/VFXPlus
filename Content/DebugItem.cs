@@ -127,8 +127,8 @@ namespace VFXPlus.Content
                 (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
                 
                 Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
-                Main.projectile[smoke].scale = 0.2f;// * Main.rand.NextFloat(0.5f, 1f);
-                Main.projectile[smoke].velocity *= 0.35f;
+                Main.projectile[smoke].scale = 0.4f;// * Main.rand.NextFloat(0.5f, 1f);
+                Main.projectile[smoke].velocity *= 0.75f;
             }
 
             return false;

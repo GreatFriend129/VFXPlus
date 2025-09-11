@@ -63,6 +63,10 @@ namespace VFXPlus.Content.QueenBee
 
 
         public int timer = 0;
+
+        //Does not get reset upon changing attacks
+        int universalTimer = 0;
+
         public int substate = 0;
         public int attackReps = 0;
 
@@ -105,9 +109,10 @@ namespace VFXPlus.Content.QueenBee
                 previousRotations.RemoveAt(0);
             }
 
-            //TODO FIX BREAKING ON ATTACK RESET
-            if (timer % 6 == 0)
+            if (universalTimer % 6 == 0)
                 NPC.frameCounter++;
+
+            universalTimer++;
 
             timer++;
         }

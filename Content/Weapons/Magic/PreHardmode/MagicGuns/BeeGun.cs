@@ -101,9 +101,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
                 d.velocity += velocity.SafeNormalize(Vector2.UnitX) * 0.85f;
             }
 
-            //Sound isn't pitched much and uncommon so we don't need to make a copy of the sound
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.1f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
+            ////Sound isn't pitched much and uncommon so we don't need to make a copy of the sound
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.1f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
 
             return true;
         }

@@ -54,6 +54,8 @@ namespace VFXPlus.Content.FeatheredFoe
         //Max vel after we start accelerating
         public float postAccelMaxVel = 21;
 
+        public float yVel = 0f;
+
         //Max vel before we start accelerating
         public float maxVel = 14f; //18f
         public int timeForVelShift = 70;// 60
@@ -176,6 +178,8 @@ namespace VFXPlus.Content.FeatheredFoe
             }
             */
             #endregion
+
+            Projectile.position.Y += yVel;
             timer++;
         }
 
@@ -1016,7 +1020,6 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
     }
-
 
     public class LineBarrier : ModProjectile
     {

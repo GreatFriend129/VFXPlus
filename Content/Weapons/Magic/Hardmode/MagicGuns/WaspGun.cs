@@ -27,7 +27,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void SetDefaults(Item entity)
         {
-            entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
@@ -60,10 +60,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             }
 
 
-            SoundEngine.PlaySound(SoundID.Item11 with { Pitch = -0.15f }, player.Center);
+            //SoundEngine.PlaySound(SoundID.Item11 with { Pitch = -0.15f }, player.Center);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.2f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
+            //SoundStyle style = new SoundStyle("Terraria/Sounds/Item_97") with { Volume = 0.2f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
 
             return true;
         }

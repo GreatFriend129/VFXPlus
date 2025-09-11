@@ -80,6 +80,8 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 SkyManager.Instance.Activate("VFXPlus:FeatheredFoe");
                 firstFrame = false;
+
+                CurrentAttack = FeatheredFoeState.TriSpin;
             }
 
             NPC.dontTakeDamage = false;
@@ -90,9 +92,11 @@ namespace VFXPlus.Content.FeatheredFoe
                 NPC.TargetClosest();
             }
 
+            //Main.NewText(CurrentAttack + "|" + attackReps);
+
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Maelstrom;
+            CurrentAttack = FeatheredFoeState.Madison;
 
             switch (CurrentAttack)
             {

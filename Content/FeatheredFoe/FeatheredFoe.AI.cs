@@ -206,6 +206,16 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 triSpinDirection = Main.rand.NextBool() ? 1 : -1;
                 triSpinSide *= -1;
+
+                attackReps++;
+
+                if (attackReps == 2)
+                {
+                    attackReps = 0;
+                    CurrentAttack = FeatheredFoeState.Dive;
+                    substate = 0;
+                }
+
             }
 
             justShotTristarPower = Math.Clamp(MathHelper.Lerp(justShotTristarPower, -0.5f, 0.1f), 0f, 100f);
@@ -311,6 +321,13 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 substate++;
                 timer = -1;
+
+                attackReps++;
+                if (attackReps == 4)
+                {
+                    attackReps = 0;
+                    CurrentAttack = FeatheredFoeState.TriSpin;
+                }
             }
 
             if (NPC.velocity.Length() > 12f)
@@ -321,11 +338,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
                 Dust p = Dust.NewDustPerfect(NPC.Center + Main.rand.NextVector2Circular(50f, 50f), ModContent.DustType<WindLine>(), vel + NPC.velocity * 0.5f,
-                    newColor: Color.SkyBlue, Scale: 0.75f);
+                    newColor: Color.DeepSkyBlue, Scale: 0.75f);
 
                 WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 0.9f, 0.35f, true);
                 //wlb.randomVelRotatePower = 0.2f;
-                wlb.drawWhiteCore = false;
+                wlb.drawWhiteCore = true;
                 p.customData = wlb;
             }
 
@@ -538,6 +555,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 if (timer == timeAfterDash + timeOfDash + timeBeforeDash)
                 {
                     timer = -1;
+                    CurrentAttack = FeatheredFoeState.CornerTravelShot;
                 }
             }
 
@@ -677,6 +695,13 @@ namespace VFXPlus.Content.FeatheredFoe
 
                     dashTrailPositions.Clear();
                     dashTrailRotations.Clear();
+
+                    attackReps++;
+                    if (attackReps == 3)
+                    {
+                        attackReps = 0;
+                        CurrentAttack = FeatheredFoeState.Madison;
+                    }
                 }
 
             }
@@ -917,10 +942,18 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 if (timer == timeBeforeRain + timeOfRain + timeAfterRain)
                 {
-                    //umbrellaStormwallInstance.active = false;
+
 
                     attackReps++;
                     timer = -1;
+
+                    if (attackReps == 3)
+                    {
+                        umbrellaStormwallInstance.active = false;
+                        attackReps = 0;
+
+                        CurrentAttack = FeatheredFoeState.OffscreenDash;
+                    }
                 }
             }
 
@@ -1147,6 +1180,8 @@ namespace VFXPlus.Content.FeatheredFoe
                     (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.1f;
                     Main.projectile[pulse].scale = 6f;
 
+                    float randYVel = Main.rand.NextBool() ? 2f : -2f;
+
                     float randYOff = 45;// Main.rand.NextFloat(-distanceBetweenNados / 2f, distanceBetweenNados / 2f);
                     for (int i = 0; i < 1 + (nadoDoubleCount * 2); i++)
                     {
@@ -1161,6 +1196,8 @@ namespace VFXPlus.Content.FeatheredFoe
 
                         int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(100f * randir, yVal + randYOff), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
                         (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = randir;
+                        (Main.projectile[nado].ModProjectile as MadisonTornado).yVel = randYVel;
+
 
                         nadoSpawnCount++;
                     }
@@ -1183,6 +1220,14 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     timer = -1;
                     nadoSpawnCount = 0;
+
+                    attackReps++;
+
+                    if (attackReps == 2)
+                    {
+                        CurrentAttack = FeatheredFoeState.UmbrellaRain;
+                        attackReps = 0;
+                    }
                 }
             }
 
@@ -1254,7 +1299,7 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
 
-                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
+                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
 
                 windOrbRecoilPower = 0.5f;
             }

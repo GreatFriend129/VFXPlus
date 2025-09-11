@@ -16,6 +16,7 @@ using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
 using Terraria.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
@@ -64,15 +65,19 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             Color newPurple = new Color(61, 2, 92) * 1f;
             Color darkPurple = new Color(42, 2, 82) * 1f;
 
-            int trailCount = 30;
-            previousRotations.Add(projectile.velocity.ToRotation());
-            previousPositions.Add(projectile.Center);
+            if (timer % 1 == 0)
+            {
+                int trailCount = 20;
+                previousVelRots.Add(projectile.velocity.ToRotation());
+                previousPositions.Add(projectile.Center);
 
-            if (previousRotations.Count > trailCount)
-                previousRotations.RemoveAt(0);
+                if (previousVelRots.Count > trailCount)
+                    previousVelRots.RemoveAt(0);
 
-            if (previousPositions.Count > trailCount)
-                previousPositions.RemoveAt(0);
+                if (previousPositions.Count > trailCount)
+                    previousPositions.RemoveAt(0);
+            }
+
 
             if (timer % 1 == 0 && Main.rand.NextBool())
             {
@@ -132,8 +137,11 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         float fadeInAlpha = 0f;
 
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPositions = new List<Vector2>();
+        List<float> previousVelRots = new List<float>();
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
+
+
 
         float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -141,7 +149,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawOrb(projectile, true);
-                DrawTrail();
+                DrawAfterImage(projectile, false);
             });
 
             Texture2D pixelSwirl = CommonTextures.PixelSwirl.Value;
@@ -156,28 +164,21 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
 
             Color newPurple = new Color(61, 2, 92) * 1f;
-            Color darkPurple = new Color(42, 2, 82) * 1f;
+            Color darkPurple = new Color(35, 2, 71) * 1f;
 
             //Glow
-            //Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/Projectile_540").Value;
-            //Main.EntitySpriteDraw(Orb, drawPos, null, newPurple * 0.15f, projectile.rotation, Orb.Size() / 2, projectile.scale * 0.75f * overallScale, 0);
-            //Main.EntitySpriteDraw(Orb, drawPos, null, darkPurple * 0.15f, projectile.rotation, Orb.Size() / 2, projectile.scale * 1.25f * overallScale, 0);
+            Texture2D Orb = CommonTextures.SoftGlow64.Value;
+            Main.EntitySpriteDraw(Orb, drawPos, null, newPurple with { A = 0 } * 0.1f, projectile.rotation, Orb.Size() / 2, projectile.scale * 1.5f * overallScale, 0);
+            Main.EntitySpriteDraw(Orb, drawPos, null, darkPurple with { A = 0 } * 0.25f, projectile.rotation, Orb.Size() / 2, projectile.scale * 2f * overallScale, 0);
 
-            Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/SoftGlow64").Value;
+            //Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/SoftGlow64").Value;
             //Main.EntitySpriteDraw(Orb, drawPos, null, darkPurple with { A = 0 } * 0.25f, projectile.rotation, Orb.Size() / 2, projectile.scale * 1.15f * overallScale, 0);
 
-
-            //Star
-            Vector2 starPos = drawPos;
-            float starScale = MathHelper.Lerp(1.5f, 0f, Easings.easeOutCirc(fadeInAlpha)) * projectile.scale * 0.75f;
-
-            Main.EntitySpriteDraw(star, starPos, null, newPurple with { A = 0 } * 2f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 1.4f, SpriteEffects.None);
-            Main.EntitySpriteDraw(star, starPos, null, Color.White with { A = 0 } * 0.85f * (1f - fadeInAlpha), projectile.rotation, star.Size() / 2f, starScale * 0.65f, SpriteEffects.None);
 
             //Border
             for (int num163 = 0; num163 < 4; num163++)
             {
-                Main.EntitySpriteDraw(vanillaTex, drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 3f, null, newPurple with { A = 0 } * 2f, projectile.rotation, TexOrigin,
+                Main.EntitySpriteDraw(vanillaTex, drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 3f, null, new Color(70, 3, 102) with { A = 0 } * 2f, projectile.rotation, TexOrigin,
                     projectile.scale * overallScale, 0f);
             }
 
@@ -197,53 +198,61 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             return false;
         }
 
-        Effect myEffect = null;
-        public void DrawTrail()
+        public void DrawAfterImage(Projectile projectile, bool giveUp)
         {
+            if (giveUp)
+                return;
+
+            //Main.NewText(projectile.velocity.Length());
+
             Color purple = new Color(61, 2, 92);
-            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+            Color darkPurple = new Color(31, 2, 62);  // Color.Purple;//new Color(61, 2, 92);
 
             Color purple3 = new Color(121, 7, 179);
 
             Color purple4 = Color.Lerp(purple, darkPurple, 0.75f);
 
-            #region shaderPrep
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/SmokeTrail").Value; //|spark_06 | Extra_196_Black
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //Trail7 30
+            Texture2D line = CommonTextures.SoulSpike.Value;
 
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
+            float trailAlpha = Utils.GetLerpValue(0f, 10f, projectile.velocity.Length(), true);
 
-            Color StripColor(float progress) => Color.White * (progress * progress * progress) * 0.25f * (progress > 0.99f ? 0f : 1f);
-            float StripWidth(float progress) => 60f * Easings.easeInSine(progress) * fadeInAlpha;
+            for (int i = 0; i < previousVelRots.Count; i++)
+            {
+                float progress = (float)i / previousVelRots.Count;
 
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+                Color col = darkPurple;// Color.Lerp(purple3, purple3, progress) * 0.5f;
 
+                //DodgerBlue or Blue
 
-            #endregion
+                float size2 = 1f * projectile.scale * overallScale * progress;
 
-            #region Shader
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+                float offValue = 10f + (10 * progress);
 
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.03f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+                Vector2 offset1 = new Vector2(0f, -offValue * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 offset2 = new Vector2(0f, offValue * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
 
-            myEffect.Parameters["glowThreshold"].SetValue(0.4f);
-            myEffect.Parameters["glowIntensity"].SetValue(2.5f);
-            myEffect.Parameters["reps"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(purple4.ToVector3() * 3f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
+                offset1 += Main.rand.NextVector2Circular(1.5f, 1.5f);
+                offset2 += Main.rand.NextVector2Circular(1.5f, 1.5f);
 
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+                Vector2 outerScale = new Vector2(size2 * 1f, size2 * 1.25f);
+                Vector2 innerScale = new Vector2(size2 * 1f, size2 * 1.25f * 0.1f);
 
-            #endregion
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, col with { A = 0 } * 1.25f * progress * fadeInAlpha * trailAlpha,
+                    previousVelRots[i], line.Size() / 2f, outerScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, col with { A = 0 } * 1.25f * progress * fadeInAlpha * trailAlpha,
+                    previousVelRots[i], line.Size() / 2f, outerScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 0 } * 0.2f * progress * fadeInAlpha * trailAlpha,
+                    previousVelRots[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 0 } * 0.2f * progress * fadeInAlpha * trailAlpha,
+                    previousVelRots[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
+            }
+
         }
 
         public void DrawOrb(Projectile projectile, bool giveUp)
@@ -265,7 +274,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             float[] scales = { 0.85f, 1.35f, 2.5f };
 
             float orbRot = projectile.rotation - MathHelper.PiOver4;
-            float orbAlpha = 0.5f;
+            float orbAlpha = 0.15f;
             float orbScale = 0.35f * overallScale * projectile.scale;
 
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;

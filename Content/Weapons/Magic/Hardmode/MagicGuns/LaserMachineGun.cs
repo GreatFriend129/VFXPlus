@@ -359,14 +359,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
 
-                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.55f);
+                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.6f);
 
-                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.75f);
-                Vector2 lineScale2 = new Vector2(1.85f, 0.15f + 0.2f * progress * 1f * 0.75f); //1.25
+                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.65f);
+                Vector2 lineScale2 = new Vector2(1.85f, 0.15f + 0.2f * progress * 1f * 0.6f); //1.25
 
                 //Main
-                Main.EntitySpriteDraw(line2, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress,
-                    projectile.velocity.ToRotation(), line2.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
+                Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 0 } * 0.5f * progress * progress,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
 
                 if (progress == 0)
                 {
@@ -375,7 +375,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 }
 
                 //White
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * progress * progress,
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.4f * progress * progress,
                     projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
             }
         }
