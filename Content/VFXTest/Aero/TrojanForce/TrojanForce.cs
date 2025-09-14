@@ -17,9 +17,7 @@ using Terraria.Graphics;
 using Terraria.GameContent.Animations;
 using Terraria.DataStructures;
 using System.Linq;
-using static tModPorter.ProgressUpdate;
-using Terraria.Modules;
-using SteelSeries.GameSense;
+using System.Net;
 
 namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 {
@@ -29,13 +27,17 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
         public override void SetDefaults()
 		{ 
-            Item.DefaultToWhip(ModContent.ProjectileType<TrojanForceWhipProj>(), 65, 3f, 2.75f, 36);
+            Item.DefaultToWhip(ModContent.ProjectileType<TrojanForceWhipProjTryAgain>(), 65, 3f, 3.75f, 34);
         }
 		public override bool MeleePrefix() => true;
 
+        bool isBlue = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            return !Main.projectile.Any(n => n.active && n.type == type && n.owner == player.whoAmI);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, ai2: isBlue ? -1 : 1f);
+
+            isBlue = !isBlue;
+            return false;
         }
     }
 
@@ -185,7 +187,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
         {
             float swingTime = Main.player[Projectile.owner].itemAnimationMax * Projectile.MaxUpdates;
             float swingProgress = Timer / swingTime;
-           
+
             List<Vector2> list = new List<Vector2>();
             Projectile.FillWhipControlPoints(Projectile, list);
 
@@ -197,7 +199,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             });
             DrawAfterImage(true);
 
-            
+
             SpriteEffects flip = Projectile.spriteDirection < 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             Texture2D texture = TextureAssets.Projectile[Type].Value;
@@ -210,7 +212,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             {
                 // These two values are set to suit this projectile's sprite, but won't necessarily work for your own.
                 // You can change them if they don't!
-                Rectangle frame = new Rectangle(0, 0, 38, 18); 
+                Rectangle frame = new Rectangle(0, 0, 38, 18);
                 Vector2 origin = new Vector2(19, 5);
                 float scale = 1;
 
@@ -329,7 +331,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                     }
                 }
             }
-            
+
             for (int i = 220; i < previousTipPositions.Count; i++)
             {
                 /*
@@ -398,18 +400,11 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
                 pos += diff;
 
-                if (i % 2 == 0)
-                isBlue = !isBlue;
+
+
             }
         }
-
-        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            Main.player[Projectile.owner].MinionAttackTargetNPC = target.whoAmI;
-            Projectile.damage = (int)(hit.Damage * 0.8f); // Multihit penalty. 
-        }
     }
-
     public class TrojanForceWhipProjTryAgain : ModProjectile
     {
         public override string Texture => "VFXPlus/Content/VFXTest/Aero/TrojanForce/TrojanForceWhipProj";
@@ -431,83 +426,135 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
         public override void SetDefaults()
         {
-            Projectile.DefaultToWhip();
+            //Projectile.DefaultToWhip();
+            Projectile.width = Projectile.height = 18;
+            Projectile.DamageType = DamageClass.SummonMeleeSpeed;
 
-            Projectile.WhipSettings.Segments = whipSegments; //14
-            Projectile.WhipSettings.RangeMultiplier = 1f;
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.tileCollide = false;
 
-            //Projectile.extraUpdates = 6;
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
+
+            Projectile.tileCollide = false;
+            Projectile.ownerHitCheck = true;
+            Projectile.penetrate = -1;
+
+
+            Projectile.WhipSettings.Segments = whipSegments;
+            Projectile.WhipSettings.RangeMultiplier = 1.5f;
+
+            Projectile.extraUpdates = 7;
         }
 
         float flyTime;
         public bool HitboxActive => Utils.GetLerpValue(0.1f, 0.7f, Projectile.ai[0] / flyTime, true) * Utils.GetLerpValue(0.9f, 0.7f, Projectile.ai[0] / flyTime, true) > 0.5f;
 
-        public override bool PreAI()
+        bool doneEffect = false;
+        bool isBlue = false;
+        public override void AI()
         {
-            Player player = Main.player[Projectile.owner];
-            flyTime = player.itemAnimationMax * Projectile.MaxUpdates;
-            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
-            Projectile.ai[0]++;
-            Projectile.Center = Main.GetPlayerArmPosition(Projectile) + Projectile.velocity * (Projectile.ai[0] - 1f);
-            Projectile.spriteDirection = (!(Vector2.Dot(Projectile.velocity, Vector2.UnitX) < 0f)) ? 1 : -1;
+            if (Timer == 0)
+            {
+                isBlue = Projectile.ai[2] == 1;
+            }
 
-            if (Projectile.ai[0] >= flyTime || player.itemAnimation == 0)
+            Player owner = Main.player[Projectile.owner];
+            Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+            Projectile.Center = Main.GetPlayerArmPosition(Projectile) + Projectile.velocity * Timer;
+            Projectile.spriteDirection = Projectile.velocity.X >= 0f ? 1 : -1;
+
+            Timer++;
+
+            float swingTime = owner.itemAnimationMax * Projectile.MaxUpdates;
+            if (Timer >= swingTime || owner.itemAnimation * 4 <= 0)
             {
                 Projectile.Kill();
-                return false;
+                return;
             }
 
-            player.heldProj = Projectile.whoAmI;
-            player.itemAnimation = player.itemAnimationMax - (int)(Projectile.ai[0] / Projectile.MaxUpdates);
-            player.itemTime = player.itemAnimation;
-
-            if (Projectile.ai[0] == (int)(flyTime / 2f))
+            owner.heldProj = Projectile.whoAmI;
+            if (Timer == swingTime / 2)
             {
-                Projectile.WhipPointsForCollision.Clear();
-                Projectile.FillWhipControlPoints(Projectile, Projectile.WhipPointsForCollision);
-                Vector2 position = Projectile.WhipPointsForCollision[^1];
-                SoundEngine.PlaySound(SoundID.Item153, position);
+                // Plays a whipcrack sound at the tip of the whip.
+                List<Vector2> points2 = Projectile.WhipPointsForCollision;
+                Projectile.FillWhipControlPoints(Projectile, points2);
+                SoundEngine.PlaySound(SoundID.Item153, points2[points2.Count - 1]);
             }
 
-            if (HitboxActive)
+            float swingProgress = Timer / swingTime;
+
+            //Main.NewText(previousTipPostions.Count);
+            List<Vector2> points_ = Projectile.WhipPointsForCollision;
+            points_.Clear();
+            Projectile.FillWhipControlPoints(Projectile, points_);
+            List<Vector2> points = points_;
+
+            if (Utils.GetLerpValue(0.1f, 0.7f, swingProgress, clamped: true) * Utils.GetLerpValue(0.9f, 0.7f, swingProgress, clamped: true) > 0.5f && Main.rand.NextBool(6))
             {
-                Projectile.WhipPointsForCollision.Clear();
-                Projectile.FillWhipControlPoints(Projectile, Projectile.WhipPointsForCollision);
+                int pointIndex = Main.rand.Next(points.Count - 4, points.Count);
+                Rectangle spawnArea = Utils.CenteredRectangle(points[pointIndex], new Vector2(30f, 30f));
+                //int dustType = DustID.Enchanted_Gold;
+                //if (Main.rand.NextBool(3))
+                //    dustType = DustID.TintableDustLighted;
+
+                Dust dust = Dust.NewDustDirect(spawnArea.TopLeft(), spawnArea.Width, spawnArea.Height, ModContent.DustType<GlowPixelCross>(), 0f, 0f, 0, isBlue ? Color.DeepSkyBlue : Color.DeepPink);
+
+                //dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(postSlowPower: 0.9f, velToBeginShrink: 2.5f, fadePower: 0.9f, shouldFadeColor: false);
+
+                dust.scale = Main.rand.NextFloat(0.35f, 0.45f);
+
+                // After choosing a randomized dust and a whip segment to spawn from, dust is spawned.
+                //Dust dust = Dust.NewDustDirect(spawnArea.TopLeft(), spawnArea.Width, spawnArea.Height, dustType, 0f, 0f, 100, Color.White);
+                dust.position = points[pointIndex];
+                //dust.fadeIn = 0.3f;
+                Vector2 spinningPoint = points[pointIndex] - points[pointIndex - 1];
+                dust.velocity *= 0.5f;
+                // This math causes these dust to spawn with a velocity perpendicular to the direction of the whip segments, giving the impression of the dust flying off like sparks.
+                dust.velocity += spinningPoint.RotatedBy(owner.direction * ((float)Math.PI / 2f)) * 0.1f;
+                //dust.velocity *= 0.35f;
             }
 
-            if (Projectile.ai[0] - 1 == 1)
+            if (swingProgress > 0.5f && swingProgress < 0.85f && Timer % 5 == 0) //58-75
             {
-                trailPosList.Add(oldTip);
-                trailPosList.Add(TipPosition);
-
-                float rot = (TipPosition - oldTip).ToRotation();
-                trailRotList.Add(rot);
-                trailRotList.Add(rot);
+                var d = Dust.NewDustPerfect(points[points.Count - 1], ModContent.DustType<GlowStarSharp>(), Vector2.Zero, 0, isBlue ? Color.DeepSkyBlue : Color.DeepPink, 0.3f);
+                d.position += Main.rand.NextVector2Circular(8, 8).RotatedBy(Projectile.rotation);
+                d.velocity += new Vector2(0f, -Main.rand.Next(1, 3)).RotatedBy(Projectile.rotation).RotatedByRandom(0.5f);
             }
-            else if (Projectile.ai[0] - 1 > 1)
+
+
+            if (swingProgress > 0.46f && swingProgress < 1f)
             {
-                int thisTrailCount = 30;
 
-                Vector2 currentTip = TipPosition;
-
-                float newRot = (TipPosition - oldTip).ToRotation();
-                float oldRot = trailRotList[trailRotList.Count - 1];
-
-                trailPosList.Add(currentTip);
-                if (trailPosList.Count > thisTrailCount)
-                    trailPosList.RemoveAt(0);
-
-                trailRotList.Add(newRot);
-                if (trailPosList.Count > thisTrailCount)
-                    trailPosList.RemoveAt(0);
+                Vector2 top = points[points.Count - 1] - owner.Center;
+                float dir = top.ToRotation();
+                
+                if (previousTipPostions.Count > 0)
+                {
+                    Vector2 o = previousTipPostions[previousTipPostions.Count - 1];
+                    Vector2 nv = top;
+                    for (float i = 0.1f; i <= 0.1f; i += 0.1f)
+                    {
+                        previousTipPostions.Add(Vector2.Lerp(o, nv, i) + dir.ToRotationVector2() * 4f);
+                        if (previousTipPostions.Count > 60)
+                        {
+                            previousTipPostions.RemoveAt(0);
+                        }
+                    }
+                }
+                else
+                {
+                    previousTipPostions.Add(top);
+                }
             }
 
-            oldTip = TipPosition;
+            trailWidth = 1f - Utils.GetLerpValue(0.85f, 0.95f, swingProgress, true);
 
-            return false;
         }
 
-        Vector2 oldTip = Vector2.Zero;
 
         public override bool PreDraw(ref Color lightColor)
         {
@@ -521,18 +568,21 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                TrailDraw(false);
             });
-            DrawTrail(true);
+            //DrawTrail(true);
+            TrailDraw(true);
 
 
             SpriteEffects flip = Projectile.spriteDirection < 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
             Texture2D texture = TextureAssets.Projectile[Type].Value;
-            Texture2D glowmask = TextureAssets.Projectile[Type].Value;
+            Texture2D glowmask = Mod.Assets.Request<Texture2D>("Content/VFXTest/Aero/TrojanForce/TrojanForceWhipProjGlow").Value; //
+
 
             Vector2 pos = list[0];
 
+            float lastRot = 0f;
             bool draw = false;
             for (int i = 0; i < list.Count - 1; i++)
             {
@@ -544,14 +594,14 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
                 // These statements determine what part of the spritesheet to draw for the current segment.
                 // They can also be changed to suit your sprite.
-                if (i == list.Count - 2)
+                if (false && i == list.Count - 2)
                 {
                     frame.Y = 66;
                     frame.Height = 18;
 
                     // For a more impactful look, this scales the tip of the whip up when fully extended, and down when curled up.
-                    Projectile.GetWhipSettings(Projectile, out float timeToFlyOut, out int _, out float _);
-                    float t = Timer / timeToFlyOut;
+                    Projectile.GetWhipSettings(Projectile, out float timeToFlyOutA, out int _, out float _);
+                    float t = Timer / timeToFlyOutA;
                     scale = MathHelper.Lerp(0.5f, 1.5f, Utils.GetLerpValue(0.1f, 0.7f, t, true) * Utils.GetLerpValue(0.9f, 0.7f, t, true));
 
                     origin.Y = 9;
@@ -582,15 +632,11 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                     origin.Y = 8;
                     draw = true;
                 }
-                else
-                {
-                    draw = true;
-                }
 
                 Vector2 element = list[i];
                 Vector2 diff = list[i + 1] - element;
 
-                if (draw)
+                if (true)
                 {
 
                     float rotation = diff.ToRotation() - MathHelper.PiOver2; // This projectile's sprite faces down, so PiOver2 is used to correct rotation.
@@ -604,6 +650,8 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                     //Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), frame, Color.HotPink with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
 
                     Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
+
+                    lastRot = rotation;
                 }
                 pos += diff;
 
@@ -611,44 +659,117 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
 
             }
+
+            //Draw the handle last so it is drawn over the chain segments
+            Color handleCol = Lighting.GetColor(list[0].ToTileCoordinates());
+
+            float myRot = (list[1] - list[0]).ToRotation() - MathHelper.PiOver2;
+            Main.EntitySpriteDraw(texture, list[0] - Main.screenPosition, new Rectangle(0, 0, 38, 18), handleCol, myRot,  new Vector2(19, 0), 1f, flip, 0);
+            Main.EntitySpriteDraw(glowmask, list[0] - Main.screenPosition, new Rectangle(0, 0, 38, 18), Color.White, myRot, new Vector2(19, 0), 1f, flip, 0);
+
+            //Who up playing wit they orb
+            Projectile.GetWhipSettings(Projectile, out float timeToFlyOut, out int _, out float _);
+            float t2 = Timer / timeToFlyOut;
+            float tipScale = MathHelper.Lerp(0.5f, 1.5f, Utils.GetLerpValue(0.1f, 0.7f, t2, true) * Utils.GetLerpValue(0.9f, 0.7f, t2, true));
+
+
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Vector2 originPoint = list[list.Count - 1] - Main.screenPosition + (lastRot + MathHelper.PiOver2).ToRotationVector2() * 5f;
+
+            Color[] cols = { Color.LightSkyBlue * 0.75f, Color.SkyBlue * 0.525f, Color.DeepSkyBlue * 0.375f };
+            if (!isBlue)
+            {
+                cols[0] = Color.Pink;
+                cols[1] = Color.HotPink;
+                cols[2] = Color.DeepPink;
+            }
+
+            float[] scales = { 0.85f, 1.6f, 2.5f };
+
+            float orbAlpha = 0.15f;
+            Vector2 orbScale = new Vector2(0.9f, 0.9f) * 0.35f * tipScale;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[0] with { A = 0 } * orbAlpha, lastRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[1] with { A = 0 } * orbAlpha, lastRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[2] with { A = 0 } * orbAlpha, lastRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+
+
+            //Draw the tip in the actual correct position 
+            Color tipCol = Lighting.GetColor(list[list.Count - 1].ToTileCoordinates());
+
+
+
+            for (int i = 0; i < 4; i++)
+            {
+                Main.EntitySpriteDraw(texture, list[list.Count - 1] - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), new Rectangle(0, 66, 38, 18), Color.White with { A = 0 } * 0.4f, lastRot, new Vector2(19, 5), tipScale, flip, 0);
+            }
+
+            Main.EntitySpriteDraw(texture, list[list.Count - 1] - Main.screenPosition, new Rectangle(0, 66, 38, 18), Color.White, lastRot, new Vector2(19, 5), tipScale, flip, 0);
+            //Main.EntitySpriteDraw(glowmask, list[list.Count - 1] - Main.screenPosition, new Rectangle(0, 66, 38, 18), Color.White, lastRot, new Vector2(19, 5), tipScale, flip, 0);
+
+            //Main.EntitySpriteDraw(glowmask, list[list.Count - 1] - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), new Rectangle(0, 66, 38, 18), Color.White with { A = 0 }, lastRot, new Vector2(19, 5), tipScale, flip, 0);
+
+
             return false;
         }
 
+        List<float> previousTipRotations = new List<float>();
+        List<Vector2> previousTipPostions = new List<Vector2>();
 
+        List<Vector2> newPositions = new List<Vector2>();
+        List<float> newRotations = new List<float>();
 
-        public List<Vector2> trailPosList = new List<Vector2>();
-        public List<float> trailRotList = new List<float>();
-
-        bool firstTrailFrame = true;
-        float overallScale = 1f;
-        float overallAlpha = 1f;
-        Effect myEffect = null;
-        public void DrawTrail(bool giveUp = false)
+        float trailWidth = 1f;
+        float trailAlpha = 1f;
+        Effect trailEffect = null;
+        public void TrailDraw(bool giveUp)
         {
-            if (giveUp)
+            if (giveUp || previousTipPostions.Count < 3)
                 return;
 
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/Extra_196_Black").Value; //
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value; //
 
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+
+            newPositions.Clear();
+            newRotations.Clear();
+            for (int i = 1; i < previousTipPostions.Count; i++)
+            {
+                Vector2 startPos = previousTipPostions[i - 1] + Main.player[Projectile.owner].Center;
+                Vector2 endPos = previousTipPostions[i] + Main.player[Projectile.owner].Center;
+
+                float rot = (endPos - startPos).ToRotation();
+
+                newPositions.Add(startPos);
+                newRotations.Add(rot);
+            }
+
+
+            Color colA = isBlue ? Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.15f) : Color.DeepPink;
+            Color colB = isBlue ? Color.SkyBlue : Color.HotPink;
 
 
             //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = trailPosList.ToArray();
-            float[] rot_arr = trailRotList.ToArray();
+            Vector2[] pos_arr = newPositions.ToArray();
+            float[] rot_arr = newRotations.ToArray();
 
 
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
 
 
-            Color StripColor(float progress) => Color.White * Easings.easeOutCubic(progress) * overallAlpha;
+            Color StripColor(float progress) => Color.White * Easings.easeInQuad(progress);
 
             float StripWidth(float progress)
             {
                 float toReturn = 0f;
-                if (progress < 0.5f) //Back half
+                if (progress < 0.5f) //back half
                 {
                     float LV = Utils.GetLerpValue(0f, 0.5f, progress, true);
                     toReturn = Easings.easeOutSine(LV);
@@ -656,18 +777,16 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 120f * 0.5f; //50
+                return toReturn * sineWidthMult * 0.75f * 60f * trailWidth;
             }
 
             float StripWidth2(float progress)
             {
-                return 40f;
-
                 float toReturn = 0f;
-                if (progress < 0.5f) //Back half
+                if (progress < 0.5f) //back half
                 {
                     float LV = Utils.GetLerpValue(0f, 0.5f, progress, true);
                     toReturn = Easings.easeOutSine(LV);
@@ -675,10 +794,10 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 40f * 0.5f; //50
+                return toReturn * sineWidthMult * 1f * 60f * trailWidth;
             }
 
 
@@ -689,30 +808,28 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
 
 
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
-            myEffect.Parameters["reps"].SetValue(1f);
+            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.015f); //0.02
+            trailEffect.Parameters["reps"].SetValue(0.5f * (previousTipPostions.Count() / 60f));
 
 
             //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.DeepPink.ToVector3() * 2f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            //vertexStrip.DrawTrail();
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["ColorOne"].SetValue(colA.ToVector3() * 2f * trailAlpha); //2f
+            trailEffect.Parameters["glowThreshold"].SetValue(0.9f);
+            trailEffect.Parameters["glowIntensity"].SetValue(1f);
+            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
 
             //UnderLayer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.HotPink.ToVector3() * 2.5f); //Hotpink4.5
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            trailEffect.Parameters["glowThreshold"].SetValue(1f);
+            trailEffect.Parameters["glowIntensity"].SetValue(1f);
+            trailEffect.Parameters["ColorOne"].SetValue(colB.ToVector3() * 5f * trailAlpha);
+            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-
-
         }
 
         // This method draws a line between all points of the whip, in case there's empty space between the sprites.
@@ -725,7 +842,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
             bool isBlue = true;
             Vector2 pos = list[0];
-            for (int i = 0; i < list.Count - 2; i++)
+            for (int i = 0; i < list.Count - 1; i++)
             {
                 Vector2 element = list[i];
                 Vector2 diff = list[i + 1] - element;

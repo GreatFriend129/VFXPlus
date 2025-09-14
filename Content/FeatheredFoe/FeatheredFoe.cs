@@ -39,6 +39,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Madison = 12,
             Maelstrom = 13,
             WindOrb = 14,
+            WindDirShot = 15
         }
 
         private FeatheredFoeState CurrentAttack
@@ -138,6 +139,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     break;
                 case FeatheredFoeState.WindOrb:
                     WindOrb();
+                    break;
+                case FeatheredFoeState.WindDirShot: 
+                    WindDirShot();
                     break;
             }
 

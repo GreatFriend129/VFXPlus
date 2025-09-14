@@ -84,8 +84,8 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
             Projectile.extraUpdates = 1;
             Projectile.penetrate = -1;
 
-            Projectile.WhipSettings.Segments = 14; //10
-            Projectile.WhipSettings.RangeMultiplier = 1.45f;
+            Projectile.WhipSettings.Segments = 12; //10
+            Projectile.WhipSettings.RangeMultiplier = 2f;
         }
 
         private float Timer
@@ -331,16 +331,16 @@ namespace VFXPlus.Content.VFXTest.CraftyWhip
 
                 if (i == list.Count - 2)
                 {
-                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.1f, flip, 0);
+                    //Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(2f, 2f), frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.1f, flip, 0);
 
-                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition , frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
+                    //Main.EntitySpriteDraw(texture, pos - Main.screenPosition , frame, Color.SkyBlue with { A = 0 } * 1f, rotation, origin, scale * 1.05f, flip, 0);
 
-                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
+                    //Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, color, rotation, origin, scale, flip, 0);
                 }
                 else
                 {
 
-                    //Main.EntitySpriteDraw(texture, pos - Main.screenPosition + Main.rand.NextVector2Circular(1.5f, 1.5f), frame, Color.SkyBlue with { A = 0 } * 0.5f, rotation, origin, scale, flip, 0);
+                    Main.EntitySpriteDraw(texture, pos - Main.screenPosition, frame, lightColor, rotation, origin, scale, flip, 0);
                 }
 
 

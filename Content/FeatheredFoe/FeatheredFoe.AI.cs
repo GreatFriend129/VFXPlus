@@ -1311,6 +1311,32 @@ namespace VFXPlus.Content.FeatheredFoe
             passiveWindParticleDirection = 0f;
         }
 
+        //FF spawns feathers that orbit around player while wind blows in a certain direction
+        //After a second the feathers spin off and shoot in the direction the wind was blowing
+        public void WindDirShot()
+        {
+            int timeBeforeSpawnFeathers = 20;
+            int timeForFeahtersToSpin
+            
+            //Hover above player
+            float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
+
+            Vector2 goalPos = player.Center + new Vector2(0f, -250);
+            BasicMovementVariant3(goalPos, moveSpeed: hoverSpeed);
+
+            
+
+            if (timer = 0 && timer % 80 == 0)
+            {
+                Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+
+                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
+
+                windOrbRecoilPower = 0.5f;
+            }
+        }
+
+
         #region MovementCode
         //Based off Emode Cryogen
         void BasicMovementVariant1(Vector2 goalPos, float accel = 0.03f, float maxSpeed = 15, float minSpeed = 5, float decel = 0.06f, float slowdown = 30)

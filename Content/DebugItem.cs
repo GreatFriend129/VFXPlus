@@ -89,6 +89,36 @@ namespace VFXPlus.Content
 
             }
 
+            Vector2 impactCenter = Main.MouseWorld;
+
+            Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
+            Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 1f);
+
+            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.35f);
+            fgb.DrawWhiteCore = true;
+            d11.customData = fgb;
+
+
+            //Impact Dust
+            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.6f);
+            Color betweenPink2 = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
+
+
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 3, 0.8f, 0.8f);
+            Dust d1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
+            d1.customData = cpb2;
+            d1.velocity = new Vector2(-0.01f, 0f);
+            d1.fadeIn = 0.1f;
+
+            Dust d2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
+            d2.customData = cpb2;
+            d2.velocity = new Vector2(0.01f, 0f);
+            d2.fadeIn = 0.1f;
+
+
+            //int windFX = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
+            //Main.projectile[windFX].rotation = Main.rand.NextFloat(6.28f);
+
             //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, Main.myPlayer);
             //int windFX3 = Projectile.NewProjectile(null, player.Center + new Vector2(-200f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFXImOld>(), 0, 0, Main.myPlayer);
 
@@ -110,7 +140,7 @@ namespace VFXPlus.Content
             Vector2 velAAA = new Vector2(8f, 0f);
             //int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 220; i < 7; i++)
             {
                 float prog = (float)i / 5f;
 
@@ -127,8 +157,8 @@ namespace VFXPlus.Content
                 (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
                 
                 Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
-                Main.projectile[smoke].scale = 0.4f;// * Main.rand.NextFloat(0.5f, 1f);
-                Main.projectile[smoke].velocity *= 0.75f;
+                Main.projectile[smoke].scale = 0.2f;// * Main.rand.NextFloat(0.5f, 1f);
+                Main.projectile[smoke].velocity *= 0.35f;
             }
 
             return false;
