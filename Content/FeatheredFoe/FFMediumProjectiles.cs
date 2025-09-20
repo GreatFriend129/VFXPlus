@@ -628,7 +628,7 @@ namespace VFXPlus.Content.FeatheredFoe
                         bof.ParentProj = Projectile.whoAmI;
                         bof.orbitSpeed = 0.1f; //0.04
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
-                        bof.orbitDistance = 200f; //230
+                        bof.orbitDistance = 150f; //200
                         bof.orbitDir = startDir;
                     }
                 }
@@ -744,7 +744,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
 
             float minRange = 40f; //40f | 240 920 for full screen
-            float maxRange = 200f; //250
+            float maxRange = 150f; //200
             for (int i = 0; i < count; i++)
             {
 

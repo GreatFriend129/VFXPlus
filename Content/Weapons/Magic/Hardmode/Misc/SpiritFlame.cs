@@ -14,6 +14,9 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
+using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Particles;
+using VFXPlus.Content.QueenBee;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -66,6 +69,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     d.alpha = Main.rand.Next(0, 2);
                     d.noLight = false;
                 }
+
+                for (int i = 0; i < 7; i++)
+                {
+                    float velMult = Main.rand.NextFloat(2f, 6f);
+                    Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
+
+                    FireParticle fire = new FireParticle(projectile.Center, randomStart * velMult * 0.35f, 1f, Color.Purple, colorMult: 2f, bloomAlpha: 1.5f);
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
 
             if (timer % 5 == 0 && Main.rand.NextBool())
@@ -96,6 +108,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawAfterImage(projectile, false);
+            });
+
             Color purp = new Color(121, 7, 179) * inFadePower;
             Color purp2 = new Color(61, 2, 92);
 
@@ -112,26 +129,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float easeVal = Easings.easeInOutBack(inFadePower, 0f, 10f);
             Vector2 vec2Scale = new Vector2(easeVal, 1f);
 
-            //After-Image
-            for (int i = 0; i < previousRotations.Count; i++)
-            {
-                float progress = (float)i / previousRotations.Count;
-
-                Color col = (purp2 * 3f) * progress * inFadePower;
-
-                float size2 = (0.25f + (progress * 0.75f)) * projectile.scale;
-
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
-
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f, //0.5f
-                        previousRotations[i], TexOrigin, vec2Scale * size2, SpriteEffects.None);
-            }
-
-            //Orb glow
-            Vector2 orbScale = new Vector2(0.75f * inFadePower, 1.25f) * projectile.scale * 0.5f;
-            Main.EntitySpriteDraw(SoftGlow, drawPos, null, purp with { A = 0 } * inFadePower * 0.75f, projectile.rotation, SoftGlow.Size() / 2f, orbScale, SpriteEffects.None);
-
-
             //Border
             for (int i = 0; i < 8; i++)
             {
@@ -143,6 +140,59 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * inFadePower, projectile.rotation, TexOrigin, vec2Scale * projectile.scale, SpriteEffects.None);
             return false;
 
+        }
+
+        public void DrawAfterImage(Projectile projectile, bool returnImmediately)
+        {
+            Color purple = new Color(61, 2, 92);
+            Color purple2 = new Color(61, 2, 92);
+            Color purple3 = new Color(121, 7, 179);
+
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+
+
+            Vector2 posOffset = new Vector2(0f, -6f * projectile.scale).RotatedBy(projectile.rotation);
+            Vector2 drawPos = projectile.Center - Main.screenPosition + posOffset;
+
+            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
+            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+
+            float easeVal = Easings.easeInOutBack(inFadePower, 0f, 10f);
+            Vector2 vec2Scale = new Vector2(easeVal, 1f);
+
+            //After-Image
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Color col = (purple2 * 1.5f) * progress * inFadePower;
+
+                float size2 = (0.25f + (progress * 0.75f)) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 1f, //0.5f
+                        previousRotations[i], TexOrigin, vec2Scale * size2, SpriteEffects.None);
+            }
+
+
+
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Color[] cols = { purple3 * 0.75f, Color.Purple * 0.525f, purple * 0.375f };
+            float[] scales = { 1.15f, 1.6f, 2.5f };
+
+            float orbRot = projectile.rotation;
+            float orbAlpha = 0.65f * inFadePower;
+            Vector2 orbOrigin = orb.Size() / 2f;
+            Vector2 orbScale = new Vector2(0.55f * easeVal, 0.85f) * projectile.scale * 0.35f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -173,27 +223,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             for (int i = 0; i < 7 + Main.rand.Next(0, 3); i++)
             {
-                if (i > 4)
-                {
-                    Vector2 smvel = Main.rand.NextVector2Circular(1f, 1f) * Main.rand.NextFloat(1f, 3f);
-                    Dust sm = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<HighResSmoke>(), smvel, newColor: littleLessPurple * 1f, Scale: Main.rand.NextFloat(0.35f, 0.75f));
-                    sm.customData = DustBehaviorUtil.AssignBehavior_HRSBase(frameToStartFade: 5, fadeDuration: 25, velSlowAmount: 1f, 
-                        overallAlpha: 1f, drawSoftGlowUnder: true, softGlowIntensity: 1f);
-                }
-
                 Color col = Main.rand.NextBool() ? newPurple * 2f : newPurple;
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 5f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2f, 5f);
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.75f, 1.25f) * 1f);
                 d.fadeIn = Main.rand.Next(0, 4);
                 d.alpha = Main.rand.Next(0, 2);
                 d.noLight = false;
             }
+            
+            for (int i = 0; i < 15; i++)
+            {
+                float velMult = Main.rand.NextFloat(1.5f, 5f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(1f, 1f);
+
+                FireParticle fire = new FireParticle(projectile.Center, randomStart * velMult, 1.25f, Color.Purple, colorMult: 0.5f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
 
             //Light Dust
-            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: littleLessPurple * 2f, Scale: 0.2f);
+            //Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: littleLessPurple * 2f, Scale: 0.2f);
 
-            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-                overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
+            //softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+            //    overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
 
             //Sound
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_14") with { Pitch = .3f, MaxInstances = -1, PitchVariance = 0.2f, Volume = 0.3f };

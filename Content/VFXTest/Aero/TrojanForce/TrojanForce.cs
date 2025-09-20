@@ -34,9 +34,13 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
         bool isBlue = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, ai2: isBlue ? -1 : 1f);
+            Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, ai1: 0, ai2: isBlue ? -1 : 1f);
 
             isBlue = !isBlue;
+
+            //Projectile.NewProjectile(source, position, velocity, type, damage, knockback, player.whoAmI, ai1: 1, ai2: isBlue ? -1 : 1f);
+
+
             return false;
         }
     }
@@ -460,11 +464,17 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 isBlue = Projectile.ai[2] == 1;
             }
 
+            //Projectile.velocity = Projectile.velocity.RotatedBy(-0.02f);
+
             Player owner = Main.player[Projectile.owner];
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
             Projectile.Center = Main.GetPlayerArmPosition(Projectile) + Projectile.velocity * Timer;
-            Projectile.spriteDirection = Projectile.velocity.X >= 0f ? 1 : -1;
+            
+            if (Projectile.ai[1] == 0)
+                Projectile.spriteDirection = Projectile.velocity.X >= 0f ? 1 : -1;
+            else
+                Projectile.spriteDirection = Projectile.velocity.X >= 0f ? -1 : 1;
 
             Timer++;
 
@@ -482,6 +492,9 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 List<Vector2> points2 = Projectile.WhipPointsForCollision;
                 Projectile.FillWhipControlPoints(Projectile, points2);
                 SoundEngine.PlaySound(SoundID.Item153, points2[points2.Count - 1]);
+
+                //if (isBlue)
+                //    Projectile.NewProjectile(Projectile.GetSource_FromThis(), owner.Center, Projectile.velocity, ModContent.ProjectileType<TrojanForceWhipProjTryAgain>(), Projectile.damage, Projectile.knockBack, owner.whoAmI, ai2: isBlue ? -1 : 1f);
             }
 
             float swingProgress = Timer / swingTime;

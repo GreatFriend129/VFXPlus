@@ -250,16 +250,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
             float rot = projectile.rotation + MathHelper.PiOver2;
-            Color col = Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f);
+            Color col = Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.05f);
             Vector2 vec2Scale = new Vector2(1.15f, 0.6f) * projectile.scale * 0.4f * sineScale;
             
-            Main.EntitySpriteDraw(line, drawPos, null, Color.Black * projectile.Opacity * 0.3f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.Black * projectile.Opacity * 0.2f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(line, drawPos, null, col with { A = 0 } * projectile.Opacity * 0.75f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, col with { A = 0 } * projectile.Opacity * 0.5f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 1.25f, SpriteEffects.None);
                 
             Vector2 offset = new Vector2(0f, 10f * projectile.scale);
             Vector2 randomOffset = Main.rand.NextVector2Circular(1.5f, 1.5f);
-            Main.EntitySpriteDraw(line, drawPos + offset + randomOffset, null, Color.DeepSkyBlue with { A = 0 } * projectile.Opacity * 0.4f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 0.8f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos + offset + randomOffset, null, Color.DeepSkyBlue with { A = 0 } * projectile.Opacity * 0.25f * drawAlpha, rot, line.Size() / 2f, vec2Scale * 0.8f, SpriteEffects.None);
 
             return false;
 

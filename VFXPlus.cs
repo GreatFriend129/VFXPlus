@@ -28,6 +28,8 @@ namespace VFXPlus
             Instance = this;
         }
 
+        public static Effect SmokeColShader;
+
         public static Effect GlowingTrailShader;
 
         public static Effect BasicTrailShader;
@@ -59,6 +61,7 @@ namespace VFXPlus
             {
                 BasicTrailShader = Instance.Assets.Request<Effect>("Effects/TrailShaders/BasicTrailShader", AssetRequestMode.ImmediateLoad).Value;
                 TrailShaderGradient = Instance.Assets.Request<Effect>("Effects/TrailShaders/TrailShaderGradient", AssetRequestMode.ImmediateLoad).Value;
+                SmokeColShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokeColShader", AssetRequestMode.ImmediateLoad).Value;
             }
 
             var screenRef = new Ref<Effect>(VFXPlus.Instance.Assets.Request<Effect>("Effects/GlowDustShader", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value);
@@ -98,8 +101,11 @@ namespace VFXPlus
             {
                 BasicTrailShader = null;
                 TrailShaderGradient = null;
+                SmokeColShader = null;
                 Instance ??= null;
             }
+
+
         }
     }
 }

@@ -7,20 +7,15 @@ using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
-using ReLogic.Content;
 using VFXPlus.Common.Utilities;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using VFXPlus.Common.Interfaces;
 using VFXPlus.Common.Drawing;
 
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 {
-    
     public class DiamondStaff : GlobalItem 
     {
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
@@ -37,7 +32,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_43") with { Volume = 0.8f, Pitch = .25f, PitchVariance = 0.05f };
             SoundEngine.PlaySound(style4, player.Center);
 
-            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_etherian_portal_dryad_touch") with { Volume = .3f, Pitch = 1f, PitchVariance = .15f, MaxInstances = -1, };
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Dd2_etherian_portal_dryad_touch") with { Volume = .3f, Pitch = 1f, PitchVariance = .15f, MaxInstances = -1, };
             SoundEngine.PlaySound(style3, player.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_20") with { Volume = 0.65f, Pitch = .45f, PitchVariance = 0.1f };

@@ -117,7 +117,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 {
                     flag10 = true;
                 }
-                if ((!flag9 && projectile.ai[1] >= (float)num14) || (flag9 && projectile.ai[0] % 1f == 0f)) //VANILLA DIFFERENCE BECAUSE THIS SHIT SUCKS ASS %5
+                if ((!flag9 && projectile.ai[1] >= (float)num14) || (flag9 && projectile.ai[0] % 5f == 0f)) //VANILLA DIFFERENCE BECAUSE THIS SHIT SUCKS ASS %5 //Ok im going back on this
                 {
                     if (!flag9)
                     {

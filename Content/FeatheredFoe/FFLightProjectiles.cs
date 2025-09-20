@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
 using VFXPlus.Common.Utilities;
@@ -877,29 +878,32 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
+        public int targetPlayer = -1;
+
         //Makes the proj shoot in specific direction
         public bool dontAimAtPlayer = false;
 
         //What direction to shoot (if we are not aiming at player)
         public float dirToShoot = 0f;
 
+        //How fast the dash is
+        public float dashSpeed = 26;
 
-        public float rotGoal = 0f;
+
         float dashVal = 0f;
-
         float pulseIntensity = 0f;
 
-        public int targetPlayer = -1;
         public override void AI()
         {
-            Player target = Main.player[targetPlayer];
+            Player target = dontAimAtPlayer ? Main.player[Main.myPlayer] : Main.player[targetPlayer];
 
             if (timer == 0)
             {
+                //Store initial velocity
                 Projectile.ai[0] = Projectile.velocity.Length();
-                previousRotations = new List<float>();
-                previousPostions = new List<Vector2>();
             }
+
+            float timeToSpin = 45f;
 
             //Spin and fade vel
             if (advancer == 0)
@@ -908,9 +912,13 @@ namespace VFXPlus.Content.FeatheredFoe
                 Projectile.ai[0] *= 0.93f;
 
                 float rotGoal = (target.Center - Projectile.Center).ToRotation();
-                Projectile.rotation = MathHelper.Lerp(rotGoal + (MathF.PI * 12f), rotGoal, Easings.easeOutCirc(timer / 45f));
 
-                if (timer == 45)
+                if (dontAimAtPlayer)
+                    rotGoal = dirToShoot;
+
+                Projectile.rotation = MathHelper.Lerp(rotGoal + (MathF.PI * 12f), rotGoal, Easings.easeOutCirc(timer / timeToSpin));
+
+                if (timer == timeToSpin)
                 {
                     SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_ogre_spit") with { Pitch = 1f, PitchVariance = .33f, MaxInstances = -1 };
                     SoundEngine.PlaySound(style, Projectile.Center);
@@ -933,7 +941,7 @@ namespace VFXPlus.Content.FeatheredFoe
             else if (advancer == 1)
             {
                 float prog = Math.Clamp(timer / 20f, 0f, 1f);
-                dashVal = MathHelper.Lerp(0f, 26f, Easings.easeOutQuad(prog));//easeoutCubic
+                dashVal = MathHelper.Lerp(0f, dashSpeed, Easings.easeOutQuad(prog));//easeoutCubic
 
                 Projectile.velocity = Projectile.rotation.ToRotationVector2() * dashVal;
             }
@@ -944,13 +952,13 @@ namespace VFXPlus.Content.FeatheredFoe
 
             int trailCount = 10;
             previousRotations.Add(Projectile.rotation);
-            previousPostions.Add(Projectile.Center);
+            previousPositions.Add(Projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             pulseIntensity = Math.Clamp(MathHelper.Lerp(pulseIntensity, -0.25f, 0.03f), 0f, 2f);
 
@@ -959,19 +967,17 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - Projectile.velocity * 0.25f;
 
-
                 float dustScale = Main.rand.NextFloat(0.25f, 0.35f) * 1.5f;
 
                 Dust smoke = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowFlare>(), dustVel, newColor: Color.DodgerBlue, Scale: dustScale);
                 smoke.alpha = 2;
-
             }
 
             timer++;
         }
 
-        public List<float> previousRotations;
-        public List<Vector2> previousPostions;
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
 
         public override bool PreDraw(ref Color lightColor)
         {
@@ -983,7 +989,7 @@ namespace VFXPlus.Content.FeatheredFoe
             Texture2D Twirl = Mod.Assets.Request<Texture2D>("Assets/Pixel/PixelSwirl").Value;
 
             #region after image
-            if (previousRotations != null && previousPostions != null)
+            if (previousRotations != null && previousPositions != null)
             {
                 for (int i = 0; i < previousRotations.Count; i++)
                 {
@@ -996,13 +1002,13 @@ namespace VFXPlus.Content.FeatheredFoe
                     Color col = Color.Lerp(Color.DodgerBlue, betweenBlue, progress) * progress;
 
                     float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
-                    Main.EntitySpriteDraw(FeatherGray, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f,
+                    Main.EntitySpriteDraw(FeatherGray, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f,
                             previousRotations[i], FeatherGray.Size() / 2f, size2, SpriteEffects.None);
 
                     Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
 
                     if (advancer != 0)
-                        Main.EntitySpriteDraw(FeatherWhite, previousPostions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f,
+                        Main.EntitySpriteDraw(FeatherWhite, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f,
                             previousRotations[i], FeatherGray.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
 
@@ -1182,19 +1188,13 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.friendly = false;
 
             Projectile.tileCollide = false;
-            Projectile.timeLeft = 22170;
+            Projectile.timeLeft = 170;
         }
 
-        public Vector2 originalDir = Vector2.Zero;
-        
-        //How far the feathers should orbit around the player
-        public float orbitDistance = 0f;
-        
-        //How fast the feathers should orbit
-        public float orbitSpeed = 0f;
-        
-        //(1 or -1)
-        public int orbitDir = 1;
+
+        public Vector2 orbitVector = Vector2.Zero;
+        public float orbitSpeed = 0.05f;
+       
 
         public int playerID = -1;
         public bool isAttacthed = true;
@@ -1214,16 +1214,18 @@ namespace VFXPlus.Content.FeatheredFoe
             if (target.active == false)
                 Projectile.Kill();
 
-            //Projectile.velocity = Vector2.Zero;
+            Projectile.velocity = Vector2.Zero;
 
-            Vector2 vecdir = originalDir.SafeNormalize(Vector2.UnitX);
-            Vector2 orbitVector = vecdir.RotatedBy(timer * orbitSpeed * orbitDir) * orbitDistance;
+            float lerpToPointProg = Math.Clamp(timer / 80f, 0f, 1f);
+            Projectile.Center = Vector2.Lerp(Projectile.Center, target.Center + orbitVector, lerpToPointProg);
 
-            float lerpToPointProg = Math.Clamp((float)timer / 40f, 0f, 1f);
-            Projectile.Center = Vector2.Lerp(Projectile.Center, target.Center + orbitVector, 1f);
+            float rotProg = Math.Clamp(timer / 25f, 0f, 1f);
+            float rot = MathHelper.Lerp(orbitVector.ToRotation(), orbitVector.ToRotation() + MathHelper.PiOver2 * (orbitSpeed > 0 ? 1f : -1), Easings.easeInSine(rotProg));
+            Projectile.rotation = rot;
 
+            orbitVector = orbitVector.RotatedBy(0.03f * orbitSpeed) * 1f;
 
-            Projectile.rotation = orbitVector.ToRotation() + MathHelper.PiOver2 * orbitDir;
+            orbitSpeed *= 0.97f;
 
             int trailCount = 10; //10
             previousRotations.Add(Projectile.rotation);
@@ -1255,7 +1257,7 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 float progress = (float)i / previousRotations.Count;
 
-                Vector2 afterImagePos = Main.projectile[playerID].Center - Main.screenPosition + previousPositions[i];
+                Vector2 afterImagePos = Main.player[playerID].Center - Main.screenPosition + previousPositions[i];
 
                 float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
 
@@ -1269,7 +1271,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 Vector2 vec2Scale = new Vector2(1.5f, 0.25f) * size;
 
                 Main.EntitySpriteDraw(FeatherWhite, afterImagePos, null, col with { A = 0 } * 0.85f * drawAlpha,
-                        previousRotations[i], FeatherGray.Size() / 2f, vec2Scale * drawScale, SpriteEffects.None);
+                        previousRotations[i], FeatherWhite.Size() / 2f, vec2Scale * drawScale, SpriteEffects.None);
             }
             #endregion
 
@@ -1289,7 +1291,12 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public override void OnKill(int timeLeft)
         {
-            //Vector2 towardsPlayer = 
+            Vector2 Tangent = (Projectile.Center - Main.player[playerID].Center).SafeNormalize(Vector2.UnitX); 
+
+            int spinFeather = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, Tangent * 1f, ModContent.ProjectileType<SpinShotFeather>(), 10, 0, Main.myPlayer);
+
+            (Main.projectile[spinFeather].ModProjectile as SpinShotFeather).dontAimAtPlayer = true;
+            (Main.projectile[spinFeather].ModProjectile as SpinShotFeather).dirToShoot = new Vector2(1f, 0f).ToRotation();
 
 
             for (int i = 0; i < 3; i++)

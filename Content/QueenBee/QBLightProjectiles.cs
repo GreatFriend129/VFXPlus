@@ -693,6 +693,7 @@ namespace VFXPlus.Content.QueenBee
 
         int timer = 0;
 
+
         float overallScale = 0f;
         float overallAlpha = 1f;
         public override void AI()
@@ -741,15 +742,28 @@ namespace VFXPlus.Content.QueenBee
             });
             DrawSmoke(true);
 
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                Vector2 drawPos = Projectile.Center - Main.screenPosition;
+                Color myCol = Color.Lerp(Color.OrangeRed, Color.Red, 0.25f);
+
+                Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+                Main.spriteBatch.Draw(Ball, drawPos, null, myCol with { A = 0 } * Easings.easeInSine(overallAlpha) * 0.25f, Projectile.rotation, Ball.Size() / 2f, Projectile.scale * overallScale * 1.45f, 0, 0f); //0.3
+
+            });
+
             return false;
         }
 
         Effect myEffect = null;
-        bool AorB = Main.rand.NextBool();
+        int smokeTex = Main.rand.NextBool(3) ? 4 : 1;
+        int maskTex = Main.rand.NextBool() ? 2 : 1;
         public void DrawSmoke(bool returnImmediately)
         {
             if (returnImmediately)
                 return;
+
+            //TODO: put the underglow in another pixelation system for TransformMatrix
 
             //float colorTimeOffset = (float)Main.timeForVisualEffects * 0.5f;
             //float sin1 = (float)Math.Sin(MathHelper.ToRadians(colorTimeOffset));
@@ -762,10 +776,13 @@ namespace VFXPlus.Content.QueenBee
             //float b = middle + length * sin3;
             //Color color = new Color((int)r, (int)g, (int)b);
 
+            //4
 
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/WispSmoke" + smokeTex).Value; //spark_02 | smoke_02
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/WispSmoke").Value; //spark_02 | smoke_02
-            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Smoke/InvertMask").Value; //WispSmokeMask, LavaNoise, noise/Swirl, vnoise is fine, Trail_2 
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Smoke/InvertMask" + maskTex).Value; 
+            
+            //Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Smoke/InvertMask").Value; //WispSmokeMask, LavaNoise, noise/Swirl, vnoise is fine, Trail_2 
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             Rectangle sourceRectangle;// = Smoke.Frame(1, 6, frameY: Projectile.frame);
@@ -778,7 +795,7 @@ namespace VFXPlus.Content.QueenBee
 
             float maskVal = 1f - overallAlpha;// 0.5f + ((float)Math.Sin(Main.timeForVisualEffects * 0.05f) * 0.5f);
 
-            Color myCol = Color.OrangeRed;// Color.Lerp(col, Color.Red, Easings.easeInOutQuad(maskVal));
+            Color myCol = Color.Lerp(Color.OrangeRed, Color.Red, 0.25f);
 
             myEffect.Parameters["color"].SetValue(myCol.ToVector3() * 15f * overallAlpha); //30
             myEffect.Parameters["glowThreshold"].SetValue(0.8f); //0.9f
@@ -789,19 +806,26 @@ namespace VFXPlus.Content.QueenBee
 
             myEffect.Parameters["maskTexture"].SetValue(Mask);
 
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-            Main.spriteBatch.Draw(Ball, drawPos, null, myCol with { A = 0 } * Easings.easeInSine(overallAlpha) * 0.25f, Projectile.rotation, Ball.Size() / 2f, Projectile.scale * overallScale * 1.45f, SE, 0f); //0.3
+            //Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            //Main.spriteBatch.Draw(Ball, drawPos, null, myCol with { A = 0 } * Easings.easeInSine(overallAlpha) * 0.25f, Projectile.rotation, Ball.Size() / 2f, Projectile.scale * overallScale * 1.45f, SE, 0f); //0.3
 
 
             //Main Tex
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
+            myEffect.CurrentTechnique.Passes[0].Apply();
             Main.spriteBatch.Draw(Smoke, drawPos, null, myCol * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.25f, SE, 0f); //0.3
 
-            //myEffect.Parameters["color"].SetValue(Color.GreenYellow.ToVector3() * 15f * overallAlpha); //30
-            //myEffect.CurrentTechnique.Passes[0].Apply();
+            myEffect.Parameters["color"].SetValue(Color.GreenYellow.ToVector3() * 15f * overallAlpha); //30
+            myEffect.CurrentTechnique.Passes[0].Apply();
             //Main.spriteBatch.Draw(Smoke, drawPos + new Vector2(200f, 0f), null, myCol * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.25f, SE, 0f); //0.3
+
+
+            myEffect.Parameters["color"].SetValue(Color.SkyBlue.ToVector3() * 10f * overallAlpha); //30
+            myEffect.CurrentTechnique.Passes[0].Apply();
+            //Main.spriteBatch.Draw(Smoke, drawPos + new Vector2(400f, 0f), null, myCol * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.25f, SE, 0f); //0.3
+
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);

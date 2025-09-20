@@ -36,6 +36,7 @@ using VFXPlus.Content.VFXTest.Aero.Oblivion;
 using VFXPlus.Content.VFXTest.Aero.Sword;
 using static log4net.Appender.ColoredConsoleAppender;
 using System.Xml.Linq;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content
@@ -70,15 +71,16 @@ namespace VFXPlus.Content
         {
             if (player.altFunctionUse == 2)
             {
-                Vector2 pos = Main.MouseWorld;
-                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
+                //ShaderParticleHandler.RemoveParticle();
+                //Vector2 pos = Main.MouseWorld;
+                //NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
                 return false;
             }
 
-            for (int iaa = -3; iaa < -224; iaa++)
+            for (int iaa = -3; iaa < -4; iaa++)
             {
                 Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * -10f;
-                float curvePower = iaa * 0.009f;
+                float curvePower = iaa * 0.05f; //0.1 | 0.2
 
                 int curveFeather = Projectile.NewProjectile(null, Main.MouseWorld, vel, ModContent.ProjectileType<CurvingFeather>(), 1, 0, Main.myPlayer);
 
@@ -89,35 +91,78 @@ namespace VFXPlus.Content
 
             }
 
-            Vector2 impactCenter = Main.MouseWorld;
 
-            Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
-            Dust d11 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<FeatheredGlowDust>(), Velocity: Vector2.Zero, newColor: between, Scale: 1f);
+            //Vector2 myvel = new Vector2(0f, -1f).RotatedByRandom(0.25f) * Main.rand.NextFloat(8f, 12f);
+            //FireParticle fire = new FireParticle(Main.MouseWorld, myvel, 1.25f, Color.Purple, colorMult: 2f, bloomAlpha: 1.25f);
+            //ShaderParticleHandler.SpawnParticle(fire);
 
-            FeatheredGlowBehavior fgb = new FeatheredGlowBehavior(AlphaChangeSpeed: 0.65f, timeToChangeAlpha: 6, ScaleChangeSpeed: 1.1f, timeToKill: 120, OverallAlpha: 0.35f);
-            fgb.DrawWhiteCore = true;
-            d11.customData = fgb;
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);
+            Color purple3 = new Color(121, 7, 179);
 
-
-            //Impact Dust
-            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.6f);
-            Color betweenPink2 = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
-
-
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.55f, true, 3, 0.8f, 0.8f);
-            Dust d1 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f);
-            d1.fadeIn = 0.1f;
-
-            Dust d2 = Dust.NewDustPerfect(impactCenter, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: betweenPink * 0.25f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f);
-            d2.fadeIn = 0.1f;
+            for (int i = 0; i < 14; i++)
+            {
+                float prog = (float)i / 17f;
 
 
-            //int windFX = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PopStar>(), 0, 0, Main.myPlayer);
-            //Main.projectile[windFX].rotation = Main.rand.NextFloat(6.28f);
+                Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 1.5f;
+
+                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1f * Main.rand.NextFloat(1f, 1.5f), purple3, colorMult: 2f, bloomAlpha: 1.5f, AlphaFade: 0.94f, VelFade: 0.9f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+            }
+
+            for (int i = 220; i < 17; i++)
+            {
+                float prog = (float)i / 17f;
+
+
+                Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 2f;
+
+                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.4f), colorMult: 2f, bloomAlpha: 1.5f, AlphaFade: 0.94f, VelFade: 0.9f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+            }
+
+            for (int i = 220; i < 7; i++)
+            {
+                float prog = (float)i / 5f;
+
+                //if (i == 0)
+                //    i = 200;
+
+                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
+
+                float velMult = Main.rand.NextFloat(2f, 6f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
+                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -12f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
+                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, randomStart * velMult, ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
+
+                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
+
+                //Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
+                Main.projectile[smoke].scale = 0f;// * Main.rand.NextFloat(0.5f, 1f);
+                Main.projectile[smoke].velocity *= 0.5f;
+
+
+                FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.25f), colorMult: 1f, bloomAlpha: 1.25f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+                //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);
+                //ShaderParticleHandler.SpawnParticle(fire);
+            }
+
+            int featherCount = 0;
+            for (int i = 0; i < featherCount; i++)
+            {
+                float prog = (i + 1f) / (float)featherCount; 
+
+                int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<OrbitPlayerFeather>(), 10, 0, player.whoAmI);
+
+                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).playerID = player.whoAmI;
+                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).orbitSpeed = 11f;
+                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).orbitVector = new Vector2(200, 0f).RotatedBy(MathHelper.TwoPi * prog);
+            }
 
             //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, Main.myPlayer);
             //int windFX3 = Projectile.NewProjectile(null, player.Center + new Vector2(-200f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFXImOld>(), 0, 0, Main.myPlayer);
@@ -140,30 +185,9 @@ namespace VFXPlus.Content
             Vector2 velAAA = new Vector2(8f, 0f);
             //int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
 
-            for (int i = 220; i < 7; i++)
-            {
-                float prog = (float)i / 5f;
-
-                //if (i == 0)
-                //    i = 200;
-
-                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
-
-                float velMult = Main.rand.NextFloat(1f, 6f);
-                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult);
-                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -10f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
-                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, randomStart * 4f, ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
-
-                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
-                
-                Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
-                Main.projectile[smoke].scale = 0.2f;// * Main.rand.NextFloat(0.5f, 1f);
-                Main.projectile[smoke].velocity *= 0.35f;
-            }
-
             return false;
 
-            Color purple3 = new Color(121, 7, 179);
+            //Color purple3 = new Color(121, 7, 179);
             Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.2f);
 
             for (int i = 220; i < 13; i++)

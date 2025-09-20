@@ -63,17 +63,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 previousPositions.RemoveAt(0);
 
 
-            float timeForPopInAnim = 21;
-            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
+            float timeForPopInAnim = 32;
+            float animProgress = Math.Clamp((timer + 8) / timeForPopInAnim, 0f, 1f);
 
-            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1f)) * 1f;
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 3f)) * 1f;
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.09f), 0f, 1f);
 
             int timeForBloomGrowAnim = 28;
             float bloomGrowProgress = Math.Clamp((float)timer / timeForBloomGrowAnim, 0f, 1f);
             bloomVel = Vector2.Lerp(Vector2.Zero, projectile.velocity, Easings.easeOutQuad(bloomGrowProgress));
 
-            if (timer % 3 == 0 && Main.rand.NextBool() && timer > 5)
+            if (timer % 3 == 0 && Main.rand.NextBool(2) && timer > 5)
             {
                 Color purp = new Color(255, 85, 255); //135
 
@@ -129,44 +129,41 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             });
             DrawVertexTrail(projectile, true);
 
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            //Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Vector2 TexOrigin = vanillaTex.Size() / 2f;
-            SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            //Vector2 TexOrigin = vanillaTex.Size() / 2f;
+            //SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            float scale = projectile.scale * overallScale * 0f;
-            float rot = projectile.rotation;
+            //float scale = projectile.scale * overallScale * 0f;
+            //float rot = projectile.rotation;
 
 
             //Draw FlareLine
             Color purp = new Color(255, 85, 255); //135
             Color purp2 = new Color(210, 40, 210); //135
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/GlowingFlare").Value;
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
             Texture2D lineHalf = Mod.Assets.Request<Texture2D>("Assets/Pixel/Medusa_Gray").Value;
 
             //Bloom
             Vector2 bloomOrigin = new Vector2(0f, lineHalf.Height / 2f);
             Vector2 bloomScale = new Vector2(0.1f * bloomVel.Length(), 1.5f);
-            Vector2 bloomScale2 = new Vector2(0.25f, 1.5f);
 
-            Main.EntitySpriteDraw(lineHalf, projectile.Center - Main.screenPosition, null, purp2 with { A = 0 } * 0.5f * overallAlpha,
+            Main.EntitySpriteDraw(lineHalf, drawPos, null, purp2 with { A = 0 } * 0.5f * overallAlpha,
                 projectile.velocity.ToRotation() + MathHelper.Pi, bloomOrigin, bloomScale, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(lineHalf, projectile.Center - Main.screenPosition, null, purp2 with { A = 0 } * 0.5f * overallAlpha, 
-                projectile.velocity.ToRotation(), bloomOrigin, bloomScale2, SpriteEffects.None);
 
-            Vector2 lineScale = new Vector2(1f, 1.2f * overallScale) * 1.15f;
+            Vector2 lineScale = new Vector2(0.75f, 1.16f * overallScale);
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, purp with { A = 0 } * 1f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.65f * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos + Main.rand.NextVector2Circular(1.4f, 1.4f), null, purp with { A = 0 } * overallAlpha * 0.75f,
+                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.8f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, purp with { A = 0 } * 1.5f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.45f * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos + Main.rand.NextVector2Circular(0.7f, 0.7f), null, purp with { A = 0 } * overallAlpha * 1f,
+                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.55f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.3f * overallAlpha,
-                projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(0.8f, 0.5f * overallScale) * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos + Main.rand.NextVector2Circular(0.35f, 0.35f), null, Color.White with { A = 0 } * overallAlpha * 1f,
+                projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * 0.3f, SpriteEffects.None);
 
             return false;
 

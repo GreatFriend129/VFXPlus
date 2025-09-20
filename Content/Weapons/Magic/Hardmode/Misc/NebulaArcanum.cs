@@ -735,6 +735,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
+
             bool doubleTrail = false;
             if (doubleTrail)
             {
@@ -830,8 +831,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Color col2 = isRed ? purple * 2f : Color.HotPink;
 
             Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, col2 with { A = 0 }, drawRot, TexOrigin, scale * 0.8f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(1.25f, 1.25f), null, col1 with { A = 0 }, drawRot, TexOrigin, scale * 0.55f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.75f, 0.75f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.35f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.7f, 0.7f), null, col1 with { A = 0 }, drawRot, TexOrigin, scale * 0.55f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.35f, 0.35f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.35f, SpriteEffects.None, 0f);
 
             return false;
         }
@@ -859,11 +860,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     if (isRed)
                         col = Color.Lerp(purple * 2f, purple3 * 2f, Easings.easeInCirc(progress));
                     else
-                        col = Color.Lerp(Color.DeepPink, Color.HotPink, Easings.easeInCirc(progress));
+                        col = Color.Lerp(Color.DeepPink, Color.DeepPink, Easings.easeInCirc(progress));
 
                     float size2 = Easings.easeInSine(progress) * projectile.scale * 1f;
 
-                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
+                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(1f * progress, 1f);
 
                     Vector2 newVec2 = new Vector2(0.5f, 0.35f) * size2;
                     Vector2 newVec22 = new Vector2(0.5f, 0.10f) * size2;

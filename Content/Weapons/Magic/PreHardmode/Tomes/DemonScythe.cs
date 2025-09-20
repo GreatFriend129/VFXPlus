@@ -37,13 +37,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle stylees = new SoundStyle("Terraria/Sounds/Item_117") with { Pitch = .45f, PitchVariance = .25f, Volume = 0.2f, MaxInstances = -1 };
+            SoundStyle stylees = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_117") with { Pitch = .45f, PitchVariance = .25f, Volume = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(stylees, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_book_staff_cast_0") with { Volume = 0.3f, Pitch = -0.25f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Dd2_book_staff_cast_0") with { Volume = 0.3f, Pitch = -0.25f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, player.Center);
 
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_8") with { Volume = 0.85f, PitchVariance = 0.1f, Pitch = .05f, MaxInstances = -1, }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_8") with { Volume = 0.85f, PitchVariance = 0.1f, Pitch = .05f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(style, player.Center);
 
             return true;
@@ -148,7 +148,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawOrb(projectile, true);
                 DrawAfterImage(projectile, false);
             });
 
@@ -255,45 +254,12 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
         }
 
-        public void DrawOrb(Projectile projectile, bool giveUp)
-        {
-            if (giveUp)
-                return;
-
-            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-
-            Color newPurple = new Color(61, 2, 92) * 1f;
-            Color darkPurple = new Color(42, 2, 82) * 1f;
-            Color purple3 = new Color(135, 15, 209);
-
-            //Glow
-            Color[] cols = { Color.White, purple3, purple3 * 1.25f };
-            float[] scales = { 0.85f, 1.35f, 2.5f };
-
-            float orbRot = projectile.rotation - MathHelper.PiOver4;
-            float orbAlpha = 0.15f;
-            float orbScale = 0.35f * overallScale * projectile.scale;
-
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 255 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 255 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 255 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
-        }
-
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Item_43") with { Volume = .25f, Pitch = -.32f, PitchVariance = .15f, MaxInstances = -1, }; 
-            SoundEngine.PlaySound(style, projectile.Center);
-
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_60") with { Volume = .15f, Pitch = .15f, PitchVariance = .12f, MaxInstances = -1, }; 
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_60") with { Volume = .15f, Pitch = .15f, PitchVariance = .12f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(style2, projectile.Center);
 
-            SoundStyle styleNormal = new SoundStyle("Terraria/Sounds/Item_10") with { Volume = 0.8f, Pitch = .15f, MaxInstances = -1, }; 
+            SoundStyle styleNormal = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_10") with { Volume = 0.68f, Pitch = .1f, MaxInstances = -1, }; 
             SoundEngine.PlaySound(styleNormal, projectile.Center);
 
 

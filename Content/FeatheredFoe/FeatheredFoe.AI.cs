@@ -1316,7 +1316,7 @@ namespace VFXPlus.Content.FeatheredFoe
         public void WindDirShot()
         {
             int timeBeforeSpawnFeathers = 20;
-            int timeForFeahtersToSpin
+            int timeForFeahtersToSpin;
             
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
@@ -1326,7 +1326,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             
 
-            if (timer = 0 && timer % 80 == 0)
+            if (timer == 0 && timer % 80 == 0)
             {
                 Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
 

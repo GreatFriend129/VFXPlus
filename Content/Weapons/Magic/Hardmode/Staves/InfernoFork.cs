@@ -20,6 +20,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 using static tModPorter.ProgressUpdate;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.QueenBee;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -53,7 +54,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            if (timer % 2 == 0 && timer > 10)
+            if (timer % 1 == 0 && timer > 10 && Main.rand.NextBool(3))
+            {
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.5f, 1.5f) - projectile.velocity * 1.25f;
+
+
+                FireParticle fire = new FireParticle(dustPos + new Vector2(0f, 0f) + Main.rand.NextVector2Circular(5f, 5f), dustVel, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 1f, bloomAlpha: 2f, 
+                    AlphaFade: 0.95f, RotPower: 0.01f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+                //FireParticle fire2 = new FireParticle(dustPos + new Vector2(0f, 0f), dustVel * 0.5f, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0f), colorMult: 1f, bloomAlpha: 2f, 
+                //    AlphaFade: 0.94f, RotPower: 0.01f);
+                //ShaderParticleHandler.SpawnParticle(fire2);
+            }
+
+            if (timer % 2 == 0 && timer > 10 && false)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.5f, 1.5f) - projectile.velocity * 2f;
@@ -180,6 +196,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.OrangeRed * 0.35f);
                 d2.customData = cpb2;
                 d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+
+
             }
 
             #region vanillaAI
@@ -305,7 +323,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         float overallAlpha = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D ball2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            Texture2D ball2 = CommonTextures.feather_circle128PMA.Value;
             Vector2 drawPos = Projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
             float drawScale = Projectile.scale * Easings.easeOutCirc(overallScale);
             float ball2Scale = drawScale * 2.9f;
@@ -360,7 +378,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Noise_1").Value);
             myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGrad").Value);
             myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/noise").Value);
-            myEffect.Parameters["uTime"].SetValue(timer * -0.01f);
+            myEffect.Parameters["uTime"].SetValue(timer * -0.015f);
             myEffect.Parameters["flowSpeed"].SetValue(-1.5f); //-0.75
             myEffect.Parameters["distortStrength"].SetValue(0.1f);
             myEffect.Parameters["colorIntensity"].SetValue(1.5f * overallAlpha);

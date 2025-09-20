@@ -197,6 +197,7 @@ Projectiles: {
 	SmokeTest3.DisplayName: Smoke Test3
 	SmokeTest4.DisplayName: Smoke Test4
 	SmokeTest5.DisplayName: Smoke Test5
+	OrbitPlayerFeather.DisplayName: Orbit Player Feather
 }
 
 Configs: {
