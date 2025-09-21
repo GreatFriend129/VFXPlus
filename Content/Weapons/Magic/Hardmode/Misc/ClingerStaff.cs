@@ -16,6 +16,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 using rail;
 using VFXPlus.Common.Drawing;
 using Terraria.Audio;
+using VFXPlus.Content.Particles;
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 {
@@ -212,7 +213,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             }
 
-            if (timer % 1 == 0 && !shouldStopDust)
+            if (timer % 1 == 0 && !shouldStopDust && false)
             {
                 Vector2 vel = new Vector2(0f, Main.rand.NextFloat(-5f, -26f));
 
@@ -221,6 +222,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 d.rotation = Main.rand.NextFloat(6.28f);
                 d.customData = new MediumSmokeBehavior(Main.rand.Next(8, 14) + 5, 0.94f, 0.01f, 0.075f); //12 28
+            }
+
+            if (timer % 1 == 0 && !shouldStopDust)
+            {
+                Vector2 vel = new Vector2(0f, -8f).RotatedByRandom(0.2f) * Main.rand.NextFloat(1.5f, 5f);
+                FireParticle fire = new FireParticle(Projectile.Center, vel, 1.25f, new Color(100, 255, 34), colorMult: 1f, bloomAlpha: 0f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
 
@@ -249,8 +258,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 origin1 = new Vector2(0f, glow1.Height / 2f);
 
             //Black Base
-            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale3, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.25f * true_width, Projectile.rotation, origin1, newScale2, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.35f * true_width, Projectile.rotation, origin1, newScale3, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(glow1, Projectile.Center - Main.screenPosition + new Vector2(-50f, 0f).RotatedBy(Projectile.rotation), null, Color.Black * 0.35f * true_width, Projectile.rotation, origin1, newScale2, SpriteEffects.None, 0f);
 
             //Bloom
             Color newGreen = new Color(100, 255, 34) * true_width;
@@ -259,7 +268,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
             //Use Dusts layer so we can draw on top of black underglow
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction("Dusts", () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
                 DrawFire(false);
             });

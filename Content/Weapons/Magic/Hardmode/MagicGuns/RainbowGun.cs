@@ -328,9 +328,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             Main.EntitySpriteDraw(bloom, drawPosStart, null, rainbow with { A = 0 } * true_alpha * 0.4f, starRotStart, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(3f, 3f), null, rainbow with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(1f, 1f), null, rainbow with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosStart + Main.rand.NextVector2Circular(4f, 4f), null, Color.White with { A = 0 } * (ease3 * true_alpha), starRotStart, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
             //End Portal
             float lerpXVal = MathHelper.Lerp(1f, 0.6f, headCollidePower - 1f);
@@ -349,9 +349,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             Main.EntitySpriteDraw(bloom, drawPosEnd, null, rainbow with { A = 0 } * true_alpha * 0.4f, starRotEnd, bloom.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(3f, 3f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(5f, 5f), null, Color.White with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(1f, 1f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(2f, 2f), null, rainbow with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1.75f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, drawPosEnd + Main.rand.NextVector2Circular(4f, 4f), null, Color.White with { A = 0 } * true_alpha, starRotEnd, portal.Size() / 2, v2Scale * 1f, SpriteEffects.None);
 
             #endregion
 
@@ -395,7 +395,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
-            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGradLoop").Value);
+            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
             myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
 
@@ -409,11 +409,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["grad3Speed"].SetValue(3.1f / 3f);
             myEffect.Parameters["grad4Speed"].SetValue(2.3f / 3f);
 
-            myEffect.Parameters["tex1Mult"].SetValue(1.5f);
-            myEffect.Parameters["tex2Mult"].SetValue(1f);
-            myEffect.Parameters["tex3Mult"].SetValue(1f);
-            myEffect.Parameters["tex4Mult"].SetValue(2f);
-            myEffect.Parameters["totalMult"].SetValue(1.25f);
+            myEffect.Parameters["tex1Mult"].SetValue(1.25f);
+            myEffect.Parameters["tex2Mult"].SetValue(1.5f);
+            myEffect.Parameters["tex3Mult"].SetValue(1.15f);
+            myEffect.Parameters["tex4Mult"].SetValue(2.5f);
+            myEffect.Parameters["totalMult"].SetValue(1f);
 
             //We want the number of repititions to be relative to the number of points
             float repValue = 0.05f * l_positions.Count;

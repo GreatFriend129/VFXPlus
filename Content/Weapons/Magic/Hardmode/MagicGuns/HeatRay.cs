@@ -15,6 +15,7 @@ using VFXPlus.Common.Utilities;
 using Terraria.Graphics;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
@@ -39,7 +40,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             //Smoke
             Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.45f);
-            for (int i = 0; i < 15; i++)
+            for (int i = 220; i < 15; i++)
             {
                 float prog = (float)i / 15f;
 
@@ -50,6 +51,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5, 0.92f, 0.01f, 0.12f); //12 28
 
                 d.velocity += velocity * 0.45f * (prog);
+            }
+
+            for (int i = 0; i < 17; i++)
+            {
+                float prog = (float)i / 7f;
+
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(2f, 15f);
+                float myScale = Main.rand.NextFloat(0.85f, 1.2f);
+                FireParticle fire = new FireParticle(spawnPos, vel, myScale, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                fire.scaleFadePower = 0.97f;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
 
@@ -104,6 +116,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                 dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
                     0.5f, 0.25f);
+            }
+
+            if (timer % 1 == 0 && false)
+            {
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.25f) * Main.rand.NextFloat(4f, 10f);
+                float myScale = Main.rand.NextFloat(1f, 1.5f);
+                FireParticle fire = new FireParticle(projectile.Center, vel, myScale, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 2f, AlphaFade: 0.89f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+                //FireParticle fire2 = new FireParticle(projectile.Center + projectile.velocity * 0.5f, vel.RotateRandom(0.1f), myScale, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 0.5f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                //ShaderParticleHandler.SpawnParticle(fire2);
             }
 
             timer++;
@@ -230,7 +253,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             true_width = MathHelper.Lerp(1f, 0f, Easings.easeOutSine(animProgress));
 
-            if (timer == 100 || true_width <= 0.07f)
+            if (timer == 100 || true_width <= 0.12f)
                 Projectile.active = false;
 
             if (timer != 0)

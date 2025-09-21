@@ -37,6 +37,7 @@ using VFXPlus.Content.VFXTest.Aero.Sword;
 using static log4net.Appender.ColoredConsoleAppender;
 using System.Xml.Linq;
 using VFXPlus.Content.Particles;
+using System.Timers;
 
 
 namespace VFXPlus.Content
@@ -88,64 +89,45 @@ namespace VFXPlus.Content
                 {
                     cf.curveValue = curvePower;
                 }
-
             }
+
+            float sin1 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f);
+            float sin2 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (MathHelper.TwoPi / 3));
+            float sin3 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (2 * MathHelper.TwoPi / 3));
+            int middle = 180;
+            int length = 100; //75
+            float r = middle + length * sin1;
+            float g = middle + length * sin2;
+            float b = middle + length * sin3;
+            Color color = new Color((int)r, (int)g, (int)b);
+
 
 
             //Vector2 myvel = new Vector2(0f, -1f).RotatedByRandom(0.25f) * Main.rand.NextFloat(8f, 12f);
-            //FireParticle fire = new FireParticle(Main.MouseWorld, myvel, 1.25f, Color.Purple, colorMult: 2f, bloomAlpha: 1.25f);
-            //ShaderParticleHandler.SpawnParticle(fire);
+            //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, 1.25f, Color.OrangeRed, colorMult: 2f, bloomAlpha: 1.25f);
+            //ShaderParticleHandler.SpawnParticle(fire1);
 
-            Color purple = new Color(61, 2, 92);
-            Color darkPurple = new Color(42, 2, 82);
-            Color purple3 = new Color(121, 7, 179);
 
-            for (int i = 0; i < 14; i++)
+            for (int i = 220; i < 8; i++)
             {
-                float prog = (float)i / 17f;
+                float prog = (float)i / 8;
 
 
-                Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 1.5f;
+                Vector2 veloF = Main.rand.NextVector2CircularEdge(10f, 10f) * Easings.easeOutQuad(prog) * 1f;
 
-                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1f * Main.rand.NextFloat(1f, 1.5f), purple3, colorMult: 2f, bloomAlpha: 1.5f, AlphaFade: 0.94f, VelFade: 0.9f);
+                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.15f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.95f, VelFade: 0.83f);
+                fire.scaleFadePower = 1.05f;
                 ShaderParticleHandler.SpawnParticle(fire);
-
             }
 
-            for (int i = 220; i < 17; i++)
-            {
-                float prog = (float)i / 17f;
-
-
-                Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 2f;
-
-                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.4f), colorMult: 2f, bloomAlpha: 1.5f, AlphaFade: 0.94f, VelFade: 0.9f);
-                ShaderParticleHandler.SpawnParticle(fire);
-
-            }
-
-            for (int i = 220; i < 7; i++)
+            for (int i = 0; i < 5; i++)
             {
                 float prog = (float)i / 5f;
 
-                //if (i == 0)
-                //    i = 200;
-
-                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
-
-                float velMult = Main.rand.NextFloat(2f, 6f);
-                Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
-                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -12f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
-                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, randomStart * velMult, ModContent.ProjectileType<SmokeTest5>(), 0, 0, player.whoAmI);
-
-                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
-
-                //Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
-                Main.projectile[smoke].scale = 0f;// * Main.rand.NextFloat(0.5f, 1f);
-                Main.projectile[smoke].velocity *= 0.5f;
-
-
-                FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.25f), colorMult: 1f, bloomAlpha: 1.25f);
+                Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
+                float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, color, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                fire.scaleFadePower = 1.1f;
                 ShaderParticleHandler.SpawnParticle(fire);
 
                 //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);

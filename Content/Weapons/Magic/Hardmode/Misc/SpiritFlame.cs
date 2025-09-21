@@ -70,7 +70,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     d.noLight = false;
                 }
 
-                for (int i = 0; i < 7; i++)
+                for (int i = 220; i < 7; i++)
                 {
                     float velMult = Main.rand.NextFloat(2f, 6f);
                     Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
@@ -94,6 +94,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(shouldFadeColor: false);
 
+            }
+
+            if (timer % 2 == 0 && Main.rand.NextBool(2) && projectile.velocity.Length() > 0)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(2f, 2f) - projectile.velocity * 0.25f;
+
+                FireParticle fire = new FireParticle(projectile.Center, vel, 0.45f, new Color(121, 7, 179), colorMult: 1f, bloomAlpha: 1.5f, AlphaFade: 0.94f + Main.rand.NextFloat(-0.02f, 0.02f), VelFade: 0.9f, RotPower: 0.1f);
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
             timer++;
@@ -211,7 +219,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Color purp2 = Color.Purple;
 
             //Impact
-            for (int i = 0; i < 6 + Main.rand.Next(0, 4); i++)
+            for (int i = 220; i < 6 + Main.rand.Next(0, 4); i++)
             {
                 Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
                 Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: littleLessPurple * 3f, Scale: Main.rand.NextFloat(0.25f, 0.65f) * 1.75f);
@@ -231,20 +239,25 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 d.noLight = false;
             }
             
-            for (int i = 0; i < 15; i++)
-            {
-                float velMult = Main.rand.NextFloat(1.5f, 5f);
-                Vector2 randomStart = Main.rand.NextVector2CircularEdge(1f, 1f);
 
-                FireParticle fire = new FireParticle(projectile.Center, randomStart * velMult, 1.25f, Color.Purple, colorMult: 0.5f, bloomAlpha: 1f, AlphaFade: 0.92f);
+            for (int i = 0; i < 14; i++)
+            {
+                float prog = (float)i / 17f;
+
+
+                Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 1.5f;
+
+                FireParticle fire = new FireParticle(projectile.Center, veloF, 1f * Main.rand.NextFloat(1f, 1.5f), new Color(121, 7, 179), colorMult: 1f, bloomAlpha: 1.5f, 
+                    AlphaFade: 0.94f + Main.rand.NextFloat(-0.02f, 0.02f), VelFade: 0.9f, RotPower: 0.5f);
                 ShaderParticleHandler.SpawnParticle(fire);
+
             }
 
             //Light Dust
-            //Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: littleLessPurple * 2f, Scale: 0.2f);
+            Dust softGlow = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: littleLessPurple * 2f, Scale: 0.2f);
 
-            //softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
-            //    overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
+            softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 10,
+                overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
 
             //Sound
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_14") with { Pitch = .3f, MaxInstances = -1, PitchVariance = 0.2f, Volume = 0.3f };

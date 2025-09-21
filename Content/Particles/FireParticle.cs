@@ -17,7 +17,12 @@ namespace VFXPlus.Content.Particles
     {
         private float alphaFade = 0.92f * Main.rand.NextFloat(0.9f, 1f);
         private float velFade = 0.85f;
+        public float scaleFadePower = 1f;
         private float rotPower = 0.02f;
+
+        
+        public float randomRotPower = 0f;
+        private float initialVelMag = 0f;
 
         private float ColorMult = 1f;
         private Color myColor;
@@ -35,6 +40,8 @@ namespace VFXPlus.Content.Particles
             BloomAlpha = bloomAlpha;
             Rotation = Main.rand.NextFloat(6.28f);
             myShader = VFXPlus.SmokeColShader;
+
+            initialVelMag = velocity.Length();
         }
 
         public FireParticle(Vector2 position, Vector2 velocity, float scale, Color color, float colorMult = 1f, float bloomAlpha = 1f, 
@@ -56,6 +63,8 @@ namespace VFXPlus.Content.Particles
 
             Rotation = Main.rand.NextFloat(6.28f);
             myShader = VFXPlus.SmokeColShader;
+
+            initialVelMag = velocity.Length();
         }
 
         public override void Update()
@@ -76,13 +85,23 @@ namespace VFXPlus.Content.Particles
                 Alpha *= alphaFade;
             Alpha *= alphaFade;
 
+            Scale *= scaleFadePower;
+
             if (Scale <= 0.2)
                 Scale -= 0.02f;
 
             if (Alpha <= 0.03f)
                 ShaderParticleHandler.RemoveParticle(this);
 
-            //Main.NewText(Alpha);
+            if (randomRotPower > 0f)
+            {
+                //Ratio of current velocity over starting velocity
+                float velPower = Velocity.Length() / initialVelMag;
+                Velocity = Velocity.RotateRandom(randomRotPower * velPower);
+            }
+
+            if (Timer > 360)
+                ShaderParticleHandler.RemoveParticle(this);
         }
 
         private float drawScale = 0f;
@@ -102,36 +121,28 @@ namespace VFXPlus.Content.Particles
         int maskTex = Main.rand.NextBool() ? 2 : 1;
         public override void DrawWithShader(SpriteBatch spriteBatch, Effect effect)
         {
-            //ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
-            //{
+            Texture2D Smoke = ModContent.Request<Texture2D>("VFXPlus/Assets/Smoke/WispSmoke" + smokeTex).Value; //spark_02 and smoke_02 also look cool
+            Texture2D Mask = ModContent.Request<Texture2D>("VFXPlus/Assets/Smoke/InvertMask" + maskTex).Value;
 
-                Texture2D Smoke = ModContent.Request<Texture2D>("VFXPlus/Assets/Smoke/WispSmoke" + smokeTex).Value; //spark_02 and smoke_02 also look cool
-                Texture2D Mask = ModContent.Request<Texture2D>("VFXPlus/Assets/Smoke/InvertMask" + maskTex).Value;
+            Vector2 drawPos = Center - Main.screenPosition;
+            Vector2 TexOrigin = Smoke.Size() / 2f;
+            SpriteEffects SE = SpriteEffects.None;
 
-                Vector2 drawPos = Center - Main.screenPosition;
-                Vector2 TexOrigin = Smoke.Size() / 2f;
-                SpriteEffects SE = SpriteEffects.None;
+            float maskVal = 1f - Alpha;
 
-                float maskVal = 1f - Alpha;
+            effect.Parameters["color"].SetValue(myColor.ToVector3() * 15f * Alpha * ColorMult);
+            effect.Parameters["glowThreshold"].SetValue(0.8f); //0.9f
+            effect.Parameters["glowPower"].SetValue(3.5f); //3.5
+            effect.Parameters["fadeProgress"].SetValue(maskVal);
+            effect.Parameters["endAlpha"].SetValue(1f);
+            effect.Parameters["maskTexture"].SetValue(Mask);
+            effect.CurrentTechnique.Passes[0].Apply();
 
-                effect.Parameters["color"].SetValue(myColor.ToVector3() * 15f * Alpha * ColorMult);
-                effect.Parameters["glowThreshold"].SetValue(0.8f); //0.9f
-                effect.Parameters["glowPower"].SetValue(3.5f); //3.5
-                effect.Parameters["fadeProgress"].SetValue(maskVal);
-                effect.Parameters["endAlpha"].SetValue(1f);
-                effect.Parameters["maskTexture"].SetValue(Mask);
-                effect.CurrentTechnique.Passes[0].Apply();
+            //spriteBatch.End();
+            //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, effect, Main.GameViewMatrix.TransformationMatrix);
 
-                //spriteBatch.End();
-                //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, effect, Main.GameViewMatrix.TransformationMatrix);
+            spriteBatch.Draw(Smoke, drawPos, null, myColor, Rotation, TexOrigin, Scale * 0.075f, SE, 0f);
 
-                spriteBatch.Draw(Smoke, drawPos, null, myColor, Rotation, TexOrigin, Scale * 0.075f, SE, 0f);
-
-
-                //spriteBatch.End();
-                //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-           // });
-            
         }
     }
 }
