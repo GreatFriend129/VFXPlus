@@ -2046,11 +2046,13 @@
         <member name="M:Terraria.GameContent.Drawing.TileDrawing.CrawlToTopOfVineAndAddSpecialPoint(System.Int32,System.Int32)">
             <summary>
             Finds the top of a tile chain of vine tiles and calls <see cref="M:Terraria.GameContent.Drawing.TileDrawing.AddSpecialPoint(System.Int32,System.Int32,Terraria.GameContent.Drawing.TileDrawing.TileCounterType)"/> using <see cref="F:Terraria.GameContent.Drawing.TileDrawing.TileCounterType.Vine"/> if not already registered for custom drawing. See <see cref="F:Terraria.ID.TileID.Sets.VineThreads"/>.
+            <br/><br/> <b>Note:</b> The tile coordinate parameters of this method are the reverse of the usual order.
             </summary>
         </member>
         <member name="M:Terraria.GameContent.Drawing.TileDrawing.CrawlToBottomOfReverseVineAndAddSpecialPoint(System.Int32,System.Int32)">
             <summary>
             Finds the bottom of a tile chain of reverse vine tiles and calls <see cref="M:Terraria.GameContent.Drawing.TileDrawing.AddSpecialPoint(System.Int32,System.Int32,Terraria.GameContent.Drawing.TileDrawing.TileCounterType)"/> using <see cref="F:Terraria.GameContent.Drawing.TileDrawing.TileCounterType.ReverseVine"/> if not already registered for custom drawing. See <see cref="F:Terraria.ID.TileID.Sets.ReverseVineThreads"/>.
+            <br/><br/> <b>Note:</b> The tile coordinate parameters of this method are the reverse of the usual order.
             </summary>
         </member>
         <member name="M:Terraria.GameContent.Drawing.TileDrawing.IsVisible(Terraria.Tile)">
@@ -3171,7 +3173,8 @@
         <member name="F:Terraria.ID.ContentSamples.NpcBestiaryRarityStars">
             <summary>
             The number of stars a given NPC type (<see cref="F:Terraria.NPC.type"/>) shows in the Bestiary.
-            <br/> Set in <see cref="M:Terraria.ModLoader.ModNPC.SetBestiary(Terraria.GameContent.Bestiary.BestiaryDatabase,Terraria.GameContent.Bestiary.BestiaryEntry)"/> or <see cref="M:Terraria.ModLoader.GlobalNPC.SetBestiary(Terraria.NPC,Terraria.GameContent.Bestiary.BestiaryDatabase,Terraria.GameContent.Bestiary.BestiaryEntry)"/>.
+            <br/><br/> Defaults to the result of <see cref="M:Terraria.ID.ContentSamples.GetNPCBestiaryRarityStarsCount(Terraria.NPC)"/>. Read the <see href="https://github.com/tModLoader/tModLoader/wiki/Bestiary-Stars">Bestiary Stars wiki page</see> to learn more about the default calculations.
+            <br/><br/> Set in SetStaticDefaults to override that logic.
             </summary>
         </member>
         <member name="F:Terraria.ID.ContentSamples.NpcBestiaryCreditIdsByNpcNetIds">
@@ -7343,6 +7346,13 @@
             <para/> Note that code should check both <c>(projectile.aiStyle == ProjAIStyleID.Explosive || ProjectileID.Sets.Explosive[projectile.type])</c> for any code targeting explosive projectiles since this set might not be complete.
             </summary>
         </member>
+        <member name="F:Terraria.ID.ProjectileID.Sets.IsInteractable">
+            <summary>
+            This projectile is a candidate for player interaction. The projectile will be able to be targeted with smart cursor. Projectile that can be right clicked should set this to true.
+            <br/><br/> The <see href="https://github.com/tModLoader/tModLoader/tree/1.4.4/ExampleMod/Content/Projectiles/ExampleInteractableProjectile.cs">ExampleInteractableProjectile.cs</see> example demonstrates properly implementing an interactable projectile. 
+            <br/><br/> Defaults to false. Vanilla entries include <see cref="F:Terraria.ID.ProjectileID.FlyingPiggyBank"/>, <see cref="F:Terraria.ID.ProjectileID.VoidLens"/>, and <see cref="F:Terraria.ID.ProjectileID.ChesterPet"/>.
+            </summary>
+        </member>
         <member name="F:Terraria.ID.ProjectileID.Search">
             <inheritdoc cref="T:ReLogic.Reflection.IdDictionary"/>
         </member>
@@ -7503,6 +7513,9 @@
         <member name="F:Terraria.ID.SlopeType.SlopeUpRight">
             <summary> Only the top and right sides are solid. </summary>
         </member>
+        <member name="F:Terraria.ID.TileID.Sets.TileCutIgnore.Regrowth">
+            <summary> Tiles that should be ignored by the <see cref="F:Terraria.ID.ItemID.StaffofRegrowth"/> hitbox despite being <see cref="F:Terraria.Main.tileCut"/>. </summary>
+        </member>
         <member name="F:Terraria.ID.TileID.Sets.IceSkateSlippery">
             <summary>
             If <see langword="true"/> for a given tile type (<see cref="P:Terraria.Tile.TileType"/>), then players will slip on that tile.
@@ -7599,6 +7612,9 @@
             Indicates that this tile can't be replaced with another tile via the block swap feature.
             <br/> Use <see cref="M:Terraria.ModLoader.ModTile.CanReplace(System.Int32,System.Int32,System.Int32)"/> or <see cref="M:Terraria.ModLoader.GlobalTile.CanReplace(System.Int32,System.Int32,System.Int32,System.Int32)"/> to dynamically prevent tile replacement for situations with more complex logic.
             </summary>
+        </member>
+        <member name="F:Terraria.ID.TileID.Sets.IsVine">
+            <summary> Indicates that this tile is a vine tile. Used to limit vine growth in an area and facilitates converting vines when the anchor tile is changed. </summary>
         </member>
         <member name="F:Terraria.ID.TileID.Sets.ReplaceTileBreakUp">
             <summary>
@@ -9598,6 +9614,9 @@
             <param name="substitutions"></param>
             <returns></returns>
         </member>
+        <member name="F:Terraria.Main.CurrentFrameFlags.HadAnActiveInteractibleProjectile">
+            <summary> Indicates that an interactable projectile exists in the world, allowing checks for interactable projectiles to execute. </summary>
+        </member>
         <member name="F:Terraria.Main.drunkWorld">
             <summary> If true, the world was generated with the <see href="https://terraria.wiki.gg/wiki/Drunk_world">Drunk world</see> secret world seed. See also <see cref="F:Terraria.WorldGen.drunkWorldGen"/>.
             <br/><br/> See <see cref="F:Terraria.Main.swapMusic"/> for information about the Otherworld soundtrack toggle. </summary>
@@ -9627,6 +9646,22 @@
             <summary>
             Used for non-gameplay in-game fullscreen UI which hide all other UI. Some examples include the bestiary, emote menu, and settings menus.
             <para/> Modders can use <see cref="M:Terraria.UI.IngameFancyUI.OpenUIState(Terraria.UI.UIState)"/> to easily display a fullscreen UI without needing to manage updating or drawing a <see cref="T:Terraria.UI.UserInterface"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.mouseLeft">
+            <summary>
+            Indicates if the left mouse/"Use Item" control keybind is currently being pressed.
+            <MouseLeftMouseLeftReleaseNote>
+		<br /><br /> <see cref="F:Terraria.Main.mouseLeft" /> and <see cref="F:Terraria.Main.mouseLeftRelease" /> are usually checked together to detect a left mouse click. For example: <c>if (Main.mouseLeft &amp;&amp; Main.mouseLeftRelease)</c>. <see cref="F:Terraria.Main.mouseLeftRelease" /> is usually set to false if that check passes to "consume" the click preventing a single click from affecting multiple things in the game.
+	</MouseLeftMouseLeftReleaseNote>
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.mouseRight">
+            <summary>
+            Indicates if the right mouse/"Interact" control keybind is currently being pressed.
+            <MouseRightMouseRightReleaseNote>
+		<br /><br /> <see cref="F:Terraria.Main.mouseRight" /> and <see cref="F:Terraria.Main.mouseRightRelease" /> are usually checked together to detect a right mouse click. For example: <c>if (Main.mouseRight &amp;&amp; Main.mouseRightRelease)</c>. <see cref="F:Terraria.Main.mouseRightRelease" /> is usually set to false if that check passes to "consume" the click preventing a single click from affecting multiple things in the game.
+	</MouseRightMouseRightReleaseNote>
             </summary>
         </member>
         <member name="F:Terraria.Main.xMas">
@@ -9806,6 +9841,7 @@
         <member name="F:Terraria.Main.tileCut">
             <summary>
             If true, Tiles of the indexed Tile Type will be destroyed by weapons and projectiles. These tiles will also be destroyed when placing a tile at it's location, see also <see cref="F:Terraria.ID.TileID.Sets.BreakableWhenPlacing"/>, which is limited to breaking this tile only by tile placement. <see cref="M:Terraria.ModLoader.ModProjectile.CanCutTiles"/> can be used to customize if a projectile should destroy tiles with this property.
+            <br/><br/> For desirable plant tiles, set <see cref="F:Terraria.ID.TileID.Sets.TileCutIgnore.Regrowth"/> as well to ignore them when using the <see cref="F:Terraria.ID.ItemID.StaffofRegrowth"/>. 
             <br/><br/> Defaults to false.
             </summary>
         </member>
@@ -10006,6 +10042,22 @@
             <see cref="P:Terraria.Main.MouseTextColorReal"/> can be used to access the typical pulsing white <see cref="T:Microsoft.Xna.Framework.Color"/> value.
             </summary>
         </member>
+        <member name="F:Terraria.Main.mouseLeftRelease">
+            <summary>
+            Indicates if the left mouse/"Use Item" control keybind was not pressed last game update.
+            <MouseLeftMouseLeftReleaseNote>
+		<br /><br /> <see cref="F:Terraria.Main.mouseLeft" /> and <see cref="F:Terraria.Main.mouseLeftRelease" /> are usually checked together to detect a left mouse click. For example: <c>if (Main.mouseLeft &amp;&amp; Main.mouseLeftRelease)</c>. <see cref="F:Terraria.Main.mouseLeftRelease" /> is usually set to false if that check passes to "consume" the click preventing a single click from affecting multiple things in the game.
+	</MouseLeftMouseLeftReleaseNote>
+            </summary>
+        </member>
+        <member name="F:Terraria.Main.mouseRightRelease">
+            <summary>
+            Indicates if the right mouse/"Interact" control keybind was not pressed last game update.
+            <MouseRightMouseRightReleaseNote>
+		<br /><br /> <see cref="F:Terraria.Main.mouseRight" /> and <see cref="F:Terraria.Main.mouseRightRelease" /> are usually checked together to detect a right mouse click. For example: <c>if (Main.mouseRight &amp;&amp; Main.mouseRightRelease)</c>. <see cref="F:Terraria.Main.mouseRightRelease" /> is usually set to false if that check passes to "consume" the click preventing a single click from affecting multiple things in the game.
+	</MouseRightMouseRightReleaseNote>
+            </summary>
+        </member>
         <member name="F:Terraria.Main.playerInventory">
             <summary> Indicates if the full player inventory is currently showing. </summary>
         </member>
@@ -10056,6 +10108,9 @@
             <summary>
             The y tile coordinate of the default spawn location of the world. Players without a bed spawn point (<see cref="F:Terraria.Player.SpawnY"/>) will spawn at this location and invasions will target this location.
             </summary>
+        </member>
+        <member name="F:Terraria.Main.npcChatRelease">
+            <summary> Similar to <see cref="F:Terraria.Main.mouseRightRelease"/>, except specific to NPC chat logic. </summary>
         </member>
         <member name="F:Terraria.Main.npcChatCornerItem">
             <summary>
@@ -10112,6 +10167,12 @@
         </member>
         <member name="F:Terraria.Main.SmartInteractY">
             <inheritdoc cref="F:Terraria.Main.SmartInteractX"/>
+        </member>
+        <member name="F:Terraria.Main.SmartInteractProj">
+            <summary>
+            Indicates the <c>Projectile.whoAmI</c> of the projectile currently being targeted by the local player's cursor for smart cursor (right click) purposes. Will be set automatically for <see cref="F:Terraria.ID.ProjectileID.Sets.IsInteractable"/> projectiles.
+            <br/><br/> Will be -1 if a projectile isn't the target of smart cursor currently. 
+            </summary>
         </member>
         <member name="F:Terraria.Main.hoverItemName">
             <summary>
@@ -14096,10 +14157,21 @@
         <member name="M:Terraria.ModLoader.GlobalNPC.ModifyHoverBoundingBox(Terraria.NPC,Microsoft.Xna.Framework.Rectangle@)">
             <summary>
             Allows you to modify the bounding box for hovering over the given NPC (affects things like whether or not its name is displayed).
-            <para/> Called on the local client only.
+            <br/><br/> This hook won't be called if <see cref="P:Terraria.NPC.ShowNameOnHover"/> is set to <see langword="false"/>.
+            <br/><br/> Called on the local client only.
             </summary>
             <param name="npc">The NPC in question.</param>
             <param name="boundingBox">The bounding box used for determining whether or not the NPC counts as being hovered over.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.GlobalNPC.PreHoverInteract(Terraria.NPC,System.Boolean)">
+            <summary>
+            Called when the NPC is selected via smart interact, or when the mouse is hovering over it. Right after <see cref="M:Terraria.ModLoader.GlobalNPC.ModifyHoverBoundingBox(Terraria.NPC,Microsoft.Xna.Framework.Rectangle@)"/>.
+            <br/><br/> Can be used to implement custom interact or hover behavior logic. By returning <see langword="false"/>, the vanilla code for town NPC chatting, drawing the chat bubble, and drawing the NPC name and life on the mouse is skipped. For example, the Old Shaking Chest NPC uses this to take a GoldenKey from the player and transform into Elder Slime. <see cref="M:Terraria.ModLoader.GlobalNPC.CanChat(Terraria.NPC)"/> can be used to force smart interact to target this NPC as well, if desired.
+            <br/><br/> This hook won't be called if <see cref="P:Terraria.NPC.ShowNameOnHover"/> is set to <see langword="false"/>. 
+            <br/><br/> Called on the local client only. 
+            </summary>
+            <param name="npc">The NPC in question.</param>
+            <param name="mouseIntersects">Whether or not mouse is actually hovering over the NPC's bounding box.</param>
         </member>
         <member name="M:Terraria.ModLoader.GlobalNPC.ModifyTownNPCProfile(Terraria.NPC)">
             <summary>
@@ -19412,9 +19484,19 @@ PostAI()</code>
         <member name="M:Terraria.ModLoader.ModNPC.ModifyHoverBoundingBox(Microsoft.Xna.Framework.Rectangle@)">
             <summary>
             Allows you to modify the bounding box for hovering over this NPC (affects things like whether or not its name is displayed).
-            <para/> Called on the local client only.
+            <br/><br/> This hook won't be called if <see cref="P:Terraria.NPC.ShowNameOnHover"/> is set to <see langword="false"/>.
+            <br/><br/> Called on the local client only.
             </summary>
             <param name="boundingBox">The bounding box used for determining whether or not the NPC counts as being hovered over.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModNPC.PreHoverInteract(System.Boolean)">
+            <summary>
+            Called when the NPC is selected via smart interact, or when the mouse is hovering over it. Right after <see cref="M:Terraria.ModLoader.ModNPC.ModifyHoverBoundingBox(Microsoft.Xna.Framework.Rectangle@)"/>.
+            <br/><br/> Can be used to implement custom interact or hover behavior logic. By returning <see langword="false"/>, the vanilla code for town NPC chatting, drawing the chat bubble, and drawing the NPC name and life on the mouse is skipped. For example, the Old Shaking Chest NPC uses this to take a GoldenKey from the player and transform into Elder Slime. <see cref="M:Terraria.ModLoader.ModNPC.CanChat"/> can be used to force smart interact to target this NPC despite as well, if desired.
+            <br/><br/> This hook won't be called if <see cref="P:Terraria.NPC.ShowNameOnHover"/> is set to <see langword="false"/>.
+            <br/><br/> Called on the local client only.
+            </summary>
+            <param name="mouseIntersects">Whether or not mouse is actually hovering over the NPC's bounding box.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModNPC.SetNPCNameList">
             <summary>
@@ -22670,7 +22752,10 @@ PostAI()</code>
             <summary> An array of the IDs of tiles that this tile can be considered as when looking for crafting stations. </summary>
         </member>
         <member name="P:Terraria.ModLoader.ModTile.HighlightTexture">
-            <summary> The highlight texture used when this tile is selected by smart interact. Defaults to adding "_Highlight" onto the main texture. </summary>
+            <summary>
+            The highlight texture used when this tile is selected by smart interact. Defaults to adding "_Highlight" onto the main texture.
+            <br/><br/> <see cref="F:Terraria.ID.TileID.Sets.HasOutlines"/> must be set to true for this to texture to be used.
+            </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModTile.AddToArray(System.Int32[]@)">
             <summary>
@@ -26626,6 +26711,32 @@ PostAI()</code>
         </member>
         <member name="F:Terraria.Player.controlDownHold">
             <summary> True when the player has been holding <see cref="F:Terraria.Player.controlDown"/> for at least 45 ticks. Used by <see cref="F:Terraria.ID.ItemID.ShimmerCloak"/>. See also <see cref="F:Terraria.Player.holdDownCardinalTimer"/>. </summary>
+        </member>
+        <member name="F:Terraria.Player.cursorItemIconEnabled">
+            <summary>
+            If true, an item will be drawn on the cursor. This is usually set along with <see cref="F:Terraria.Player.cursorItemIconID"/> and/or <see cref="F:Terraria.Player.cursorItemIconText"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.cursorItemIconReversed">
+            <summary>
+            If true, the item drawn on the cursor will be flipped horizontally.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.cursorItemIconID">
+            <summary>
+            The Item type to draw on the cursor when <see cref="F:Terraria.Player.cursorItemIconEnabled"/> is true.
+            <br/><br/> Defaults to 0. Set to -1 to prevent the selected item from being drawn on the cursor, which is the default behavior if in tool/tile placement range of the selected item.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.cursorItemIconPush">
+            <summary>
+            When drawing an item on the cursor (<see cref="F:Terraria.Player.cursorItemIconEnabled"/>), the item will be offset in both the X and Y directions by this many pixels. Used by Clentaminator solutions (10) and fishing bait (6) so the icons don't overlap the cursor as much as usual.
+            </summary>
+        </member>
+        <member name="F:Terraria.Player.cursorItemIconText">
+            <summary>
+            Text to be drawn on the cursor when <see cref="F:Terraria.Player.cursorItemIconEnabled"/> is true. 
+            </summary>
         </member>
         <member name="F:Terraria.Player.manaCost">
             <summary>

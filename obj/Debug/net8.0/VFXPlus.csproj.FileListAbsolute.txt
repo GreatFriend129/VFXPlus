@@ -330,7 +330,6 @@ C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Deb
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.AssemblyInfo.cs
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.csproj.CoreCompileInputs.cache
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.sourcelink.json
-C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.csproj.CopyComplete
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.dll
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\refint\VFXPlus.dll
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.pdb
@@ -393,7 +392,6 @@ C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Deb
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\UtfUnknown.xml
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.VisualStudio.Setup.Configuration.Interop.dll
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\System.Diagnostics.EventLog.dll
-C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\System.Text.Json.dll
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.CodeAnalysis.xml
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.xml
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll.config
@@ -403,3 +401,4 @@ C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Deb
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.Extensions.Primitives.xml
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\Microsoft.VisualStudio.Setup.Configuration.Interop.xml
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\bin\Debug\net8.0\System.Diagnostics.EventLog.xml
+C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.csproj.Up2Date

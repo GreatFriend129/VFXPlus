@@ -1,4 +1,4 @@
-﻿//Borrowed from SotS WaterTrail
+//Borrowed from SotS WaterTrail
 
 sampler uImage0 : register(s0);
 sampler uImage1 : register(s1);

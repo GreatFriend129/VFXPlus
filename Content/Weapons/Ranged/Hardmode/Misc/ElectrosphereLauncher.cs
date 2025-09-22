@@ -17,7 +17,6 @@ using System.Threading;
 using VFXPlus.Common.Drawing;
 using Terraria.Graphics;
 using Terraria.Physics;
-using AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest.Aero;
 using ReLogic.Utilities;

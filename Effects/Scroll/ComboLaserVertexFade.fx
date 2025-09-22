@@ -1,4 +1,4 @@
-﻿matrix WorldViewProjection;
+matrix WorldViewProjection;
 sampler uImage0 : register(s0);
 
 float4 Color1;

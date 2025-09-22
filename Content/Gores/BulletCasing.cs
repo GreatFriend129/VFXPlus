@@ -12,7 +12,7 @@ using Terraria.Graphics.Shaders;
 using ReLogic.Content;
 using static Terraria.NPC;
 
-namespace AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun
+namespace VFXPlus.Content.Gores
 {
     public class BulletCasing : ModGore
     {

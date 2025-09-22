@@ -1,43 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
 using System;
-using Microsoft.CodeAnalysis;
-using Terraria.GameContent.Drawing;
-using VFXPlus.Content.VFXTest;
-using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 using VFXPlus.Content.Dusts;
-using System.Runtime.Intrinsics.Arm;
-using System.Linq;
 using VFXPlus.Content.FeatheredFoe;
-using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
-using Microsoft.Build.Evaluation;
 using VFXPlus.Common.Utilities;
-using log4net.Core;
-using System.Threading;
-using Terraria.Utilities;
-using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
-using VFXPLus.Common;
-using Terraria.Utilities.Terraria.Utilities;
-using System.Net;
-using VFXPlus.Content.Weapons.Ranged.Ammo.Arrows;
-using VFXPlus.Content.VFXTest.Aero;
-using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
-using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
 using VFXPlus.Common;
-using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
-using VFXPlus.Content.VFXTest.Aero.Oblivion;
-using VFXPlus.Content.VFXTest.Aero.Sword;
-using static log4net.Appender.ColoredConsoleAppender;
-using System.Xml.Linq;
 using VFXPlus.Content.Particles;
-using System.Timers;
 
 
 namespace VFXPlus.Content
@@ -120,7 +92,7 @@ namespace VFXPlus.Content
                 ShaderParticleHandler.SpawnParticle(fire);
             }
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 220; i < 5; i++)
             {
                 float prog = (float)i / 5f;
 
@@ -156,7 +128,7 @@ namespace VFXPlus.Content
 
 
             float gap = 22.5f;
-            for (int i = 220; i < 20; i++)
+            for (int i = 0; i < 20; i++)
             {
                 Vector2 spawnPos = player.Center + new Vector2(0f, gap * i);
                 Vector2 vel = new Vector2(7f, 0f);// * Main.rand.NextFloat(0.98f, 1.02f);

@@ -4,19 +4,12 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using Terraria.DataStructures;
-using System.Linq;
-using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using VFXPlus.Content.VFXTest;
-using AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.Gores;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns

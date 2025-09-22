@@ -14,9 +14,8 @@ using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.GameContent;
 using System.Threading;
-using VFXPlus.Content.VFXTest;
-using AerovelenceMod.Content.Items.Weapons.AreaPistols.ErinGun;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.Gores;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns

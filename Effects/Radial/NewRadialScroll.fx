@@ -1,4 +1,4 @@
-﻿// Shader based off of: https://nekotoarts.github.io/blog/Polar-Water-Breakdown
+// Shader based off of: https://nekotoarts.github.io/blog/Polar-Water-Breakdown
 const float TAU = 6.283185;
 
 sampler2D uImage0 : register(s0);

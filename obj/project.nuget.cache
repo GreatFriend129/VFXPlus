@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pdqVJVRtqCrNQuMw+X9k/ezxZNgPDpfxxi4NKqB6KVdl7+gI5I4CC7sNCD0p4COGqMgJ0oT8dVlkZ7xjEkkxdA==",
+  "dgSpecHash": "TjN9BtVEIsQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\Colin\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\VFXPlus\\VFXPlus.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\Colin\\.nuget\\packages\\tmodloader.codeassist\\0.1.5\\tmodloader.codeassist.0.1.5.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }
