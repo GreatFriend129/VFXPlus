@@ -106,9 +106,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
 
-                float offsetIntensity = (1.5f * (1f - progress)) + 4.5f;
+                float offsetIntensity = (1.5f * (1f - progress)) + 3f; //+4.5
 
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(offsetIntensity, offsetIntensity); //3f
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(offsetIntensity, offsetIntensity);
 
                 float startScale = 1f + sineScale;
 

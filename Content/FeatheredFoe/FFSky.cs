@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using ReLogic.Content;
 using System;
 using Terraria;
@@ -10,83 +11,27 @@ using Terraria.Utilities;
 using Terraria.WorldBuilding;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
+using static Terraria.ModLoader.PlayerDrawLayer;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
     public class FFSky : CustomSky
     {
         private float bgPulsePower = 0f;
-        
+        private float timeSpeed = 1f;
         
         
         private bool isActive = false;
         private float intensity = 0f;
         private int timer = 0;
-        private UnifiedRandom myRand = new();
 
-
-        private BackgroundFeather[] FallingFeathers;
-        //private BackgroundFeather[] FallingFeathers;
 
         private Texture2D _bgTexture;
-        private Texture2D _featherTexture;
+        private Texture2D _mainTexture;
         public override void OnLoad()
         {
             _bgTexture = ModContent.Request<Texture2D>("VFXPlus/Content/FeatheredFoe/Assets/FFSkyBorder", AssetRequestMode.ImmediateLoad).Value;
-            _featherTexture = ModContent.Request<Texture2D>("VFXPlus/Content/FeatheredFoe/Assets/Feather", AssetRequestMode.ImmediateLoad).Value;
-
-            //GenerateFeathers();
-        }
-
-        private int FeathersRemaining;
-        private void GenerateFeathers()
-        {
-            FallingFeathers = new BackgroundFeather[400]; //400
-            for (int i = 0; i < FallingFeathers.Length; i++)
-            {
-                FallingFeathers[i] = new BackgroundFeather();
-
-                int num = (int)((Main.screenPosition.Y * 0.7) - Main.screenHeight);
-                int minValue = (int)(num - (Main.worldSurface * 16.0));
-                FallingFeathers[i].Center = new Vector2(myRand.Next(0, Main.maxTilesX) * 16, Main.rand.Next(minValue, num));
-                FallingFeathers[i].Rotation = MathHelper.PiOver2;// Main.rand.NextFloat(6.282f);
-                FallingFeathers[i].Speed = 5f + (3f * (float)myRand.NextDouble());
-                FallingFeathers[i].Depth = ((float)i / FallingFeathers.Length * 1.75f) + 1.6f;
-                if (myRand.NextBool(60))
-                {
-                    FallingFeathers[i].Speed = 6f + (3f * (float)myRand.NextDouble());
-                    FallingFeathers[i].Depth += 0.5f;
-                }
-                else if (myRand.NextBool(30))
-                {
-                    FallingFeathers[i].Speed = 6f + (2f * (float)myRand.NextDouble());
-                }
-
-                FallingFeathers[i].Speed *= 2f;
-
-                FallingFeathers[i].Active = true;
-            }
-
-            FeathersRemaining = FallingFeathers.Length;
-
-
-            //Falling Feathers
-            /*
-            FallingFeathers = new BackgroundFeather[200];
-            for (int i = 0; i < 200; i++)
-            {
-                FallingFeathers[i] = new BackgroundFeather();
-
-                float startingX = Main.rand.Next(Main.screenWidth);
-                float startingY = Main.rand.Next(Main.screenHeight);
-                Vector2 startPos = new Vector2(startingX, startingY);
-
-                FallingFeathers[i].Center = startPos;
-                FallingFeathers[i].Speed = 5f + (3f * (float)myRand.NextDouble());
-                FallingFeathers[i].Depth = ((float)i / FallingFeathers.Length * 1.75f) + 1.6f;
-                FallingFeathers[i].Rotation = MathHelper.PiOver2;
-            }
-            */
+            _mainTexture = ModContent.Request<Texture2D>("VFXPlus/Content/FeatheredFoe/Assets/FFSkyMain", AssetRequestMode.ImmediateLoad).Value;
         }
 
         public override void Update(GameTime gameTime)
@@ -115,120 +60,68 @@ namespace VFXPlus.Content.FeatheredFoe
 
             intensity = Math.Clamp(intensity, 0, 1);
 
+            //Simple trig to get the direction components | xComponent of right triangle is cos(theta) and y is sin(theta)
+            float xDir = MathF.Cos(windRotation);
+            float yDir = MathF.Sin(windRotation);
 
+            float mult = 0.002f * (1f + bgPulsePower * 7f);
 
-            //Feathers
-            #region FeatherUpdate
-            for (int i = 0; i < FallingFeathers.Length; i++)
-            {
-                if (!FallingFeathers[i].Active)
-                    continue;
-
-                FallingFeathers[i].Center.Y += FallingFeathers[i].Speed * 2.5f; //2f
-                //Feathers[i].rotation += Feathers[i].Speed / 65;
-                if (!(FallingFeathers[i].Center.Y > Main.worldSurface * 16.0))
-                    continue;
-
-                FallingFeathers[i].Depth = (i / (float)FallingFeathers.Length * 1.75f) + 1.6f;
-                FallingFeathers[i].Center = new Vector2(myRand.Next(0, Main.maxTilesX) * 16, -100f);
-                //Feathers[i].Rotation = Main.rand.NextFloat(6.282f);
-                FallingFeathers[i].Speed = 5f + (3f * (float)myRand.NextDouble());
-                if (myRand.NextBool(60))
-                {
-                    FallingFeathers[i].Speed = 6f + (3f * (float)myRand.NextDouble());
-                    FallingFeathers[i].Depth += 0.5f;
-                }
-                else if (myRand.NextBool(30))
-                {
-                    FallingFeathers[i].Speed = 6f + (2f * (float)myRand.NextDouble());
-                }
-            }
-
-            #endregion
+            xOffset -= xDir * mult;
+            yOffset -= yDir * mult;
 
             timer++;
         }
 
-
+        private float xOffset = 0f;
+        private float yOffset = 0f;
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
         {
+
             if (maxDepth >= 0 && minDepth < 0)
             {
-
                 Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 1f);
 
+                float sineAlpha =  0.1f + MathF.Sin((float)Main.timeForVisualEffects * 0.02f) * 0.05f;
+
                 //Sky
-                spriteBatch.Draw(_bgTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), between with { A = 0 } * 0.1f * bgPulsePower);
+                spriteBatch.Draw(_bgTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), between with { A = 0 } * (sineAlpha + bgPulsePower * 0.2f));
             }
 
-            //Feathers
+            if (minDepth < 9f && maxDepth > 9) //min < 9 | max > 9 = under tiles player npcs
+            {
+                Effect smokeEffect = VFXPlus.SmokeNoiseShader;
+
+                Color smokeCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
+                Color smokeB = Color.Lerp(Color.Silver, smokeCol, bgPulsePower);
+
+                float smokeAlpha = 0.15f + (bgPulsePower * 0.25f);
+
+                smokeEffect.Parameters["zoom"].SetValue(3.0f);
+                smokeEffect.Parameters["color"].SetValue(smokeB.ToVector3() * smokeAlpha); //0f
+                smokeEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.07f);
+
+                smokeEffect.Parameters["xOffset"].SetValue(xOffset);
+                smokeEffect.Parameters["yOffset"].SetValue(yOffset);
+                //smokeEffect.Parameters["yOffset"].SetValue(-(float)Main.timeForVisualEffects * 0.001f);
+
+
+                //DeepSkyBlue -> SkyBlue | 5.0 | 0.25f | 0.05f
+
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, default, default, smokeEffect);
+
+
+                spriteBatch.Draw(_mainTexture, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White);
+
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, default, default, null, Main.GameViewMatrix.TransformationMatrix);
+
+            }
+
             return;
-
-            //Main.NewText(spriteBatch.ToString());
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-
-            int num = -1;
-            int num2 = 0;
-            for (int i = 0; i < FallingFeathers.Length; i++)
-            {
-                float depth = FallingFeathers[i].Depth;
-                if (num == -1 && depth < maxDepth)
-                    num = i;
-
-                if (depth <= minDepth)
-                    break;
-
-                num2 = i;
-            }
-
-            if (num == -1)
-                return;
-
-            Vector2 vector = Main.screenPosition + new Vector2(Main.screenWidth >> 1, Main.screenHeight >> 1);
-            Rectangle rectangle = new(-1000, -1000, 4000, 4000);
-            for (int j = num; j < num2; j++)
-            {
-                if (FallingFeathers[j].Active)
-                {
-                    Color color = new Color((Main.ColorOfTheSkies.ToVector4() * 0.9f) + new Vector4(0.1f)) * 0.8f;
-                    float num3 = 1f;
-                    if (FallingFeathers[j].Depth > 3f)
-                        num3 = 0.6f;
-                    else if (FallingFeathers[j].Depth > 2.5)
-                        num3 = 0.7f;
-                    else if (FallingFeathers[j].Depth > 2f)
-                        num3 = 0.8f;
-                    else if (FallingFeathers[j].Depth > 1.5)
-                        num3 = 0.9f;
-
-                    num3 *= 0.6f;
-                    color = new Color((int)(color.R * num3), (int)(color.G * num3), (int)(color.B * num3), (int)(color.A * num3));
-                    Vector2 vector2 = new(1f / FallingFeathers[j].Depth, 0.9f / FallingFeathers[j].Depth);
-                    Vector2 position = FallingFeathers[j].Center;
-                    position = ((position - vector) * vector2) + vector - Main.screenPosition;
-                    position.X = (position.X + 500f) % 4000f;
-                    if (position.X < 0f)
-                        position.X += 4000f;
-
-                    position.X -= 500f;
-                    if (rectangle.Contains((int)position.X, (int)position.Y))
-                    {
-                        Vector2 origin = _featherTexture.Size() / 2;
-                        for (int i = 1; i < 8; i += 2)
-                            spriteBatch.Draw(_featherTexture, position - new Vector2(0, i * FallingFeathers[j].Speed), null, Color.SkyBlue with { A = 0 } * 1f * (0.5f - (0.5f * i / 8)), FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
-
-                        spriteBatch.Draw(_featherTexture, position, null, Color.White * 1f, FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
-
-                        spriteBatch.Draw(_featherTexture, position, null, Color.White with { A = 0 } * 0.4f, FallingFeathers[j].Rotation, origin, vector2.X * 1.25f, SpriteEffects.None, 0f);
-                    }
-                }
-            }
-
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, default, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
         }
 
+        private float windRotation = 0f;
         public bool CheckActive()
         {
             for (int i = 0; i < Main.maxNPCs; i++)
@@ -237,7 +130,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 {
                     if (Main.npc[i].ModNPC is FeatheredFoeBoss ff)
                     {
-                        bgPulsePower = ff.bgPulsePower;
+                        bgPulsePower = ff.windOverlayOpacity;// ff.bgPulsePower;
+                        windRotation = ff.windOverlayRotation;
                     }
 
                     return true;
@@ -250,7 +144,6 @@ namespace VFXPlus.Content.FeatheredFoe
         public override void Activate(Vector2 position, params object[] args)
         {
             isActive = true;
-            GenerateFeathers();
         } 
 
         public override void Deactivate(params object[] args) => isActive = false;
@@ -261,15 +154,4 @@ namespace VFXPlus.Content.FeatheredFoe
 
     }
 
-    public class BackgroundFeather
-    {
-        public Vector2 Center;
-        public float Rotation;
-        public float Depth;
-        public float Speed;
-
-        public bool Active;
-
-        public Vector2 vec2Speed;
-    }
 }

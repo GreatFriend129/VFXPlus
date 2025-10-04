@@ -35,6 +35,8 @@ namespace VFXPlus
         public static Effect BasicTrailShader;
         public static Effect TrailShaderGradient;
 
+        public static Effect SmokeNoiseShader;
+
         public override void Load()
         {
             // Literally ripped from SLR
@@ -62,6 +64,7 @@ namespace VFXPlus
                 BasicTrailShader = Instance.Assets.Request<Effect>("Effects/TrailShaders/BasicTrailShader", AssetRequestMode.ImmediateLoad).Value;
                 TrailShaderGradient = Instance.Assets.Request<Effect>("Effects/TrailShaders/TrailShaderGradient", AssetRequestMode.ImmediateLoad).Value;
                 SmokeColShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokeColShader", AssetRequestMode.ImmediateLoad).Value;
+                SmokeNoiseShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokyNoise", AssetRequestMode.ImmediateLoad).Value;
             }
 
             var screenRef = new Ref<Effect>(VFXPlus.Instance.Assets.Request<Effect>("Effects/GlowDustShader", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value);
@@ -102,6 +105,7 @@ namespace VFXPlus
                 BasicTrailShader = null;
                 TrailShaderGradient = null;
                 SmokeColShader = null;
+                SmokeNoiseShader = null;
                 Instance ??= null;
             }
 

@@ -198,6 +198,9 @@ Projectiles: {
 	SmokeTest4.DisplayName: Smoke Test4
 	SmokeTest5.DisplayName: Smoke Test5
 	OrbitPlayerFeather.DisplayName: Orbit Player Feather
+	WindDirShotNado.DisplayName: Wind Dir Shot Nado
+	FireEye.DisplayName: Fire Eye
+	TrailTestOmega.DisplayName: Trail Test Omega
 }
 
 Configs: {

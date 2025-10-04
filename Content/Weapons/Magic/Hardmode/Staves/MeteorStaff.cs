@@ -227,44 +227,42 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (giveUp)
                 return;
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value; //SoulSpike cool too
 
             //After-Image
-            if (previousRotations != null && previousPositions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
+                float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Gold, Color.OrangeRed * 1f, progress) * 1f * overallAlpha;// * Easings.easeInQuad(progress);
+                Color col = Color.Lerp(Color.Gold, Color.OrangeRed * 1f, progress) * 1f * overallAlpha;// * Easings.easeInQuad(progress);
 
 
-                    Vector2 lineScale = new Vector2(1f * overallScale, 0.3f * progress) * progress * overallScale;
+                Vector2 lineScale = new Vector2(1f * overallScale, 0.3f * progress) * progress * overallScale;
 
-                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    //2 > 1
-                    Vector2 offset1 = new Vector2(0f, -22f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
-                    Vector2 offset2 = new Vector2(0f, 22f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
+                //2 > 1
+                Vector2 offset1 = new Vector2(0f, -20f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 offset2 = new Vector2(0f, 20f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
 
-                    
-                    offset1 += Main.rand.NextVector2Circular(1f + (10f * (1f - progress)), 15f).RotatedBy(projectile.velocity.ToRotation());
-                    offset2 += Main.rand.NextVector2Circular(1f + (10f * (1f - progress)), 15f).RotatedBy(projectile.velocity.ToRotation()); //1f 1.5f
 
-                    Vector2 innerScale = new Vector2(1f * overallScale, 0.15f * progress) * progress * overallScale;
+                offset1 += Main.rand.NextVector2Circular(1f + (10f * (1f - progress)), 10f).RotatedBy(projectile.velocity.ToRotation());
+                offset2 += Main.rand.NextVector2Circular(1f + (10f * (1f - progress)), 10f).RotatedBy(projectile.velocity.ToRotation()); //1f + 10f | 15f | 5f looks cool
 
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
-                        previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
+                Vector2 innerScale = new Vector2(1f * overallScale, 0.15f * progress) * progress * overallScale;
 
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
-                        previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
+                    previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
 
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
-                        previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
-                    Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
-                        previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
+                    previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
 
-                }
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
+                    previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
+                    previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
             }
         }
 

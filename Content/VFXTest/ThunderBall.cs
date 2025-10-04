@@ -1,24 +1,25 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Build.Evaluation;
+using Microsoft.CodeAnalysis;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
+using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.GameContent.Drawing;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using System;
-using Microsoft.CodeAnalysis;
-using Terraria.GameContent.Drawing;
+using Terraria.Utilities;
 using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
-using Terraria.Utilities;
-using Terraria.GameContent;
-using Microsoft.Build.Evaluation;
-using static tModPorter.ProgressUpdate;
 using VFXPlus.Content.Dusts;
-using System.Collections.Generic;
+using VFXPlus.Content.Particles;
 using VFXPLus.Common;
-using Terraria.Graphics;
+using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.VFXTest
 {
@@ -1342,5 +1343,160 @@ namespace VFXPlus.Content.VFXTest
 
         }
     }
+
+    public class FireEye : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.penetrate = -1;
+
+            Projectile.timeLeft = 800;
+            Projectile.width = 20;
+            Projectile.height = 20;
+        }
+
+        int timer = 0;
+        public override void AI()
+        {
+            Projectile.timeLeft = 2;
+            if (timer % 1 == 0)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    float prog = (float)i / 7;
+
+
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(7f, 3f) * Main.rand.NextFloat(1f, 1.5f);
+
+                    float fireScale = Main.rand.NextFloat(2f, 2.5f);
+
+                    FireParticle fire = new FireParticle(Projectile.Center, veloF + new Vector2(20f, 0f), fireScale, Color.Lerp(Color.GreenYellow, Color.Green, 0.5f), colorMult: 1f, bloomAlpha: 1.15f, AlphaFade: 0.92f, VelFade: 0.9f);
+                    //fire.randomRotPower = 0.3f;
+                    fire.scaleFadePower = 1.03f;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
+
+
+            timer++;
+        }
+
+        Vector2 stretch = Vector2.Zero;
+        float overallScale = 1f;
+        float overallAlpha = 0f;
+        Vector2 drawScale = Vector2.Zero;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+                //Orb
+                Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+                Vector2 originPoint = Projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
+
+                Color[] cols = { Color.White * 0.75f, Color.OrangeRed * 0.525f, Color.OrangeRed * 0.375f };
+                float[] scales = { 0.85f, 1.6f, 2.5f };
+
+                float orbAlpha = 0f;
+                float orbScale = 0.5f;
+
+                float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+                float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+                Main.EntitySpriteDraw(orb, originPoint, null, cols[0] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, originPoint, null, cols[1] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, originPoint, null, cols[2] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+            });
+
+            Texture2D orb2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
+            Texture2D orb3 = CommonTextures.feather_circle128PMA.Value;
+
+            //Main.EntitySpriteDraw(orb2, Projectile.Center - Main.screenPosition, null, Color.Black, 0f, orb2.Size() / 2f, new Vector2(0.2f, 0.f), SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb3, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, 0f, orb3.Size() / 2f, new Vector2(0.5f, 0.35f), SpriteEffects.None);
+
+            return false;
+        }
+    }
+
+    public class TrailTestOmega : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float alpha = 0f;
+        float scale = 0f;
+
+        int timer = 0;
+
+        BaseTrailInfo trail1 = new BaseTrailInfo();
+        public override void AI()
+        {
+            //Trail1 Info Dump
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/SoulSpikeHalf").Value;
+            trail1.trailPointLimit = 165;
+            trail1.trailWidth = 15;
+            trail1.trailMaxLength = 165;
+            trail1.timesToDraw = 1;
+            trail1.shouldSmooth = false;
+            trail1.pinchHead = false;
+            trail1.pinchTail = false;
+            //trail1.pinchAmount = 0.5f;
+
+            trail1.trailTime = 0f;
+            trail1.trailColor = Color.SkyBlue;
+
+            trail1.trailRot = Projectile.velocity.ToRotation();
+            trail1.trailPos = Projectile.Center + Projectile.velocity;
+            trail1.TrailLogic();
+
+            Projectile.tileCollide = true;
+            Projectile.velocity.Y += 0.2f;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(false);
+            });
+
+            DrawTrail(true);
+
+            return false;
+        }
+
+        public void DrawTrail(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            trail1.TrailDrawing(Main.spriteBatch);
+        }
+
+    }
+
 
 }

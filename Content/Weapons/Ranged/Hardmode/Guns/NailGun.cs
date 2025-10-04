@@ -263,7 +263,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             SoundEngine.PlaySound(SoundID.Item70 with { Pitch = 0.2f, Volume = 0.4f, MaxInstances = -1, PitchVariance = 0.35f }, projectile.Center);
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/hero_fury_charm_burst") with { Pitch = 0.6f, PitchVariance = 0.3f, MaxInstances = -1, Volume = 0.2f };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/hero_fury_charm_burst") with { Pitch = 0.6f, PitchVariance = 0.3f, MaxInstances = -1, Volume = 0.2f };
             SoundEngine.PlaySound(style2, projectile.Center);
 
             SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_explosive_trap_explode_1") with { PitchVariance = 0.25f, Pitch = 0.25f, Volume = 0.4f };

@@ -258,9 +258,12 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        public void SwirlFeather()
+        public void RisingNado()
         {
-
+            //Hover above player
+            //Telegraph wind upward
+            //Move up and screenwrap to under player
+            //Burst of rising nados
         }
 
         bool isX = true;
@@ -459,7 +462,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 0.11f, Pitch = 0.7f, PitchVariance = 0.05f, MaxInstances = 1 };
                     SoundEngine.PlaySound(styleD, NPC.Center);
 
-                    SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.09f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
+                    SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = 0.09f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
                     SoundEngine.PlaySound(styleC, NPC.Center);
 
                     player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 25f;
@@ -660,7 +663,7 @@ namespace VFXPlus.Content.FeatheredFoe
                         SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 0.08f, Pitch = 0.7f, PitchVariance = 0.05f, MaxInstances = 1 };
                         SoundEngine.PlaySound(styleD, NPC.Center);
 
-                        SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.07f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
+                        SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = 0.07f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
                         SoundEngine.PlaySound(styleC, NPC.Center);
 
                         player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
@@ -791,7 +794,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.5f * overallVolume, Pitch = .7f, PitchVariance = 0.05f, MaxInstances = -1 };
                     SoundEngine.PlaySound(styleA, NPC.Center);
 
-                    SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.15f * overallVolume, Pitch = .4f, PitchVariance = .1f, MaxInstances = -1 };
+                    SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = 0.15f * overallVolume, Pitch = .4f, PitchVariance = .1f, MaxInstances = -1 };
                     SoundEngine.PlaySound(styleC, NPC.Center);
 
                     SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 1f * overallVolume, Pitch = .6f, PitchVariance = 0.05f, MaxInstances = 1 };
@@ -1290,7 +1293,7 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             float yGoal = (float)Math.Sin((float)timer * 0.03f);
 
-            windOrbDest = new Vector2(-600, -500 * yGoal) * (1f + windOrbRecoilPower);
+            windOrbDest = new Vector2(-500, -250 * yGoal) * (1f + windOrbRecoilPower);
             BasicMovementVariant3(player.Center + windOrbDest, moveSpeed: 4f);
 
             windOrbRecoilPower = Math.Clamp(MathHelper.Lerp(windOrbRecoilPower, -0.5f, 0.04f), 0f, 2f);
@@ -1299,13 +1302,15 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
 
-                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
+                int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 1f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
+
+                (Main.projectile[orb].ModProjectile as FFWindOrb).playerID = player.whoAmI;
 
                 windOrbRecoilPower = 0.5f;
             }
 
-            windOverlayOpacityGoal = 0.15f;
-            windOverlayRotation = 0f;
+            windOverlayOpacityGoal = 0.2f;
+            windOverlayRotation = yGoal * 0.1f;
 
             doPassiveWindParticles = true;
             passiveWindParticleDirection = 0f;
@@ -1313,26 +1318,68 @@ namespace VFXPlus.Content.FeatheredFoe
 
         //FF spawns feathers that orbit around player while wind blows in a certain direction
         //After a second the feathers spin off and shoot in the direction the wind was blowing
+        Vector2 tornadoDashDir = Vector2.Zero;
         public void WindDirShot()
-        {
-            int timeBeforeSpawnFeathers = 20;
-            int timeForFeahtersToSpin;
-            
+        {   
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
 
-            Vector2 goalPos = player.Center + new Vector2(0f, -250);
+            Vector2 goalPos = player.Center + tornadoDashDir * -250f;// new Vector2(0f, -250);
             BasicMovementVariant3(goalPos, moveSpeed: hoverSpeed);
 
-            
+            int orbitTime = 90;
 
-            if (timer == 0 && timer % 80 == 0)
+            if (timer == 30)
             {
-                Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+                tornadoDashDir = Main.rand.NextVector2CircularEdge(1f, 1f);
 
-                Projectile.NewProjectile(null, NPC.Center, toPlayer * 10f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
+                int nadoCount = 7; //7 215
+                float bonusRot = Main.rand.NextFloat(6.28f);// Main.rand.NextBool() ? 0f : MathHelper.PiOver4;
+                for (int i = 0; i < nadoCount; i++)
+                {
+                    float prog = (i + 1f) / (float)nadoCount;
 
-                windOrbRecoilPower = 0.5f;
+                    int are5 = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<WindDirShotNado>(), 10, 2, player.whoAmI);
+
+                    (Main.projectile[are5].ModProjectile as WindDirShotNado).playerID = player.whoAmI;
+                    (Main.projectile[are5].ModProjectile as WindDirShotNado).endingShotDir = tornadoDashDir.ToRotation();
+                    (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitVector = new Vector2(225f, 0f).RotatedBy((MathHelper.TwoPi * prog) + bonusRot);
+                    (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitTime = orbitTime;
+                }
+            }
+
+            if (timer >= 30)
+            {
+                windOverlayOpacityGoal = timer >= 30 + orbitTime ? 1f : 0.35f;
+                windOverlayRotation = tornadoDashDir.ToRotation();
+
+                doPassiveWindParticles = true;
+                passiveWindParticleDirection = tornadoDashDir.ToRotation();
+                centerPassiveWindParticlesOnPlayer = true;
+
+                passiveWindParticlesCount = 2;
+            }
+
+            if (timer == 30 + orbitTime)
+            {
+                windOverlayOpacityGoal = 2f;
+
+                int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
+                (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 30;
+                (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.5f;
+                Main.projectile[pulse].scale = 6f;
+
+                player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
+            }
+
+            if (timer == 150)
+            {
+                timer = -1;
+
+                windOverlayOpacityGoal = 0f;
+                doPassiveWindParticles = false;
+                centerPassiveWindParticlesOnPlayer = false;
+                passiveWindParticlesCount = 1;
             }
         }
 

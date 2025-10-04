@@ -17,6 +17,7 @@ using System.Threading;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using VFXPlus.Common.Drawing;
 using static Terraria.ModLoader.PlayerDrawLayer;
+using Terraria.GameContent.NetModules;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
@@ -31,12 +32,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_etherian_portal_dryad_touch") with { Volume = .3f, Pitch = .91f, PitchVariance = .32f, MaxInstances = -1, };
+            SoundEngine.PlaySound(style3, player.Center);
+
             return true;
         }
 
@@ -98,9 +102,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             #region Trail
-            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.08f) * overallAlpha;
+            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.15f) * overallAlpha;
 
-            int trueTrailWidth = (int)(27f * overallScale); //20
+            int trueTrailWidth = (int)(25f * overallScale); //20
 
             if (trueTrailWidth < 3)
                 trueTrailWidth = 0;
@@ -168,7 +172,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 projectile.ai[1] = 1f;
                 projectile.localAI[0] = -Main.rand.Next(48);
-                SoundEngine.PlaySound(in SoundID.Item34, projectile.position);
+                //SoundEngine.PlaySound(in SoundID.Item34, projectile.position);
             }
             else if (projectile.ai[1] == 1f && projectile.owner == Main.myPlayer)
             {
@@ -315,23 +319,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
 
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
 
-            Color col1 = Color.White * 0.55f;
-            Color col2 = Color.HotPink * 0.525f * 0.75f;
-            Color col3 = Color.DeepPink * 0.375f * 0.5f;
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
 
-            float scale1 = 0.85f;
-            float scale2 = 1.6f;
-            float scale3 = 2.5f;
-            float scale = 1.15f * drawScale;
+            Color[] cols = { Color.White, Color.HotPink * 0.525f, Color.DeepPink * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
 
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+            float orbScale = 0.65f * drawScale;
+            float orbAlpha = overallAlpha * 0.5f;
 
-            //Main.EntitySpriteDraw(orb, drawPos, null, col1 with { A = 0 }, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.8f * projectile.scale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, col2 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.8f), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, col3 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.8f), SpriteEffects.None);
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.13f) * 0.1f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.22f) * 0.05f;
+
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[0] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[0] * orbScale * new Vector2(1f, 0.8f * projectile.scale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[1] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[1] * orbScale * sineScale1 * new Vector2(1f, 0.8f), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[2] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[2] * orbScale * sineScale2 * new Vector2(1f, 0.8f), SpriteEffects.None);
 
 
 
@@ -341,23 +344,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
             SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
-            
+
             //After-Image
-            if (previousRotations != null && previousPositions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = progress * drawScale;// (0.75f + (progress * 0.25f)) * projectile.scale;
+                float progress = (float)i / previousRotations.Count;
+                float size = progress * drawScale;// (0.75f + (progress * 0.25f)) * projectile.scale;
 
-                    Color col = Color.Pink * progress * projectile.Opacity * overallAlpha;
+                Color col = Color.Pink * progress * projectile.Opacity * overallAlpha;
 
-                    Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f, //0.5f
-                            previousRotations[i], TexOrigin, size, se);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f, //0.5f
+                        previousRotations[i], TexOrigin, size, se);
 
             }
 
@@ -456,16 +455,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
                 overallAlpha: 0.21f, DrawWhiteCore: true, 1f, 1f);
 
-            //SoftGlowDustBehavior sgbt = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.87f, sizeChangeSpeed: 0.80f, timeToKill: 150,
-                //overallAlpha: 0.27f, DrawWhiteCore: true, 1f, 1f);
-            
-            //Dust softGlow2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DeepPink, Scale: 0.35f);
-            //softGlow2.customData = sgbt;
-            //Dust softGlow3 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.HotPink, Scale: 0.25f);
-            //softGlow3.customData = sgbt;
-            //Dust softGlow4 = Dust.NewDustPerfect(projectile.Center + projectile.velocity + new Vector2(100f, 0f), ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.LightPink, Scale: 0.15f);
-            //softGlow4.customData = sgbt;
 
+            //Sound
+            int variant = Main.rand.Next(1, 4);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Impact/BoltCrash" + variant);
+            SoundEngine.PlaySound(style, projectile.Center);
 
             #region vanillaKill
             int num121 = Utils.SelectRandom<int>(Main.rand, 242, 73, 72, 71, 255);
@@ -487,7 +481,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 num127 = 2.2f;
                 vector26 *= 0.5f;
             }
-            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
             projectile.position = projectile.Center;
             projectile.width = (projectile.height = num124);
             projectile.Center = projectile.position;
@@ -537,7 +531,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             #endregion
             return false;
-            return base.PreKill(projectile, timeLeft);
         }
 
     }
@@ -600,15 +593,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             #region Trail
-            Color thisBlue = betweenBlue2 * overallAlpha;// Color.Lerp(Color.HotPink, Color.DeepPink, 0f) * overallAlpha;
+            Color thisBlue = betweenBlue2 * overallAlpha;// * 0.875f;// Color.Lerp(Color.HotPink, Color.DeepPink, 0f) * overallAlpha;
 
-            int trueTrailWidth = (int)(35f * overallScale); //20
+            int trueTrailWidth = (int)(30f * overallScale); //35
 
             if (trueTrailWidth < 3)
                 trueTrailWidth = 0;
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/EvenThinnerGlowLine").Value; //07Black
             trail1.trailPointLimit = 85;
             trail1.trailWidth = trueTrailWidth;
             trail1.trailMaxLength = 250;
@@ -680,7 +673,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 projectile.ai[1] = 1f;
                 projectile.localAI[0] = -Main.rand.Next(48);
-                SoundEngine.PlaySound(in SoundID.Item34, projectile.position);
+                //SoundEngine.PlaySound(in SoundID.Item34, projectile.position);
             }
             else if (projectile.ai[1] == 1f && projectile.owner == Main.myPlayer)
             {

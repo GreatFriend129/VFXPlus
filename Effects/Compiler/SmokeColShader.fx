@@ -20,6 +20,7 @@ float fadeProgress = 1.0;
 
 float endAlpha = 1.0;
 
+
 float4 main(float4 screenspace : TEXCOORD0) : COLOR0
 {
     float2 baseUV = screenspace.xy;

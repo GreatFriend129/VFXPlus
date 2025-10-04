@@ -1,20 +1,21 @@
-using System;
 using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
-using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
 using ReLogic.Content;
-using VFXPlus.Common.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
+using Terraria.Graphics;
+using Terraria.ID;
+using Terraria.ModLoader;
+using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -35,22 +36,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-
-            Vector2 pos = position + velocity.SafeNormalize(Vector2.UnitX) * 30;
-
-            for (int i = 10; i < 2 + Main.rand.Next(0, 3); i++) //2 //0,3
-            {
-
-                ParticleOrchestraSettings particleSettings = new()
-                {
-                    PositionInWorld = pos,
-                    MovementVector = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-1.5f, 1.5f)) * Main.rand.NextFloat(0f, 4f)
-                };
-                ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.SilverBulletSparkle, particleSettings);
-
-            }
-
-
             return true;
         }
 
@@ -64,11 +49,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return lateInstantiation && (entity.type == ProjectileID.SkyFracture) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.SkyFractureToggle;
         }
 
-        float sineOffset = Main.rand.NextFloat(6.28f);
+        float randomSineOffset = Main.rand.NextFloat(0f, 10f);
         int randomTrailLengthOffset = Main.rand.Next(-1, 2);
 
 
-        BaseTrailInfo trail1 = new BaseTrailInfo();
         Vector2 spawnPos = Vector2.Zero;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
@@ -78,6 +62,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (timer == 0)
             {
                 projectile.alpha = 0;
+                projectile.frame = Main.rand.Next(0, 14);
+
                 spawnPos = projectile.Center;
                 projectile.ai[0] = projectile.scale;
 
@@ -98,8 +84,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 d.customData = new CirclePulseBehavior(0.05f, true, 12, 0.35f, 0.7f);
             }
 
-            int trailCount = 8 + randomTrailLengthOffset;
-            previousRotations.Add(projectile.rotation);
+            int trailCount = 10 + randomTrailLengthOffset;
+            previousRotations.Add(projectile.velocity.ToRotation());
             previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
@@ -116,79 +102,30 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Main.dust[d].velocity *= 0.45f;
             }
 
-            float timeForPopInAnim = 15f;
+            float timeForPopInAnim = 20f;
             float animProgress = Math.Clamp((float)(timer / timeForPopInAnim), 0f, 1f);
             projectile.scale = projectile.ai[0] + (1f - Easings.easeOutCirc(animProgress)) * 0.5f;
 
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.4f, 0.08f), 0f, 1f);
 
-
             Lighting.AddLight(projectile.Center, Color.DeepSkyBlue.ToVector3() * 0.75f * overallAlpha);
-
-            Color thisBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.65f) * overallAlpha;
-
-            #region trail info
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value; //EvenThinnerGlowLine == Really clean
-            trail1.trailPointLimit = 90;
-            trail1.trailWidth = (int)(18 * overallAlpha);
-            trail1.trailMaxLength = 200 * overallAlpha;
-            trail1.timesToDraw = 2;
-            trail1.shouldSmooth = false;
-            trail1.pinchHead = true;
-            trail1.useEffectMatrix = true;
-
-            trail1.trailColor = thisBlue;
-
-            trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + projectile.velocity;
-            trail1.TrailLogic();
-            #endregion
-
-            // V Super nice
-            #region alt 
-            /*
-            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.08f) * overallAlpha;
-            Color thisBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.65f) * overallAlpha;
-
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/LavaTrailV1").Value; //EvenThinnerGlowLine == Really clean
-            trail1.trailPointLimit = 90;
-            trail1.trailWidth = (int)(18 * overallAlpha);
-            trail1.trailMaxLength = 200 * overallAlpha;
-            trail1.timesToDraw = 2;
-            trail1.shouldSmooth = false;
-            trail1.pinch = true;
-            trail1.useEffectMatrix = true;
-
-            trail1.trailColor = thisBlue;
-
-            trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + projectile.velocity;
-            trail1.TrailLogic();
-            */
-            #endregion
 
             timer++;
             return false;
         }
 
-        float fadeInPower = 0f;
         public float overallAlpha = 0f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            trail1.trailTime = (float)Main.timeForVisualEffects * 0.035f;
-
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                //trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
                 DrawTrail(projectile, false);
             });
             DrawTrail(projectile, true);
-            //trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: true);
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
-            Texture2D glorb = CommonTextures.feather_circle128PMA.Value;
+
 
             //So apparently sky fracture is like the only thing in all of terraria that uses a horizontal spritesheet
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -197,73 +134,91 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(14, 1, frameX: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
+            //Sword is slightly off-center on spritesheet, so this is to fix that
+            Vector2 swordOffset = new Vector2(0f, 2f).RotatedBy(projectile.velocity.ToRotation());
 
-            Vector2 glorbScale = new Vector2(1f, 0.4f) * 0.8f;
-            Vector2 glorbOffset = new Vector2(0f, -1.5f * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
-            Main.EntitySpriteDraw(glorb, drawPos + glorbOffset, null, Color.DeepSkyBlue with { A = 0 } * overallAlpha * 0.25f, projectile.velocity.ToRotation(), glorb.Size() / 2f, glorbScale * projectile.scale * overallAlpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(glorb, drawPos + glorbOffset, null, Color.SkyBlue with { A = 0 } * overallAlpha * 0.1f, projectile.velocity.ToRotation(), glorb.Size() / 2f, glorbScale * projectile.scale * overallAlpha * 0.75f, SpriteEffects.None);
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+
+            Color[] cols = { Color.SkyBlue * 0.75f, Color.SkyBlue * 0.525f, Color.DeepSkyBlue * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
+
+            float orbRot = projectile.rotation - MathHelper.PiOver4;
+            float orbAlpha = 0.35f;
+            Vector2 orbScale = new Vector2(0.5f, 0.25f) * 0.75f * overallAlpha;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+
 
             float sinVal = (float)Math.Sin(Main.timeForVisualEffects * 0.12f);
 
             //Border
             for (int i = 0; i < 4; i++)
             {
-
                 float dist = 4f + (sinVal * 1f);
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+                Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction) + swordOffset;
 
 
                 float opacity = projectile.Opacity * (0.85f + sinVal * 0.15f);
                 Main.EntitySpriteDraw(vanillaTex, offsetDrawPos, sourceRectangle, 
-                    Color.DodgerBlue with { A = 0 } * 0.15f * opacity, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallAlpha, SpriteEffects.None);
+                    Color.DeepSkyBlue with { A = 0 } * 0.15f * opacity, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallAlpha, SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.DeepSkyBlue * overallAlpha * 0.5f, projectile.rotation, TexOrigin, projectile.scale * overallAlpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(vanillaTex, drawPos + swordOffset, sourceRectangle, Color.White * overallAlpha * 0.15f, projectile.rotation, TexOrigin, projectile.scale * overallAlpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.SkyBlue with { A = 0 } * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallAlpha, SpriteEffects.None);
+            float overglowScale = projectile.scale * overallAlpha + (MathF.Sin((float)Main.timeForVisualEffects * 0.15f) * 0.08f);
+            Main.EntitySpriteDraw(vanillaTex, drawPos + swordOffset, sourceRectangle, Color.SkyBlue with { A = 0 } * overallAlpha, projectile.rotation, TexOrigin, overglowScale, SpriteEffects.None);
             
             
-            return true;
+            return false;
 
         }
 
+        Effect myEffect = null;
         public void DrawTrail(Projectile projectile, bool giveUp)
         {
             if (giveUp)
                 return;
 
-            //So apparently sky fracture is like the only thing in all of terraria that uses a horizontal spritesheet
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            myEffect ??= ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
-            Color color = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f);
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpikeHalf").Value; //
 
-            float overallWidth = 1f + ((float)Math.Sin(Main.timeForVisualEffects * 0.11f) * 0.25f);
-            for (int i = 0; i < previousPositions.Count; i++)
-            {
-                float progress = (float)i / previousPositions.Count;
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
 
-                Vector2 trailPos = previousPositions[i] - Main.screenPosition;
+            Color StripColor(float progress) => Color.White * Easings.easeOutQuart(progress * progress) * overallAlpha;
 
-                //float trailAlpha = progress * progress * projectile.Opacity;
 
-                //Start End
-                Color trailColor = Color.Lerp(color, Color.DodgerBlue, Easings.easeOutSine(1f - progress)) * Easings.easeOutCirc(progress);
+            float sineStripWidth = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.12f) * 0.15f;
+            float StripWidth(float progress) => 8f * sineStripWidth * overallAlpha;
 
-                Vector2 trailScaleThick = new Vector2(0.5f, 0.1f + Easings.easeInQuad(progress) * 0.45f);
-                trailScaleThick.X *= 1f;
-                Vector2 trailScaleThin = new Vector2(trailScaleThick.X, trailScaleThick.Y * 0.55f);
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
 
-                trailScaleThick.Y *= overallWidth;
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(0f); //0.02
+            myEffect.Parameters["reps"].SetValue(1f);
 
-                Main.EntitySpriteDraw(flare, trailPos, null, trailColor with { A = 0 } * 0.75f, projectile.velocity.ToRotation(),
-                    flare.Size() / 2f, trailScaleThick, 0);
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.25f).ToVector3() * 4f);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
 
-                //Main.EntitySpriteDraw(flare, trailPos, null, Color.White with { A = 0 }, previousRotations[i], 
-                //flare.Size() / 2f, trailScaleThin, 0);
-            }
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            
+            vertexStrip.DrawTrail();
+            
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -291,17 +246,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.8f, sizeChangeSpeed: 0.9f, timeToKill: 10,
                 overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
-
-            for (int i = 20; i < 2 + Main.rand.Next(0,2); i++)
-            {
-                ParticleOrchestraSettings particleSettings = new()
-                {
-                    PositionInWorld = projectile.Center,
-                    MovementVector = Main.rand.NextVector2Circular(2f, 2f) + projectile.velocity * 0.025f
-                };
-
-                ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.SilverBulletSparkle, particleSettings);
-            }
 
             return false;
         }

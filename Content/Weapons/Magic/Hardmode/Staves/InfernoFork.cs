@@ -54,7 +54,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            if (timer % 1 == 0 && timer > 10 && Main.rand.NextBool(3))
+            if (timer % 1 == 0 && timer > 10 && Main.rand.NextBool(3) && false)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.5f, 1.5f) - projectile.velocity * 1.25f;
@@ -69,20 +69,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 //ShaderParticleHandler.SpawnParticle(fire2);
             }
 
-            if (timer % 2 == 0 && timer > 10 && false)
+
+            if (timer % 3 == 0)
             {
-                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.5f, 1.5f) - projectile.velocity * 2f;
-
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.15f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 1f;
-
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.5f, Scale: dustScale);
-                smoke.alpha = 2;
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
+                FireParticle fire = new FireParticle(projectile.Center, vel, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 3f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
-            float timeForPopInAnim = 30;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
+            float timeForPopInAnim = 40;
+            float animProgress = Math.Clamp((timer + 15) / timeForPopInAnim, 0f, 1f);
             overallScale = 0.1f + MathHelper.Lerp(0f, 0.9f, Easings.easeInOutBack(animProgress, 0f, 1.35f));
 
             overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.09f), 0f, 1f);
@@ -197,7 +194,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 d2.customData = cpb2;
                 d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
+                //Fire particles
 
+                for (int i = 0; i < 10; i++)
+                {
+                    float prog = (float)i / 10;
+
+
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(12f, 12f) * Easings.easeOutCirc(prog) * 1f;
+
+                    float fireScale = Main.rand.NextFloat(1.75f, 2.25f);
+
+                    FireParticle fire = new FireParticle(projectile.Center + new Vector2(0f, 0f), veloF, fireScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 1.5f, bloomAlpha: 1.5f, AlphaFade: 0.95f, VelFade: 0.84f);
+                    fire.scaleFadePower = 1.01f; //1.05
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
 
             #region vanillaAI
@@ -252,7 +263,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Projectile.tileCollide = false;
 
             Projectile.penetrate = -1;
-            Projectile.timeLeft = 22900;
+            Projectile.timeLeft = 2900;
         }
 
         public override bool? CanDamage() => false;
@@ -279,6 +290,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     Projectile.active = false;
             }
 
+
+            if (timer % 1 == 0 && !shouldFadeOut)
+            {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(5f, 8f);
+                FireParticle fire = new FireParticle(Projectile.Center + vel * 1.5f, vel, 1.25f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 2f, bloomAlpha: 0.75f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
 
             if (timer > 5 && timer % 2 == 0 && !shouldFadeOut)
             {

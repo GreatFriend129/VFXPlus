@@ -736,7 +736,7 @@ namespace VFXPlus.Content.QueenBee
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 DrawSmoke(false);
             });
@@ -778,7 +778,7 @@ namespace VFXPlus.Content.QueenBee
 
             //4
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/WispSmoke" + smokeTex).Value; //spark_02 | smoke_02
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/WispSmokeClear").Value; //spark_02 | smoke_02
 
             Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Smoke/InvertMask" + maskTex).Value; 
             
@@ -797,12 +797,14 @@ namespace VFXPlus.Content.QueenBee
 
             Color myCol = Color.Lerp(Color.OrangeRed, Color.Red, 0.25f);
 
-            myEffect.Parameters["color"].SetValue(myCol.ToVector3() * 15f * overallAlpha); //30
-            myEffect.Parameters["glowThreshold"].SetValue(0.8f); //0.9f
+            myEffect.Parameters["color"].SetValue(myCol.ToVector3() * 15f * overallAlpha); //15
+            myEffect.Parameters["glowThreshold"].SetValue(0.4f); //0.8f
             myEffect.Parameters["glowPower"].SetValue(3.5f); //3.5
             myEffect.Parameters["fadeProgress"].SetValue(maskVal);
-            myEffect.Parameters["endAlpha"].SetValue(1f);
+            myEffect.Parameters["endAlpha"].SetValue(1f * overallAlpha); //* overallAlpha
 
+
+            //15 | 0.2 | 3.5 | 1f | clear smoke | Additive | Pixelation System
 
             myEffect.Parameters["maskTexture"].SetValue(Mask);
 

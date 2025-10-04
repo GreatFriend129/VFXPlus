@@ -155,9 +155,9 @@ namespace VFXPlus
         [ReloadRequired]
         public bool StaffOfEarthToggle = true;
 
-        [DefaultValue(true)]
-        [ReloadRequired]
-        public bool BetsysWrathToggle = true;
+        //[DefaultValue(true)]
+        //[ReloadRequired]
+        //public bool BetsysWrathToggle = true;
         #endregion
 
         //-----------------------------------------------------------

@@ -110,8 +110,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/FlareImpact") with { Volume = 0.15f, Pitch = -0.8f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .04f, Pitch = .65f, PitchVariance = .05f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style2, player.Center);
+            //SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .04f, Pitch = .65f, PitchVariance = .05f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style2, player.Center);
 
             return true;
         }

@@ -421,10 +421,10 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
         public override void Load()
         {
-            circle_053 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053");
-            muzzle_flash_12 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/muzzle_flash_12");
-            star_07 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Flare/star_07");
-            circle_053Black = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053Black");
+            circle_053 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053");
+            muzzle_flash_12 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/muzzle_flash_12");
+            star_07 = ModContent.Request<Texture2D>("VFXPlus/Assets/Flare/star_07");
+            circle_053Black = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053Black");
         }
 
         public override void Unload()
@@ -1075,10 +1075,10 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
         public override void Load()
         {
-            circle_053 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053");
-            muzzle_flash_12 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/muzzle_flash_12");
-            star_07 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Flare/star_07");
-            circle_053Black = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053Black");
+            circle_053 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053");
+            muzzle_flash_12 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/muzzle_flash_12");
+            star_07 = ModContent.Request<Texture2D>("VFXPlus/Assets/Flare/star_07");
+            circle_053Black = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053Black");
         }
 
         public override void Unload()
@@ -1473,10 +1473,10 @@ namespace VFXPlus.Content.VFXTest.Aero.Oblivion
 
         public override void Load()
         {
-            circle_053 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053");
-            muzzle_flash_12 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/muzzle_flash_12");
-            star_07 = ModContent.Request<Texture2D>("AerovelenceMod/Assets/Flare/star_07");
-            circle_053Black = ModContent.Request<Texture2D>("AerovelenceMod/Assets/MuzzleFlashes/circle_053Black");
+            circle_053 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053");
+            muzzle_flash_12 = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/muzzle_flash_12");
+            star_07 = ModContent.Request<Texture2D>("VFXPlus/Assets/Flare/star_07");
+            circle_053Black = ModContent.Request<Texture2D>("VFXPlus/Assets/MuzzleFlashes/circle_053Black");
         }
 
         public override void Unload()

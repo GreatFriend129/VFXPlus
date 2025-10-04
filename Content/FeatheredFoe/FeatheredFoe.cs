@@ -29,7 +29,7 @@ namespace VFXPlus.Content.FeatheredFoe
             TriSpin = 2, 
             MartletOrbitFeather = 3,
             CircleBurstFeather = 4,
-            SwirlFeather = 5,
+            RisingNado = 5,
             CornerTravelShot = 6,
             MeleeTalon = 7,
             CircleDash = 8,
@@ -97,7 +97,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.Madison;
+            CurrentAttack = FeatheredFoeState.WindDirShot;
 
             switch (CurrentAttack)
             {
@@ -116,8 +116,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 case FeatheredFoeState.CircleBurstFeather: //Forked burst
                     CircleBurstFeather();
                     break;
-                case FeatheredFoeState.SwirlFeather: //Nothing
-                    SwirlFeather();
+                case FeatheredFoeState.RisingNado: //Nothing
+                    RisingNado();
                     break;
                 case FeatheredFoeState.CornerTravelShot: //hardish to hit
                     CornerTravelShot();

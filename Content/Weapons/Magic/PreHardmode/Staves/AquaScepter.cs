@@ -164,7 +164,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
                 float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
 
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(6f, 6f); //3f
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(4.5f, 4.5f); //6f
 
                 float startScale = projectile.ai[2] + sineScale;
 

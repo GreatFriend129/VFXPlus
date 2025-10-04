@@ -53,23 +53,30 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 d.velocity += velocity * 0.45f * (prog);
             }
 
-            for (int i = 0; i < 17; i++)
+            for (int i = 20; i < 17; i++)
             {
                 float prog = (float)i / 7f;
 
                 Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(2f, 15f);
-                float myScale = Main.rand.NextFloat(0.85f, 1.2f);
-                FireParticle fire = new FireParticle(spawnPos, vel, myScale, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
-                fire.scaleFadePower = 0.97f;
+                float myScale = Main.rand.NextFloat(0.6f, 0.95f);
+                FireParticle fire = new FireParticle(spawnPos, vel, myScale, Color.Lerp(Color.OrangeRed, Color.Orange, 0.3f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
                 ShaderParticleHandler.SpawnParticle(fire);
             }
 
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(2f, 15f);
+                FireParticle fire = new FireParticle(spawnPos, vel, 1f, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .1f, Pitch = 0.55f, PitchVariance = .1f };
-            SoundEngine.PlaySound(style2, player.Center);
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Fire/HeatRayShot2") with { Volume = 0.65f, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style3, player.Center);
 
-            SoundStyle styla = new SoundStyle("Terraria/Sounds/Item_122") with { Volume = 0.15f, Pitch = .9f, PitchVariance = 0.11f, MaxInstances = -1 };
-            SoundEngine.PlaySound(styla, player.Center);
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/HeatRayShot") with { Volume = 0.45f, Pitch = -0.75f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style4, player.Center);
+
 
             return true;
         }
@@ -180,7 +187,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             //Smoke
             Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
-            for (int i = 0; i < 15; i++)
+            for (int i = 220; i < 15; i++)
             {
                 float prog = (float)i / 15f;
 
@@ -193,6 +200,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 //d.velocity += projectile.oldVelocity * -0.5f * (prog);
             }
 
+            for (int i = 220; i < 17; i++)
+            {
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.85f) * Main.rand.NextFloat(2f, 12f);
+                float myScale = Main.rand.NextFloat(0.6f, 0.95f);
+                FireParticle fire = new FireParticle(projectile.Center, -vel, myScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.25f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(2f, 15f);
+                FireParticle fire = new FireParticle(projectile.Center, -vel, 1f, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
 
             if (vfxIndex != -1)
                 (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;

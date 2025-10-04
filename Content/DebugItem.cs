@@ -10,6 +10,7 @@ using VFXPlus.Common.Utilities;
 using VFXPlus.Common;
 using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.VFXTest;
 
 
 namespace VFXPlus.Content
@@ -45,10 +46,11 @@ namespace VFXPlus.Content
             if (player.altFunctionUse == 2)
             {
                 //ShaderParticleHandler.RemoveParticle();
-                //Vector2 pos = Main.MouseWorld;
-                //NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
+                Vector2 pos = Main.MouseWorld;
+                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
                 return false;
             }
+
 
             for (int iaa = -3; iaa < -4; iaa++)
             {
@@ -63,6 +65,25 @@ namespace VFXPlus.Content
                 }
             }
 
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 18f, ModContent.ProjectileType<WindTrail>(), 0, 0, Main.myPlayer);
+
+
+            float endDir = new Vector2(1f, 1f).ToRotation() + Main.rand.NextFloat(6.28f);
+            float boost = Main.rand.NextFloat(6.28f);
+            int featherCount = 0;
+            for (int i = 0; i < featherCount; i++)
+            {
+                float prog = (i + 1f) / (float)featherCount;
+
+                int are5 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<WindDirShotNado>(), 10, 0, player.whoAmI);
+
+                (Main.projectile[are5].ModProjectile as WindDirShotNado).playerID = player.whoAmI;
+                (Main.projectile[are5].ModProjectile as WindDirShotNado).endingShotDir = endDir;
+                (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitVector = new Vector2(215f, 0f).RotatedBy(boost + (MathHelper.TwoPi * prog));
+
+
+            }
+
             float sin1 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f);
             float sin2 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (MathHelper.TwoPi / 3));
             float sin3 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (2 * MathHelper.TwoPi / 3));
@@ -74,22 +95,61 @@ namespace VFXPlus.Content
             Color color = new Color((int)r, (int)g, (int)b);
 
 
-
-            //Vector2 myvel = new Vector2(0f, -1f).RotatedByRandom(0.25f) * Main.rand.NextFloat(8f, 12f);
-            //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, 1.25f, Color.OrangeRed, colorMult: 2f, bloomAlpha: 1.25f);
-            //ShaderParticleHandler.SpawnParticle(fire1);
-
-
-            for (int i = 220; i < 8; i++)
+            for (int i = 220; i < 5; i++)
             {
-                float prog = (float)i / 8;
+                float prog = (float)i / 5f;
+
+                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
+
+                float velMult = Main.rand.NextFloat(2f, 6f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
+                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -12f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, Main.myPlayer);
+
+                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
+
+                Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
+                Main.projectile[smoke].scale = 0.5f;// * Main.rand.NextFloat(0.5f, 1f);
+                Main.projectile[smoke].velocity *= 0.75f;
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                float fireScale = Main.rand.NextFloat(1.35f, 1.55f);
+                float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
+                float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
+
+                Color thisCol = Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
+
+                //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(4f, 7f);
+                //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 2f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f, RotPower: 0.02f);
+                //fire1.randomRotPower = 0.5f;
+                //fire1.scaleFadePower = scaleFade;
+                //ShaderParticleHandler.SpawnParticle(fire1);
+
+                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f);
+                FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 2f, bloomAlpha: 1.65f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
+                fire1.randomRotPower = 0.5f;
+                fire1.scaleFadePower = 1.05f;
+                ShaderParticleHandler.SpawnParticle(fire1);
+            }
 
 
-                Vector2 veloF = Main.rand.NextVector2CircularEdge(10f, 10f) * Easings.easeOutQuad(prog) * 1f;
 
-                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, 1.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.15f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.95f, VelFade: 0.83f);
-                fire.scaleFadePower = 1.05f;
+            for (int i = 220; i < 5; i++)
+            {
+                float prog = (float)i / 5;
+
+
+                Vector2 veloF = Main.rand.NextVector2CircularEdge(5f, 5f) * Main.rand.NextFloat(2f, 4f);
+
+                float fireScale = Main.rand.NextFloat(1.5f, 2f);
+
+                FireParticle fire = new FireParticle(Main.MouseWorld, veloF, fireScale, Color.Lerp(Color.Aqua, Color.Aquamarine, 0.35f), colorMult: 0.75f, bloomAlpha: 0.75f, AlphaFade: 0.91f, VelFade: 0.92f);
+                fire.scaleFadePower = 1.05f; //1.05
+                fire.randomRotPower = 0.5f;
                 ShaderParticleHandler.SpawnParticle(fire);
+
+
             }
 
             for (int i = 220; i < 5; i++)
@@ -98,25 +158,16 @@ namespace VFXPlus.Content
 
                 Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
                 float myScale = Main.rand.NextFloat(1.25f, 1.5f);
-                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, color, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
                 fire.scaleFadePower = 1.1f;
                 ShaderParticleHandler.SpawnParticle(fire);
+
 
                 //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);
                 //ShaderParticleHandler.SpawnParticle(fire);
             }
 
-            int featherCount = 0;
-            for (int i = 0; i < featherCount; i++)
-            {
-                float prog = (i + 1f) / (float)featherCount; 
 
-                int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<OrbitPlayerFeather>(), 10, 0, player.whoAmI);
-
-                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).playerID = player.whoAmI;
-                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).orbitSpeed = 11f;
-                (Main.projectile[are].ModProjectile as OrbitPlayerFeather).orbitVector = new Vector2(200, 0f).RotatedBy(MathHelper.TwoPi * prog);
-            }
 
             //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, Main.myPlayer);
             //int windFX3 = Projectile.NewProjectile(null, player.Center + new Vector2(-200f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<InfernoForkVFXImOld>(), 0, 0, Main.myPlayer);
@@ -128,7 +179,7 @@ namespace VFXPlus.Content
 
 
             float gap = 22.5f;
-            for (int i = 0; i < 20; i++)
+            for (int i = 220; i < 20; i++)
             {
                 Vector2 spawnPos = player.Center + new Vector2(0f, gap * i);
                 Vector2 vel = new Vector2(7f, 0f);// * Main.rand.NextFloat(0.98f, 1.02f);
@@ -136,8 +187,8 @@ namespace VFXPlus.Content
                 Main.projectile[are2].scale = 1.125f;
             }
 
-            Vector2 velAAA = new Vector2(8f, 0f);
-            //int are = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
+            //Vector2 velAAA = new Vector2(8f, 0f);
+            //int are3 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
 
             return false;
 

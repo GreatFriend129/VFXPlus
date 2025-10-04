@@ -4,6 +4,9 @@ float uTime : register(c0);
 
 float3 color;
 
+float xOffset = 0.0;
+float yOffset = 0.0;
+
 //Higher number = more zoomed out
 float zoom = 1.0;
 
@@ -52,7 +55,11 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
 {
     //Our normal cartesian coordinates
     float2 baseUV = screenspace.xy;
-
+    
+    //Offset position
+    baseUV.x += xOffset;
+    baseUV.y += yOffset;
+    
     //Starting color of texture shader is being applied to
     float4 baseCol = tex2D(uImage0, baseUV);
     
@@ -73,6 +80,10 @@ float4 main(float4 screenspace : TEXCOORD0) : COLOR0
     
     // f^3 + 0.6f^2 + 0.5f
     float coef = (f * f * f + (0.6 * f * f) + (0.5 * f));
+    
+    //coef's max value is 1.5 so normalize this between 0 and 1
+    //float trueCoef = coef / 1.5;
+    //float4 toReturn = float4(color * coef, trueCoef);
     
     float4 toReturn = float4(color * coef, baseCol.a);
     return toReturn;

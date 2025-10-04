@@ -980,7 +980,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (timer == 0)
                 Projectile.ai[0] = 1f;
 
-            int trailCount = 20;  //14
+            int trailCount = 10;  //14
             previousRotations.Add(Projectile.velocity.ToRotation()); //
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -997,7 +997,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Projectile.velocity = Projectile.velocity.RotatedBy(0.09f * Projectile.ai[0]); //0.045
 
-            if (timer % 4 == 0)
+            if (timer % 4 == 0 && Main.rand.NextBool(20))
                 Projectile.ai[0] *= -1f;
 
 
@@ -1005,6 +1005,8 @@ namespace VFXPlus.Content.FeatheredFoe
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
 
             overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1.3f;
+
+            Projectile.velocity.Y += 0.5f;
 
             timer++;
         }
@@ -1028,6 +1030,50 @@ namespace VFXPlus.Content.FeatheredFoe
             if (giveUp)
                 return;
 
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Content/VFXTest/SoulSpikeHalf").Value; //
+            //Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //
+
+            //SoulSpikeTrail : pixelized : good
+            //FlareLineHalfRight : meh
+            //MonsoonRocket_Trail : meh
+            //HalfGlowingFlare | pgood
+            //SoulSpikeHalf | REALLY GOOD
+
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            Color StripColor(float progress) => Color.White * Easings.easeInCirc(progress) * overallAlpha;
+
+            float StripWidth(float progress)
+            {
+                return 10f;
+            }
+
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(0f); //0.02
+            myEffect.Parameters["reps"].SetValue(1f);
+
+
+            //Over layer
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f).ToVector3() * 6f); //Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f 6f
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+            /*
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/s06sBloom").Value; //
 
@@ -1299,7 +1345,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (timer == 0)
                 Projectile.ai[0] = 1f;
 
-            int trailCount = 50;  //14
+            int trailCount = 35;  //25
             previousRotations.Add(Projectile.velocity.ToRotation()); //
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -1309,7 +1355,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
-            Projectile.velocity = Projectile.velocity.RotatedBy(0.045f * Projectile.ai[0]); //0.045
+            Projectile.velocity = Projectile.velocity.RotatedBy(0.005f * Projectile.ai[0]); //0.045
 
             if (timer % 4 == 0 && Main.rand.NextBool(20))
                 Projectile.ai[0] *= -1f;
@@ -1329,9 +1375,9 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawVertexTrail(false);
+                DrawVertexTrail(true);
             });
-            DrawVertexTrail(true);
+            DrawVertexTrail(false);
 
             return false;
         }
@@ -1342,7 +1388,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (giveUp)
                 return;
 
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Noise/LavaNoise").Value; //
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/spark_07_Black").Value; //
 
             if (myEffect == null)
@@ -1357,7 +1403,7 @@ namespace VFXPlus.Content.FeatheredFoe
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
 
 
-            Color StripColor(float progress) => Color.White * Easings.easeInCirc(progress) * overallAlpha;
+            Color StripColor(float progress) => Color.White * Easings.easeOutCirc(progress) * overallAlpha * 0.25f;
 
             float StripWidth(float progress)
             {
@@ -1370,10 +1416,10 @@ namespace VFXPlus.Content.FeatheredFoe
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 15f; //50
+                return  overallScale * 8f; //50
             }
 
             float StripWidth2(float progress)
@@ -1387,7 +1433,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = Easings.easeOutSine(1f - LV);
                 }
 
                 return toReturn * overallScale * 60; //50
@@ -1407,10 +1453,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
             //Over layer
+            Color betweenBlu = Color.Lerp(Color.LightSkyBlue, Color.White, 0.85f);
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.OrangeRed.ToVector3() * 2.5f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
-            myEffect.Parameters["glowIntensity"].SetValue(2f);
+            myEffect.Parameters["ColorOne"].SetValue(betweenBlu.ToVector3() * 2f);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
@@ -1419,7 +1466,7 @@ namespace VFXPlus.Content.FeatheredFoe
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Goldenrod.ToVector3() * 2.5f); //Hotpink4.5
+            myEffect.Parameters["ColorOne"].SetValue(Color.SkyBlue.ToVector3() * 2.5f); //Hotpink4.5
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             //vertexStrip2.DrawTrail();
 

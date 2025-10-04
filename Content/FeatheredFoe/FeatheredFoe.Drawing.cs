@@ -76,8 +76,8 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
         float windOverlayOpacityGoal = 0f;
-        float windOverlayOpacity = 0f;
-        float windOverlayRotation = 0f;
+        public float windOverlayOpacity = 0f;
+        public float windOverlayRotation = 0f;
 
         Effect ScrollEffect = null;
         Texture2D ScrollTex1 = null;

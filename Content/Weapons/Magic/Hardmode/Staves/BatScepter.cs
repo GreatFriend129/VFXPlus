@@ -190,7 +190,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                         previousRotations[i], TexOrigin, size * overallScale, SpriteEffects.None);
 
                 //Inner Line
-                Vector2 vec2Scale = new Vector2(0.5f * size2, 1.5f) * overallScale;
+                Vector2 vec2Scale = new Vector2(0.5f * size2, 1.25f) * overallScale;
 
                 Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.Black * 0.15f * progress * overallAlpha,
                     previousVelrots[i] + MathHelper.PiOver2, TexOrigin, vec2Scale, SpriteEffects.None);

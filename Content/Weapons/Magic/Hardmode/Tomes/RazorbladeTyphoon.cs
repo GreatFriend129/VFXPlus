@@ -265,7 +265,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 {
                     float progress = (float)i / previousRotations.Count;
 
-                    Color col = Color.Lerp(Color.Blue, Color.DeepSkyBlue * 1f, progress) * 0.5f;// * Easings.easeInQuad(progress);
+                    Color col = Color.Lerp(Color.Blue, Color.Aqua * 1f, progress) * 0.5f;// * Easings.easeInQuad(progress);
 
                     //DodgerBlue or Blue
 
@@ -273,39 +273,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                     Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    //2 > 1
-                    int variant = 0; //0
                     Vector2 offset1 = new Vector2(0f, -22f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
                     Vector2 offset2 = new Vector2(0f, 22f * progress * projectile.scale).RotatedBy(projectile.velocity.ToRotation());
 
-                    if (variant == 0)
-                    {
-                        offset1 += Main.rand.NextVector2Circular(10f * projectile.scale, 10f);
-                        offset2 += Main.rand.NextVector2Circular(10f * projectile.scale, 10f); //1f 1.5f
-                    }
-                    else if (variant == 1)
-                    {
-                        //Use for a sword trail
-                        offset1 += Main.rand.NextVector2Circular(15f, 15f);
-                        offset2 += Main.rand.NextVector2Circular(1f, 1.5f); //1f 1.5f
-                    }
-                    else if (variant == 2)
-                    {
-                        //Not great
-                        offset1 += Main.rand.NextVector2Circular(5f, 5f);
-                        offset2 += Main.rand.NextVector2Circular(5f, 5f); //1f 1.5f
-                    }
-                    else if (variant == 3)
-                    {
-                        //Cool but not for this
-                        offset1 += Main.rand.NextVector2Circular(15f, 1f);
-                        offset2 += Main.rand.NextVector2Circular(15f, 1f); //1f 1.5f
-                    }
-                    else if (variant == 4)
-                    {
-                        offset1 += Main.rand.NextVector2Circular(1f, 15f).RotatedBy(previousRotations[i]);
-                        offset2 += Main.rand.NextVector2Circular(1f, 15f).RotatedBy(previousRotations[i]); //1f 1.5f
-                    }
+                    offset1 += Main.rand.NextVector2Circular(7f, 10f * progress) * projectile.scale;
+                    offset2 += Main.rand.NextVector2Circular(7f, 10f * progress) * projectile.scale; //1f 1.5f
 
                     Vector2 innerScale = new Vector2(size2 * 1.25f, size2 * 1.25f * 0.1f);
 
@@ -317,6 +289,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                     Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 0 } * 0.6f * progress * alpha,
                         previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
+
                     Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 0 } * 0.6f * progress * alpha,
                         previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
 
@@ -457,7 +430,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             }
 
 
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.2f, Pitch = -0.25f, PitchVariance = 0.2f, MaxInstances = -1 }; 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.2f, Pitch = -0.25f, PitchVariance = 0.2f, MaxInstances = -1 }; 
             SoundEngine.PlaySound(style, projectile.Center);
 
             return base.PreKill(projectile, timeLeft);

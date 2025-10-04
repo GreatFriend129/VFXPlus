@@ -195,35 +195,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            //After-Image
-            for (int i = 220; i < previousRotations.Count; i++)
-            {
-                float progress = (float)i / previousRotations.Count;
-                float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-
-                Color col = Color.Lerp(Color.LightSkyBlue, Color.White, progress) * progress * projectile.Opacity * 0.5f;
-
-                //float size2 = (1f + (progress * 0.25f)) * projectile.scale;
-                float size2 = 0.8f + (progress * 0.2f) * projectile.scale;
-
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
-
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos + offset, sourceRectangle, col with { A = 0 } * 0.5f,
-                        previousRotations[i], TexOrigin, size2, SpriteEffects.None);
-
-                if (i > 5) //2
-                {
-                    Vector2 vec2Scale = new Vector2(0.2f, 1.5f) * size;
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos + offset, sourceRectangle, Color.White with { A = 0 } * 0.25f * progress * 0.5f,
-                        previousRotations[i], TexOrigin, vec2Scale, SpriteEffects.None);
-                }
-
-            }
-
             Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
-
             Color between = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.75f);
+            Color between2 = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 1f);
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
@@ -238,7 +213,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 float startScale = 1f + sineScale;
 
-                Color col = Color.Lerp(between, Color.DeepSkyBlue, 1f - progress);
+                Color col = Color.Lerp(between, Color.SkyBlue, 1f - progress);
 
                 float easedFadeValue = progress * progress;
 
@@ -251,7 +226,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
                 //White
-                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, between with { A = 0 } * 0.5f * easedFadeValue, //1f
+                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, col with { A = 0 } * 0.5f * easedFadeValue, //1f
                     previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
 
             }

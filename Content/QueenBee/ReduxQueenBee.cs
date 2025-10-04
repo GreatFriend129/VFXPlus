@@ -87,6 +87,8 @@ namespace VFXPlus.Content.QueenBee
                 NPC.TargetClosest();
             }
 
+            Main.NewText("ignore me");
+
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen
 
             CurrentAttack = QueenBeeState.Dummy;

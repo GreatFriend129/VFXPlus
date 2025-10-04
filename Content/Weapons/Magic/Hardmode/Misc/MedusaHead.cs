@@ -164,7 +164,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreAI(Projectile projectile)
         {
             if (timer == 0)
+            {
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = .08f, Pitch = -.25f, MaxInstances = -1, };
+                SoundEngine.PlaySound(style, projectile.Center);
+
                 storedVelocity = projectile.velocity;
+            }
 
             projectile.velocity = Vector2.Zero;
             

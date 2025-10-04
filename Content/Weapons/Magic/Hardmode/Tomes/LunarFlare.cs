@@ -1,19 +1,20 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
@@ -166,8 +167,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
 
-            Main.EntitySpriteDraw(line, drawPos, null, Color.White with { A = 0 }, rot, line.Size() / 2f, 1f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(line, drawPos, null, Color.Aquamarine with { A = 0 }, rot, line.Size() / 2f, 2f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.White with { A = 0 } * 0.8f, rot, line.Size() / 2f, 1f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.Aquamarine with { A = 0 } * 0.8f, rot, line.Size() / 2f, 2f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
 
             return false;
         }
@@ -217,7 +218,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Vector2 offset = Main.rand.NextVector2Circular(5f, 8f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 offset = Main.rand.NextVector2Circular(5f, 4f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
 
                 Vector2 innerScale = new Vector2(1f, 0.15f * progress * drawScale) * progress;
 
@@ -225,7 +226,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     previousRotations[i], line.Size() / 2f, lineScale * 1.25f * 1.5f, SpriteEffects.None);
 
                 Main.EntitySpriteDraw(line, AfterImagePos + offset, null, Color.White with { A = 0 } * 0.85f * progress * 1f,
-                    previousRotations[i], line.Size() / 2f, innerScale * 1.5f, SpriteEffects.None);
+                   previousRotations[i], line.Size() / 2f, innerScale * 1.5f, SpriteEffects.None);
             }
 
         }
@@ -326,14 +327,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 for (int i = 0; i < 12; i++) //16
                 {
-                    Color col1 = Color.Lerp(Color.Aquamarine, Color.Aqua, 0.65f);
+                    Color col1 = Color.Lerp(Color.Aquamarine, Color.Aqua, 0.85f);
 
-                    float progress = (float)i / 21;
+                    float progress = (float)i / 12;
                     Color col = Color.Lerp(Color.Black, col1, progress);
 
                     Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1f, 4f) * 2.5f,
                         newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 2.15f);
                     d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.25f); //12 28
+                }
+
+                for (int i = 220; i < 10; i++)
+                {
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(12f, 12f) * Main.rand.NextFloat(1f, 2f);
+
+                    float fireScale = Main.rand.NextFloat(1.25f, 1.75f);
+
+                    FireParticle fire = new FireParticle(Projectile.Center + new Vector2(0f, 0f), veloF, fireScale, Color.Aqua, colorMult: 0.5f, bloomAlpha: 0.5f, AlphaFade: 0.91f, VelFade: 0.9f);
+                    //fire.scaleFadePower = 1.05f; //1.05
+                    fire.randomRotPower = 0.35f;
+                    ShaderParticleHandler.SpawnParticle(fire);
+
+
                 }
             }
 

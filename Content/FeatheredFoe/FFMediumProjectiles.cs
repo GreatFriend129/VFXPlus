@@ -601,21 +601,28 @@ namespace VFXPlus.Content.FeatheredFoe
 
         }
 
-        float animProgress = 0;
         float overallAlpha = 0f;
         float overallScale = 0f;
 
         int timer = 0;
-        public int advancer = 0;
+        
         public int startDir = 1;
-        public float additionAmount = 0.1f;
+        public int playerID = -1;
 
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPositions = new List<Vector2>();
         public override void AI()
         {
+            if (playerID == -1)
+            {
+                Main.NewText("playerID == -1 | FFWindOrb");
+                Projectile.active = false;
+                return;
+            }
+            Player target = Main.player[playerID];
+
             if (timer == 0)
             {
+
+
                 int featherCount = 3;
                 for (int i = 0; i < featherCount; i++)
                 {
@@ -634,7 +641,24 @@ namespace VFXPlus.Content.FeatheredFoe
                 }
 
             }
-            
+
+            //SpeedUp
+            if (timer < 60)
+                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + 0.2f);
+
+            //Homing
+            if (timer < 60)
+            {
+                float oldSpeed = Projectile.velocity.Length();
+                Vector2 toTarget = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);
+
+                float velLength = Projectile.velocity.Length();
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, toTarget * velLength, 0.04f);
+
+                if (Projectile.velocity.Length() < oldSpeed)
+                    Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * oldSpeed;
+            }
+
             int trailCount = 7; //5
             previousRotations.Add(Projectile.rotation);
             previousPositions.Add(Projectile.Center);
@@ -666,9 +690,14 @@ namespace VFXPlus.Content.FeatheredFoe
 
             overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 0.75f)) * 1f;
 
+            float animProgress2 = Math.Clamp((float)timer / 45f, 0f, 1f);
+            Projectile.rotation = MathHelper.Lerp(-2f * (Projectile.velocity.X > 0 ? 1 : -1), 0f, Easings.easeOutQuart(animProgress2));
+
             timer++;
         }
 
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -702,7 +731,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
             float scale = 1f;
 
-
             Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
             Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.1f, 0f, Orb.Size() / 2f, endScale * 1f * overallScale, SpriteEffects.FlipHorizontally);
@@ -723,7 +751,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
                 float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
 
-                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
+                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, rot + newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
 
                 //8
                 if (i >= 8)
@@ -1115,6 +1143,199 @@ namespace VFXPlus.Content.FeatheredFoe
                     Main.EntitySpriteDraw(glowThick, drawPos, null, Color.White with { A = 0 }, Projectile.rotation, glowThick.Size() / 2f, vec2Scale2, 0);
             });
 
+            return false;
+        }
+
+    }
+
+    public class WindDirShotNado : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[Projectile.type] = 8;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 56;
+            Projectile.height = 56; //64
+
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = false;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 17000;
+        }
+
+
+        public Vector2 orbitVector = new Vector2(200f, 0f);
+        public float endingShotDir = 0f;
+        
+        public float orbitTime = 80;
+        public float spinInRadialDistance = MathHelper.Pi * 2f;
+        public float startDashSpeed = 4f;
+        public float lateDashSpeed = 29f;
+
+        float drawAlpha = 0f;
+        float drawScale = 0f;
+
+        int timer = 0;
+        public int advancer = 0;
+
+        public int playerID = -1;
+
+        public override void AI()
+        {
+            if (timer == 0)
+            Projectile.scale *= 1f;
+
+            #region behavior
+            if (playerID == -1)
+            {
+                Main.NewText("playerID == -1 | WindDirShotNado");
+                Projectile.active = false;
+                return;
+            }
+            Player target = Main.player[playerID];
+
+            if (target.active == false)
+                Projectile.Kill();
+
+            float spinInProgress = (float)timer / orbitTime;
+            if (timer <= orbitTime)
+            {
+                Projectile.damage = 0;
+
+                float rot = MathHelper.Lerp(spinInRadialDistance, 0f, Easings.easeOutQuart(spinInProgress));
+                Vector2 goalPos = orbitVector.RotatedBy(rot) * Easings.easeOutCirc(spinInProgress);
+                Projectile.Center = goalPos + target.Center;
+
+                Projectile.velocity = Vector2.Zero;
+
+                if (timer == orbitTime)
+                {
+                    Projectile.velocity = endingShotDir.ToRotationVector2() * startDashSpeed;
+                    Projectile.timeLeft = 100;
+                }
+            }
+            else
+            {
+                Projectile.damage = 10;
+
+                Projectile.velocity = (Projectile.velocity + Projectile.velocity.SafeNormalize(Vector2.UnitX) * 1f);
+                if (Projectile.velocity.Length() > lateDashSpeed)
+                    Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * lateDashSpeed;
+            }
+            #endregion
+
+            #region draw+dust
+
+            int trailCount = 14; //7
+            previousRotations.Add(Projectile.rotation);
+            previousPositions.Add(Projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            //AlphaScale
+            float timeForPopInAnim = 30;
+            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
+            drawScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1.5f));
+
+            drawAlpha = Math.Clamp(MathHelper.Lerp(drawAlpha, 1.5f, 0.09f), 0f, 1f);
+
+
+            
+            //Vanilla weather pain dust
+            if (timer % 3 == 0 && Main.rand.NextBool())
+            {
+                int num6 = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 120, default(Color), 0.35f);
+                Main.dust[num6].noGravity = true;
+                Main.dust[num6].fadeIn = 0.45f;
+                Main.dust[num6].velocity = Main.rand.NextVector2Circular(2f, 2f) + new Vector2(0f, -2f) + Projectile.velocity * 0.75f;
+                for (int j = 0; j < 1; j++)
+                {
+                    Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, 16, Projectile.velocity.X, Projectile.velocity.Y, 60, default(Color), 0.35f);
+                    dust.noGravity = true;
+                    dust.fadeIn = 0.35f;
+                    dust.velocity = Main.rand.NextVector2Circular(2f, 2f) * 0.2f + new Vector2(0f, -0.4f) + Projectile.velocity * 1.5f;
+                    dust.position -= Projectile.velocity * 3f;
+                }
+            }
+
+            if (timer % 1 == 0 && timer > orbitTime)
+            {
+                Vector2 dustPos = Projectile.Center + Main.rand.NextVector2Circular(30f, 30f);
+                Vector2 dustVel = Main.rand.NextVector2Circular(3f, 3f) - Projectile.velocity * 0.5f;
+
+                float dustScale = Main.rand.NextFloat(0.5f, 1f);
+
+                Dust wind = Dust.NewDustPerfect(dustPos, 176, dustVel * 1f, newColor: Color.LightSkyBlue with { A = 0 } * 0.5f, Scale: dustScale); //dust176
+                wind.noGravity = true;
+            }
+
+            //Anim
+            Projectile.frameCounter++;
+            if (Projectile.frameCounter >= 4)
+            {
+                Projectile.frameCounter = 0;
+                Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
+            }
+
+            Projectile.rotation = 0f + Projectile.velocity.X * 0.02f;
+            #endregion
+
+            timer++;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/FFTornado").Value;
+            Texture2D Bloom = CommonTextures.feather_circle128PMA.Value;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+            Rectangle sourceRectangle = Tex.Frame(1, Main.projFrames[Projectile.type], frameY: Projectile.frame);
+            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            SpriteEffects se = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            //After-Image
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Color col = Color.Lerp(Color.DodgerBlue, Color.SkyBlue, progress) * progress * progress * drawAlpha;
+
+                float size2 = (0.5f + (progress * 0.75f)) * Projectile.scale * drawScale;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Main.EntitySpriteDraw(Tex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.25f,
+                        previousRotations[i], TexOrigin, size2, se);
+            }
+
+            //Border
+            for (int i = 0; i < 4; i++)
+            {
+                Main.EntitySpriteDraw(Tex, drawPos + Main.rand.NextVector2Circular(5f, 5f), sourceRectangle,
+                    Color.LightSkyBlue with { A = 0 } * 0.35f * drawAlpha, Projectile.rotation, TexOrigin, Projectile.scale * 1.05f * drawScale, se);
+            }
+
+            //Bloom
+            Vector2 bloomScale = new Vector2(0.7f, 0.9f);
+            Main.EntitySpriteDraw(Bloom, drawPos, null, Color.DeepSkyBlue with { A = 0 } * drawAlpha * 0.25f, Projectile.rotation, Bloom.Size() / 2f, bloomScale * Projectile.scale * drawScale, se);
+            Main.EntitySpriteDraw(Bloom, drawPos, null, Color.SkyBlue with { A = 0 } * drawAlpha * 0.15f, Projectile.rotation, Bloom.Size() / 2f, bloomScale * Projectile.scale * drawScale * 0.8f, se);
+
+            //Main
+            Main.EntitySpriteDraw(Tex, drawPos, sourceRectangle, lightColor * drawAlpha, Projectile.rotation, TexOrigin, Projectile.scale * drawScale, se);
             return false;
         }
 
