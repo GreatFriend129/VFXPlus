@@ -1373,13 +1373,14 @@ namespace VFXPlus.Content.VFXTest
                     float prog = (float)i / 7;
 
 
-                    Vector2 veloF = Main.rand.NextVector2CircularEdge(7f, 3f) * Main.rand.NextFloat(1f, 1.5f);
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(5f, 5f) * Main.rand.NextFloat(1f, 1.5f);
 
-                    float fireScale = Main.rand.NextFloat(2f, 2.5f);
+                    float fireScale = Main.rand.NextFloat(1.75f, 2.25f);
 
-                    FireParticle fire = new FireParticle(Projectile.Center, veloF + new Vector2(20f, 0f), fireScale, Color.Lerp(Color.GreenYellow, Color.Green, 0.5f), colorMult: 1f, bloomAlpha: 1.15f, AlphaFade: 0.92f, VelFade: 0.9f);
+                    FireParticle fire = new FireParticle(Projectile.Center, veloF, fireScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.15f), colorMult: 1f, bloomAlpha: 1.15f, AlphaFade: 0.92f, VelFade: 0.9f);
                     //fire.randomRotPower = 0.3f;
                     fire.scaleFadePower = 1.03f;
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
                     ShaderParticleHandler.SpawnParticle(fire);
                 }
             }
@@ -1402,10 +1403,10 @@ namespace VFXPlus.Content.VFXTest
                 Texture2D orb = CommonTextures.feather_circle128PMA.Value;
                 Vector2 originPoint = Projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
 
-                Color[] cols = { Color.White * 0.75f, Color.OrangeRed * 0.525f, Color.OrangeRed * 0.375f };
+                Color[] cols = { Color.White * 1f, Color.OrangeRed * 0.75f, Color.OrangeRed * 0.525f };
                 float[] scales = { 0.85f, 1.6f, 2.5f };
 
-                float orbAlpha = 0f;
+                float orbAlpha = 1f;
                 float orbScale = 0.5f;
 
                 float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
@@ -1420,8 +1421,10 @@ namespace VFXPlus.Content.VFXTest
             Texture2D orb2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/bigCircle2").Value;
             Texture2D orb3 = CommonTextures.feather_circle128PMA.Value;
 
-            //Main.EntitySpriteDraw(orb2, Projectile.Center - Main.screenPosition, null, Color.Black, 0f, orb2.Size() / 2f, new Vector2(0.2f, 0.f), SpriteEffects.None);
-            //Main.EntitySpriteDraw(orb3, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, 0f, orb3.Size() / 2f, new Vector2(0.5f, 0.35f), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb2, Projectile.Center - Main.screenPosition, null, Color.Black, 0f, orb2.Size() / 2f, new Vector2(0.3f, 0.3f), SpriteEffects.None);
+
+            //Main.EntitySpriteDraw(orb3, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, 0f, orb3.Size() / 2f, new Vector2(0.35f, 0.35f), SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb3, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, 0f, orb3.Size() / 2f, new Vector2(0.35f, 0.35f), SpriteEffects.None);
 
             return false;
         }

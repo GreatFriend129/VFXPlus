@@ -58,6 +58,8 @@ namespace VFXPlus.Content.FeatheredFoe
                 }
             }
 
+            windRotation = MathHelper.Lerp(windRotation, windRotationGoal, 0.1f);
+
             intensity = Math.Clamp(intensity, 0, 1);
 
             //Simple trig to get the direction components | xComponent of right triangle is cos(theta) and y is sin(theta)
@@ -121,7 +123,9 @@ namespace VFXPlus.Content.FeatheredFoe
             return;
         }
 
+        
         private float windRotation = 0f;
+        private float windRotationGoal = 0f;
         public bool CheckActive()
         {
             for (int i = 0; i < Main.maxNPCs; i++)
@@ -131,7 +135,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.npc[i].ModNPC is FeatheredFoeBoss ff)
                     {
                         bgPulsePower = ff.windOverlayOpacity;// ff.bgPulsePower;
-                        windRotation = ff.windOverlayRotation;
+                        windRotationGoal = ff.windOverlayRotation;
                     }
 
                     return true;

@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using Terraria.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
@@ -40,7 +41,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             SoundStyle stylees = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_117") with { Pitch = .45f, PitchVariance = .25f, Volume = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(stylees, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_book_staff_cast_0") with { Volume = 0.2f, Pitch = -0.5f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Dd2_book_staff_cast_0") with { Volume = 0.2f, Pitch = -0.5f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, player.Center);
 
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_8") with { Volume = 0.85f, PitchVariance = 0.1f, Pitch = .05f, MaxInstances = -1, }; 
@@ -88,22 +89,18 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             fadeInAlpha = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 0f));
             scaleFadeIn = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(progress, 0f, 2f));
 
-            //Trailing Fire Dust
+
+            //Fire Particles
             if (timer % 2 == 0 && timer > 10)
             {
-                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity;
+                Vector2 VelDir = projectile.velocity.SafeNormalize(Vector2.UnitX);
 
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.75f) * 1.2f;
+                Vector2 dustVel = (VelDir * Main.rand.NextFloat(1f, 4.1f)).RotateRandom(0.3f);
 
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.5f, Scale: dustScale);
-                smoke.alpha = 2;
-
-                Vector2 dustPos2 = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
-                Vector2 dustVel2 = Main.rand.NextVector2CircularEdge(1.25f, 1.25f) - projectile.velocity;
-                Dust d = Dust.NewDustPerfect(dustPos2, 6, dustVel2);
-                d.noGravity = true;
+                FireParticle fire = new FireParticle(projectile.Center, -dustVel * 1.75f, 1f, Color.Lerp(Color.OrangeRed, Color.Orange, 0f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f); //colMult3 || alphafade .92
+                fire.scaleFadePower = 1.04f; //1.06 look sweet at higher proj speed
+                fire.renderLayer = RenderLayer.UnderProjectiles;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
             #region vanillaAI dear god

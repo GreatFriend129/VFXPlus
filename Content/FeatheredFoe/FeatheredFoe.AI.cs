@@ -1334,16 +1334,16 @@ namespace VFXPlus.Content.FeatheredFoe
                 tornadoDashDir = Main.rand.NextVector2CircularEdge(1f, 1f);
 
                 int nadoCount = 7; //7 215
-                float bonusRot = Main.rand.NextFloat(6.28f);// Main.rand.NextBool() ? 0f : MathHelper.PiOver4;
+                //float bonusRot = Main.rand.NextFloat(6.28f);// Main.rand.NextBool() ? 0f : MathHelper.PiOver4;
                 for (int i = 0; i < nadoCount; i++)
                 {
-                    float prog = (i + 1f) / (float)nadoCount;
+                    float prog = (i + 0f) / (float)nadoCount;
 
                     int are5 = Projectile.NewProjectile(null, player.Center, Vector2.Zero, ModContent.ProjectileType<WindDirShotNado>(), 10, 2, player.whoAmI);
 
                     (Main.projectile[are5].ModProjectile as WindDirShotNado).playerID = player.whoAmI;
                     (Main.projectile[are5].ModProjectile as WindDirShotNado).endingShotDir = tornadoDashDir.ToRotation();
-                    (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitVector = new Vector2(225f, 0f).RotatedBy((MathHelper.TwoPi * prog) + bonusRot);
+                    (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitVector = -tornadoDashDir.RotatedBy((MathHelper.TwoPi * prog)) * 225f;
                     (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitTime = orbitTime;
                 }
             }
@@ -1369,8 +1369,12 @@ namespace VFXPlus.Content.FeatheredFoe
                 (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.5f;
                 Main.projectile[pulse].scale = 6f;
 
-                player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
+                player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 25f; //15
             }
+
+            //Make screenshake last a longer time (at lower power)
+            if (timer > 30 + orbitTime && timer < 30 + orbitTime + 15)
+                player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = Math.Max(10f, player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower);
 
             if (timer == 150)
             {

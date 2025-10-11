@@ -25,6 +25,9 @@ namespace VFXPlus.Common
             particles = new List<ShaderParticle>();
             particlesToKill = new List<ShaderParticle>();
             particlesToSpawn = new List<ShaderParticle>();
+
+            //dustsLayerParticles = new List<ShaderParticle>();
+            //underprojLayerParticles = new List<ShaderParticle>();
         }
 
         public override void Unload()
@@ -34,6 +37,9 @@ namespace VFXPlus.Common
             particles = null;
             particlesToKill = null;
             particlesToSpawn = null;
+
+            //dustsLayerParticles = null;
+            //underprojLayerParticles = null;
         }
         public override void PostUpdateEverything()
         {
@@ -66,7 +72,6 @@ namespace VFXPlus.Common
             }
 
             particles.Add(particle);
-            //particle.particleType = particleTypes[particle.GetType()];
         }
 
 
@@ -96,6 +101,10 @@ namespace VFXPlus.Common
 
             particles.AddRange(particlesToSpawn);
             particlesToSpawn.Clear();
+
+            //Need to clear here instead of in draw method otherwise it won't work for reasons
+            //underprojLayerParticles.Clear();
+            //dustsLayerParticles.Clear();
         }
 
         public static void RemoveParticle(ShaderParticle particle)
@@ -107,6 +116,10 @@ namespace VFXPlus.Common
             //particles.Remove(particle);
         }
 
+
+        //TODO optimize
+        //private static List<ShaderParticle> underprojLayerParticles;
+        //private static List<ShaderParticle> dustsLayerParticles;
         public static void DrawAllParticles(SpriteBatch sb)
         {
             if (Main.dedServ || particles.Count == 0)
@@ -122,7 +135,6 @@ namespace VFXPlus.Common
             }
 
             //Draw shader layer
-
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 sb.End();
@@ -130,7 +142,8 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    particle.DrawWithShader(sb, particle.myShader);
+                    if (particle.renderLayer == RenderLayer.Dusts)
+                        particle.DrawWithShader(sb, particle.myShader);
                 }
 
                 sb.End();
@@ -138,44 +151,92 @@ namespace VFXPlus.Common
 
             });
 
+            //UnderProjLayer
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, VFXPlus.SmokeColShader, Main.GameViewMatrix.EffectMatrix);
+
+                foreach (ShaderParticle particle in particles)
+                {
+                    if (particle.renderLayer == RenderLayer.UnderProjectiles)
+                        particle.DrawWithShader(sb, particle.myShader);
+                }
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
+            });
+        }
+
+        //Todo make a version of this that actually works
+        public static void DrawAllParticlesFailedAttempt(SpriteBatch sb)
+        {
+            /*
+            if (Main.dedServ || particles.Count == 0)
+                return;
+
+            foreach (ShaderParticle particle in particles)
+            {
+                if (particle == null)
+                    continue;
+
+                //Add particle to designated RenderLayer list (unless it is already in it, which can happen when game is paused)
+                if (particle.renderLayer == RenderLayer.UnderProjectiles && !underprojLayerParticles.Contains(particle))
+                    underprojLayerParticles.Add(particle);
+                else if (particle.renderLayer == RenderLayer.Dusts && !dustsLayerParticles.Contains(particle))
+                    dustsLayerParticles.Add(particle);
+            }
+
+            //--Draw normal Layer
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                foreach (ShaderParticle particle in underprojLayerParticles)
+                    particle.Draw(sb);
+            });
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                foreach (ShaderParticle particle in dustsLayerParticles)
+                    particle.Draw(sb);
+            });
+
+
+            //--Draw shader layer
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, VFXPlus.SmokeColShader, Main.GameViewMatrix.EffectMatrix);
+
+                foreach (ShaderParticle particle in underprojLayerParticles)
+                    particle.DrawWithShader(sb, particle.myShader);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
+            });
+
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, VFXPlus.SmokeColShader, Main.GameViewMatrix.EffectMatrix);
+
+                foreach (ShaderParticle particle in dustsLayerParticles)
+                    particle.DrawWithShader(sb, particle.myShader);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
+            });
+
+            //dustsLayerParticles.Clear();
+            //underprojLayerParticles.Clear();
+
             //sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             //Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            */
         }
 
     }
 
-    /*
-    public class ShaderParticleDetour : ModSystem
-    {
-        public override void Load()
-        {
-            On_Main.DrawDust += DrawOnDustLayer;
-        }
-        public override void Unload()
-        {
-            On_Main.DrawDust -= DrawOnDustLayer;
-        }
-
-        private static void DrawOnDustLayer(On_Main.orig_DrawDust orig, Main self)
-        {
-            orig(self);
-            ShaderParticleHandler.DrawAllParticles(Main.spriteBatch);
-        }
-
-        public override void PostUpdateEverything()
-        {
-            if (!Main.dedServ)
-                ShaderParticleHandler.UpdateParticles();
-        }
-    }
-
-    public class Wtd : ModSystem
-    {
-        public override void PostUpdateEverything()
-        {
-            if (!Main.dedServ)
-                ShaderParticleHandler.UpdateParticles();
-        }
-    }
-    */
 }

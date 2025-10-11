@@ -54,8 +54,8 @@ namespace VFXPlus.Content.VFXTest.Aero
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/starUIToss") with { Volume = .1f, Pitch = .1f, PitchVariance = .12f, }; 
-            SoundEngine.PlaySound(style, player.Center);
+            //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/starUIToss") with { Volume = .1f, Pitch = .1f, PitchVariance = .12f, }; 
+            //SoundEngine.PlaySound(style, player.Center);
 
             return true;
         }
@@ -112,8 +112,8 @@ namespace VFXPlus.Content.VFXTest.Aero
                         Dust.NewDustPerfect(l_positions[m], ModContent.DustType<GlowPixelCross>(), dustVel, newColor: dustCol, Scale: Main.rand.NextFloat(0.2f, 0.3f));
                     }
 
-                    SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/star_impact_01") with { Volume = .05f, Pitch = 1f, PitchVariance = .33f, };
-                    SoundEngine.PlaySound(style, l_positions[m]);
+                    //SoundStyle style = new SoundStyle("AerovelenceMod/Sounds/Effects/star_impact_01") with { Volume = .05f, Pitch = 1f, PitchVariance = .33f, };
+                    //SoundEngine.PlaySound(style, l_positions[m]);
 
                     return true;
                 }
@@ -348,7 +348,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
 
             myEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value);
-            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/FireGradLoop").Value);
+            myEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/RainbowGrad1").Value);
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
             myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background  |95 | 3f looks very goozma
 

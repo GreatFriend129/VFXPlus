@@ -148,7 +148,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 TrailDraw(projectile);
             });
 
-            Texture2D line2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line2 = CommonTextures.Flare.Value;
 
             Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
 
@@ -164,7 +164,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public void TrailDraw(Projectile projectile)
         {
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D line = CommonTextures.SoulSpike.Value;
 
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
@@ -203,7 +203,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_1") with { Volume = .05f, Pitch = .9f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Deerclops_ice_attack_1") with { Volume = .05f, Pitch = .9f, PitchVariance = 0.3f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_107") with { Volume = .3f, Pitch = .9f, PitchVariance = 0.2f, MaxInstances = -1 };

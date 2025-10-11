@@ -1,16 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using System;
+using VFXPlus.Common;
+using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.FeatheredFoe;
-using VFXPlus.Common.Utilities;
-using VFXPlus.Common;
-using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest;
+using static Terraria.ModLoader.PlayerDrawLayer;
 
 
 namespace VFXPlus.Content
@@ -50,7 +51,6 @@ namespace VFXPlus.Content
                 NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
                 return false;
             }
-
 
             for (int iaa = -3; iaa < -4; iaa++)
             {
@@ -118,7 +118,7 @@ namespace VFXPlus.Content
                 float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
                 float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
 
-                Color thisCol = Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
+                Color thisCol = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);// Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);
 
                 //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(4f, 7f);
                 //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 2f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f, RotPower: 0.02f);

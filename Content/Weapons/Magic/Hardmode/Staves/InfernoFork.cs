@@ -70,7 +70,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
 
-            if (timer % 3 == 0)
+            if (timer % 3 == 0 && timer > 3)
             {
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
                 FireParticle fire = new FireParticle(projectile.Center, vel, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 3f, bloomAlpha: 1f, AlphaFade: 0.9f);
@@ -164,6 +164,46 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Main.EntitySpriteDraw(FireBall, drawPos + off, null, Color.White with { A = 0 } * overallAlpha, rot + MathHelper.PiOver2, FireBall.Size() / 2f, v2scale * totalScale * 0.5f, SpriteEffects.None);
 
         }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            for (int i = 0; i < previousPositions.Count; i++)
+            {
+                Vector2 pos = previousPositions[i];
+                Vector2 velRot = previousRotations[i].ToRotationVector2();
+
+                if (i % 1 == 0 && i > 2)
+                {
+                    Color col = Color.OrangeRed;
+
+                    Dust d = Dust.NewDustPerfect(pos, ModContent.DustType<GlowPixelFast>(), Alpha: 100, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.45f));
+
+                    Vector2 dustVel = (velRot * Main.rand.NextFloat(1f, 4.1f) * -0.5f).RotateRandom(0.3f);
+                    d.velocity = dustVel + Main.rand.NextVector2Circular(3f, 3f);
+                }
+
+            }
+
+            for (int i = 0; i < previousPositions.Count; i++)
+            {
+                Vector2 pos = previousPositions[i];
+                Vector2 velRot = previousRotations[i].ToRotationVector2();
+
+                if (i % 3 == 0 && i > 7)
+                {
+                    //Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
+                    Vector2 dustVel = (velRot * Main.rand.NextFloat(1f, 4.1f) * -0.5f).RotateRandom(0.3f);
+                    //dustVel += Main.rand.NextVector2Circular(3f, 3f);
+
+                    FireParticle fire = new FireParticle(pos, dustVel * 3f, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 3f, bloomAlpha: 1f, AlphaFade: 0.88f);
+                    fire.scaleFadePower = 1.08f;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+
+            }
+
+            return true;
+        }
     }
 
     public class InfernoBlastOverride : GlobalProjectile
@@ -183,15 +223,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 vfxBlastIndex = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, projectile.owner);
 
-                CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.8f, 0.8f);
+                CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.9f, 0.9f);
 
-                Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Orange * 0.35f);
-                d1.scale = 0.02f;
+                Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.OrangeRed * 0.35f);
+                d1.scale = 0.07f;
                 d1.customData = cpb2;
                 d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
 
                 Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.OrangeRed * 0.35f);
                 d2.customData = cpb2;
+                d2.scale = 0.05f;
                 d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
                 //Fire particles
@@ -201,11 +242,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     float prog = (float)i / 10;
 
 
-                    Vector2 veloF = Main.rand.NextVector2CircularEdge(12f, 12f) * Easings.easeOutCirc(prog) * 1f;
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(10f, 10f) * Easings.easeOutCirc(prog) * 1f; //12
 
                     float fireScale = Main.rand.NextFloat(1.75f, 2.25f);
 
-                    FireParticle fire = new FireParticle(projectile.Center + new Vector2(0f, 0f), veloF, fireScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 1.5f, bloomAlpha: 1.5f, AlphaFade: 0.95f, VelFade: 0.84f);
+                    FireParticle fire = new FireParticle(projectile.Center, veloF, fireScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 1.5f, bloomAlpha: 1.5f, AlphaFade: 0.95f, VelFade: 0.86f);
                     fire.scaleFadePower = 1.01f; //1.05
                     ShaderParticleHandler.SpawnParticle(fire);
                 }
@@ -277,7 +318,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             //Grow to scale
             if (!shouldFadeOut)
             {
-                overallScale = Math.Clamp(MathHelper.Lerp(overallScale, 1.5f, 0.05f), 0f, 1f);
+                overallScale = Math.Clamp(MathHelper.Lerp(overallScale, 1.5f, 0.04f), 0f, 1f);
             }
             //FadeOut
             else

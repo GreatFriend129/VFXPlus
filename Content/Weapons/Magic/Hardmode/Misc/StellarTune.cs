@@ -109,7 +109,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Dust line = Dust.NewDustPerfect(projectile.Center + sideOffset, ModContent.DustType<MuraLineBasic>(), vel, 255,
                     newColor: Color.DeepPink * 0.35f, Scale: Main.rand.NextFloat(0.35f, 0.5f) * 0.75f);
 
-                line.customData = new MuraLineBehavior(new Vector2(1f, 1f), WhiteIntensity: 0.45f);
+                line.customData = new MuraLineBehavior(new Vector2(0.75f, 1f), WhiteIntensity: 0.45f);
             }
 
             #endregion

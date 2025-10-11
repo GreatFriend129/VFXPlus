@@ -102,7 +102,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             #region Trail
-            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.15f) * overallAlpha;
+            Color thisPink = Color.Lerp(Color.HotPink, Color.DeepPink, 0.15f) * overallAlpha; //0.15
 
             int trueTrailWidth = (int)(25f * overallScale); //20
 
@@ -461,6 +461,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Impact/BoltCrash" + variant);
             SoundEngine.PlaySound(style, projectile.Center);
 
+            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/star_impact_01") with { Volume = .15f, Pitch = -.44f, };
+            //SoundEngine.PlaySound(style2, projectile.Center);
+
             #region vanillaKill
             int num121 = Utils.SelectRandom<int>(Main.rand, 242, 73, 72, 71, 255);
             int num122 = 255;
@@ -551,7 +554,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreAI(Projectile projectile)
         {
             Color betweenBlue = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
-            Color betweenBlue2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.25f);
+            Color betweenBlue2 = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.25f); //25
 
             if (timer == 0)
             {
@@ -805,20 +808,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
 
 
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Content/VFXTest/GoozmaGlowSoft").Value;
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
 
-            Color col2 = Color.SkyBlue * 0.525f * 0.75f;
-            Color col3 = Color.DeepSkyBlue * 0.375f * 0.5f;
+            Color[] cols = { Color.White, Color.SkyBlue * 0.525f, Color.DeepSkyBlue * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
 
-            float scale2 = 1.6f;
-            float scale3 = 2.5f;
-            float scale = 1.15f * drawScale;
+            float orbScale = 0.65f * drawScale;
+            float orbAlpha = overallAlpha * 0.5f;
 
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.13f) * 0.1f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.22f) * 0.05f;
 
-            Main.EntitySpriteDraw(orb, drawPos, null, col2 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.8f), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, col3 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.8f), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[0] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[0] * orbScale * new Vector2(1f, 0.8f * projectile.scale), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[1] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[1] * orbScale * sineScale1 * new Vector2(1f, 0.8f), SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, cols[2] with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scales[2] * orbScale * sineScale2 * new Vector2(1f, 0.8f), SpriteEffects.None);
 
 
 
@@ -830,21 +834,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             SpriteEffects se = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipVertically;
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
-                {
-                    float progress = (float)i / previousRotations.Count;
-                    float size = progress * drawScale;// (0.75f + (progress * 0.25f)) * projectile.scale;
+                float progress = (float)i / previousRotations.Count;
+                float size = progress * drawScale;// (0.75f + (progress * 0.25f)) * projectile.scale;
 
-                    Color col = Color.SkyBlue * progress * projectile.Opacity * overallAlpha;
+                Color col = Color.SkyBlue * progress * projectile.Opacity * overallAlpha;
 
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f, //0.5f
-                            previousRotations[i], TexOrigin, size, se);
-
-                }
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.35f, //0.5f
+                        previousRotations[i], TexOrigin, size, se);
 
             }
 
@@ -943,6 +943,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
                 overallAlpha: 0.18f, DrawWhiteCore: true, 1f, 1f);
 
+            //Sound
+            int variant = Main.rand.Next(1, 4);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Impact/BoltCrash" + variant);
+            SoundEngine.PlaySound(style with { Pitch = - 0.15f }, projectile.Center);
+
+            ///SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_117") with { Volume = .25f, Pitch = 1f, PitchVariance = 0.1f};
+            //SoundEngine.PlaySound(style2, projectile.Center);
+
+            //SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/hero_butterfly_blade") with { Volume = .4f, Pitch = -.66f, PitchVariance = 0.1f };
+            //SoundEngine.PlaySound(style4, projectile.Center);
+
+            //SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/star_impact_01") with { Volume = .25f, Pitch = -.8f, };
+            //SoundEngine.PlaySound(style3, projectile.Center);
+
             #region vanillaKill
             int num121 = Utils.SelectRandom<int>(Main.rand, 242, 73, 72, 71, 255);
             int num122 = 255;
@@ -963,7 +977,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 num127 = 2.2f;
                 vector26 *= 0.5f;
             }
-            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
             projectile.position = projectile.Center;
             projectile.width = (projectile.height = num124);
             projectile.Center = projectile.position;
@@ -1013,80 +1027,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             #endregion
             return false;
-            
-            #region storedDUstthing
-            /*
-            for (int i = 0; i < 12; i++)
-            {
-                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: between, Scale: Main.rand.NextFloat(0.35f, 0.65f));
-                dust.velocity += projectile.velocity * 0.25f;
-
-                dust.noLight = false;
-                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
-                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
-            }
-
-            for (int i = 0; i < 15; i++)
-            {
-                Color col = Main.rand.NextBool() ? Color.DeepPink : between;
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 7f);
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.75f, 1.5f));
-                d.velocity += projectile.velocity * 0.9f;
-
-                d.velocity *= 0.7f;
-
-
-                d.fadeIn = Main.rand.Next(0, 4);
-                d.alpha = Main.rand.Next(0, 2);
-                d.noLight = false;
-
-            }
-
-
-            //Smoke
-            for (int i = 0; i < 22; i++)
-            {
-                float prog = (float)i / 22f;
-
-                Color col = Color.Lerp(Color.HotPink, Color.Black, 1f - prog);
-
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.5f, 3.4f) * 1.65f,
-                    newColor: col with { A = 0 } * prog * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1.25f);
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(5, 22), 0.95f, 0.01f, 0.35f); //12 28
-
-                d.velocity += projectile.velocity * 1.5f * (1f - prog);
-            }
-
-            for (int m = 220; m < 10; m++)
-            {
-                float range = m > 3 ? 0.3f : 0.6f;
-
-                float xScaleMinus = Main.rand.NextFloat(0.3f, 1.6f);
-
-                Vector2 normalVel = projectile.velocity.SafeNormalize(Vector2.UnitX);
-
-                Vector2 dustPos = projectile.Center + normalVel * 7f;
-
-                Dust d = Dust.NewDustPerfect(dustPos, ModContent.DustType<MuraLineDust>(), normalVel.RotatedBy(Main.rand.NextFloat(-1 * range, range)) * Main.rand.NextFloat(4f, 14f),
-                    newColor: Color.HotPink, Scale: 0.25f);
-
-                d.customData = new MuraLineBehavior(new Vector2(2f - xScaleMinus, 2.5f), VelFadeSpeed: 0.92f);
-                //d.customData = new MuraLineBehavior(new Vector2(1f, 1f));
-
-            }
-
-            for (int i = 220; i < 12; i++)
-            {
-                float velVal = Main.rand.NextFloat(4f, 8f) * 1.5f;
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(),
-                        projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.4f, 0.41f)) * velVal, newColor: between, Scale: 1f);
-
-                //d.customData = new GlowFlareBehavior(0.4f, 2.5f);
-            }
-            */
-            #endregion
-
         }
 
     }

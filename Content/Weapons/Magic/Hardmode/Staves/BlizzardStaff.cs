@@ -154,32 +154,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 1f, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 0.65f, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
 
-
-            for (int i = 0; i < 3; i++)
-            {
-                //Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3f, 3f), sourceRectangle, Color.White with { A = 0 } * 0.05f, projectile.rotation, TexOrigin, projectile.scale * drawScale, SpriteEffects.None);
-            }
-
-            /*
-             *             //Orb
-            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
-            Color[] cols = { Color.LightSkyBlue * 0.75f, Color.SkyBlue * 0.525f, Color.DeepSkyBlue * 0.375f };
-            float[] scales = { 1.15f, 1.6f, 2.5f };
-
-            float orbRot = projectile.rotation;
-            float orbAlpha = 0.3f;
-            Vector2 orbScale = new Vector2(0.4f, 1f) * 0.3f * projectile.scale;
-            Vector2 orbOrigin = orb.Size() / 2f;
-
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
-            */
             return false;
         }
 
@@ -195,7 +170,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D line = CommonTextures.SoulSpike.Value;
 
             Color between = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.75f);
             Color between2 = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 1f);
@@ -234,7 +209,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/deerclops_ice_attack_1") with { Volume = .05f, Pitch = 0.9f, PitchVariance = 0.3f, MaxInstances = 1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Deerclops_ice_attack_1") with { Volume = .05f, Pitch = 0.9f, PitchVariance = 0.3f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, projectile.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Item_107Trim") with { Volume = .27f, Pitch = .7f, PitchVariance = 0.2f, MaxInstances = 1 };

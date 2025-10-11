@@ -106,7 +106,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float animProgress = Math.Clamp((float)(timer / timeForPopInAnim), 0f, 1f);
             projectile.scale = projectile.ai[0] + (1f - Easings.easeOutCirc(animProgress)) * 0.5f;
 
-            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.4f, 0.08f), 0f, 1f);
+            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.8f, 0.08f), 0f, 1f);
 
             Lighting.AddLight(projectile.Center, Color.DeepSkyBlue.ToVector3() * 0.75f * overallAlpha);
 
@@ -196,7 +196,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
-            Color StripColor(float progress) => Color.White * Easings.easeOutQuart(progress * progress) * overallAlpha;
+            Color StripColor(float progress) => Color.White * Easings.easeInQuad(progress) * overallAlpha;
 
 
             float sineStripWidth = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.12f) * 0.15f;

@@ -20,7 +20,6 @@ namespace VFXPlus.Content.Particles
         public float scaleFadePower = 1f;
         private float rotPower = 0.02f;
 
-        
         public float randomRotPower = 0f;
         private float initialVelMag = 0f;
 
@@ -40,6 +39,7 @@ namespace VFXPlus.Content.Particles
             BloomAlpha = bloomAlpha;
             Rotation = Main.rand.NextFloat(6.28f);
             myShader = VFXPlus.SmokeColShader;
+            renderLayer = RenderLayer.Dusts;
 
             initialVelMag = velocity.Length();
         }
@@ -63,6 +63,7 @@ namespace VFXPlus.Content.Particles
 
             Rotation = Main.rand.NextFloat(6.28f);
             myShader = VFXPlus.SmokeColShader;
+            renderLayer = RenderLayer.Dusts;
 
             initialVelMag = velocity.Length();
         }
@@ -71,8 +72,6 @@ namespace VFXPlus.Content.Particles
         {
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((Timer + 10) / timeForPopInAnim, 0f, 1f);
-            drawScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
-
             
             Rotation += Velocity.X * 0.25f * rotPower * (Velocity.X > 0 ? 1f : -1f);
             Velocity *= velFade;
@@ -104,11 +103,9 @@ namespace VFXPlus.Content.Particles
                 ShaderParticleHandler.RemoveParticle(this);
         }
 
-        private float drawScale = 0f;
-
         public override void Draw(SpriteBatch spriteBatch)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(renderLayer, () =>
             {
                 Vector2 drawPos = Center - Main.screenPosition;
 
@@ -138,11 +135,7 @@ namespace VFXPlus.Content.Particles
             effect.Parameters["maskTexture"].SetValue(Mask);
             effect.CurrentTechnique.Passes[0].Apply();
 
-            //spriteBatch.End();
-            //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, effect, Main.GameViewMatrix.TransformationMatrix);
-
             spriteBatch.Draw(Smoke, drawPos, null, myColor, Rotation, TexOrigin, Scale * 0.075f, SE, 0f);
-
         }
     }
 }

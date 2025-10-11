@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Steamworks;
 using System;
 using Terraria;
+using VFXPlus.Common.Drawing;
 
 namespace VFXPlus.Common
 {
@@ -29,6 +30,9 @@ namespace VFXPlus.Common
         //Should this particle kill at a certain time
         public bool shouldKillEarly;
         public int timeToKillEarly;
+
+
+        public RenderLayer renderLayer;
 
         public Effect myShader;
 

@@ -43,7 +43,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
             SoundEngine.PlaySound(style2, player.Center);
 
             foreach (Projectile p in Main.projectile)

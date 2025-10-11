@@ -153,7 +153,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             fadeInScale = Easings.easeOutCubic(fadeInProg);
 
 
-            stuckInPower = MathHelper.Clamp(stuckInPower - 0.06f, 0f, 1f);
+            stuckInPower = MathHelper.Clamp(stuckInPower - 0.06f, 0f, 1f); //0.06
             justHitPower = Math.Clamp(MathHelper.Lerp(justHitPower, 0.15f, 0.13f), 1f, 1.15f);
 
             if (!isAttached && stuckInTimer > 12)
@@ -217,7 +217,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                         previousRotations[i], TexOrigin, vec2Scale2 * overallScale, SpriteEffects.None);
             }
 
-            float rotBonus = MathF.Cos(stuckInPower * MathHelper.TwoPi * 2f) * 0.3f * Easings.easeInSine(stuckInPower); //0.4
+            float rotBonus = MathF.Sin(stuckInPower * MathHelper.TwoPi * 2f) * 0.5f * Easings.easeInCirc(stuckInPower); //0.4
 
             int layers = isAttached ? 6 : 5;
             for (int i = 0; i < layers; i++)

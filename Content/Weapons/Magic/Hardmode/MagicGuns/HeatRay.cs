@@ -74,7 +74,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Fire/HeatRayShot2") with { Volume = 0.65f, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style3, player.Center);
 
-            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/HeatRayShot") with { Volume = 0.45f, Pitch = -0.75f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/HeatRayShot") with { Volume = 0.3f, Pitch = -0.75f, PitchVariance = 0.3f, MaxInstances = -1 };
             SoundEngine.PlaySound(style4, player.Center);
 
 
