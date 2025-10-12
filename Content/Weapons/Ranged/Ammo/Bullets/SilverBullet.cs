@@ -29,7 +29,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SilverBullet);
+            return lateInstantiation && (entity.type == ProjectileID.SilverBullet) && false;
         }
 
         float randomTrailSpeed = 1f;

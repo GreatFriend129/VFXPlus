@@ -46,7 +46,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.05f); //12 28
             }
 
-            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_43") with { Volume = 0.2f, Pitch = -.25f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_43") with { Volume = 0.15f, Pitch = -.5f, PitchVariance = 0.15f, MaxInstances = -1 };
             SoundEngine.PlaySound(style4, player.Center);
 
             return true;

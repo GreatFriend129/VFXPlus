@@ -16,12 +16,12 @@ namespace VFXPlus.Common
     {
         public override void OnModLoad()
         {
-            IL_Projectile.Update += RemoveFlamingArrowDust;
-            IL_Projectile.Update += RemoveFrostburnArrowDust;
-            IL_Projectile.Update += RemoveCursedArrowDust;
-            IL_Projectile.Update += RemoveIchorArrowDust;
-            IL_Projectile.Update += RemoveUnholyArrowDust;
-            IL_Projectile.Update += RemoveJesterArrowDust;
+            //IL_Projectile.Update += RemoveFlamingArrowDust;
+            //IL_Projectile.Update += RemoveFrostburnArrowDust;
+            //IL_Projectile.Update += RemoveCursedArrowDust;
+            //IL_Projectile.Update += RemoveIchorArrowDust;
+            //IL_Projectile.Update += RemoveUnholyArrowDust;
+            //IL_Projectile.Update += RemoveJesterArrowDust;
         }
 
         // So for some reason a lot of arrows have their dust run in the Update function instead of AI

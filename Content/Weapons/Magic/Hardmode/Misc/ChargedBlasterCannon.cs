@@ -299,7 +299,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                                 if (num29 < 1f) //Small shot
                                 {
-                                    SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.5f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1}; 
+                                    SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_75") with { Volume = 0.5f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1}; 
                                     SoundEngine.PlaySound(style, projectile.Center);
 
                                     SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = 0.15f, Pitch = .35f, PitchVariance = 0.1f, MaxInstances = -1 }; 
@@ -307,13 +307,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                                 }
                                 else //Big shot
                                 {
-                                    SoundStyle style = new SoundStyle("Terraria/Sounds/Item_75") with { Volume = 0.35f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1 };
+                                    SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_75") with { Volume = 0.35f, Pitch = -0.05f, PitchVariance = .05f, MaxInstances = -1 };
                                     SoundEngine.PlaySound(style, projectile.Center);
 
                                     SoundStyle style32 = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = 0.2f, Pitch = 0.25f, MaxInstances = -1, PitchVariance = 0.1f };
                                     SoundEngine.PlaySound(style32, projectile.Center);
 
-                                    SoundStyle style23 = new SoundStyle("Terraria/Sounds/Custom/dd2_sky_dragons_fury_shot_0") with { Pitch = 0.15f, PitchVariance = 0.4f, Volume = 0.3f };
+                                    SoundStyle style23 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Dd2_sky_dragons_fury_shot_0") with { Pitch = 0.15f, PitchVariance = 0.4f, Volume = 0.3f };
                                     SoundEngine.PlaySound(style23, projectile.Center);
 
                                     SoundStyle stylec = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_67") with { Pitch = 0f, Volume = 0.55f, PitchVariance = 0.1f, MaxInstances = -1 }; //1f
@@ -692,7 +692,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_106") with { Volume = .15f, Pitch = .4f, PitchVariance = 0.05f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style3, projectile.Center);
 
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Thunder_0") with { Volume = .08f, Pitch = 1f, PitchVariance = .12f, MaxInstances = -1, };
+                SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Thunder_0") with { Volume = .08f, Pitch = 1f, PitchVariance = .12f, MaxInstances = -1, };
                 SoundEngine.PlaySound(style2, projectile.Center);
             }
 
