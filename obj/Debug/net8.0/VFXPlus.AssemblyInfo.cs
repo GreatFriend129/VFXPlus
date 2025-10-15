@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VFXPlus")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cc5b9f0bb0569f8150a621092ec832d8484f2b8f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4dac6c57604078928448d2f0f119c76cc5aec4cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("VFXPlus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VFXPlus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

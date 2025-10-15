@@ -26,7 +26,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.Starfury);
+            return lateInstatiation && (item.type == ItemID.Starfury) && false;
         }
 
         public override void SetDefaults(Item entity)

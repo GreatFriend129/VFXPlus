@@ -27,7 +27,7 @@ namespace VFXPlus.Content.Weapons.Summon.DD2
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.DD2LightningAuraT1);
+            return lateInstantiation && (entity.type == ProjectileID.DD2LightningAuraT1) && false;
         }
 
         int timer = 0;
