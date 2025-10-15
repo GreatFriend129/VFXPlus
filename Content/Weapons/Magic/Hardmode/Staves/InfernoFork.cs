@@ -195,7 +195,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     Vector2 dustVel = (velRot * Main.rand.NextFloat(1f, 4.1f) * -0.5f).RotateRandom(0.3f);
                     //dustVel += Main.rand.NextVector2Circular(3f, 3f);
 
-                    FireParticle fire = new FireParticle(pos, dustVel * 3f, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 3f, bloomAlpha: 1f, AlphaFade: 0.88f);
+                    FireParticle fire = new FireParticle(pos, dustVel * 3f, 0.75f, Color.Lerp(Color.OrangeRed, Color.Red, 0.5f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.88f);
                     fire.scaleFadePower = 1.08f;
                     ShaderParticleHandler.SpawnParticle(fire);
                 }

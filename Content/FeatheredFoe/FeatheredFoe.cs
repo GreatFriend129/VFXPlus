@@ -99,6 +99,8 @@ namespace VFXPlus.Content.FeatheredFoe
 
             CurrentAttack = FeatheredFoeState.WindDirShot;
 
+            Main.NewText("ignore me!");
+
             switch (CurrentAttack)
             {
                 case FeatheredFoeState.BasicAttack:

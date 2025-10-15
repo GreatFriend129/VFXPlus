@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 
 namespace VFXPlus.Content.VFXTest.Aero
 {
+    /*
     public class CrystalCrescent : ModItem
     {
         
@@ -301,5 +302,5 @@ namespace VFXPlus.Content.VFXTest.Aero
             #endregion
         }
     }
-
+    */
 }

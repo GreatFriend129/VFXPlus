@@ -33,18 +33,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_line") with { Pitch = .55f, Volume = 0.35f, PitchVariance = 0.1f }; 
+            //SoundEngine.PlaySound(style, player.Center);
+
+            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
+            //SoundEngine.PlaySound(style2, player.Center);
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Tech/MagicImpactLong2") with { Volume = 0.65f };
             SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_176") with { Volume = 1f, Pitch = 1f, PitchVariance = 0.1f }; 
-            SoundEngine.PlaySound(style2, player.Center);
 
             foreach (Projectile p in Main.projectile)
             {

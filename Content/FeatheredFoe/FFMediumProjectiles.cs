@@ -621,7 +621,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             if (timer == 0)
             {
-
+                Projectile.ai[0] = Projectile.velocity.Length();
 
                 int featherCount = 3;
                 for (int i = 0; i < featherCount; i++)
@@ -633,7 +633,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.1f; //0.04
+                        bof.orbitSpeed = 0.1f; //0.1
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
                         bof.orbitDistance = 150f; //200
                         bof.orbitDir = startDir;
@@ -643,33 +643,22 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
             //SpeedUp
-            if (timer < 60)
-                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + 0.2f);
+            float speedUpProg = Utils.GetLerpValue(0f, 1f, (float)timer / 70f, true);
+            if (timer < 70)
+                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + Easings.easeInQuart(0.7f));
 
             //Homing
-            if (timer < 60)
+            if (timer < 90 && timer > 50)
             {
                 float oldSpeed = Projectile.velocity.Length();
                 Vector2 toTarget = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);
 
                 float velLength = Projectile.velocity.Length();
-                Projectile.velocity = Vector2.Lerp(Projectile.velocity, toTarget * velLength, 0.04f);
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, toTarget * velLength, 0.02f);
 
                 if (Projectile.velocity.Length() < oldSpeed)
                     Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * oldSpeed;
             }
-
-            int trailCount = 7; //5
-            previousRotations.Add(Projectile.rotation);
-            previousPositions.Add(Projectile.Center);
-
-            if (previousRotations.Count > trailCount)
-                previousRotations.RemoveAt(0);
-
-            if (previousPositions.Count > trailCount)
-                previousPositions.RemoveAt(0);
-
-            Projectile.rotation -= 0.25f;
 
             if (timer % 1 == 0)
             {
@@ -748,7 +737,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
                 float alpha = prog;
-                float newRot = (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
+                float newRot = rot + (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
                 float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
 
                 Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, rot + newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
@@ -867,13 +856,13 @@ namespace VFXPlus.Content.FeatheredFoe
 
             if (timer == 0)
             {
-                int featherCount = 8;
+                int featherCount = 6;
                 for (int i = 0; i < featherCount; i++)
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount) * i;
 
                     float dir = Projectile.ai[0];
-                    Vector2 goalPos = new Vector2(325, 0f).RotatedBy(rot).RotatedBy(dir); //350
+                    Vector2 goalPos = new Vector2(300, 0f).RotatedBy(rot).RotatedBy(dir); //325
                     Vector2 spawnPos = Projectile.Center + goalPos + dir.ToRotationVector2() * -500f; //-300
 
                     int a = Projectile.NewProjectile(null, spawnPos, Vector2.Zero, ModContent.ProjectileType<RelativeToProjFeather>(), 1, 1);

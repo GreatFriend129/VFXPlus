@@ -72,6 +72,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 CirclePulseBehavior b2A = new CirclePulseBehavior(0.65f * 1f, true, 2, 0.15f, 0.3f);
                 b2A.drawLayer = "OverPlayers";
                 d2A.customData = b2A;
+
+                //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/Ding") with { Volume = 0.2f, Pitch = -0.9f, PitchVariance = 0.15f };
+                //SoundEngine.PlaySound(style);
             }
 
             int trailCount = 22; //16
@@ -567,6 +570,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 CirclePulseBehavior b2A = new CirclePulseBehavior(0.75f * 1f, true, 2, 0.2f, 0.35f);
                 b2A.drawLayer = "OverPlayers";
                 d2A.customData = b2A;
+
+                //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = .45f, Pitch = -.45f, PitchVariance = 0.1f };
+                //SoundEngine.PlaySound(style);
             }
 
             int trailCount = 22;

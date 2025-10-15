@@ -1298,18 +1298,20 @@ namespace VFXPlus.Content.FeatheredFoe
 
             windOrbRecoilPower = Math.Clamp(MathHelper.Lerp(windOrbRecoilPower, -0.5f, 0.04f), 0f, 2f);
 
-            if (timer != 0 && timer % 80 == 0)
+            if (timer != 0 && timer % 90 == 0) //180
             {
                 Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
 
-                int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 1f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
+                //int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 10.1f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
+                //(Main.projectile[orb].ModProjectile as FFWindOrb2).endVel = 1f;
 
+                int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 0.5f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
                 (Main.projectile[orb].ModProjectile as FFWindOrb).playerID = player.whoAmI;
 
                 windOrbRecoilPower = 0.5f;
             }
 
-            windOverlayOpacityGoal = 0.2f;
+            windOverlayOpacityGoal = 0.2f; //0.2f
             windOverlayRotation = yGoal * 0.1f;
 
             doPassiveWindParticles = true;

@@ -331,7 +331,7 @@ namespace VFXPlus.Content.Projectiles
 
 
             //Star on tip of gun
-            Texture2D Flash = (Texture2D)ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/CrispStarPMA");
+            Texture2D Flash = CommonTextures.CrispStarPMA.Value;
 
             Vector2 starPos = drawPos + new Vector2(StarPosition.X, StarPosition.Y * Player.direction).RotatedBy(Projectile.rotation);
 

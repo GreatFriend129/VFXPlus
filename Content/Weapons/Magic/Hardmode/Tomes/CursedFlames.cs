@@ -1,21 +1,22 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using Terraria.Graphics;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
@@ -36,7 +37,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            Color colBetween = Color.Lerp(Color.Green, Color.GreenYellow, 0.5f);
+            Color colBetween = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
 
             for (int i = 0; i < 17; i++)
             {
@@ -50,6 +51,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 d.velocity += velocity * 0.6f * (prog);
             }
+
+            for (int i = 220; i < 5; i++)
+            {
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(4f, 16f);
+                FireParticle fire = new FireParticle(position, vel, 0.5f, colBetween, colorMult: 2f, bloomAlpha: 2f, AlphaFade: 0.91f, VelFade: 0.87f);
+                fire.scaleFadePower = 1.11f;
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
+
             return true;
         }
 
@@ -123,6 +133,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Main.dust[d].rotation = Main.rand.NextFloat(6.28f);
 
                 Main.dust[d].customData = new MediumSmokeBehavior(Main.rand.Next(8, 14) + 5, 0.94f, 0.01f, 0.05f); //12 28
+            }
+
+            //fuck this looks good but I dont want to have to change it again
+            if (timer % 1 == 0 && timer > 3 && false)
+            {
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
+                FireParticle fire = new FireParticle(projectile.Center, vel, 1f, Color.Lerp(Color.Green, Color.GreenYellow, 0.25f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                fire.scaleFadePower = 1.08f;
+                ShaderParticleHandler.SpawnParticle(fire);
+
+                //Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
+                //FireParticle fire = new FireParticle(projectile.Center, vel, 0.75f, Color.Lerp(Color.Green, Color.GreenYellow, 0.25f), colorMult: 2f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                //fire.scaleFadePower = 1.08f;
+                //ShaderParticleHandler.SpawnParticle(fire);
             }
 
             //Based off of coralite mod slime emperor 

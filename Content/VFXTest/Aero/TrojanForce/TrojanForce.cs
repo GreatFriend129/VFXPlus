@@ -21,6 +21,7 @@ using System.Net;
 
 namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 {
+    /*
 	public class TrojanForce : ModItem
 	{
         public override string Texture => "VFXPlus/Content/VFXTest/Aero/TrojanForce/TrojanForce";
@@ -334,43 +335,6 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                         Main.spriteBatch.Draw(Core, newPosition - Main.screenPosition, null, Color.White with { A = 0 } * fade * 0.25f, newRotation, Core.Size() / 2f, coreScale * 0.5f, 0f, 0f);
                     }
                 }
-            }
-
-            for (int i = 220; i < previousTipPositions.Count; i++)
-            {
-                /*
-                float progress = (float)i / previousTipPositions.Count;
-
-                Vector2 tipPos = previousTipPositions[i];
-                float tipRot = 0f;/// previousTipRotations[i] + ((float)Main.timeForVisualEffects * 0.06f);
-
-                float colOpacity = Easings.easeInCirc(progress) * 1f;
-
-                Color col = Color.Lerp(Color.DeepPink, Color.HotPink, Easings.easeInCubic(progress)) with { A = 0 } * Easings.easeInCirc(progress) * 1f;
-
-                float finalTrailScale = coreScale * 0.7f;// * progress * 0.2f;
-
-
-                Main.EntitySpriteDraw(Core, tipPos - Main.screenPosition, null, col, tipRot, Core.Size() / 2f, finalTrailScale, 0);
-                Main.EntitySpriteDraw(Core, tipPos - Main.screenPosition, null, Color.White with { A = 0 } * colOpacity, tipRot, Core.Size() / 2f, finalTrailScale * 0.35f, 0);
-
-                //Draw two after images in between each tip
-                if (i != 0 && false)
-                {
-                    Vector2 previousTipPos = previousTipPositions[i - 1];
-
-                    Vector2 inBetweenPos = Vector2.Lerp(tipPos, previousTipPos, 0.33f);
-
-                    Main.EntitySpriteDraw(Core, inBetweenPos - Main.screenPosition, null, col, 0f, Core.Size() / 2f, finalTrailScale, 0);
-                    Main.EntitySpriteDraw(Core, inBetweenPos - Main.screenPosition, null, Color.White with { A = 0 } * colOpacity, 0f, Core.Size() / 2f, finalTrailScale * 0.35f, 0);
-
-                    inBetweenPos = Vector2.Lerp(tipPos, previousTipPos, 0.66f);
-
-                    Main.EntitySpriteDraw(Core, inBetweenPos - Main.screenPosition, null, col, 0f, Core.Size() / 2f, finalTrailScale, 0);
-                    Main.EntitySpriteDraw(Core, inBetweenPos - Main.screenPosition, null, Color.White with { A = 0 } * colOpacity, 0f, Core.Size() / 2f, finalTrailScale * 0.35f, 0);
-
-                }
-                */
             }
 
         }
@@ -885,5 +849,5 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             Projectile.damage = (int)(hit.Damage * 0.8f); // Multihit penalty. 
         }
     }
-
+    */
 }
