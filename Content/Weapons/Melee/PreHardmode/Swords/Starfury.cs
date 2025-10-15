@@ -48,7 +48,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Starfury);
+            return lateInstantiation && (entity.type == ProjectileID.Starfury) && false;
         }
 
         public List<Vector2> previousPositions = new List<Vector2>();

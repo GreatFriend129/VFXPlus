@@ -20,8 +20,6 @@ using rail;
 using Terraria.Graphics;
 using System.Runtime.Intrinsics.X86;
 using System.Net;
-using static Terraria.ModLoader.PlayerDrawLayer;
-using VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc

@@ -12,7 +12,6 @@ using System.Linq;
 using System.Threading;
 using ReLogic.Content;
 using VFXPlus.Common.Interfaces;
-using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 
 
 namespace VFXPlus

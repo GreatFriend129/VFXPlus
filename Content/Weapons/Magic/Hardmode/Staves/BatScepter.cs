@@ -1,21 +1,22 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.GameContent.Drawing;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using Terraria.GameContent.Drawing;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -64,26 +65,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 24;
+            int trailCount = 13;
+            previousRotations.Add(projectile.velocity.ToRotation());
+            previousPositions.Add(projectile.Center + projectile.velocity);
 
-            for (int i = 0; i < 2; i++)
-            {
-                Vector2 pos = projectile.Center + (i == 0 ? Vector2.Zero : projectile.velocity * 0.5f);
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
 
-                previousRotations.Add(projectile.rotation);
-                previousPositions.Add(pos);
-                previousVelrots.Add(projectile.velocity.ToRotation());
-
-                if (previousRotations.Count > trailCount)
-                    previousRotations.RemoveAt(0);
-
-                if (previousPositions.Count > trailCount)
-                    previousPositions.RemoveAt(0);
-
-                if (previousVelrots.Count > trailCount)
-                    previousVelrots.RemoveAt(0);
-            }
-
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             if (timer % 3 == 0 && Main.rand.NextBool(6) && timer != 0)
             {
@@ -110,7 +100,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         float overallScale = 0f;
         float overallAlpha = 0f;
-        List<float> previousVelrots = new List<float>();
         List<float> previousRotations = new List<float>();
         List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -129,6 +118,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             //147, 112, 219 
             Color purp = new Color(105, 63, 191);
+
+            Texture2D orb = CommonTextures.PartiGlowPMA.Value;
+            float orbScale = overallScale * 1.15f;
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.Black * 0.08f, projectile.velocity.ToRotation(), orb.Size() / 2f, orbScale, SpriteEffects.None);
 
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.Black * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SpriteEffects.None);
@@ -151,52 +144,43 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         }
 
+        Effect myEffect = null;
         public void DrawTrail(Projectile projectile, bool giveUp)
         {
             if (giveUp)
                 return;
 
-            Texture2D Line = CommonTextures.SoulSpike.Value;
+            myEffect ??= ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
-            //147, 112, 219 
-            Color purp = new Color(105, 63, 191);
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpikeHalf").Value; //
 
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
 
-            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Pixel/PartiGlow").Value;
-            float orbScale = overallScale * 1.25f;
-            Vector2 drawPos = projectile.Center - Main.screenPosition;// + drawPosOffset;
-
-            Main.EntitySpriteDraw(orb, drawPos, null, purp with { A = 0 } * 0.1f, projectile.velocity.ToRotation(), orb.Size() / 2f, orbScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * 0.1f, projectile.velocity.ToRotation(), orb.Size() / 2f, orbScale * 0.5f, SpriteEffects.None);
-
-            //After-Image
-            for (int i = 0; i < previousRotations.Count; i++)
-            {
-                float progress = (float)i / previousRotations.Count;
-
-                float size = Easings.easeOutSine(1f * progress) * projectile.scale;
-                //float size = (0.75f + (progress * 0.25f)) * projectile.scale;
-                float size2 = progress * projectile.scale;
+            Color StripColor(float progress) => Color.White * Easings.easeInQuad(progress) * overallAlpha;
 
 
-                Color col = purp * progress * overallAlpha;
+            float sineStripWidth = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.12f) * 0.15f;
+            float StripWidth(float progress) => 16f * sineStripWidth * overallScale * Easings.easeOutQuad(progress);
 
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col * 0.25f,
-                        previousRotations[i], TexOrigin, size * overallScale, SpriteEffects.None);
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(0f); //0.02
+            myEffect.Parameters["reps"].SetValue(1f);
 
-                //Inner Line
-                Vector2 vec2Scale = new Vector2(0.5f * size2, 1.25f) * overallScale;
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.Black, Color.MediumPurple, 0.2f).ToVector3() * 1.5f);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, Color.Black * 0.15f * progress * overallAlpha,
-                    previousVelrots[i] + MathHelper.PiOver2, TexOrigin, vec2Scale, SpriteEffects.None);
-            }
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
 
+            vertexStrip.DrawTrail();
 
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

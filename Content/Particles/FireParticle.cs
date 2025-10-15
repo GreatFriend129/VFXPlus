@@ -3,7 +3,6 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework.Graphics;
 using VFXPlus.Common.Interfaces;
-using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 using VFXPlus.Common;
 using ReLogic.Content;
 using Microsoft.Xna.Framework;
