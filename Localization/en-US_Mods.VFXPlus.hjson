@@ -201,6 +201,7 @@ Projectiles: {
 	WindDirShotNado.DisplayName: Wind Dir Shot Nado
 	FireEye.DisplayName: Fire Eye
 	TrailTestOmega.DisplayName: Trail Test Omega
+	H3Impact.DisplayName: H3 Impact
 }
 
 Configs: {

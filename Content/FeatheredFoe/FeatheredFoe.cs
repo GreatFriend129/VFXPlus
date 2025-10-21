@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
 using Terraria;
@@ -13,6 +14,7 @@ using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
+using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -22,7 +24,7 @@ namespace VFXPlus.Content.FeatheredFoe
         public override string Texture => "Terraria/Images/Projectile_0";
 
 
-        private enum FeatheredFoeState
+        public enum FeatheredFoeState
         {
             BasicAttack = 0,
             SwoopFeatherBehind = 1,
@@ -47,6 +49,9 @@ namespace VFXPlus.Content.FeatheredFoe
             get => (FeatheredFoeState)NPC.ai[0];
             set => NPC.ai[0] = (float)value;
         }
+
+        public List<FeatheredFoeState> attackOptions = new List<FeatheredFoeState>();
+
 
         public override void SetStaticDefaults() { }
 
@@ -97,7 +102,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.WindDirShot;
+            //CurrentAttack = FeatheredFoeState.WindOrb;
 
             Main.NewText("ignore me!");
 
@@ -173,6 +178,29 @@ namespace VFXPlus.Content.FeatheredFoe
             timer++;
         }
 
+        public void ChooseNextAttack()
+        {
+            FeatheredFoeState[] options = { 
+                FeatheredFoeState.TriSpin,
+                FeatheredFoeState.Dive, 
+                FeatheredFoeState.CornerTravelShot, 
+                FeatheredFoeState.OffscreenDash, 
+                FeatheredFoeState.UmbrellaRain, 
+                FeatheredFoeState.WindDirShot, 
+                FeatheredFoeState.Madison  };
+            
+            
+            int nextAttackIndex = Main.rand.Next(0, options.Length);
+
+            CurrentAttack = options[nextAttackIndex];
+
+            timer = -1;
+            attackReps = 0;
+            substate = 0;
+            drawTriSpinStar = false;
+            drawDrill = false;
+        }
+
 
         public float bgPulsePower = 0f;
 
@@ -202,6 +230,15 @@ namespace VFXPlus.Content.FeatheredFoe
                 wind.noGravity = true;
             }
 
+            float xAmount = MathF.Cos(rot);
+            Main.windSpeedCurrent += xAmount * 0.008f;
+            Main.windSpeedTarget += xAmount * 0.008f;
+
+            //Cap out at around 60mph
+            Main.windSpeedCurrent = Math.Clamp(Main.windSpeedCurrent, -1.2f, 1.2f);
+            Main.windSpeedTarget = Math.Clamp(Main.windSpeedTarget, -1.2f, 1.2f);
+
+            //Main.NewText(Main.windSpeedCurrent);
         }
     }
 }

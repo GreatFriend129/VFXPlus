@@ -94,7 +94,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 Effect smokeEffect = VFXPlus.SmokeNoiseShader;
 
                 Color smokeCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
-                Color smokeB = Color.Lerp(Color.Silver, smokeCol, bgPulsePower);
+                Color smokeB = Color.Lerp(Color.Silver, smokeCol, Easings.easeOutSine(bgPulsePower));
 
                 float smokeAlpha = 0.15f + (bgPulsePower * 0.25f);
 

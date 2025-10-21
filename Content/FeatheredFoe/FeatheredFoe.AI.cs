@@ -6,6 +6,7 @@ using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Map;
 using Terraria.ModLoader;
@@ -211,9 +212,12 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 if (attackReps == 2)
                 {
-                    attackReps = 0;
-                    CurrentAttack = FeatheredFoeState.Dive;
-                    substate = 0;
+                    ChooseNextAttack();
+
+                    //timer = -1;
+                    //attackReps = 0;
+                    //CurrentAttack = FeatheredFoeState.Dive;
+                    //substate = 0;
                 }
 
             }
@@ -328,8 +332,7 @@ namespace VFXPlus.Content.FeatheredFoe
                 attackReps++;
                 if (attackReps == 4)
                 {
-                    attackReps = 0;
-                    CurrentAttack = FeatheredFoeState.TriSpin;
+                    ChooseNextAttack();
                 }
             }
 
@@ -558,7 +561,12 @@ namespace VFXPlus.Content.FeatheredFoe
                 if (timer == timeAfterDash + timeOfDash + timeBeforeDash)
                 {
                     timer = -1;
-                    CurrentAttack = FeatheredFoeState.CornerTravelShot;
+                    attackReps++;
+
+                    if (attackReps == 5)
+                    {
+                        ChooseNextAttack();
+                    }
                 }
             }
 
@@ -955,190 +963,10 @@ namespace VFXPlus.Content.FeatheredFoe
                         umbrellaStormwallInstance.active = false;
                         attackReps = 0;
 
-                        CurrentAttack = FeatheredFoeState.OffscreenDash;
+                        ChooseNextAttack();
                     }
                 }
             }
-
-
-            /*
-            if (timer >= 70)
-            {
-                //Sound effect and pulse shtuff
-                if (timer == 70)
-                {
-                    bgPulsePower = 2.5f;
-
-                    windOverlayOpacityGoal = 1f;
-                    windOverlayRotation = MathHelper.PiOver2;
-
-                    float overallVolume = 0.4f;
-
-                    //Sound
-                    SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/water_blast_projectile_spell_03") with { Volume = 0.5f * overallVolume, Pitch = .7f, PitchVariance = 0.05f, MaxInstances = -1 };
-                    SoundEngine.PlaySound(styleA, NPC.Center);
-
-                    SoundStyle styleC = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/flame_thrower_airblast_rocket_redirect") with { Volume = 0.15f * overallVolume, Pitch = .4f, PitchVariance = .1f, MaxInstances = -1 };
-                    SoundEngine.PlaySound(styleC, NPC.Center);
-
-                    SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 1f * overallVolume, Pitch = .6f, PitchVariance = 0.05f, MaxInstances = 1 }; 
-                    SoundEngine.PlaySound(styleD, NPC.Center);
-
-                    int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
-                    (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 60;
-                    (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.8f;
-                    Main.projectile[pulse].scale = 9f;
-
-
-                    storedShakeCenter = NPC.Center;
-                }
-
-                //Continually shake screen for a while
-                if (timer < 105)
-                    player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 15f;
-
-                NPC.Center = storedShakeCenter;
-
-                //Spawning feathers and dust
-                if (timer < 120)
-                {
-                    //Push the player downward if they are above FF
-                    if (player.Center.Y < NPC.Center.Y)
-                    {
-                        if (player.velocity.Y < 0)
-                            player.velocity.Y *= -1;
-
-                        player.velocity.Y += 0.75f; 
-                    }
-
-                    int smokePerFrame = 10 * 2;
-                    int windDustPerFrame = 5 * 2;
-                    int windLinePerFrame = 1 * 2;
-                    int feathersPerBurst = 5 * 2;
-
-                    float burstWidth = 1000f * 2f;
-
-                    //Feathers
-                    if (timer % 6 == 0)
-                    {
-                        for (int i = 0; i < feathersPerBurst; i++)
-                        {
-                            float prog = (float)i / (float)feathersPerBurst;
-
-                            float x = MathHelper.Lerp(-burstWidth, -safeZoneWidth, prog);
-
-                            Vector2 spawnPosL = new Vector2(x + Main.rand.NextFloat(-135f, 135f), -400f + Main.rand.NextFloat(-50f, 50f));
-                            Vector2 spawnPosR = new Vector2((-1f * x) + Main.rand.NextFloat(-135f, 135f), -400f + Main.rand.NextFloat(-50f, 50f));
-
-                            //Left Side
-                            int pl = Projectile.NewProjectile(null, NPC.Center + spawnPosL, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                            (Main.projectile[pl].ModProjectile as StraightFeather).accelTime = 0;
-                            (Main.projectile[pl].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
-                            Main.projectile[pl].extraUpdates = 3;
-
-                            //Right Side
-                            int pr = Projectile.NewProjectile(null, NPC.Center + spawnPosR, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                            (Main.projectile[pr].ModProjectile as StraightFeather).accelTime = 0;
-                            (Main.projectile[pr].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
-                            Main.projectile[pr].extraUpdates = 3;
-                        }
-                    }
-
-
-                    //Spawn 2 feathers on the edge of the border every 14 frames
-                    if (timer % 14 == 0)
-                    {
-                        //Dont spawn them exactly on the border size (95f) because the feathers have a wide hitbox
-                        Vector2 spawnPosL = NPC.Center + new Vector2(safeZoneWidth + 15f, -400f + Main.rand.NextFloat(-25f, 25f));
-                        Vector2 spawnPosR = NPC.Center + new Vector2(-safeZoneWidth - 15f, -400f + Main.rand.NextFloat(-25f, 25f));
-
-                        int p1 = Projectile.NewProjectile(null, spawnPosL, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                        (Main.projectile[p1].ModProjectile as StraightFeather).accelTime = 0;
-                        (Main.projectile[p1].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
-                        Main.projectile[p1].extraUpdates = 3;
-
-                        int p2 = Projectile.NewProjectile(null, spawnPosR, new Vector2(0f, 15f), ModContent.ProjectileType<StraightFeather>(), 1, 1);
-                        (Main.projectile[p2].ModProjectile as StraightFeather).accelTime = 0;
-                        (Main.projectile[p2].ModProjectile as StraightFeather).isFromUmbrellaRain = true;
-                        Main.projectile[p2].extraUpdates = 3;
-                    }
-
-
-
-                    #region Rain Particles
-                    //Smoke Dust
-                    for (int i = 0; i < smokePerFrame; i++)
-                    {
-                        float rot = MathHelper.PiOver2;
-                        int side = Main.rand.NextBool() ? 1 : -1;
-
-                        Vector2 smokeDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
-                        Vector2 smokeDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(8f, 12f) * 1.5f;
-
-                        Dust smoke = Dust.NewDustPerfect(smokeDustSpawnPosition, ModContent.DustType<SmallSmoke>(), smokeDustVelocity,
-                            newColor: Color.LightSkyBlue * 1f, Scale: Main.rand.NextFloat(7f, 9f));
-
-                        SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 0.45f, ScaleFadePower: 0.97f, false);
-                        smoke.customData = ssb;
-                    }
-
-                    //Wind Dust
-                    for (int i2 = 0; i2 < windDustPerFrame; i2++)
-                    {
-                        float rot = MathHelper.PiOver2;
-                        int side = Main.rand.NextBool() ? 1 : -1;
-
-                        Vector2 windDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
-                        Vector2 windDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(0.95f, 2.5f) * 45f;
-
-                        float dustScale = Main.rand.NextFloat(1.25f, 2f);
-                        Dust wind = Dust.NewDustPerfect(windDustSpawnPosition, 176, windDustVelocity * 1f, newColor: Color.SkyBlue with { A = 0 } * 1f, Scale: dustScale); //dust176
-                        wind.noGravity = true;
-                        wind.rotation = Main.rand.NextFloat(6.28f);
-                    }
-
-                    //Wind Line
-                    for (int i3 = 0; i3 < windLinePerFrame; i3++)
-                    {
-                        float rot = MathHelper.PiOver2;
-                        int side = Main.rand.NextBool() ? 1 : -1;
-
-
-                        Vector2 windDustSpawnPosition = NPC.Center + (new Vector2(1f * -200f + Main.rand.NextFloat(-400f, 0f), Main.rand.NextFloat(safeZoneWidth, burstWidth) * side)).RotatedBy(rot);
-                        Vector2 windDustVelocity = new Vector2(1f, 0f).RotatedBy(rot) * Main.rand.NextFloat(0.95f, 3f) * 45f;
-
-                        Dust p = Dust.NewDustPerfect(windDustSpawnPosition, ModContent.DustType<WindLine>(), windDustVelocity * 1f, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.4f, 0.55f));
-
-                        p.customData = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, 4f, 2f, false);
-                    }
-                    #endregion
-                }
-                else
-                {
-                    if (timer == 120)
-                    {
-                        if (umbrellaTelegraphProj.active)
-                            (umbrellaTelegraphProj.ModProjectile as UmbrellaTelegraph).shouldFadeOut = true;
-                    }
-
-
-                    windOverlayOpacityGoal = 0f;
-                    windOverlayOpacity *= 0.9f;
-                }
-
-                NPC.Center = NPC.Center + (Main.rand.NextVector2CircularEdge(0.5f, 0.5f) * player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower);
-
-                if (timer == 210)
-                {
-                    substate = 0;
-
-                    umbrellaStormwallInstance.active = false;
-
-                    windOverlayOpacityGoal = 0f;
-                    timer = -1;
-                }
-            }
-            */
 
         }
 
@@ -1199,7 +1027,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
                         int nado = Projectile.NewProjectile(NPC.GetSource_FromThis(), startPos + new Vector2(100f * randir, yVal + randYOff), Vector2.Zero, ModContent.ProjectileType<MadisonTornado>(), 10, 0, Main.myPlayer);
                         (Main.projectile[nado].ModProjectile as MadisonTornado).startDir = randir;
-                        (Main.projectile[nado].ModProjectile as MadisonTornado).yVel = randYVel;
+                        //(Main.projectile[nado].ModProjectile as MadisonTornado).yVel = randYVel;
 
 
                         nadoSpawnCount++;
@@ -1226,9 +1054,9 @@ namespace VFXPlus.Content.FeatheredFoe
 
                     attackReps++;
 
-                    if (attackReps == 2)
+                    if (attackReps == 3)
                     {
-                        CurrentAttack = FeatheredFoeState.UmbrellaRain;
+                        ChooseNextAttack();
                         attackReps = 0;
                     }
                 }
@@ -1293,19 +1121,19 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             float yGoal = (float)Math.Sin((float)timer * 0.03f);
 
-            windOrbDest = new Vector2(-500, -250 * yGoal) * (1f + windOrbRecoilPower);
+            windOrbDest = new Vector2(-500, 0 * yGoal) * (1f + windOrbRecoilPower);
             BasicMovementVariant3(player.Center + windOrbDest, moveSpeed: 4f);
 
             windOrbRecoilPower = Math.Clamp(MathHelper.Lerp(windOrbRecoilPower, -0.5f, 0.04f), 0f, 2f);
 
-            if (timer != 0 && timer % 90 == 0) //180
+            if (timer != 0 && timer % 280 == 0) //180
             {
                 Vector2 toPlayer = (player.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
 
                 //int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 10.1f, ModContent.ProjectileType<FFWindOrb2>(), 10, 0);
                 //(Main.projectile[orb].ModProjectile as FFWindOrb2).endVel = 1f;
 
-                int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 0.5f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
+                int orb = Projectile.NewProjectile(null, NPC.Center, toPlayer * 5f, ModContent.ProjectileType<FFWindOrb>(), 10, 0);
                 (Main.projectile[orb].ModProjectile as FFWindOrb).playerID = player.whoAmI;
 
                 windOrbRecoilPower = 0.5f;
@@ -1322,7 +1150,9 @@ namespace VFXPlus.Content.FeatheredFoe
         //After a second the feathers spin off and shoot in the direction the wind was blowing
         Vector2 tornadoDashDir = Vector2.Zero;
         public void WindDirShot()
-        {   
+        {
+            int nadoCount = 4 + attackReps;
+
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
 
@@ -1335,8 +1165,6 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 tornadoDashDir = Main.rand.NextVector2CircularEdge(1f, 1f);
 
-                int nadoCount = 7; //7 215
-                //float bonusRot = Main.rand.NextFloat(6.28f);// Main.rand.NextBool() ? 0f : MathHelper.PiOver4;
                 for (int i = 0; i < nadoCount; i++)
                 {
                     float prog = (i + 0f) / (float)nadoCount;
@@ -1367,9 +1195,15 @@ namespace VFXPlus.Content.FeatheredFoe
                 windOverlayOpacityGoal = 2f;
 
                 int pulse = Projectile.NewProjectile(null, NPC.Center, Vector2.Zero, ModContent.ProjectileType<WindPulse>(), 0, 0, player.whoAmI);
-                (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 30;
-                (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.5f;
-                Main.projectile[pulse].scale = 6f;
+                (Main.projectile[pulse].ModProjectile as WindPulse).timeForPulse = 40;
+                (Main.projectile[pulse].ModProjectile as WindPulse).intensity = 0.4f;
+                Main.projectile[pulse].scale = 9f;
+
+                SoundStyle styleD = new SoundStyle("VFXPlus/Sounds/Effects/Cries/astrolotl") with { Volume = 0.08f, Pitch = 0.7f, PitchVariance = 0.05f, MaxInstances = 1 };
+                SoundEngine.PlaySound(styleD, NPC.Center);
+
+                SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/flame_thrower_airblast_rocket_redirect") with { Volume = 0.07f, Pitch = .5f, PitchVariance = .1f, MaxInstances = -1 };
+                SoundEngine.PlaySound(styleC, NPC.Center);
 
                 player.GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 25f; //15
             }
@@ -1380,12 +1214,19 @@ namespace VFXPlus.Content.FeatheredFoe
 
             if (timer == 150)
             {
+                attackReps++;
                 timer = -1;
 
                 windOverlayOpacityGoal = 0f;
                 doPassiveWindParticles = false;
                 centerPassiveWindParticlesOnPlayer = false;
                 passiveWindParticlesCount = 1;
+
+                if (attackReps == 4)
+                {
+                    attackReps = 0;
+                    ChooseNextAttack();
+                }
             }
         }
 

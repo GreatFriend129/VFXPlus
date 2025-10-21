@@ -321,7 +321,6 @@ namespace VFXPlus.Content.FeatheredFoe
             Projectile.width = 56;
             Projectile.height = 64;
 
-
             Projectile.hostile = true;
             Projectile.friendly = false;
             Projectile.ignoreWater = false;
@@ -329,7 +328,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
             Projectile.penetrate = -1;
             Projectile.timeLeft = 11500;
-
         }
 
 
@@ -623,8 +621,8 @@ namespace VFXPlus.Content.FeatheredFoe
             {
                 Projectile.ai[0] = Projectile.velocity.Length();
 
-                int featherCount = 3;
-                for (int i = 0; i < featherCount; i++)
+                int featherCount = 3; //3
+                for (int i = 220; i < featherCount; i++)
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount) * i;
 
@@ -633,9 +631,44 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.1f; //0.1
+                        bof.orbitSpeed = 0.25f; //0.1
                         bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
                         bof.orbitDistance = 150f; //200
+                        bof.orbitDir = startDir;
+                    }
+                }
+
+                int featherCount2 = 5;
+                for (int i = 1; i < featherCount2; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount2) * i;
+
+                    int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                    float reverseI = featherCount2 - i;
+                    if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                    {
+                        bof.ParentProj = Projectile.whoAmI;
+                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f; //0.1
+                        bof.originalDir = new Vector2(0f, 1f);
+                        bof.orbitDistance = 25f + (150 * i); //200
+                        bof.orbitDir = startDir;
+                    }
+                }
+
+                for (int i = 1; i < featherCount2; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount2) * i;
+
+                    int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                    float reverseI = featherCount2 - i;
+                    if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                    {
+                        bof.ParentProj = Projectile.whoAmI;
+                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f;
+                        bof.originalDir = new Vector2(0f, -1f);
+                        bof.orbitDistance = 25f + (150 * i); //200
                         bof.orbitDir = startDir;
                     }
                 }
@@ -644,11 +677,11 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //SpeedUp
             float speedUpProg = Utils.GetLerpValue(0f, 1f, (float)timer / 70f, true);
-            if (timer < 70)
-                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + Easings.easeInQuart(0.7f));
+            if (timer < 120)
+                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + Easings.easeInQuart(speedUpProg) * 0.1f);
 
             //Homing
-            if (timer < 90 && timer > 50)
+            if (timer < 90 && timer > 50 && false)
             {
                 float oldSpeed = Projectile.velocity.Length();
                 Vector2 toTarget = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);

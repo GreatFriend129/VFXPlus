@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -9,9 +8,8 @@ using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.FeatheredFoe;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
-using VFXPlus.Content.VFXTest;
-using static Terraria.ModLoader.PlayerDrawLayer;
 
 
 namespace VFXPlus.Content
@@ -65,34 +63,18 @@ namespace VFXPlus.Content
                 }
             }
 
-            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 18f, ModContent.ProjectileType<WindTrail>(), 0, 0, Main.myPlayer);
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, new Vector2(1f, -1f).SafeNormalize(Vector2.UnitX) * 7.5f, ProjectileID.SapphireBolt, 0, 0, Main.myPlayer);
 
+            int are5 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
+            Main.projectile[are5].rotation = velocity.ToRotation() + MathHelper.PiOver2;
+            Main.projectile[are5].scale = 0.75f * 0f;
 
-            float endDir = new Vector2(1f, 1f).ToRotation() + Main.rand.NextFloat(6.28f);
-            float boost = Main.rand.NextFloat(6.28f);
-            int featherCount = 0;
-            for (int i = 0; i < featherCount; i++)
-            {
-                float prog = (i + 1f) / (float)featherCount;
-
-                int are5 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<WindDirShotNado>(), 10, 0, player.whoAmI);
-
-                (Main.projectile[are5].ModProjectile as WindDirShotNado).playerID = player.whoAmI;
-                (Main.projectile[are5].ModProjectile as WindDirShotNado).endingShotDir = endDir;
-                (Main.projectile[are5].ModProjectile as WindDirShotNado).orbitVector = new Vector2(215f, 0f).RotatedBy(boost + (MathHelper.TwoPi * prog));
-
-
-            }
-
-            float sin1 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f);
-            float sin2 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (MathHelper.TwoPi / 3));
-            float sin3 = (float)Math.Sin(Main.timeForVisualEffects * 0.05f + (2 * MathHelper.TwoPi / 3));
-            int middle = 180;
-            int length = 100; //75
-            float r = middle + length * sin1;
-            float g = middle + length * sin2;
-            float b = middle + length * sin3;
-            Color color = new Color((int)r, (int)g, (int)b);
+            Color[] colarr = { Color.White, Color.Crimson, Color.Red };
+            (Main.projectile[are5].ModProjectile as H3Impact).cols = colarr;
+            (Main.projectile[are5].ModProjectile as H3Impact).xScaleMult = 1f;
+            (Main.projectile[are5].ModProjectile as H3Impact).yScaleMult = 1f;
+            (Main.projectile[are5].ModProjectile as H3Impact).pixelize = false;
+            (Main.projectile[are5].ModProjectile as H3Impact).additive = false;
 
 
             for (int i = 220; i < 5; i++)
@@ -112,7 +94,7 @@ namespace VFXPlus.Content
                 Main.projectile[smoke].velocity *= 0.75f;
             }
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 220; i < 2; i++)
             {
                 float fireScale = Main.rand.NextFloat(1.35f, 1.55f);
                 float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
