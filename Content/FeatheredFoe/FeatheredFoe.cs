@@ -102,9 +102,9 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            //CurrentAttack = FeatheredFoeState.WindOrb;
+            CurrentAttack = FeatheredFoeState.WindDirShot;
 
-            Main.NewText("ignore me!");
+            //Main.NewText("ignore me!");
 
             switch (CurrentAttack)
             {
@@ -178,21 +178,39 @@ namespace VFXPlus.Content.FeatheredFoe
             timer++;
         }
 
+        public List<FeatheredFoeState> previousAttacks = new List<FeatheredFoeState>();
         public void ChooseNextAttack()
         {
-            FeatheredFoeState[] options = { 
+            //Attack Options
+            FeatheredFoeState[] options = {
                 FeatheredFoeState.TriSpin,
-                FeatheredFoeState.Dive, 
-                FeatheredFoeState.CornerTravelShot, 
-                FeatheredFoeState.OffscreenDash, 
-                FeatheredFoeState.UmbrellaRain, 
-                FeatheredFoeState.WindDirShot, 
+                FeatheredFoeState.Dive,
+                FeatheredFoeState.CornerTravelShot,
+                FeatheredFoeState.OffscreenDash,
+                FeatheredFoeState.UmbrellaRain,
+                FeatheredFoeState.WindDirShot,
                 FeatheredFoeState.Madison  };
-            
-            
-            int nextAttackIndex = Main.rand.Next(0, options.Length);
 
-            CurrentAttack = options[nextAttackIndex];
+
+            previousAttacks.Add(CurrentAttack);
+
+            //Only store the previous 3 attacks
+            if (previousAttacks.Count >= 4)
+                previousAttacks.RemoveAt(0);
+
+
+            //Loop until we select an attack that isn't in the list
+            bool hasFoundAttack = false;
+            while (!hasFoundAttack)
+            {
+                int nextAttackIndex = Main.rand.Next(0, options.Length);
+                
+                if (!previousAttacks.Contains(options[nextAttackIndex]))
+                {
+                    CurrentAttack = options[nextAttackIndex];
+                    hasFoundAttack = true;
+                }
+            }
 
             timer = -1;
             attackReps = 0;
@@ -230,9 +248,10 @@ namespace VFXPlus.Content.FeatheredFoe
                 wind.noGravity = true;
             }
 
+            //Blow wind in the direction of the wind particles
             float xAmount = MathF.Cos(rot);
-            Main.windSpeedCurrent += xAmount * 0.008f;
-            Main.windSpeedTarget += xAmount * 0.008f;
+            Main.windSpeedCurrent += xAmount * 0.012f; //008
+            Main.windSpeedTarget += xAmount * 0.012f;
 
             //Cap out at around 60mph
             Main.windSpeedCurrent = Math.Clamp(Main.windSpeedCurrent, -1.2f, 1.2f);

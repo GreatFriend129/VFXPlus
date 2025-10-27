@@ -240,432 +240,298 @@ namespace VFXPlus.Content.QueenBee
 
     }
 
-    public class SmokeTest : ModProjectile
+    public class StingerTest2 : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
         public override void SetDefaults()
         {
             Projectile.width = Projectile.height = 10;
-            Projectile.ignoreWater = true;
-            Projectile.tileCollide = false;
+            Projectile.ignoreWater = false;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = true;
             Projectile.timeLeft = 370;
 
         }
 
-        public Color col = Color.OrangeRed * 0.75f;
-        public float alphaFade = 0.94f * Main.rand.NextFloat(0.9f, 1f);
-        public float scaleFade = 0.97f;
-        public float velFade = 0.9f;
-        public float ticksBetweenFrames = 3;
-        public float rotPower = 0.02f;
-
-        public float randomRotatePower = 0f;
-
-        float whiteAmount = 0f;// Main.rand.NextFloat(0.15f);
-        float whiteFade = 0.8f;
-
         int timer = 0;
+        float alpha = 0f;
+        float pulseIntensity = 0f;
 
-        float overallScale = 0f;
-        float overallAlpha = 1f;
+        public int velShrinkTime = 35;
+        public int velGrowTime = 60;
+        public float velShrinkAmount = 0.93f;
+        public float velGrowAmount = 1.15f;
+
         public override void AI()
         {
             if (timer == 0)
-                Projectile.ai[0] = Main.rand.NextBool() ? 1 : 2;
-            
-            if (timer % ticksBetweenFrames == 0 && Projectile.frame <= 4 && timer != 0)
-                Projectile.frame = Projectile.frame + 1;
-
-            float timeForPopInAnim = 20;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
-            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
-
-            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.07f), 0f, 1f);
-
-            Projectile.rotation += Projectile.velocity.Length() * rotPower * (Projectile.velocity.X > 0 ? 1f : -1f);
-
-            Projectile.velocity *= velFade;
-
-            if (Projectile.frame >= 4)
             {
-                Projectile.scale *= scaleFade;
-                overallAlpha *= alphaFade;
-                overallAlpha *= alphaFade;
+                Projectile.ai[0] = Projectile.velocity.Length();
+                previousRotations = new List<float>();
+                previousPositions = new List<Vector2>();
+
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_ogre_spit") with { Pitch = 1f, PitchVariance = .33f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style, Projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_1") with { Pitch = .54f, PitchVariance = 0.2f, Volume = 0.3f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style3, Projectile.Center);
+
+                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_42") with { Pitch = .2f, PitchVariance = .2f, Volume = 0.55f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style2, Projectile.Center);
+
+                Projectile.rotation = Projectile.velocity.ToRotation();
+
+                pulseIntensity = 1f;
             }
-            Projectile.scale *= scaleFade;
-            overallAlpha *= alphaFade;
 
-            if (overallAlpha <= 0.05f || Projectile.scale <= 0.05f)
-                Projectile.active = false;
 
-            whiteAmount *= whiteFade;
+            if (timer <= velShrinkTime)
+                Projectile.velocity *= velShrinkAmount;
+            else if (timer < velGrowTime)
+                Projectile.velocity *= velGrowAmount;
+
+
+            int trailCount = 10;
+            previousRotations.Add(Projectile.rotation);
+            previousPositions.Add(Projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            //Dust
+            if (timer % 2 == 0 && Main.rand.NextBool(3) && timer > velShrinkTime)
+            {
+
+
+            }
+
+
+
+            pulseIntensity = Math.Clamp(MathHelper.Lerp(pulseIntensity, -0.25f, 0.045f), 0f, 2f);
+            alpha = Math.Clamp(MathHelper.Lerp(alpha, 1.25f, 0.045f), 0f, 1f);
 
             timer++;
         }
 
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            if (timer <= 0) return false;
+            Texture2D Feather = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/Stinger").Value;
+            Texture2D FeatherGray = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/StingerGray").Value;
+            Texture2D FeatherWhite = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/StingerWhite").Value;
+
+            Vector2 vec2MainScale = new Vector2(1f, 0.25f + (alpha * 0.75f)) * Projectile.scale;
+
+            #region after image
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                DrawSmoke(false);
-            });
-            DrawSmoke(true);
+                float progress = (float)i / previousRotations.Count;
+
+                float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
+
+                Color betweenBlue = Color.Lerp(Color.Orange, Color.Yellow, 0.5f);
+
+                Color col = Color.Lerp(Color.OrangeRed, Color.Orange, progress) * progress;
+
+                float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
+                Main.EntitySpriteDraw(FeatherGray, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f * alpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, size2, SpriteEffects.None);
+
+                Vector2 vec2Scale = new Vector2(1f, 0.25f) * size;
+
+                Main.EntitySpriteDraw(FeatherWhite, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * alpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, vec2Scale, SpriteEffects.None);
+            }
+
+            #endregion
+
+            Color outerCol = Color.Lerp(Color.Orange with { A = 0 } * 0.5f, Color.Gold with { A = 0 } * 0.8f, pulseIntensity);
+            float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity);
+            for (int i = 0; i < 3; i++)
+            {
+                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), null, outerCol * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * scale, SpriteEffects.None);
+            }
+
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor * Easings.easeOutCirc(alpha), Projectile.rotation, Feather.Size() / 2f, vec2MainScale, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.4f * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * 1f, SpriteEffects.None);
+
 
             return false;
         }
 
-        public void DrawSmoke(bool returnImmediately)
+        public override void OnKill(int timeLeft)
         {
-            if (returnImmediately || timer == 0)
-                return;
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(1.5f, 1.5f) * 1f;
+                Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.Orange, Scale: Main.rand.NextFloat(0.35f, 0.45f));
+                dust.velocity += Projectile.velocity * 0.25f;
 
-            //Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/SmokeSheet" + Projectile.ai[0]).Value;
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/SmokeSheetSharp1").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle = Smoke.Frame(1, 6, frameY: Projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-            SpriteEffects SE = SpriteEffects.None;// Projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
-            Color toUse = Color.Lerp(col, Color.White, Easings.easeOutSine(whiteAmount));
-
-            //Main Tex
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-            //Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, Color.White with { A = 0 } * Easings.easeInCirc(overallAlpha) * 0.1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.75f, SE, 0f); //0.3
-            Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, toUse with { A = 0 } * overallAlpha * 5f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            //Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, col with { A = 0 } * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-            //Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);
+            }
         }
+
     }
 
-    public class SmokeTest2 : ModProjectile
+    public class StopAndStartStinger : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
         public override void SetDefaults()
         {
             Projectile.width = Projectile.height = 10;
-            Projectile.ignoreWater = true;
-            Projectile.tileCollide = false;
+            Projectile.ignoreWater = false;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = true;
             Projectile.timeLeft = 370;
 
+            Projectile.scale = 1.15f;
         }
 
-        public Color col = Color.OrangeRed * 0.75f;
-        public float alphaFade = 0.95f * Main.rand.NextFloat(0.9f, 1f);
-        public float scaleFade = 0.97f;
-        public float velFade = 0.9f;
-        public float ticksBetweenFrames = 3;
-        public float rotPower = 0.02f;
-
-        public float randomRotatePower = 0f;
-
-        float whiteAmount = Main.rand.NextFloat(0.5f);
-        float whiteFade = 0.8f;
-
         int timer = 0;
+        float alpha = 0f;
+        float pulseIntensity = 0f;
 
-        float overallScale = 0f;
-        float overallAlpha = 1f;
+        public int velShrinkTime = 35;
+        public int velGrowTime = 60;
+        public float velShrinkAmount = 0.93f;
+        public float velGrowAmount = 1.15f;
+
+        public float maxVel = 15f;
         public override void AI()
         {
-            if (timer % ticksBetweenFrames == 0 && Projectile.frame <= 4 && timer != 0)
-                Projectile.frame = Projectile.frame + 1;
-
-            float timeForPopInAnim = 20;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
-            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
-
-            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.07f), 0f, 1f);
-
-            Projectile.rotation += Projectile.velocity.X * rotPower * (Projectile.velocity.X > 0 ? 1f : -1f);
-
-            Projectile.velocity *= velFade;
-
-            if (Projectile.frame >= 4)
+            if (timer == 0)
             {
-                Projectile.scale *= scaleFade;
-                overallAlpha *= alphaFade;
-                overallAlpha *= alphaFade;
+                Projectile.ai[0] = Projectile.velocity.Length();
+                previousRotations = new List<float>();
+                previousPositions = new List<Vector2>();
+
+                SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_ogre_spit") with { Pitch = 1f, PitchVariance = .33f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style, Projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_1") with { Pitch = .54f, PitchVariance = 0.2f, Volume = 0.3f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style3, Projectile.Center);
+
+                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_42") with { Pitch = .2f, PitchVariance = .2f, Volume = 0.55f, MaxInstances = 1 };
+                SoundEngine.PlaySound(style2, Projectile.Center);
+
+                Projectile.rotation = Projectile.velocity.ToRotation();
+
+                pulseIntensity = 1f;
             }
-            Projectile.scale *= scaleFade;
-            overallAlpha *= alphaFade;
 
-            if (overallAlpha <= 0.05f || Projectile.scale <= 0.05f)
-                Projectile.active = false;
 
-            whiteAmount *= whiteFade;
+            if (timer <= velShrinkTime)
+                Projectile.velocity *= velShrinkAmount;
+            else if (timer < velGrowTime)
+                Projectile.velocity *= velGrowAmount;
+
+            if (Projectile.velocity.Length() > maxVel)
+                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * maxVel;
+
+
+            int trailCount = 10;
+            previousRotations.Add(Projectile.rotation);
+            previousPositions.Add(Projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            //Dust
+            if (timer % 2 == 0 && Main.rand.NextBool(3) && timer > velShrinkTime)
+            {
+
+
+            }
+
+
+
+            pulseIntensity = Math.Clamp(MathHelper.Lerp(pulseIntensity, -0.25f, 0.045f), 0f, 2f);
+            alpha = Math.Clamp(MathHelper.Lerp(alpha, 1.25f, 0.045f), 0f, 1f);
 
             timer++;
         }
 
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            if (timer <= 0) return false;
+            Texture2D Feather = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/Stinger").Value;
+            Texture2D FeatherGray = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/StingerGray").Value;
+            Texture2D FeatherWhite = Mod.Assets.Request<Texture2D>("Content/QueenBee/Assets/StingerWhite").Value;
+
+            Vector2 vec2MainScale = new Vector2(1f, 0.25f + (alpha * 0.75f)) * Projectile.scale;
+
+            #region after image
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                DrawSmoke(false);
-            });
-            DrawSmoke(true);
+                float progress = (float)i / previousRotations.Count;
 
-            return false;
-        }
+                float size = (0.75f + (progress * 0.25f)) * Projectile.scale;
 
-        public void DrawSmoke(bool returnImmediately)
-        {
-            if (returnImmediately)
-                return;
+                Color betweenBlue = Color.Lerp(Color.Orange, Color.Yellow, 0.5f);
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke1SheetClear").Value;
+                Color col = Color.Lerp(Color.OrangeRed, Color.Orange, progress) * progress;
 
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle = Smoke.Frame(1, 6, frameY: Projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-            SpriteEffects SE = SpriteEffects.None;// Projectile.velocity.X > 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                float size2 = (1f + (progress * 0.25f)) * Projectile.scale;
+                Main.EntitySpriteDraw(FeatherGray, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.55f * alpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, size2, SpriteEffects.None);
 
-            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/GlowMisc", AssetRequestMode.ImmediateLoad).Value;
-            myEffect.Parameters["uColor"].SetValue(col.ToVector3() * Easings.easeInOutCubic(overallAlpha) * 2f);
-            myEffect.Parameters["uTime"].SetValue(0);
-            myEffect.Parameters["uOpacity"].SetValue(0.7f); //0.6
-            myEffect.Parameters["uSaturation"].SetValue(0.5f);
+                Vector2 vec2Scale = new Vector2(1f, 0.25f) * size;
 
-            Color toUse = Color.Lerp(col, Color.White, 0.5f * Easings.easeOutQuad(whiteAmount));
-
-            //Main Tex
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.Default, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
-
-            //Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, Color.White with { A = 0 } * Easings.easeInCirc(overallAlpha) * 0.1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.75f, SE, 0f); //0.3
-            Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, toUse with { A = 255 } * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE, 0f); //0.3
-            //Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, col with { A = 0 } * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-        }
-    }
-
-    public class SmokeTest3 : ModProjectile
-    {
-        public override string Texture => "Terraria/Images/Projectile_0";
-        public override void SetDefaults()
-        {
-            Projectile.width = Projectile.height = 10;
-            Projectile.ignoreWater = true;
-            Projectile.tileCollide = false;
-            Projectile.timeLeft = 370;
-
-        }
-
-        public Color col = Color.OrangeRed * 0.75f;
-        public float alphaFade = 1f;//0.95f * Main.rand.NextFloat(0.9f, 1f);
-        public float scaleFade = 0.97f;
-        public float velFade = 0.85f;
-        public float ticksBetweenFrames = 3;
-        public float rotPower = 0.02f;
-
-        public float randomRotatePower = 0f;
-
-        float whiteAmount = 0f * Main.rand.NextFloat(0.25f);
-        float whiteFade = 0.8f;
-
-        int timer = 0;
-
-        float overallScale = 0f;
-        float overallAlpha = 1f;
-        public override void AI()
-        {
-            if (timer % ticksBetweenFrames == 0 && Projectile.frame <= 4 && timer != 0)
-                Projectile.frame = Projectile.frame + 1;
-
-            float timeForPopInAnim = 20;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
-            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
-
-            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.07f), 0f, 1f);
-
-            Projectile.rotation += Projectile.velocity.X * rotPower * (Projectile.velocity.X > 0 ? 1f : -1f);
-
-            Projectile.velocity *= velFade;
-
-            if (Projectile.frame >= 4)
-            {
-                Projectile.scale *= scaleFade;
-                overallAlpha *= alphaFade;
-                overallAlpha *= alphaFade;
+                Main.EntitySpriteDraw(FeatherWhite, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * alpha,
+                        previousRotations[i], FeatherGray.Size() / 2f, vec2Scale, SpriteEffects.None);
             }
-            Projectile.scale *= scaleFade;
-            overallAlpha *= alphaFade;
 
-            if (Projectile.scale <= 0.2)
-                Projectile.scale -= 0.02f;
+            #endregion
 
-            if (overallAlpha <= 0.05f || Projectile.scale <= 0.05f)
-                Projectile.active = false;
-
-            whiteAmount *= whiteFade;
-
-            timer++;
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            Color outerCol = Color.Lerp(Color.Orange with { A = 0 } * 0.5f, Color.Gold with { A = 0 } * 0.8f, pulseIntensity);
+            float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity);
+            for (int i = 0; i < 3; i++)
             {
-                DrawSmoke(false);
-            });
-            DrawSmoke(true);
-
-            return false;
-        }
-
-        Effect myEffect = null;
-        bool AorB = Main.rand.NextBool();
-        public void DrawSmoke(bool returnImmediately)
-        {
-            if (returnImmediately)
-                return;
-
-            int sheet = AorB ? 1 : 2;
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/SmokeC").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle = Smoke.Frame(1, 6, frameY: Projectile.frame);
-            Vector2 TexOrigin = sourceRectangle.Size() / 2f;
-            SpriteEffects SE = SpriteEffects.None;
-
-            Color toUse = Color.Lerp(col, Color.Wheat, Easings.easeOutQuad(whiteAmount));
-
-            //Main Tex
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.Default, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
-
-            Texture2D Orb = CommonTextures.feather_circle128PMA.Value;
-            //Main.spriteBatch.Draw(Orb, drawPos, null, Color.Black with { A = 255 } * overallAlpha * 0.2f, Projectile.rotation, Orb.Size() / 2f, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            Main.spriteBatch.Draw(Orb, drawPos, null, toUse with { A = 0 } * overallAlpha * 0.25f, Projectile.rotation, Orb.Size() / 2f, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            Main.spriteBatch.Draw(Smoke, drawPos, sourceRectangle, toUse with { A = 0 } * overallAlpha * 1f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale, SE, 0f); //0.3
-
-
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
-        }
-    }
-
-    public class SmokeTest4 : ModProjectile
-    {
-        public override string Texture => "Terraria/Images/Projectile_0";
-        public override void SetDefaults()
-        {
-            Projectile.width = Projectile.height = 10;
-            Projectile.ignoreWater = true;
-            Projectile.tileCollide = false;
-            Projectile.timeLeft = 370;
-
-        }
-
-        public Color col = Color.OrangeRed * 0.75f;
-        public float alphaFade = 0.99f;//0.95f * Main.rand.NextFloat(0.9f, 1f);
-        public float scaleFade = 0.97f;
-        public float velFade = 0.85f;
-        public float ticksBetweenFrames = 3;
-        public float rotPower = 0.02f;
-
-        public float randomRotatePower = 0f;
-
-        float whiteAmount = 0f * Main.rand.NextFloat(0.25f);
-        float whiteFade = 0.8f;
-
-        int timer = 0;
-
-        float overallScale = 0f;
-        float overallAlpha = 1f;
-        public override void AI()
-        {
-            if (timer % ticksBetweenFrames == 0 && Projectile.frame <= 4 && timer != 0)
-                Projectile.frame = Projectile.frame + 1;
-
-            float timeForPopInAnim = 20;
-            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
-            overallScale = 0.25f + MathHelper.Lerp(0f, 0.75f, Easings.easeInOutBack(animProgress, 0f, 1f));
-
-            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.07f), 0f, 1f);
-
-            Projectile.rotation += Projectile.velocity.X * rotPower * (Projectile.velocity.X > 0 ? 1f : -1f);
-
-            Projectile.velocity *= velFade;
-
-            if (Projectile.frame >= 4)
-            {
-                Projectile.scale *= scaleFade;
-                overallAlpha *= alphaFade;
-                overallAlpha *= alphaFade;
+                Main.EntitySpriteDraw(FeatherWhite, Projectile.Center - Main.screenPosition + Main.rand.NextVector2Circular(3f, 3f), null, outerCol * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * scale, SpriteEffects.None);
             }
-            Projectile.scale *= scaleFade;
-            overallAlpha *= alphaFade;
 
-            if (Projectile.scale <= 0.2)
-                Projectile.scale -= 0.02f;
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, lightColor * Easings.easeOutCirc(alpha), Projectile.rotation, Feather.Size() / 2f, vec2MainScale, SpriteEffects.None);
 
-            if (overallAlpha <= 0.05f || Projectile.scale <= 0.05f)
-                Projectile.active = false;
+            Main.EntitySpriteDraw(Feather, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.4f * alpha, Projectile.rotation, Feather.Size() / 2f, vec2MainScale * 1f, SpriteEffects.None);
 
-            whiteAmount *= whiteFade;
-
-            timer++;
-        }
-
-        public override bool PreDraw(ref Color lightColor)
-        {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
-            {
-                DrawSmoke(false);
-            });
-            DrawSmoke(true);
 
             return false;
         }
 
-        Effect myEffect = null;
-        bool AorB = Main.rand.NextBool();
-        public void DrawSmoke(bool returnImmediately)
+        public override void OnKill(int timeLeft)
         {
-            if (returnImmediately)
-                return;
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(1.5f, 1.5f) * 1f;
+                Dust dust = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.Orange, Scale: Main.rand.NextFloat(0.35f, 0.45f));
+                dust.velocity += Projectile.velocity * 0.25f;
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/BlurSmoke").Value;
-
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Rectangle sourceRectangle;// Smoke.Frame(1, 6, frameY: Projectile.frame);
-            Vector2 TexOrigin = Smoke.Size() / 2f;
-            SpriteEffects SE = SpriteEffects.None;
-
-            Color toUse = Color.Lerp(col, Color.Wheat, Easings.easeOutQuad(whiteAmount));
-
-            //Main Tex
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.Default, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
-
-            Texture2D Orb = CommonTextures.feather_circle128PMA.Value;
-            //Main.spriteBatch.Draw(Orb, drawPos, null, Color.Black with { A = 255 } * overallAlpha * 0.2f, Projectile.rotation, Orb.Size() / 2f, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            //Main.spriteBatch.Draw(Orb, drawPos, null, toUse with { A = 0 } * overallAlpha * 0.25f, Projectile.rotation, Orb.Size() / 2f, Projectile.scale * overallScale, SE, 0f); //0.3
-
-            Main.spriteBatch.Draw(Smoke, drawPos, null, col with { A = 0 } * overallAlpha * 0.75f, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.075f, SE, 0f); //0.3
-            Main.spriteBatch.Draw(Smoke, drawPos, null, Color.LightGoldenrodYellow with { A = 0 } * overallAlpha, Projectile.rotation, TexOrigin, Projectile.scale * overallScale * 0.075f * 0.35f, SE, 0f); //0.3
-
-
-            //Main.spriteBatch.End();
-            //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
-
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);
+            }
         }
+
     }
+
+
 
     public class SmokeTest5 : ModProjectile
     {

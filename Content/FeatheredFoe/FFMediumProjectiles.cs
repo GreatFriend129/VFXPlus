@@ -638,7 +638,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     }
                 }
 
-                int featherCount2 = 5;
+                int featherCount2 = 10;
                 for (int i = 1; i < featherCount2; i++)
                 {
                     float rot = (MathHelper.TwoPi / (float)featherCount2) * i;
@@ -649,9 +649,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f; //0.1
+                        bof.orbitSpeed = (0.015f + (reverseI * 0.005f)) * 2f; //0.1
                         bof.originalDir = new Vector2(0f, 1f);
-                        bof.orbitDistance = 25f + (150 * i); //200
+                        bof.orbitDistance = 25f + (50 * i); //200
                         bof.orbitDir = startDir;
                     }
                 }
@@ -666,9 +666,9 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
                     {
                         bof.ParentProj = Projectile.whoAmI;
-                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f;
+                        bof.orbitSpeed = (0.015f + (reverseI * 0.005f)) * 2f;
                         bof.originalDir = new Vector2(0f, -1f);
-                        bof.orbitDistance = 25f + (150 * i); //200
+                        bof.orbitDistance = 25f + (50 * i); //200
                         bof.orbitDir = startDir;
                     }
                 }
@@ -840,6 +840,269 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
     }
+
+    public class FFWindOrb3 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.width = 64;
+            Projectile.height = 64;
+
+
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = false;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float overallAlpha = 0f;
+        float overallScale = 0f;
+
+        int timer = 0;
+
+        public int startDir = 1;
+        public int playerID = -1;
+
+        public override void AI()
+        {
+            if (playerID == -1)
+            {
+                Main.NewText("playerID == -1 | FFWindOrb");
+                Projectile.active = false;
+                return;
+            }
+            Player target = Main.player[playerID];
+
+            if (timer == 0)
+            {
+                Projectile.ai[0] = Projectile.velocity.Length();
+
+                int featherCount = 3; //3
+                for (int i = 220; i < featherCount; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount) * i;
+
+                    int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                    if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                    {
+                        bof.ParentProj = Projectile.whoAmI;
+                        bof.orbitSpeed = 0.25f; //0.1
+                        bof.originalDir = new Vector2(1f, 0f).RotatedBy(rot);
+                        bof.orbitDistance = 150f; //200
+                        bof.orbitDir = startDir;
+                    }
+                }
+
+                int featherCount2 = 5;
+                for (int i = 1; i < featherCount2; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount2) * i;
+
+                    int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                    float reverseI = featherCount2 - i;
+                    if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                    {
+                        bof.ParentProj = Projectile.whoAmI;
+                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f; //0.1
+                        bof.originalDir = new Vector2(0f, 1f);
+                        bof.orbitDistance = 25f + (150 * i); //200
+                        bof.orbitDir = startDir;
+                    }
+                }
+
+                for (int i = 1; i < featherCount2; i++)
+                {
+                    float rot = (MathHelper.TwoPi / (float)featherCount2) * i;
+
+                    int a = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<BasicOrbitingFeather>(), 1, 1);
+
+                    float reverseI = featherCount2 - i;
+                    if (Main.projectile[a].ModProjectile is BasicOrbitingFeather bof)
+                    {
+                        bof.ParentProj = Projectile.whoAmI;
+                        bof.orbitSpeed = 0.03f;// (0.015f + (reverseI * 0.005f)) * 0.65f;
+                        bof.originalDir = new Vector2(0f, -1f);
+                        bof.orbitDistance = 25f + (150 * i); //200
+                        bof.orbitDir = startDir;
+                    }
+                }
+
+            }
+
+            //SpeedUp
+            float speedUpProg = Utils.GetLerpValue(0f, 1f, (float)timer / 70f, true);
+            if (timer < 120)
+                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * (Projectile.velocity.Length() + Easings.easeInQuart(speedUpProg) * 0.1f);
+
+            //Homing
+            if (timer < 90 && timer > 50 && false)
+            {
+                float oldSpeed = Projectile.velocity.Length();
+                Vector2 toTarget = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);
+
+                float velLength = Projectile.velocity.Length();
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, toTarget * velLength, 0.02f);
+
+                if (Projectile.velocity.Length() < oldSpeed)
+                    Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * oldSpeed;
+            }
+
+            if (timer % 1 == 0)
+            {
+                float scale = 1.4f;
+
+                SmallSmokeBehavior ssb = new SmallSmokeBehavior(ColorIntensity: 3f, 0.92f);
+
+                Vector2 random = Main.rand.NextVector2CircularEdge(40f, 40f) * Main.rand.NextFloat(1f, 5f);
+
+                Vector2 vel = random.RotatedBy(MathHelper.PiOver2).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * Main.rand.NextFloat(4f, 14f) * 0.25f;
+
+                Dust star = Dust.NewDustPerfect(Projectile.Center + random, ModContent.DustType<SmallSmoke>(), vel, newColor: Color.White, Scale: scale);
+                star.customData = ssb;
+            }
+
+            float timeForPopInAnim = 35; //37
+            float animProgress = Math.Clamp((timer + 13) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 0.75f)) * 1f;
+
+            float animProgress2 = Math.Clamp((float)timer / 45f, 0f, 1f);
+            Projectile.rotation = MathHelper.Lerp(-2f * (Projectile.velocity.X > 0 ? 1 : -1), 0f, Easings.easeOutQuart(animProgress2));
+
+            timer++;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                GoddamnMonsoonCirc(50); //460 | 50 | 10
+
+                DrawVanillaSwirl2(true);
+            });
+
+            DrawVanillaSwirl2(false);
+
+            return false;
+        }
+
+        public void DrawVanillaSwirl2(bool giveUp = true)
+        {
+            if (giveUp) return;
+
+            Texture2D Swirl = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaSwirl").Value; //FireSpot goes kinda crazy| same with PixelSwirl
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            float rot = Projectile.rotation;
+            Vector2 origin = Swirl.Size() / 2f;
+
+            float sinOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.05f) * 0.2f;
+            float cosOff = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.077f) * 0.1f;
+
+            float startScale = sinOff;
+            float endScale = 6f * cosOff;
+
+            float scale = 1f;
+
+            Texture2D Orb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.1f, 0f, Orb.Size() / 2f, endScale * 1f * overallScale, SpriteEffects.FlipHorizontally);
+            Main.EntitySpriteDraw(Orb, drawPos, null, Color.Black * 0.35f, 0f, Orb.Size() / 2f, endScale * 0.15f * overallScale, SpriteEffects.FlipHorizontally);
+
+            for (int i = 0; i < 12; i++) //18
+            {
+                float prog = 1f - ((float)i / 12f);
+
+                //prog = Easings.easeOutSine(prog);
+
+                //End Color <--> Start color
+                Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
+                Color col = Color.Lerp(between * 1f, Color.LightSkyBlue, Easings.easeOutSine(prog));
+
+
+                float alpha = prog;
+                float newRot = rot + (float)Main.timeForVisualEffects * 0.025f * scale; //(i % 2 == 0 ? 1f : -1f);
+                float newScale = MathHelper.Lerp(endScale, startScale, Easings.easeOutCubic(prog));
+
+                Main.EntitySpriteDraw(Swirl, drawPos + new Vector2(0f * i, 0f), null, col with { A = 0 } * alpha, rot + newRot, origin, newScale * 1.25f * overallScale, SpriteEffects.FlipHorizontally);
+
+                //8
+                if (i >= 8)
+                    scale = scale * 1.25f;
+                else
+                    scale = scale * 1.15f;
+            }
+
+        }
+
+        public void GoddamnMonsoonCirc(int count = 50)
+        {
+            //Texture2D windTexture = Mod.Assets.Request<Texture2D>("Content/FeatheredFoe/Assets/Feather").Value;
+            Texture2D windTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_89").Value; //PixelSwirl
+            Texture2D dustTexture = Mod.Assets.Request<Texture2D>("Content/Dusts/Textures/Basic").Value;
+
+            FastRandom r = new("mule".GetHashCode());
+            float speedTime = Main.GlobalTimeWrappedHourly * 1.75f;
+
+            float minRange = 40f; //40f | 240 920 for full screen
+            float maxRange = 150f; //200
+            for (int i = 0; i < count; i++)
+            {
+
+                Texture2D texture;
+                Rectangle frame;
+                Vector2 scale;
+                float rotation = MathHelper.PiOver2;
+                if (r.NextFloat() < 0.3f)
+                {
+                    texture = windTexture;
+                    frame = texture.Bounds;
+                    scale = new Vector2(0.3f, 0.66f) * 0.4f; //0.3 0.66
+                }
+                else
+                {
+                    texture = dustTexture;
+                    frame = texture.Frame(verticalFrames: 3, frameY: r.Next(3));
+                    scale = new(0.5f, 0.5f);
+                    rotation += speedTime * NextFloatFastRandom(r, 0.8f, 1.2f);
+                }
+                Vector2 origin = frame.Size() / 2f;
+                float speed = NextFloatFastRandom(r, 0.8f, 4f);
+                float progress = (speedTime * speed + r.NextFloat()) % 3f;
+
+                float scaleWave = MathF.Sin(progress * MathHelper.Pi);
+                float ringDistance = NextFloatFastRandom(r, minRange, maxRange);
+
+                float randomRot = NextFloatFastRandom(r, 0f, MathHelper.TwoPi) + speedTime * speed;
+
+                Vector2 drawPosition = Projectile.Center + new Vector2(1f, 0f).RotatedBy(randomRot) * ringDistance;
+
+
+                Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.32f);
+                Main.EntitySpriteDraw(texture, drawPosition - Main.screenPosition, frame, col with { A = 0 } * 0.9f, randomRot + rotation + MathHelper.PiOver2, origin,
+                    new Vector2(scale.X * scaleWave * scaleWave, scale.Y * scaleWave) * 3f, SpriteEffects.None);
+
+            }
+        }
+
+        public float NextFloatFastRandom(FastRandom random, float min, float max)
+        {
+            return min + random.NextFloat() * (max - min);
+        }
+
+    }
+
     public class FFWindOrb2 : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";

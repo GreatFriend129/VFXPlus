@@ -1,18 +1,9 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
-using System.Linq;
-using System.Runtime.InteropServices.Marshalling;
 using Terraria;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.GameContent.Events;
-using Terraria.GameContent.ItemDropRules;
-using Terraria.Graphics.Effects;
-using Terraria.Graphics.Shaders;
 using Terraria.ID;
 using Terraria.ModLoader;
+using static VFXPlus.Content.FeatheredFoe.FeatheredFoeBoss;
 
 namespace VFXPlus.Content.QueenBee
 {
@@ -32,7 +23,9 @@ namespace VFXPlus.Content.QueenBee
             NamaahWall = 4, 
             Galaga = 5,
             Sweep = 6, 
-            ForkedBurst = 7
+            ForkedBurst = 7,
+            RadialBurst = 8,
+            OphanaimBees = 9,
         }
 
         private QueenBeeState CurrentAttack
@@ -58,6 +51,8 @@ namespace VFXPlus.Content.QueenBee
 
             NPC.knockBackResist = 0;
             NPC.npcSlots = 10;
+
+            NPC.HitSound = SoundID.NPCHit1;
         }
         public Player player => Main.player[NPC.target];
 
@@ -74,9 +69,12 @@ namespace VFXPlus.Content.QueenBee
         bool firstFrame = true;
         public override void AI()
         {
+            //43aistyle
+
             if (firstFrame)
             {
                 firstFrame = false;
+                CurrentAttack = QueenBeeState.OphanaimBees;
             }
 
             NPC.dontTakeDamage = false;
@@ -84,19 +82,30 @@ namespace VFXPlus.Content.QueenBee
 
             if (NPC.target < 0 || NPC.target == 255 || Main.player[NPC.target].dead || !Main.player[NPC.target].active)
             {
-                NPC.TargetClosest();
+                NPC.TargetClosest(false);
             }
 
-            Main.NewText("ignore me");
-
-            //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen
-
-            CurrentAttack = QueenBeeState.Dummy;
+            //CurrentAttack = QueenBeeState.OphanaimBees;
 
             switch (CurrentAttack)
             {
                 case QueenBeeState.Dummy:
                     Dummy();
+                    break;
+                case QueenBeeState.Sweep:
+                    StingerSweep();
+                    break;
+                case QueenBeeState.NamaahWall:
+                    NamaahWall();
+                    break;
+                case QueenBeeState.RadialBurst:
+                    RadialBurst();
+                    break;
+                case QueenBeeState.VanillaDashes:
+                    VanillaDashes();
+                    break;
+                case QueenBeeState.OphanaimBees:
+                    OphanaimBees(); 
                     break;
             }
 
@@ -117,6 +126,73 @@ namespace VFXPlus.Content.QueenBee
             universalTimer++;
 
             timer++;
+        }
+
+        public void FacePlayer()
+        {
+            if (player.Center.X > NPC.Center.X)
+                NPC.direction = 1;
+            else
+                NPC.direction = -1;
+        }
+        
+        public void ChooseNextAttack()
+        {
+            //CurrentAttack = QueenBeeState.VanillaDashes;
+
+            QueenBeeState[] options = {
+                QueenBeeState.VanillaDashes,
+                QueenBeeState.Sweep,
+                QueenBeeState.OphanaimBees,
+                QueenBeeState.NamaahWall,  };
+
+            int nextAttackIndex = Main.rand.Next(0, options.Length);
+            CurrentAttack = options[nextAttackIndex];
+
+            timer = -1;
+            attackReps = 0;
+            substate = 0;
+            drawOphaLines = false;
+
+
+            //Attack Options
+            /*
+            FeatheredFoeState[] options = {
+                FeatheredFoeState.TriSpin,
+                FeatheredFoeState.Dive,
+                FeatheredFoeState.CornerTravelShot,
+                FeatheredFoeState.OffscreenDash,
+                FeatheredFoeState.UmbrellaRain,
+                FeatheredFoeState.WindDirShot,
+                FeatheredFoeState.Madison  };
+
+
+            previousAttacks.Add(CurrentAttack);
+
+            //Only store the previous 3 attacks
+            if (previousAttacks.Count >= 4)
+                previousAttacks.RemoveAt(0);
+
+
+            //Loop until we select an attack that isn't in the list
+            bool hasFoundAttack = false;
+            while (!hasFoundAttack)
+            {
+                int nextAttackIndex = Main.rand.Next(0, options.Length);
+
+                if (!previousAttacks.Contains(options[nextAttackIndex]))
+                {
+                    CurrentAttack = options[nextAttackIndex];
+                    hasFoundAttack = true;
+                }
+            }
+
+            timer = -1;
+            attackReps = 0;
+            substate = 0;
+            drawTriSpinStar = false;
+            drawDrill = false;
+            */
         }
 
     }

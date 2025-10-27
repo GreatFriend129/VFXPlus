@@ -1372,7 +1372,7 @@ namespace VFXPlus.Content.VFXTest
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/SoulSpikeHalf").Value;
             trail1.trailPointLimit = 165;
-            trail1.trailWidth = 15;
+            trail1.trailWidth = 25;
             trail1.trailMaxLength = 165;
             trail1.timesToDraw = 1;
             trail1.shouldSmooth = false;
@@ -1381,7 +1381,7 @@ namespace VFXPlus.Content.VFXTest
             //trail1.pinchAmount = 0.5f;
 
             trail1.trailTime = 0f;
-            trail1.trailColor = Color.SkyBlue;
+            trail1.trailColor = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.85f);
 
             trail1.trailRot = Projectile.velocity.ToRotation();
             trail1.trailPos = Projectile.Center + Projectile.velocity;
@@ -1397,10 +1397,10 @@ namespace VFXPlus.Content.VFXTest
         {
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                DrawTrail(true);
             });
 
-            DrawTrail(true);
+            DrawTrail(false);
 
             return false;
         }

@@ -980,7 +980,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (timer == 0)
                 Projectile.ai[0] = 1f;
 
-            int trailCount = 10;  //14
+            int trailCount = 14;  //14
             previousRotations.Add(Projectile.velocity.ToRotation()); //
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -1006,7 +1006,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1.3f;
 
-            Projectile.velocity.Y += 0.5f;
+            //Projectile.velocity.Y += 0.5f;
 
             timer++;
         }
@@ -1029,50 +1029,7 @@ namespace VFXPlus.Content.FeatheredFoe
         {
             if (giveUp)
                 return;
-
-
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Content/VFXTest/SoulSpikeHalf").Value; //
-            //Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //
-
-            //SoulSpikeTrail : pixelized : good
-            //FlareLineHalfRight : meh
-            //MonsoonRocket_Trail : meh
-            //HalfGlowingFlare | pgood
-            //SoulSpikeHalf | REALLY GOOD
-
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-            Color StripColor(float progress) => Color.White * Easings.easeInCirc(progress) * overallAlpha;
-
-            float StripWidth(float progress)
-            {
-                return 10f;
-            }
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(0f); //0.02
-            myEffect.Parameters["reps"].SetValue(1f);
-
-
-            //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f).ToVector3() * 6f); //Color.Lerp(Color.DodgerBlue, Color.SkyBlue, 0.15f 6f
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-
+            
             /*
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/s06sBloom").Value; //
@@ -1156,8 +1113,8 @@ namespace VFXPlus.Content.FeatheredFoe
             vertexStrip2.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-
-            /*
+            */
+            
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
             Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
 
@@ -1173,20 +1130,20 @@ namespace VFXPlus.Content.FeatheredFoe
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
 
 
-            Color StripColor(float progress) => Color.White * Easings.easeInSine(progress) * overallAlpha;
+            Color StripColor(float progress) => Color.White * Easings.easeInQuad(progress) * overallAlpha;
 
             float StripWidth(float progress)
             {
                 float toReturn = 0f;
-                if (progress < 0.5f)
+                if (progress < 0.85f)
                 {
-                    float LV = Utils.GetLerpValue(0f, 0.5f, progress, true);
-                    toReturn = Easings.easeOutQuad(LV);
+                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
+                    toReturn = Easings.easeOutCirc(LV);
                 }
                 else
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = Easings.easeOutQuad(1f - LV);
+                    toReturn = 1f;// Easings.easeOutQuad(1f - LV);
                 }
 
                 return toReturn * sineWidthMult * overallScale * 50f; //80
@@ -1201,28 +1158,28 @@ namespace VFXPlus.Content.FeatheredFoe
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
             myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
-            myEffect.Parameters["reps"].SetValue(1f);
+            myEffect.Parameters["reps"].SetValue(0.5f);
 
 
             //UnderLayer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2.5f);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Orange.ToVector3() * 2.5f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
 
             //Over layer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Aquamarine.ToVector3() * 2f);
+            myEffect.Parameters["ColorOne"].SetValue(Color.Orange.ToVector3() * 2f);
             myEffect.Parameters["glowThreshold"].SetValue(0.8f);
             myEffect.Parameters["glowIntensity"].SetValue(1.2f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
 
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            */
+            
             ////////////////////////////////
             ///*/
             //Good shit two

@@ -1,21 +1,13 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using MonoMod.Utils.Cil;
-using rail;
-using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
-using Terraria.Map;
 using Terraria.ModLoader;
-using Terraria.WorldBuilding;
 using VFXPlus.Common;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPLus.Common;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace VFXPlus.Content.FeatheredFoe
 {
@@ -711,7 +703,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     if (attackReps == 3)
                     {
                         attackReps = 0;
-                        CurrentAttack = FeatheredFoeState.Madison;
+                        ChooseNextAttack();
                     }
                 }
 
@@ -769,7 +761,7 @@ namespace VFXPlus.Content.FeatheredFoe
             }
 
 
-            int timeBeforeRain = 80; //70
+            int timeBeforeRain = 80 + (attackReps == 0 ? 40 : 0); //70
             int timeOfRain = 50; //50
             int timeAfterRain = 25; //100
 
@@ -958,7 +950,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     attackReps++;
                     timer = -1;
 
-                    if (attackReps == 3)
+                    if (attackReps == 4)
                     {
                         umbrellaStormwallInstance.active = false;
                         attackReps = 0;

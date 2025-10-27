@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -10,6 +11,7 @@ using VFXPlus.Content.FeatheredFoe;
 using VFXPlus.Content.Particles;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
+using VFXPlus.Content.VFXTest;
 
 
 namespace VFXPlus.Content
@@ -46,7 +48,7 @@ namespace VFXPlus.Content
             {
                 //ShaderParticleHandler.RemoveParticle();
                 Vector2 pos = Main.MouseWorld;
-                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
+                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<QueenBee.ReduxQueenBee>());
                 return false;
             }
 
@@ -63,19 +65,96 @@ namespace VFXPlus.Content
                 }
             }
 
-            //int windFX2 = Projectile.NewProjectile(null, player.Center, new Vector2(1f, -1f).SafeNormalize(Vector2.UnitX) * 7.5f, ProjectileID.SapphireBolt, 0, 0, Main.myPlayer);
+            for (int j = 0; j < 1; j++)
+            {
+                Vector2 basePos = player.Center;
 
+
+                int bee = NPC.NewNPC(null, (int)basePos.X, (int)basePos.Y, ModContent.NPCType<WalledDashBee>());
+                (Main.npc[bee].ModNPC as WalledDashBee).isHittable = false;
+                (Main.npc[bee].ModNPC as WalledDashBee).ownerIndex = -1;
+                (Main.npc[bee].ModNPC as WalledDashBee).goalPos = basePos + new Vector2(0f, -500f);
+                (Main.npc[bee].ModNPC as WalledDashBee).timeToReachDest = 60;
+                (Main.npc[bee].ModNPC as WalledDashBee).circleRadius = 300f;
+            }
+
+            float beeCount = 20f * 0f; //20 | 10f min 20f max
+            Vector2 randStart = Main.rand.NextVector2Unit();
+            for (float i = 0; i < beeCount; i++)
+            {
+                float prog = (float)i / beeCount;
+
+                float rot = MathHelper.TwoPi * prog;
+
+                Vector2 offsetPos = randStart.RotatedBy(rot) * 325f;
+                Vector2 spawnPos = player.Center + offsetPos;
+
+
+                bool shouldBeHittable = (rot < MathHelper.PiOver4 * 1f || rot > MathHelper.TwoPi - MathHelper.PiOver4 * 1f);
+
+                int bee = NPC.NewNPC(null, (int)spawnPos.X, (int)spawnPos.Y, ModContent.NPCType<AsgoreBee>());
+                (Main.npc[bee].ModNPC as AsgoreBee).isHittable = shouldBeHittable;
+                (Main.npc[bee].ModNPC as AsgoreBee).centerPos = player.Center;
+                (Main.npc[bee].ModNPC as AsgoreBee).centerOffset = offsetPos;
+                (Main.npc[bee].ModNPC as AsgoreBee).inwardSpeed = 1.5f;
+                (Main.npc[bee].ModNPC as AsgoreBee).rotSpeed = 0.013f; //0.03 | 0.013
+
+                Main.npc[bee].scale = 1.15f;
+
+            }
+
+            float ophaniamCount = 0f;
+            float spineCount = 6;
+            float ophSide = Main.rand.NextBool() ? 1f : -1f;
+            for (int j = 0; j < spineCount; j++)
+            {
+                float jProg = (float)j / spineCount;
+
+                float rot = MathHelper.TwoPi * jProg;
+
+                for (int i = 2; i < ophaniamCount; i++)
+                {
+                    float prog = (float)(i + 1f) / ophaniamCount;
+
+
+                    int bee = NPC.NewNPC(null, (int)Main.MouseWorld.X, (int)Main.MouseWorld.Y, ModContent.NPCType<OphanaimBee>());
+                    (Main.npc[bee].ModNPC as OphanaimBee).isHittable = i % 2 == 0;
+
+                    (Main.npc[bee].ModNPC as OphanaimBee).secondDirection = new Vector2(0f, ophSide).RotatedBy(rot);
+                    (Main.npc[bee].ModNPC as OphanaimBee).secondSpeed = 6f;
+                    (Main.npc[bee].ModNPC as OphanaimBee).timeBeforeSecondDirection = 60;
+                    (Main.npc[bee].ModNPC as OphanaimBee).velFadeAmount = 0.85f;
+
+
+                    Main.npc[bee].velocity = new Vector2(5 + (12f * i), 0f).RotatedBy(rot);
+                }
+            }
+
+
+            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 22f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+
+            /*
             int are5 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
-            Main.projectile[are5].rotation = velocity.ToRotation() + MathHelper.PiOver2;
-            Main.projectile[are5].scale = 0.75f * 0f;
+            Main.projectile[are5].rotation = 0f;
+            Main.projectile[are5].scale = 1.5f;
 
-            Color[] colarr = { Color.White, Color.Crimson, Color.Red };
+            Color[] colarr = { Color.White, Color.Orange, Color.OrangeRed };
             (Main.projectile[are5].ModProjectile as H3Impact).cols = colarr;
-            (Main.projectile[are5].ModProjectile as H3Impact).xScaleMult = 1f;
+            (Main.projectile[are5].ModProjectile as H3Impact).xScaleMult = 0.5f;
             (Main.projectile[are5].ModProjectile as H3Impact).yScaleMult = 1f;
             (Main.projectile[are5].ModProjectile as H3Impact).pixelize = false;
             (Main.projectile[are5].ModProjectile as H3Impact).additive = false;
 
+            int are6 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
+            Main.projectile[are6].rotation = MathHelper.PiOver2;
+            Main.projectile[are6].scale = 1.5f;
+
+            (Main.projectile[are6].ModProjectile as H3Impact).cols = colarr;
+            (Main.projectile[are6].ModProjectile as H3Impact).xScaleMult = 0.5f;
+            (Main.projectile[are6].ModProjectile as H3Impact).yScaleMult = 1f;
+            (Main.projectile[are6].ModProjectile as H3Impact).pixelize = false;
+            (Main.projectile[are6].ModProjectile as H3Impact).additive = false;
+            */
 
             for (int i = 220; i < 5; i++)
             {

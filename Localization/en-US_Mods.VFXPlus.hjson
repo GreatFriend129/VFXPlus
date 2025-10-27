@@ -202,6 +202,9 @@ Projectiles: {
 	FireEye.DisplayName: Fire Eye
 	TrailTestOmega.DisplayName: Trail Test Omega
 	H3Impact.DisplayName: H3 Impact
+	StingerTest2.DisplayName: Stinger Test2
+	StopAndStartStinger.DisplayName: Stop And Start Stinger
+	FFWindOrb3.DisplayName: F F Wind Orb3
 }
 
 Configs: {
@@ -672,4 +675,7 @@ NPCs: {
 	FeatheredFoe.DisplayName: Feathered Foe
 	ReduxQueenBee.DisplayName: Redux Queen Bee
 	FeatheredFoeBoss.DisplayName: Feathered Foe Boss
+	HittableBee.DisplayName: Hittable Bee
+	AsgoreBee.DisplayName: Asgore Bee
+	OphanaimBee.DisplayName: Ophanaim Bee
 }
