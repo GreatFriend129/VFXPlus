@@ -253,24 +253,47 @@ namespace VFXPlus.Content.QueenBee
         float angleOffset = 0f;
 
         float distToTravel = 0f;
+
+        Vector2 previousPos = Vector2.Zero;
         public override void AI()
         {
             if (timer == 0)
+            {
                 startPos = NPC.Center;
+                angleOffset = Main.rand.NextFloat(6.28f);
+
+                if (ownerIndex == -1)
+                {
+                    NPC.active = false;
+                    return;
+                }
+            }
+            previousPos = NPC.Center;
+
+
+            NPC owner = Main.npc[ownerIndex];
+
 
             float movementProgress = Math.Clamp((float)timer / timeToReachDest, 0f, 1f);
 
-            Vector2 trueEndPos = startPos + goalPos;
+            Vector2 trueEndPos = owner.Center + goalPos;
 
-            Vector2 circleOffset = new Vector2(circleRadius * (1f - movementProgress), 0f).RotatedBy(MathHelper.TwoPi * movementProgress);
+            Vector2 circleOffset = new Vector2(circleRadius * Easings.easeInQuad(1f - movementProgress), 0f).RotatedBy(MathHelper.Pi * Easings.easeOutQuart(movementProgress));
+            circleOffset = circleOffset.RotatedBy(angleOffset);
 
-            NPC.Center = Vector2.Lerp(startPos, trueEndPos + circleOffset, movementProgress);
+            NPC.Center = Vector2.Lerp(owner.Center + (startPos - owner.Center), trueEndPos + circleOffset, Easings.easeOutQuad(movementProgress));
+
+
+            //For rotation, doesnt actually affect movement
+            //NPC.velocity = NPC.Center - previousPos;
+
 
             BaseBeeAI();
 
-            //Auto Kill after like 4 seconds
-            if (timer > 220)
+            //Auto Kill after like 2 seconds
+            if (timer > 120)
                 fadeOut = true;
+
         }
     }
 

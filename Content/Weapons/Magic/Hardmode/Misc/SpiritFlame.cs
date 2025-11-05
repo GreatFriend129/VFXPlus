@@ -248,7 +248,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Vector2 veloF = Main.rand.NextVector2CircularEdge(4f, 4f) * Easings.easeOutQuad(prog) * 1.5f;
 
                 FireParticle fire = new FireParticle(projectile.Center, veloF, 1f * Main.rand.NextFloat(1f, 1.5f), new Color(121, 7, 179), colorMult: 1f, bloomAlpha: 1.5f, 
-                    AlphaFade: 0.94f + Main.rand.NextFloat(-0.02f, 0.02f), VelFade: 0.9f, RotPower: 0.5f);
+                    AlphaFade: 0.94f + Main.rand.NextFloat(-0.02f, 0.02f), VelFade: 0.9f, RotPower: 0.35f);
                 ShaderParticleHandler.SpawnParticle(fire);
 
             }

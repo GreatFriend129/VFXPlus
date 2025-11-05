@@ -1,3 +1,4 @@
+using Microsoft.Build.Tasks;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria;
@@ -120,14 +121,15 @@ namespace VFXPlus.Content.QueenBee
         public void WalledDashes()
         {
             //Move to player side
+            //Spawn Wall of bees and wait
             //Dash
-            //After a time, turn around and start rising or falling to player y val
-            //Repeat
+
 
             //Max Speed = 25tbd | 30 tad | 35 dash speed //|(MathF.Abs(distToPlayerY) < 5f && timer > (float)timeBeforeDash / 2f) | basic movement 10f
 
-            int timeBeforeDash = 50;
-            int timeAfterDash = 40;
+            int timeBeforeSpawnWall = 10;
+            int timeBeforeDash = 75; //60 //Dash starts after timeBeforeSpawnWall + timeBeforeDash
+            int timeAfterDash = 50;
 
             //Move to player side
             if (substate == 0)
@@ -137,21 +139,47 @@ namespace VFXPlus.Content.QueenBee
                 isDashing = false;
                 if (timer == 0)
                 {
-                    vanillaDashVec = new Vector2(500f * vanillaDashSide, 0f);
+                    wallDashVerticleSide = Main.rand.NextBool() ? 1 : -1;
+                    wallDashVec = new Vector2(500f * wallDashSide, 0f);
                 }
 
-                BasicMovement(player.Center + vanillaDashVec, 5f, 540);
+                NPC.velocity.X *= 0.95f;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, NPC.DirectionTo(player.Center + wallDashVec) * (NPC.Distance(player.Center + wallDashVec) / 15), 0.3f); //high lerpval gives less overshoot
 
-                float distToPlayerY = (player.Center.Y - NPC.Center.Y);
-
-                if (timer == timeBeforeDash)// || (MathF.Abs(distToPlayerY) < 5f && timer > (float)timeBeforeDash / 2f))
+                if (timer == timeBeforeSpawnWall)
                 {
-                    Dust d2 = Dust.NewDustPerfect(NPC.Center + new Vector2(0f, 20f), ModContent.DustType<CirclePulse>(), new Vector2(-2f * vanillaDashSide, 0f), newColor: Color.Goldenrod * 0.3f);
+                    int beeCount = 10;
+                    for (int j = 0; j < 10; j++)
+                    {
+                        float prog = (float)j / (float)beeCount;
+
+                        Vector2 spawnPos = NPC.Center + new Vector2(430f, 0f).RotatedBy(MathHelper.TwoPi * prog);// + Main.rand.NextVector2Circular(200f, 200f);
+
+                        int bee = NPC.NewNPC(null, (int)spawnPos.X, (int)spawnPos.Y, ModContent.NPCType<WalledDashBee>());
+                        (Main.npc[bee].ModNPC as WalledDashBee).isHittable = false;
+                        (Main.npc[bee].ModNPC as WalledDashBee).ownerIndex = NPC.whoAmI;
+                        (Main.npc[bee].ModNPC as WalledDashBee).goalPos = new Vector2(0f, (-50f - (35f * j)) * wallDashVerticleSide);
+                        (Main.npc[bee].ModNPC as WalledDashBee).timeToReachDest = 60 + Main.rand.Next(-14, 4);
+                        (Main.npc[bee].ModNPC as WalledDashBee).circleRadius = 450f + (100f * prog);
+                    }
+                }
+                if (timer == timeBeforeSpawnWall + timeBeforeDash)
+                {
+                    timer = -1;
+                    substate++;
+                }
+            }
+            //Dash
+            else if (substate == 1)
+            {
+                if (timer == 0)
+                {
+                    Dust d2 = Dust.NewDustPerfect(NPC.Center + new Vector2(0f, 20f), ModContent.DustType<CirclePulse>(), new Vector2(-2f * wallDashSide, 0f), newColor: Color.Goldenrod * 0.3f);
                     CirclePulseBehavior b2 = new CirclePulseBehavior(1.75f, true, 2, 0.2f, 0.4f);
                     b2.drawLayer = "UnderProjectiles";
                     d2.customData = b2;
 
-                    Dust d3 = Dust.NewDustPerfect(NPC.Center + new Vector2(0f, 20f), ModContent.DustType<CirclePulse>(), new Vector2(-4f * vanillaDashSide, 0f), newColor: Color.Goldenrod * 0.15f);
+                    Dust d3 = Dust.NewDustPerfect(NPC.Center + new Vector2(0f, 20f), ModContent.DustType<CirclePulse>(), new Vector2(-4f * wallDashSide, 0f), newColor: Color.Goldenrod * 0.15f);
                     CirclePulseBehavior b3 = new CirclePulseBehavior(1f, true, 1, 0.2f, 0.4f);
                     d3.scale = 0.05f;
                     b3.drawLayer = "UnderProjectiles";
@@ -160,17 +188,12 @@ namespace VFXPlus.Content.QueenBee
                     //Vanilla QB charge sound
                     SoundEngine.PlaySound(SoundID.Zombie125 with { Volume = 0.75f, Pitch = 0f, MaxInstances = -1 }, NPC.Center);
 
-                    timer = -1;
-                    substate++;
                 }
-            }
-            //Dash
-            else if (substate == 1)
-            {
-                isDashing = true;
-                NPC.velocity = new Vector2(-25f * vanillaDashSide, 0f);
 
-                int trailCount = 8;
+                isDashing = true;
+                NPC.velocity = new Vector2(-20f * wallDashSide, 0f);
+
+                int trailCount = 10;
                 dashTrailPositions.Add(NPC.Center);
                 dashTrailRotations.Add(NPC.velocity.ToRotation());
 
@@ -186,10 +209,10 @@ namespace VFXPlus.Content.QueenBee
                     dashTrailRotations.Clear();
                     substate = 0;
                     timer = -1;
-                    vanillaDashSide *= -1;
+                    wallDashSide *= -1;
 
                     attackReps++;
-                    if (attackReps == 5)
+                    if (attackReps == 4)
                     {
                         ChooseNextAttack();
                     }
@@ -294,25 +317,44 @@ namespace VFXPlus.Content.QueenBee
         }
 
         Vector2 radialBurstPos = Vector2.Zero;
-        float radialBurstAngle = 0f;
+        int radialBurstSide = 1;
         public void RadialBurst()
         {
             if (timer == 0)
             {
+                if (attackReps == 0)
+                    radialBurstSide = (NPC.Center.X > player.Center.X) ? 1 : -1;
+
                 NPC.velocity = Vector2.Zero;
 
-                sweepGoalPos = new Vector2(215f, -120f); //175
+                radialBurstPos = new Vector2(225f * radialBurstSide, -120f); //175
 
             }
 
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
 
-            BasicMovement(player.Center + sweepGoalPos, hoverSpeed, 480f);
+            BasicMovement(player.Center + radialBurstPos, hoverSpeed, 480f);
+
+            FacePlayer();
 
 
-            if (timer == 80 || timer == 110 || timer == 140)
+            int timeBetweenShots = 30;
+            if (timer == 80 || timer == 80 + timeBetweenShots || timer == 80 + timeBetweenShots + timeBetweenShots)
             {
+                Vector2 spawnPos = NPC.Center + new Vector2(-20f * radialBurstSide, 40f);
+
+                CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.35f, true, 1, 0.8f, 0.8f);
+
+                Dust d1 = Dust.NewDustPerfect(spawnPos, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Orange * 0.5f);
+                d1.scale = 0.1f;
+                d1.customData = cpb2;
+                d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
+
+                Dust d2 = Dust.NewDustPerfect(spawnPos, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: Color.Orange * 0.5f);
+                d2.scale = 0.1f;
+                d2.customData = cpb2;
+                d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
                 float shotCount = 10; //10
                 Vector2 randStart = Main.rand.NextVector2Unit();
@@ -323,22 +365,50 @@ namespace VFXPlus.Content.QueenBee
                     float rot = MathHelper.TwoPi * prog;
 
                     Vector2 vel = randStart.RotatedBy(rot) * 6f;
-                    Vector2 spawnPos = NPC.Center + new Vector2(-20f, 40f);
 
                     int stinger = Projectile.NewProjectile(null, spawnPos, vel, ModContent.ProjectileType<StopAndStartStinger>(), 1, 0, Main.myPlayer);
                     Main.projectile[stinger].scale = 1.15f;
 
-                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkTime = 40; //velGrowTime60 //velShrinkAmount0.93 //velGrowAmount 1.15
-                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowTime = 90; //velGrowTime60 //velShrinkAmount0.93 //velGrowAmount 1.15
-                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkAmount = 0.9f; //velGrowTime60 //velShrinkAmount0.93 //velGrowAmount 1.15
-                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowAmount = 1.14f; //velGrowTime60 //velShrinkAmount0.93 //velGrowAmount 1.15
-                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).maxVel = 12f; //velGrowTime60 //velShrinkAmount0.93 //velGrowAmount 1.15
+                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkTime = 40; 
+                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowTime = 90; 
+                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkAmount = 0.9f; 
+                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowAmount = 1.14f; 
+                    (Main.projectile[stinger].ModProjectile as StopAndStartStinger).maxVel = 12f; 
+
+                    for (int m = 0; m < 1 + Main.rand.Next(0, 2); m++)
+                    {
+                        Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
+                        Dust dust = Dust.NewDustPerfect(spawnPos + randomStart, DustID.t_Honey, vel * 0.65f + randomStart, Scale: Main.rand.NextFloat(1f, 1.75f));
+
+                        dust.noGravity = true;
+
+                        //dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                        //    rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: true);
+                    }
+
+                    Color GPCCol = Color.Lerp(Color.OrangeRed, Color.DarkGoldenrod, 0.95f);
+                    for (int m = 0; m < 1; m++)
+                    {
+                        Vector2 randomStart = Main.rand.NextVector2Circular(2f, 2f) * 1f;
+                        Dust dust = Dust.NewDustPerfect(spawnPos + randomStart, ModContent.DustType<GlowPixelCross>(), vel * 0.65f + randomStart, newColor: GPCCol, Scale: Main.rand.NextFloat(0.35f, 0.45f));
+
+                        dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                            rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: false);
+                    }
                 }
+                NPC.velocity *= 0.5f;
+                NPC.velocity += new Vector2(6f * radialBurstSide, -6f);
             }
 
             if (timer == 160)
             {
+                radialBurstSide *= -1;
                 timer = -1;
+
+                attackReps++;
+
+                if (attackReps == 2)
+                    ChooseNextAttack();
             }
 
         }
@@ -352,7 +422,7 @@ namespace VFXPlus.Content.QueenBee
             
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 9f : 3f);
 
-            BasicMovement(player.Center + new Vector2(0f, -150f), hoverSpeed, 1240f);
+            BasicMovement(player.Center + new Vector2(0f, -200f), hoverSpeed, 1240f); //150
             FacePlayer();
 
             if (timer == timeBeforeSpawn)
@@ -390,6 +460,7 @@ namespace VFXPlus.Content.QueenBee
                 if (attackReps == 2)
                 {
                     ChooseNextAttack();
+                    timer = -200;
                 }
             }
 

@@ -445,9 +445,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             myEffect.Parameters["vignetteSize"].SetValue(0.1f);
             myEffect.Parameters["vignetteBlend"].SetValue(0.32f);
 
-            //Black layer
-            Main.spriteBatch.Draw(ball2, drawPos, null, Color.Black * 0.5f * overallAlpha, 0f, ball2.Size() / 2, 0.45f * ball2Scale, 0f, 0f);
-            Main.spriteBatch.Draw(ball2, drawPos, null, Color.Black * 0.75f * overallAlpha, 0f, ball2.Size() / 2, 0.55f * ball2Scale, 0f, 0f);
 
             //Large orange glow
             Color betweenORED = Color.Lerp(Color.Orange, Color.OrangeRed, 0.6f + sineColor);

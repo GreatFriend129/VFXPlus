@@ -1,5 +1,6 @@
 using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -13,7 +14,7 @@ namespace VFXPlus.Content.QueenBee
         public override string Texture => "Terraria/Images/Projectile_0";
 
 
-        private enum QueenBeeState
+        public enum QueenBeeState
         {
             Dummy = -1,
             SpawnAnim = 0,
@@ -74,7 +75,7 @@ namespace VFXPlus.Content.QueenBee
             if (firstFrame)
             {
                 firstFrame = false;
-                CurrentAttack = QueenBeeState.OphanaimBees;
+                CurrentAttack = QueenBeeState.NamaahWall;
             }
 
             NPC.dontTakeDamage = false;
@@ -85,7 +86,7 @@ namespace VFXPlus.Content.QueenBee
                 NPC.TargetClosest(false);
             }
 
-            //CurrentAttack = QueenBeeState.OphanaimBees;
+            CurrentAttack = QueenBeeState.NamaahWall;
 
             switch (CurrentAttack)
             {
@@ -106,6 +107,9 @@ namespace VFXPlus.Content.QueenBee
                     break;
                 case QueenBeeState.OphanaimBees:
                     OphanaimBees(); 
+                    break;
+                case QueenBeeState.WalledDashes:
+                    WalledDashes();
                     break;
             }
 
@@ -135,7 +139,8 @@ namespace VFXPlus.Content.QueenBee
             else
                 NPC.direction = -1;
         }
-        
+
+        public List<QueenBeeState> previousAttacks = new List<QueenBeeState>();
         public void ChooseNextAttack()
         {
             //CurrentAttack = QueenBeeState.VanillaDashes;
@@ -144,7 +149,9 @@ namespace VFXPlus.Content.QueenBee
                 QueenBeeState.VanillaDashes,
                 QueenBeeState.Sweep,
                 QueenBeeState.OphanaimBees,
-                QueenBeeState.NamaahWall,  };
+                QueenBeeState.NamaahWall,
+                QueenBeeState.WalledDashes, 
+                QueenBeeState.RadialBurst };
 
             int nextAttackIndex = Main.rand.Next(0, options.Length);
             CurrentAttack = options[nextAttackIndex];
@@ -153,7 +160,7 @@ namespace VFXPlus.Content.QueenBee
             attackReps = 0;
             substate = 0;
             drawOphaLines = false;
-
+            isDashing = false;
 
             //Attack Options
             /*

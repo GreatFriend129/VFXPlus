@@ -14,8 +14,12 @@ namespace VFXPlus.Content.Particles
 {
     public class FireParticle : ShaderParticle
     {
+        public int timeBeforeStartAlphaFade = 0;
+
         private float alphaFade = 0.92f * Main.rand.NextFloat(0.9f, 1f);
         private float velFade = 0.85f;
+        
+        //Scale is multiplied by this every frame
         public float scaleFadePower = 1f;
         private float rotPower = 0.02f;
 
@@ -75,13 +79,17 @@ namespace VFXPlus.Content.Particles
             Rotation += Velocity.X * 0.25f * rotPower * (Velocity.X > 0 ? 1f : -1f);
             Velocity *= velFade;
 
-            //Fade more after a short while
-            if (Timer >= 12)
-                Alpha *= alphaFade;
+            if (Timer >= timeBeforeStartAlphaFade)
+            {
+                //Fade more after a short while
+                if (Timer >= 12 + timeBeforeStartAlphaFade)
+                    Alpha *= alphaFade;
 
-            if (Alpha < 0.09f)
+                //Fade even more once we are close to gone
+                if (Alpha < 0.09f)
+                    Alpha *= alphaFade;
                 Alpha *= alphaFade;
-            Alpha *= alphaFade;
+            }
 
             Scale *= scaleFadePower;
 
@@ -98,7 +106,7 @@ namespace VFXPlus.Content.Particles
                 Velocity = Velocity.RotateRandom(randomRotPower * velPower);
             }
 
-            if (Timer > 360)
+            if (Timer > 360 + timeBeforeStartAlphaFade)
                 ShaderParticleHandler.RemoveParticle(this);
         }
 

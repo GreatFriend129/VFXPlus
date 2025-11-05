@@ -144,7 +144,7 @@ namespace VFXPlus.Content.VFXTest
     }
 
 
-    public class EnergyShieldDash : ModProjectile
+   public class EnergyShieldDash : ModProjectile
    {
 
        //Spawn Projectile when player presses dash inputs

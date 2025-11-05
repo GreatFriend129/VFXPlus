@@ -95,13 +95,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             if (timer == 2)
             {
                 //Spawn the VFX projectile
-                int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RainbowGunVFX>(), 0, 0, projectile.owner);
-                vfxIndex = p;
-                Main.projectile[p].rotation = projectile.velocity.ToRotation();
+                if (Main.myPlayer == projectile.owner)
+                {
+                    int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RainbowGunVFX>(), 0, 0, projectile.owner);
+                    vfxIndex = p;
+                    Main.projectile[p].rotation = projectile.velocity.ToRotation();
 
-                //Start the VFX proj at random color
-                float randRainbowOffset = Main.rand.NextFloat(0f, 1f);
-                (Main.projectile[p].ModProjectile as RainbowGunVFX).rainbowOffset = randRainbowOffset;
+                    //Start the VFX proj at random color
+                    float randRainbowOffset = Main.rand.NextFloat(0f, 1f);
+                    (Main.projectile[p].ModProjectile as RainbowGunVFX).rainbowOffset = randRainbowOffset;
+                }
 
                 ParticleOrchestraSettings particleSettings = new()
                 {
@@ -109,8 +112,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     MovementVector = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2) * 20f //30
 
                 };
-
-
                 ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings);
 
                 //Circle Pulses
@@ -161,7 +162,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return false;
+            return true;
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -188,9 +189,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             return lateInstantiation && (entity.type == ProjectileID.RainbowBack) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.RainbowGunToggle;
         }
 
+        public override bool PreAI(Projectile projectile)
+        {
+            return base.PreAI(projectile);
+        }
+
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return false;
+            return true;
         }
     }
 
@@ -223,7 +229,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         int timer = 0;
         float true_width = 1f;
         float true_alpha = 0.1f;
-
 
         public bool longFade = false;
 
@@ -306,7 +311,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public List<float> l_rotations = new List<float>();
         public override bool PreDraw(ref Color lightColor)
         {
-            if (l_positions.Count == 0 || l_rotations.Count == 0)
+            if (l_positions.Count == 0 || l_rotations.Count == 0 || true)
                 return false;
 
             float ease1 = shouldFade ? Easings.easeOutQuad(true_alpha) : Easings.easeInOutBack(true_alpha, 0f, 5f);
@@ -364,7 +369,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                DrawTrail(true);
             });
             DrawTrail(true);
 

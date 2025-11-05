@@ -12,6 +12,7 @@ using VFXPlus.Content.Particles;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest;
+using VFXPlus.Content.VFXTest.Aero;
 
 
 namespace VFXPlus.Content
@@ -65,20 +66,7 @@ namespace VFXPlus.Content
                 }
             }
 
-            for (int j = 0; j < 1; j++)
-            {
-                Vector2 basePos = player.Center;
-
-
-                int bee = NPC.NewNPC(null, (int)basePos.X, (int)basePos.Y, ModContent.NPCType<WalledDashBee>());
-                (Main.npc[bee].ModNPC as WalledDashBee).isHittable = false;
-                (Main.npc[bee].ModNPC as WalledDashBee).ownerIndex = -1;
-                (Main.npc[bee].ModNPC as WalledDashBee).goalPos = basePos + new Vector2(0f, -500f);
-                (Main.npc[bee].ModNPC as WalledDashBee).timeToReachDest = 60;
-                (Main.npc[bee].ModNPC as WalledDashBee).circleRadius = 300f;
-            }
-
-            float beeCount = 20f * 0f; //20 | 10f min 20f max
+            float beeCount = 10f * 0f; //20 | 10f min 20f max
             Vector2 randStart = Main.rand.NextVector2Unit();
             for (float i = 0; i < beeCount; i++)
             {
@@ -96,42 +84,48 @@ namespace VFXPlus.Content
                 (Main.npc[bee].ModNPC as AsgoreBee).isHittable = shouldBeHittable;
                 (Main.npc[bee].ModNPC as AsgoreBee).centerPos = player.Center;
                 (Main.npc[bee].ModNPC as AsgoreBee).centerOffset = offsetPos;
-                (Main.npc[bee].ModNPC as AsgoreBee).inwardSpeed = 1.5f;
-                (Main.npc[bee].ModNPC as AsgoreBee).rotSpeed = 0.013f; //0.03 | 0.013
+                (Main.npc[bee].ModNPC as AsgoreBee).inwardSpeed = 1.5f; //1.5
+                (Main.npc[bee].ModNPC as AsgoreBee).rotSpeed = 0.013f * 0f; //0.03 | 0.013
 
                 Main.npc[bee].scale = 1.15f;
 
             }
 
-            float ophaniamCount = 0f;
-            float spineCount = 6;
-            float ophSide = Main.rand.NextBool() ? 1f : -1f;
-            for (int j = 0; j < spineCount; j++)
+
+            
+            for (float i = -6; i > 7; i++)
             {
-                float jProg = (float)j / spineCount;
+                //float prog = (float)i / shotCount;
 
-                float rot = MathHelper.TwoPi * jProg;
+                float absI = Math.Abs(i);
 
-                for (int i = 2; i < ophaniamCount; i++)
-                {
-                    float prog = (float)(i + 1f) / ophaniamCount;
+                float rot = (0.2f + 0.015f * absI) * i;
 
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(rot) * 6f;
 
-                    int bee = NPC.NewNPC(null, (int)Main.MouseWorld.X, (int)Main.MouseWorld.Y, ModContent.NPCType<OphanaimBee>());
-                    (Main.npc[bee].ModNPC as OphanaimBee).isHittable = i % 2 == 0;
+                int stinger = Projectile.NewProjectile(null, player.Center, vel, ModContent.ProjectileType<StopAndStartStinger>(), 1, 0, Main.myPlayer);
+                Main.projectile[stinger].scale = 1.15f;
 
-                    (Main.npc[bee].ModNPC as OphanaimBee).secondDirection = new Vector2(0f, ophSide).RotatedBy(rot);
-                    (Main.npc[bee].ModNPC as OphanaimBee).secondSpeed = 6f;
-                    (Main.npc[bee].ModNPC as OphanaimBee).timeBeforeSecondDirection = 60;
-                    (Main.npc[bee].ModNPC as OphanaimBee).velFadeAmount = 0.85f;
-
-
-                    Main.npc[bee].velocity = new Vector2(5 + (12f * i), 0f).RotatedBy(rot);
-                }
+                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkTime = (i % 2 == 0 ? 40 : 60);
+                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowTime = 290; //90
+                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkAmount = 0.9f;
+                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowAmount = 1.14f;
+                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).maxVel = 10f; //12
             }
 
+            //Dust d2 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse2>(), velocity.SafeNormalize(Vector2.UnitX) * 2f, newColor: Color.HotPink * 0.8f);
+            //CirclePulseBehavior b2 = new CirclePulseBehavior(1.25f, true, 2, 0.15f, 0.4f);
+            //b2.drawLayer = "UnderProjectiles";
+            //d2.customData = b2;
 
-            //int windFX2 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 22f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+            //Dust d23 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse2>(), velocity.SafeNormalize(Vector2.UnitX) * -0.01f, newColor: Color.DeepSkyBlue * 0.8f);
+            //CirclePulseBehavior b23 = new CirclePulseBehavior(2f, true, 1, 0.4f, 0.4f);
+            //b23.drawLayer = "UnderProjectiles";
+            //d23.customData = b23;
+
+            int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * -10f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+
 
             /*
             int are5 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
@@ -179,19 +173,26 @@ namespace VFXPlus.Content
                 float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
                 float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
 
-                Color thisCol = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);// Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);
+                Color thisCol = Color.Lerp(Color.LightSkyBlue, Color.DeepSkyBlue, 0.25f);
+                // Color.Lerp(Color.Purple, Color.DeepPink, 0f);// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);// Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);
 
-                //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(4f, 7f);
-                //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 2f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f, RotPower: 0.02f);
+                //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(2f, 4.5f);
+                //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 0.5f, bloomAlpha: 2f, AlphaFade: alphaFade, VelFade: 0.9f, RotPower: 0.02f);
                 //fire1.randomRotPower = 0.5f;
-                //fire1.scaleFadePower = scaleFade;
+                //fire1.scaleFadePower = 1.05f;
+                //fire1.timeBeforeStartAlphaFade = 5;
                 //ShaderParticleHandler.SpawnParticle(fire1);
 
                 Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f);
-                FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 2f, bloomAlpha: 1.65f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
-                fire1.randomRotPower = 0.5f;
-                fire1.scaleFadePower = 1.05f;
-                ShaderParticleHandler.SpawnParticle(fire1);
+                FireParticle fire = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(5f, 5f), myvel, 0.75f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
+                    AlphaFade: 0.95f, RotPower: 0.01f);
+                ShaderParticleHandler.SpawnParticle(fire);
+
+                //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 0.5f, bloomAlpha: 2f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
+                //fire1.randomRotPower = 0.5f;
+                //fire1.scaleFadePower = 1.05f;
+                //fire1.timeBeforeStartAlphaFade = 20;
+                //ShaderParticleHandler.SpawnParticle(fire1);
             }
 
 

@@ -78,6 +78,11 @@ Items: {
 		DisplayName: Cavern Sword
 		Tooltip: ""
 	}
+
+	BooyahBomb: {
+		DisplayName: Booyah Bomb
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -205,6 +210,12 @@ Projectiles: {
 	StingerTest2.DisplayName: Stinger Test2
 	StopAndStartStinger.DisplayName: Stop And Start Stinger
 	FFWindOrb3.DisplayName: F F Wind Orb3
+	CrackTest.DisplayName: Crack Test
+	BooyahBombProj.DisplayName: Booyah Bomb Proj
+	BooyahHeldProj.DisplayName: Booyah Held Proj
+	BooyahBombRecoil.DisplayName: Booyah Bomb Recoil
+	BooyahBombExplosion.DisplayName: Booyah Bomb Explosion
+	WindTrail3.DisplayName: Wind Trail3
 }
 
 Configs: {
@@ -678,4 +689,5 @@ NPCs: {
 	HittableBee.DisplayName: Hittable Bee
 	AsgoreBee.DisplayName: Asgore Bee
 	OphanaimBee.DisplayName: Ophanaim Bee
+	WalledDashBee.DisplayName: Walled Dash Bee
 }

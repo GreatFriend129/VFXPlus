@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
-using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using Terraria.Utilities;
+using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
-using Terraria.Graphics;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 using static Terraria.ModLoader.PlayerDrawLayer;
 
 
@@ -419,7 +420,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Color darkPurple = new Color(42, 2, 82);
             Color purple3 = new Color(121, 7, 179);
 
-            for (int i = 0; i < 16; i++)
+            for (int i = 220; i < 16; i++)
             {
                 float prog = (float)i / 16f;
 
@@ -435,12 +436,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             }
 
-            for (int i = 0; i < 17 + Main.rand.Next(0, 6); i++)
+            for (int i = 0; i < 8; i++)
+            {
+                float fireScale = Main.rand.NextFloat(1.5f, 1.65f);
+                float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
+                float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
+
+                Color thisCol = Main.rand.NextFloat() > 0.5 ? purple3 : purple;
+
+                Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(2f, 4.5f);
+                FireParticle fire1 = new FireParticle(projectile.Center + myvel * 2f, myvel, fireScale, thisCol, colorMult: 0.5f, bloomAlpha: 1.5f, AlphaFade: alphaFade, VelFade: 0.93f, RotPower: 0.1f);
+                fire1.randomRotPower = 0.5f;
+                fire1.scaleFadePower = 1.05f;
+                fire1.timeBeforeStartAlphaFade = 5;
+                ShaderParticleHandler.SpawnParticle(fire1);
+            }
+
+            for (int i = 0; i < 7 + Main.rand.Next(0, 6); i++)
             {
                 Color col = Main.rand.NextBool() ? Color.Purple * 2f : purple3 * 1.5f;
 
 
-                float velMult = Main.rand.NextFloat(3f, 9f);
+                float velMult = Main.rand.NextFloat(5f, 12f);
                 Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
                 Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), randomStart, Alpha: 0,
                     newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f));
@@ -464,17 +481,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             softGlow.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 2, timeToChangeScale: 0, fadeSpeed: 0.91f, sizeChangeSpeed: 0.92f, timeToKill: 150,
                 overallAlpha: 0.18f, DrawWhiteCore: true, 1f, 1f);
 
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.8f, 0.8f);
-            Color ringCol = Color.Lerp(purple3, Color.Purple, 0.25f);
+            //CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.8f, 0.8f);
+            //Color ringCol = Color.Lerp(purple3, Color.Purple, 0.25f);
 
-            Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
-            d1.scale = 0.04f;
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
+            //Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
+            //d1.scale = 0.04f;
+            //d1.customData = cpb2;
+            //d1.velocity = new Vector2(-0.01f, 0f).RotatedBy(0f);
 
-            Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
+            //Dust d2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<CirclePulse>(), Velocity: Vector2.Zero, newColor: ringCol * 1.15f);
+            //d2.customData = cpb2;
+            //d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
             #region VanillaKill
             projectile.position = projectile.Center;

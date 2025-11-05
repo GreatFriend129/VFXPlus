@@ -1,24 +1,25 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using Terraria.Graphics;
 using VFXPlus.Common.Drawing;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using static tModPorter.ProgressUpdate;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 using VFXPlus.Content.VFXTest;
+using static tModPorter.ProgressUpdate;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -94,7 +95,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             bool vanillaDust = true;
 
 
-            if (timer % 2 == 0 && timer > 5) //4
+            if (timer % 2 == 0 && timer > 5 && false) //4
             {
                 int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<HighResSmoke>(), newColor: Color.LightSkyBlue, Scale: Main.rand.NextFloat(0.25f, 0.5f) * 0.9f);
                 Main.dust[d].velocity += projectile.velocity * 0.25f;
@@ -103,6 +104,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 HighResSmokeBehavior hrsb = DustBehaviorUtil.AssignBehavior_HRSBase(overallAlpha: 0.35f); //0.5
                 hrsb.isPixelated = true;
                 Main.dust[d].customData = hrsb;
+            }
+
+            if (timer % 1 == 0)
+            {
+                Color thisCol = Color.Lerp(Color.LightSkyBlue, Color.DeepSkyBlue, 0.25f);
+                Vector2 particleVel = projectile.velocity * 0.1f;
+
+                FireParticle fire = new FireParticle(projectile.Center + Main.rand.NextVector2Circular(3f, 3f), particleVel, 0.5f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
+                   AlphaFade: 0.95f, RotPower: 0.01f); //95
+                fire.renderLayer = RenderLayer.UnderProjectiles;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
 
@@ -114,7 +126,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float timeForPopInAnim = 30;
             float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
 
-            drawScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 2f)) * 1f;
+            drawScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
 
             timer++;
 

@@ -2432,6 +2432,66 @@
             <param name="itemId">The <see cref="F:Terraria.Item.type"/> to check.</param>
             <returns>The <see cref="T:Terraria.GameContent.Items.ItemVariant"/> to use under the current conditions, or <see langword="null"/> if no appropriate <see cref="T:Terraria.GameContent.Items.ItemVariant"/> exists.</returns>
         </member>
+        <member name="T:Terraria.GameContent.Liquid.LiquidEdgeRenderer">
+            <summary>
+            Responsible for special rendering of liquid edges/slopes for the rewritten
+            liquid slope handling.
+            </summary>
+            <remarks>
+            See the related pull request:
+            https://github.com/tModLoader/tModLoader/pull/4714
+            </remarks>
+        </member>
+        <member name="F:Terraria.GameContent.Liquid.LiquidEdgeRenderer.Enabled">
+            <summary>
+            Whether the special edge rendering logic is enabled.
+            <br />
+            Even if it's enabled, it will only apply if <see cref="P:Terraria.GameContent.Liquid.LiquidEdgeRenderer.Active"/>
+            is <see langword="true"/>.
+            </summary>
+        </member>
+        <member name="P:Terraria.GameContent.Liquid.LiquidEdgeRenderer.Active">
+            <summary>
+            Whether the new rendering is actually active for this frame.
+            </summary>
+        </member>
+        <member name="P:Terraria.GameContent.Liquid.LiquidEdgeRenderer.MaskShader">
+            <summary>
+            Turns all pixels with alpha above zero white, and all others transparent.
+            </summary>
+        </member>
+        <member name="P:Terraria.GameContent.Liquid.LiquidEdgeRenderer.DefaultLiquidMask">
+            <summary>
+            The default liquid mask tile for tiles in <see cref="F:Terraria.ID.TileID.Sets.BlocksWaterDrawingBehindSelf"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.GameContent.Liquid.LiquidRenderer.WATERFALL_LENGTH">
+            <summary>
+            Liquids use this to control how many tiles long their liquidfall is. <br/>
+            Liquidfalls are drawn whenever there is not a solid block underneath a liquid, most visible when a liquid is overtop of a half block. <br/>
+            This makes liquids look less akward when falling downwards.
+            </summary>
+        </member>
+        <member name="F:Terraria.GameContent.Liquid.LiquidRenderer.DEFAULT_OPACITY">
+            <summary>
+            How strong a liquid's opacity. <br/>
+            Liquids like lava and honey use this to make them look more viscous by making things inside the liquid less visible. <br/>
+            </summary>
+        </member>
+        <member name="F:Terraria.GameContent.Liquid.LiquidRenderer.WAVE_MASK_STRENGTH">
+            <summary>
+            Modifies the colors of the liquid wavemask. <br/>
+            Modifies the wave alpha. <br/>
+            Vanilla leaves this array blank by default.
+            </summary>
+        </member>
+        <member name="F:Terraria.GameContent.Liquid.LiquidRenderer.VISCOSITY_MASK">
+            <summary>
+            This is how powerful the ripples are for liquids. <br/>
+            Lava and honey use this to have ripples be less strong. <br/>
+            Can cause weird visual issues with ripples if set to large numbers like 255.
+            </summary>
+        </member>
         <member name="F:Terraria.GameContent.PlayerEyeHelper.EyeState.InStorm">
             <summary>
             <br/> Out of 120 ticks, 5 of them will have eyes closed; otherwise eyes are half closed.
@@ -4350,6 +4410,11 @@
         <member name="F:Terraria.ID.ItemID.Sets.IsSpaceGun">
             <summary>
             Set to <see langword="true"/> to make this Item set its mana cost to 0 whenever <see cref="F:Terraria.Player.spaceGun"/> is set to <see langword="true"/>.
+            </summary>
+        </member>
+        <member name="F:Terraria.ID.ItemID.Sets.DropSeedsIfInInventory">
+            <summary>
+            Set to <see langword="true"/> to have seeds drop whenever grass breaks with this Item in the player's inventory.
             </summary>
         </member>
         <member name="F:Terraria.ID.ItemID.Search">
@@ -7883,6 +7948,11 @@
         <member name="F:Terraria.ID.TileID.Sets.CanBeSloped">
             <summary> Allows non-solid tiles to be sloped (solid tiles can always be sloped, regardless of this set). </summary>
         </member>
+        <member name="F:Terraria.ID.TileID.Sets.Infectable">
+            <summary> Whether or not this tile can be infected by the natural spreading of biomes such as corruption, crimson, or hallow.
+            <br>Doesn't affect the spreading in <see cref="M:Terraria.WorldGen.hardUpdateWorld(System.Int32,System.Int32)"/>, only used in <see cref="M:Terraria.WorldGen.SpreadInfectionToNearbyTile(System.Int32,System.Int32,System.Int32,System.Int32)"/></br>
+            </summary>
+        </member>
         <member name="F:Terraria.ID.TileID.Sets.PreventsTileHammeringIfOnTopOfIt">
             <summary>
             Prevents a tile immediately below a tile of this type from being hammered (sloped). Since a sloped tile would break a typical bottom tile anchor, this prevents such tiles from being broken in this manner. Anything in <see cref="F:Terraria.ID.TileID.Sets.BasicChest"/> or <see cref="F:Terraria.ID.TileID.Sets.BasicDresser"/> are also protected in the same manner. This is typically used for tiles that shouldn't break as easily as other tiles, such as tiles containing Tile Entities holding items.
@@ -8062,20 +8132,20 @@
         </member>
         <member name="F:Terraria.Item.potionDelay">
             <summary>
-            The default cooldown, in ticks, of most healing items.<br/>
-            This value is never changed. For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> or <see cref="F:Terraria.Player.potionDelayTime"/>.<br/>
+            The default cooldown, in ticks, of most healing items.
+            <br/><br/> This value is never changed. For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> and <see cref="F:Terraria.Player.PotionDelayModifier"/>.
             </summary>
         </member>
         <member name="F:Terraria.Item.restorationDelay">
             <summary>
-            The default cooldown, in ticks, of Restoration Potions.<br/>
-            This value is never changed. For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> or <see cref="F:Terraria.Player.restorationDelayTime"/>.<br/>
+            The default cooldown, in ticks, of Restoration Potions.
+            <br/><br/> This value is never changed. For creating a Philosopher's Stone-like item, For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> and <see cref="F:Terraria.Player.PotionDelayModifier"/>.
             </summary>
         </member>
         <member name="F:Terraria.Item.mushroomDelay">
             <summary>
-            The default cooldown, in ticks, of Mushrooms.<br/>
-            This value is never changed. For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> or <see cref="F:Terraria.Player.mushroomDelayTime"/>.<br/>
+            The default cooldown, in ticks, of Mushrooms.
+            <br/><br/> This value is never changed. For creating a Philosopher's Stone-like item, see <see cref="F:Terraria.Player.pStone"/> and <see cref="F:Terraria.Player.PotionDelayModifier"/>.
             </summary>
         </member>
         <member name="F:Terraria.Item.questItem">
@@ -8429,8 +8499,8 @@
         </member>
         <member name="F:Terraria.Item.potion">
             <summary>
-            If true, this item will inflict potion sickness on use. Also determines whether the item cannot be used when the player has potion sickness, and if the item can be used with the Quick Heal key.
-            <br/> Defaults to <see langword="false"/>.
+            If true, this item will inflict potion sickness on use. Also determines whether the item cannot be used when the player has potion sickness (<see cref="F:Terraria.Player.potionDelay"/> > 0), and if the item can be used with the Quick Heal key.
+            <br/><br/> Defaults to <see langword="false"/>.
             </summary>
         </member>
         <member name="F:Terraria.Item.consumable">
@@ -9541,7 +9611,13 @@
         </member>
         <member name="T:Terraria.Lighting">
             <summary>
-            This class manages lighting in the game world. Lighting is calculated and tracked at tile coordinates within the users game view. The most common use of this class is to use GetColor methods to retrieve the light values at a location for drawing a specific entity. Another common usage is adding light to the game world using the AddLight methods.
+            This class manages lighting in the game world. Lighting is calculated and tracked at tile coordinates within the users game view. The most common use of this class is to use <c>GetColor</c> methods to retrieve the light values at a location for drawing a specific entity. Another common usage is adding light to the game world using the <c>AddLight</c> methods.
+            <br/><br/> Lighting is not calculated on the server, as such it should not be used for anything gameplay related that needs to sync with the server. 
+            </summary>
+        </member>
+        <member name="M:Terraria.Lighting.Brightness(System.Int32,System.Int32)">
+            <summary>
+            Gets the light level at the specified Tile coordinate location. The light level is the average RGB values at the tile coordinate (<see cref="M:Terraria.Lighting.GetColor(System.Int32,System.Int32)"/>) multiplied by <see cref="P:Terraria.Lighting.GlobalBrightness"/>. Ranges from 0 to 1.2 and is affected by <see cref="F:Terraria.ID.BuffID.Darkness"/>.
             </summary>
         </member>
         <member name="M:Terraria.Lighting.GetSubLight(Microsoft.Xna.Framework.Vector2)">
@@ -10562,8 +10638,9 @@
         </member>
         <member name="P:Terraria.Main.CurrentPlayer">
             <summary>
-            A replacement for `Main.LocalPlayer` which respects whichever player is currently running hooks on the main thread.
-            This works in the player select screen, and in multiplayer (when other players are updating)
+            A replacement for <see cref="P:Terraria.Main.LocalPlayer"/> which respects whichever player is currently running hooks on the main thread.
+            This works in the player select screen, and in multiplayer (when other players are updating).
+            <br/><br/> <see cref="T:Terraria.Main.CurrentPlayerOverride"/> can be used to temporarily override CurrentPlayer.
             </summary>
         </member>
         <member name="P:Terraria.Main.ActivePlayers">
@@ -10660,6 +10737,12 @@
             <summary>
             Syncs rain state if <see cref="M:Terraria.Main.StartRain"/> or <see cref="M:Terraria.Main.StopRain"/> were called in the same tick and caused a change to <seealso cref="F:Terraria.Main.maxRaining"/>.
             <br>Can be called on any side, but only the server will actually sync it.</br>
+            </summary>
+        </member>
+        <member name="T:Terraria.Main.CurrentPlayerOverride">
+            <summary>
+            Overrides <see cref="P:Terraria.Main.CurrentPlayer"/>. For example, <c>using var _currentPlr = new Main.CurrentPlayerOverride(player);</c> would result in Main.CurrentPlayer returning the specified player until the end of the current scope.
+            <br/><br/> Used internally to make <see cref="T:Terraria.ModLoader.ModAccessorySlot"/> access a specific player rather than <see cref="P:Terraria.Main.LocalPlayer"/>.
             </summary>
         </member>
         <member name="M:Terraria.Main.RunOnMainThread(System.Action)">
@@ -11201,7 +11284,7 @@
         </member>
         <member name="T:Terraria.ModLoader.Config.SliderAttribute">
             <summary>
-            Affects whether this data will be presented as a slider or an input field. Add this attribute to use a slider. Currently only affects data of type int.
+            Affects whether this data will be presented as a slider or an input field. Add this attribute to use a slider. Currently only affects data of type int and enum.
             </summary>
         </member>
         <member name="T:Terraria.ModLoader.Config.DrawTicksAttribute">
@@ -11232,6 +11315,16 @@
         <member name="T:Terraria.ModLoader.Config.ExpandAttribute">
             <summary>
             Affects whether this data will be expanded by default. The default value currently is true. Use the constructor with 2 parameters to control if list elements should be collapsed or expanded.
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.Config.DropdownAttribute">
+            <summary>
+            If present, this data will be presented as a drop down. Currently only affects enums, causing the choices to be displayed as a dropdown instead of the usual expanded panel.
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.Config.CycleAttribute">
+            <summary>
+            If present, this data will be presented as a cylc button. Currently only affects enums, causing the choices to be cycled by button clicks instead of the usual expanded panel.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.Config.ConfigManager.GeneratePopulatedClone(Terraria.ModLoader.Config.ModConfig)">
@@ -11430,6 +11523,14 @@
         <member name="M:Terraria.ModLoader.Config.UI.ConfigElement.Bind(Terraria.ModLoader.Config.UI.PropertyFieldWrapper,System.Object,System.Collections.IList,System.Int32)">
             <summary>
             Bind must always be called after the ctor and serves to facilitate a convenient inheritance workflow for custom ConfigElemets from mods.
+            </summary>
+        </member>
+        <member name="T:Terraria.ModLoader.Config.UI.EnumElement2">
+            <summary>
+            Supports 3 modes of operation:
+            Normal: Options are presented in an expanded panel
+            DropdownAttribute: Options are presented in a dropdown, fading out the background. If more than 4 enum elements, the dropdown becomes a wider UIGrid
+            CycleAttribute: Options are cycled through on left/right click
             </summary>
         </member>
         <member name="T:Terraria.ModLoader.ContentCache">
@@ -13463,6 +13564,24 @@
             <param name="item">The item being used.</param>
             <param name="player">The player using the item.</param>
             <param name="manaConsumed">The mana consumed from the player.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.GlobalItem.ModifyPotionDelay(Terraria.Item,Terraria.Player,System.Int32@)">
+            <summary>
+            Allows you to dynamically modify the potion delay applied by a specific healing potion. <paramref name="baseDelay"/> and <see cref="F:Terraria.Player.PotionDelayModifier"/> will be used to calculate a final potion delay, provided in <see cref="M:Terraria.ModLoader.GlobalItem.ApplyPotionDelay(Terraria.Item,Terraria.Player,System.Int32)"/>.
+            <br/><br/> Modders can modify <see cref="F:Terraria.Player.PotionDelayModifier"/> directly in hooks like <see cref="M:Terraria.ModLoader.ModItem.UpdateAccessory(Terraria.Player,System.Boolean)"/> rather than use this hook to adjust potion delay times for all items.
+            </summary>
+            <param name="item">The healing item being used.</param>
+            <param name="player">The player consuming the item.</param>
+            <param name="baseDelay">The base potion delay length, in ticks.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.GlobalItem.ApplyPotionDelay(Terraria.Item,Terraria.Player,System.Int32)">
+            <summary>
+            Called before the potion delay is applied to the player after consuming a healing potion. 
+            <br/><br/> Return false to prevent application of the <see cref="F:Terraria.ID.BuffID.PotionSickness"/> buff and setting <see cref="F:Terraria.Player.potionDelay"/>.
+            </summary>
+            <param name="item">The healing item being used.</param>
+            <param name="player">The player consuming the item.</param>
+            <param name="potionDelay">The calculated potion delay.</param>
         </member>
         <member name="M:Terraria.ModLoader.GlobalItem.ModifyWeaponDamage(Terraria.Item,Terraria.Player,Terraria.ModLoader.StatModifier@)">
             <summary>
@@ -16999,6 +17118,12 @@ PostAI()</code>
             A ModAccessorySlot instance represents a net new accessory slot instance. You can store fields in the ModAccessorySlot class.
             </summary>
         </member>
+        <member name="P:Terraria.ModLoader.ModAccessorySlot.Player">
+            <summary>
+            The player that this ModAccessorySlot is currently accessing, equivalent to <see cref="P:Terraria.Main.CurrentPlayer"/>. ModAccessorySlot are singletons, the behavior of properties like <see cref="P:Terraria.ModLoader.ModAccessorySlot.FunctionalItem"/> depends on the current player.
+            <br/><br/> <b>Main.CurrentPlayer documentation:</b><br/> <inheritdoc cref="P:Terraria.Main.CurrentPlayer"/>
+            </summary>
+        </member>
         <member name="P:Terraria.ModLoader.ModAccessorySlot.HasEquipmentLoadoutSupport">
             <summary>
             Gets or sets a value indicating whether this slot supports equipment loadouts. If <see langword="false"/>,
@@ -17008,6 +17133,30 @@ PostAI()</code>
             <br/><br/> Changing the value from <see langword="true"/> to <see langword="false"/> will cause the extra items to be spawned on the player when they enter the world.
             <br/> Changing the value from <see langword="false"/> to <see langword="true"/> will result in the currently selected loadout holding the items.
             <br/><br/> Slots that don't support loadouts will appear with the default green background texture, as if they were an accessory in loadout #1 or from before loadout support was added to the game.
+            </summary>
+        </member>
+        <member name="P:Terraria.ModLoader.ModAccessorySlot.FunctionalItem">
+            <summary>
+            The functional item of this equipment slot.
+            <br/><br/> This property always accesses the equipment of the current player, see <see cref="P:Terraria.ModLoader.ModAccessorySlot.Player"/> for more info.
+            </summary>
+        </member>
+        <member name="P:Terraria.ModLoader.ModAccessorySlot.VanityItem">
+            <summary>
+            The vanity item of this equipment slot.
+            <br/><br/> This property always accesses the equipment of the current player, see <see cref="P:Terraria.ModLoader.ModAccessorySlot.Player"/> for more info.
+            </summary>
+        </member>
+        <member name="P:Terraria.ModLoader.ModAccessorySlot.DyeItem">
+            <summary>
+            The dye item of this equipment slot.
+            <br/><br/> This property always accesses the equipment of the current player, see <see cref="P:Terraria.ModLoader.ModAccessorySlot.Player"/> for more info.
+            </summary>
+        </member>
+        <member name="P:Terraria.ModLoader.ModAccessorySlot.HideVisuals">
+            <summary>
+            Indicates if the corresponding <see cref="P:Terraria.ModLoader.ModAccessorySlot.FunctionalItem"/> is set to be hidden or not. 
+            <br/><br/> This property always accesses the equipment of the current player, see <see cref="P:Terraria.ModLoader.ModAccessorySlot.Player"/> for more info.
             </summary>
         </member>
         <member name="M:Terraria.ModLoader.ModAccessorySlot.PreDraw(Terraria.ModLoader.AccessorySlotType,Terraria.Item,Microsoft.Xna.Framework.Vector2,System.Boolean)">
@@ -17541,7 +17690,7 @@ PostAI()</code>
             <summary>
             Allows you to change what happens when this tile/wall is converted into another biome. If you need to override or add a new conversion to a vailla tile, use <see cref="M:Terraria.ModLoader.TileLoader.RegisterConversion(System.Int32,System.Int32,Terraria.ModLoader.TileLoader.ConvertTile)"/> and <see cref="M:Terraria.ModLoader.WallLoader.RegisterConversion(System.Int32,System.Int32,Terraria.ModLoader.WallLoader.ConvertWall)"/>.
             <para/> Purification powder uses a separate conversionType, as it doesn't convert hallowed tiles back to purity tiles. Be sure to check for <see cref="F:Terraria.ID.BiomeConversionID.PurificationPowder"/> as well as <see cref="F:Terraria.ID.BiomeConversionID.Purity"/> when handling corruption/crimson tiles.
-            <para/> You can use <see cref="M:Terraria.WorldGen.ConvertTile(System.Int32,System.Int32,System.Int32,System.Boolean)"/> or <see cref="M:Terraria.WorldGen.ConvertWall(System.Int32,System.Int32,System.Int32)"/> to automatically handle tile framing and multiplayer syncing.
+            <para/> You can use <see cref="M:Terraria.WorldGen.ConvertTile(System.Int32,System.Int32,System.Int32)"/> or <see cref="M:Terraria.WorldGen.ConvertWall(System.Int32,System.Int32,System.Int32)"/> to automatically handle tile framing and multiplayer syncing.
             </summary>
             <param name="i"></param>
             <param name="j"></param>
@@ -18448,6 +18597,22 @@ PostAI()</code>
             </summary>
             <param name="player">The player using the item.</param>
             <param name="manaConsumed">The mana consumed from the player.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModItem.ModifyPotionDelay(Terraria.Player,System.Int32@)">
+            <summary>
+            Allows you to dynamically modify the potion delay applied by a specific healing potion. <paramref name="baseDelay"/> and <see cref="F:Terraria.Player.PotionDelayModifier"/> will be used to calculate a final potion delay, provided in <see cref="M:Terraria.ModLoader.ModItem.ApplyPotionDelay(Terraria.Player,System.Int32)"/>.
+            <br/><br/> Modders can modify <see cref="F:Terraria.Player.PotionDelayModifier"/> directly in hooks like <see cref="M:Terraria.ModLoader.ModItem.UpdateAccessory(Terraria.Player,System.Boolean)"/> rather than use this hook to adjust potion delay times for all items.
+            </summary>
+            <param name="player">The player consuming the item.</param>
+            <param name="baseDelay">The base potion delay length, in ticks.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModItem.ApplyPotionDelay(Terraria.Player,System.Int32)">
+            <summary>
+            Called before the potion delay is applied to the player after consuming a healing potion. 
+            <br/><br/> Return false to prevent application of the <see cref="F:Terraria.ID.BuffID.PotionSickness"/> buff and setting <see cref="F:Terraria.Player.potionDelay"/>.
+            </summary>
+            <param name="player">The player consuming the item.</param>
+            <param name="potionDelay">The calculated potion delay.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModItem.ModifyWeaponDamage(Terraria.Player,Terraria.ModLoader.StatModifier@)">
             <summary>
@@ -21155,6 +21320,14 @@ PostAI()</code>
             </summary>
             <param name="item">The item being used.</param>
             <param name="manaConsumed">The mana consumed from the player.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.ModPlayer.ApplyPotionDelay(Terraria.Item,System.Int32)">
+            <summary>
+            Called before the potion delay is applied to the player after consuming a healing potion. 
+            <br/><br/> Return false to prevent application of the <see cref="F:Terraria.ID.BuffID.PotionSickness"/> buff and setting <see cref="F:Terraria.Player.potionDelay"/>.
+            </summary>
+            <param name="item">The healing item being used.</param>
+            <param name="potionDelay">The calculated potion delay.</param>
         </member>
         <member name="M:Terraria.ModLoader.ModPlayer.ModifyWeaponDamage(Terraria.Item,Terraria.ModLoader.StatModifier@)">
             <summary>
@@ -24781,6 +24954,13 @@ PostAI()</code>
             Scales all components of this StatModifier for the purposes of applying damage class modifier inheritance.<para/>This is <b>NOT</b> intended for typical modding usage, if you are looking to increase this stat by some percentage, use the addition (<c>+</c>) operator.
             </summary>
         </member>
+        <member name="M:Terraria.ModLoader.StatModifier.Undo(System.Single)">
+            <summary>
+            Calculates a base value from a provided adjusted value, undoing <see cref="M:Terraria.ModLoader.StatModifier.ApplyTo(System.Single)"/>.
+            </summary>
+            <param name="currentValue">The value to remove modifiers from</param>
+            <returns></returns>
+        </member>
         <member name="T:Terraria.ModLoader.SystemLoader">
             <summary>
             This is where all <see cref="T:Terraria.ModLoader.ModSystem"/> hooks are gathered and called.
@@ -24836,6 +25016,15 @@ PostAI()</code>
             <param name="tileType">The tile type that has is affected by this custom conversion.</param>
             <param name="conversionType">The conversion type for which the tile should use custom conversion code.</param>
             <param name="conversionDelegate">Code to run when the tile attempts to get converted. Return false to signal that your custom conversion took place and that vanilla code shouldn't be ran.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.TileLoader.RegisterConversion(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Registers a tile type as having custom biome conversion code for this specific <see cref="T:Terraria.ID.BiomeConversionID"/>. For modded tiles, you can directly use <see cref="M:Terraria.ModLoader.TileLoader.Convert(System.Int32,System.Int32,System.Int32)"/> <br/>
+            If you need to register conversions that rely on <see cref="T:Terraria.ID.TileID.Sets.Conversion"/> being fully populated, consider doing it in <see cref="M:Terraria.ModLoader.ModBiomeConversion.PostSetupContent"/>
+            </summary>
+            <param name="tileType">The tile type that has is affected by this custom conversion.</param>
+            <param name="conversionType">The conversion type for which the tile should use custom conversion code.</param>
+            <param name="toType">What <paramref name="tileType"/> is converted into when it's hit with the <paramref name="conversionType"/>.</param>
         </member>
         <member name="M:Terraria.ModLoader.TileLoader.RegisterSimpleConversion(System.Int32,System.Int32,System.Int32,System.Boolean)">
             <summary>
@@ -25060,7 +25249,9 @@ PostAI()</code>
         </member>
         <member name="M:Terraria.ModLoader.UI.UICommon.TooltipMouseText(System.String)">
             <summary>
-            Draws a tooltip on the mouse cursor. Functions like <see cref="M:Terraria.Main.MouseText(System.String,System.Int32,System.Byte,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)"/> and <see cref="F:Terraria.Main.hoverItemName"/>, but adds the same background seen in item tooltips behind the text.
+            Draws a tooltip on the mouse cursor.
+            <br/><br/> Functions like <see cref="M:Terraria.Main.MouseText(System.String,System.Int32,System.Byte,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)"/> and <see cref="F:Terraria.Main.hoverItemName"/>, but adds the same background seen in item tooltips behind the text.
+            <br/><br/> Only works during rendering, calling this during Update will not do anything.
             </summary>
             <param name="text"></param>
         </member>
@@ -25111,6 +25302,15 @@ PostAI()</code>
             <param name="wallType">The wall type that has is affected by this custom conversion.</param>
             <param name="conversionType">The conversion type for which the wall should use custom conversion code.</param>
             <param name="conversionDelegate">Code to run when the wall attempts to get converted. Return false to signal that your custom conversion took place and that vanilla code shouldn't be ran.</param>
+        </member>
+        <member name="M:Terraria.ModLoader.WallLoader.RegisterConversion(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Registers a wall type as having custom biome conversion code for this specific <see cref="T:Terraria.ID.BiomeConversionID"/>. For modded walls, you can directly use <see cref="M:Terraria.ModLoader.WallLoader.Convert(System.Int32,System.Int32,System.Int32)"/> <br/>
+            If you need to register conversions that rely on <see cref="T:Terraria.ID.WallID.Sets.Conversion"/> being fully populated, consider doing it in <see cref="M:Terraria.ModLoader.ModBiomeConversion.PostSetupContent"/>
+            </summary>
+            <param name="wallType">The wall type that has is affected by this custom conversion.</param>
+            <param name="conversionType">The conversion type for which the wall should use custom conversion code.</param>
+            <param name="toType">What <paramref name="wallType"/> is converted into when it's hit with the <paramref name="conversionType"/>.</param>
         </member>
         <member name="M:Terraria.ModLoader.WallLoader.RegisterSimpleConversion(System.Int32,System.Int32,System.Int32,System.Boolean)">
             <summary>
@@ -25926,7 +26126,7 @@ PostAI()</code>
         </member>
         <member name="M:Terraria.NPC.FindFirstNPC(System.Int32)">
             <summary>
-            Returns the index within <see cref="F:Terraria.Main.npc"/> of the first active NPC in the world of the given NPC type (<see cref="F:Terraria.NPC.type"/>).
+            Returns the index within <see cref="F:Terraria.Main.npc"/> of the first active NPC in the world of the given NPC type (<see cref="F:Terraria.NPC.type"/>). Returns -1 if not found.
             </summary>
             <param name="Type"></param>
             <returns></returns>
@@ -27107,6 +27307,11 @@ PostAI()</code>
         <member name="F:Terraria.Player.respawnTimer">
             <summary> The amount of time in ticks before this player respawns after death. Most suitably modified in <see cref="M:Terraria.ModLoader.ModPlayer.Kill(System.Double,System.Int32,System.Boolean,Terraria.DataStructures.PlayerDeathReason)"/> </summary>
         </member>
+        <member name="F:Terraria.Player.potionDelay">
+            <summary>
+            The potion sickness delay, in ticks. This value mirrors the remaining time for the <see cref="F:Terraria.ID.BuffID.PotionSickness"/> buff.
+            </summary>
+        </member>
         <member name="F:Terraria.Player.difficulty">
             <summary>
             The <see href="https://terraria.wiki.gg/wiki/Difficulty">player difficulty</see>. Valid values are found in <see cref="T:Terraria.ID.PlayerDifficultyID"/>. 
@@ -27699,6 +27904,11 @@ PostAI()</code>
             <para/> What this typically means in practice is that an auto-swinging pickaxe will not attempt to swing again until the player deliberately releases the mouse button and clicks again. This is usually used by tile entities that drop their contained item when mined to prevent the player from accidentally mining the tile itself when attempting to "mine" the item from the tile entity.
             </summary>
         </member>
+        <member name="M:Terraria.Player.FindClosest(Microsoft.Xna.Framework.Vector2,System.Int32,System.Int32)">
+            <summary>
+            Finds and returns the index of the closest player to the center of a rectangle defined by the provided arguments. The arguments are usually <see cref="F:Terraria.Entity.position"/>, <see cref="F:Terraria.Entity.width"/>, and <see cref="F:Terraria.Entity.height"/>.
+            </summary>
+        </member>
         <member name="M:Terraria.Player.AddBuff(System.Int32,System.Int32,System.Boolean,System.Boolean)">
             <summary>
             Gives the player the provided buff. This accounts for if the player is immune to the buff. This also accounts for adjusting the buff time for different game modes. If the player already has the buff, the re-apply logic will happen. Vanilla buff types are found in <see cref="T:Terraria.ID.BuffID"/> and modded buffs are typically retrieved using <see cref="M:Terraria.ModLoader.ModContent.BuffType``1"/>. The quiet parameter will determine if the network sync message should happen. This should only be set to false in non-deterministic situations (such as random chance) and code that only runs locally. Other situations run on all clients so the buff should automatically be applied on all clients, keeping the player buff data in sync without burdening the network. When in doubt, consult vanilla source code examples or test your code.
@@ -28028,6 +28238,11 @@ PostAI()</code>
             <para/> Applied in the calculation of <see cref="P:Terraria.Player.breathCDMax"/>.
             </summary>
         </member>
+        <member name="F:Terraria.Player.PotionDelayModifier">
+            <summary>
+            Modifies the cooldown of health potions. Can be used to adjust potion cooldown calculations, similar to the Philosopher's Stone.
+            </summary>
+        </member>
         <member name="M:Terraria.Player.GetModPlayer``1">
             <summary> Gets the instance of the specified ModPlayer type. This will throw exceptions on failure. </summary>
             <exception cref="T:System.Collections.Generic.KeyNotFoundException"/>
@@ -28302,6 +28517,15 @@ PostAI()</code>
              To prevent the use of remaining jumps, use <see cref="M:Terraria.Player.ConsumeAllExtraJumps"/> or <see cref="F:Terraria.Player.blockExtraJumps"/>.<br/>
              To cancel a regular jump as well, do <c>Player.jump = 0;</c>
              </summary>
+        </member>
+        <member name="M:Terraria.Player.HasItem(System.Boolean[])">
+            <summary>
+            Checks if the player has any item in their <see cref="F:Terraria.Player.inventory"/> that appears in the provided Item ID set (<paramref name="itemSet"/>).
+            <br/><br/> For example <c>if (player.HasItem(ItemID.Sets.Glowsticks))</c> would return true if the player has any glowstick item.
+            <br/><br/> Does not check Void Bag.
+            </summary>
+            <param name="itemSet">A set of length <see cref="P:Terraria.ModLoader.ItemLoader.ItemCount"/> to check against</param>
+            <returns>True if the player has such an item</returns>
         </member>
         <member name="T:Terraria.Player.HurtModifiers">
             <summary>
@@ -28861,6 +29085,12 @@ PostAI()</code>
             Time in ticks before this projectile will naturally despawn.
             <br/> Each update timeLeft is decreased by 1. Once timeLeft hits 0, the Projectile will naturally despawn. The default value, 3600, is measured in ticks, which are usually 60 per seconds, so the default despawn time is about 60 seconds. Adjust this if you want the projectile to fizzle early rather than travel infinitely. Note that <see cref="F:Terraria.Projectile.extraUpdates"/> will cause it to decrease faster than normal time because Update is being called more often.
             <br/> Defaults to 3600.
+            </summary>
+        </member>
+        <member name="F:Terraria.Projectile.soundDelay">
+            <summary>
+            Represents a delay measured in ticks before this projectile should play a sound again. Automatically decreased by 1 each tick until it reaches 0. It is up to the AI of the projectile to set this to a value and play sounds once it reaches 0.
+            <br/><br/> Defaults to 0.
             </summary>
         </member>
         <member name="F:Terraria.Projectile.damage">
@@ -30367,6 +30597,12 @@ PostAI()</code>
         <member name="E:Terraria.UI.UIElement.OnMouseOut">
             <summary> Called by <see cref="M:Terraria.UI.UIElement.MouseOut(Terraria.UI.UIMouseEvent)"/>. Use this event instead of inheritance if suitable. </summary>
         </member>
+        <member name="E:Terraria.UI.UIElement.OnUpdate">
+            <summary> Called at the start of <see cref="M:Terraria.UI.UIElement.Update(Microsoft.Xna.Framework.GameTime)"/>. Use this event instead of inheritance if suitable. </summary>
+        </member>
+        <member name="E:Terraria.UI.UIElement.OnDraw">
+            <summary> Called at the start of <see cref="M:Terraria.UI.UIElement.Draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)"/>. Use this event instead of inheritance if suitable. </summary>
+        </member>
         <member name="M:Terraria.UI.UIElement.DrawSelf(Microsoft.Xna.Framework.Graphics.SpriteBatch)">
             <summary>
             Used to draw this element (not the children). Use this to give an element custom visuals. Use <see cref="M:Terraria.UI.UIElement.GetDimensions"/> to determine the area to draw in.
@@ -30811,7 +31047,7 @@ itemFoundData.CopyTo(itemsFound, 0);
         </member>
         <member name="M:Terraria.Wiring.TripWire(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
-            Used to send a single to wiring wired up to the specified area. The parameters represent the tile coordinates where wire signals will be sent. Mechanism tiles such as <see cref="F:Terraria.ID.TileID.Switches"/>, <see cref="F:Terraria.ID.TileID.PressurePlates"/>, <see cref="F:Terraria.ID.TileID.Timers"/>, and <see cref="F:Terraria.ID.TileID.LogicSensor"/> use this method as part of their interaction code.
+            Used to send a signal to wiring wired up to the specified area. The parameters represent the tile coordinates where wire signals will be sent. Mechanism tiles such as <see cref="F:Terraria.ID.TileID.Switches"/>, <see cref="F:Terraria.ID.TileID.PressurePlates"/>, <see cref="F:Terraria.ID.TileID.Timers"/>, and <see cref="F:Terraria.ID.TileID.LogicSensor"/> use this method as part of their interaction code.
             </summary>
             <param name="left"></param>
             <param name="top"></param>
@@ -31039,6 +31275,12 @@ itemFoundData.CopyTo(itemsFound, 0);
             <param name="effectOnly">Prevents the tile from being destroyed but still spawns hit dust and prevents the hit sound.</param>
             <param name="noItem">Prevents the item from dropping. Only relevant for 1x1 tiles.</param>
         </member>
+        <member name="M:Terraria.WorldGen.GetPlayerForTile(System.Int32,System.Int32)">
+            <summary>
+            Gets the player closest to the provided tile coordinates. Usually used to determine which player mined a tile.
+            <br/><br/> Technically this could be incorrect if multiple players are close, but since tile operations do not track which player triggered them, this is a reasonable approach.
+            </summary>
+        </member>
         <member name="M:Terraria.WorldGen.ChlorophyteDefense(System.Int32,System.Int32)">
             <summary>
             Called when an evil biome or hallow tile attempts to spread onto a tile but Chlorophyte (ore or bricks) is found nearby. If the tile targeted by the spreading biome happened to already be converted, this code will purify it back to its regular variant.<br/>
@@ -31064,6 +31306,9 @@ itemFoundData.CopyTo(itemsFound, 0);
             </summary>
         </member>
         <member name="M:Terraria.WorldGen.ConvertTile(System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <inheritdoc cref="M:Terraria.WorldGen.ConvertTile(System.Int32,System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:Terraria.WorldGen.ConvertTile(System.Int32,System.Int32,System.Int32)">
             <summary>
             Converts the single tile at the given coordinate into a specified new tile type<br/>
             Automatically handles tile framing and multiplayer syncing.
@@ -31071,7 +31316,6 @@ itemFoundData.CopyTo(itemsFound, 0);
             <param name="i">The X coordinate of the target tile.</param>
             <param name="j">The Y coordinate of the target tile.</param>
             <param name="newType">The new type to convert the tile into</param>
-            <param name="tryBreakTrees">Should the conversion try to break trees above the converted tile if the new type is invalid for the tree</param>
         </member>
         <member name="M:Terraria.WorldGen.ConvertWall(System.Int32,System.Int32,System.Int32)">
             <summary>

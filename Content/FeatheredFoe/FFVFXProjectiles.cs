@@ -966,7 +966,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             Projectile.tileCollide = false;
             Projectile.timeLeft = 1000; //180
-            Projectile.extraUpdates = 0;
+            Projectile.extraUpdates = 1;
         }
 
 
@@ -980,7 +980,7 @@ namespace VFXPlus.Content.FeatheredFoe
             if (timer == 0)
                 Projectile.ai[0] = 1f;
 
-            int trailCount = 14;  //14
+            int trailCount = 42;  //14
             previousRotations.Add(Projectile.velocity.ToRotation()); //
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -1006,7 +1006,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1.3f;
 
-            //Projectile.velocity.Y += 0.5f;
+            Projectile.velocity.Y += 0.15f;
 
             timer++;
         }
@@ -1115,78 +1115,9 @@ namespace VFXPlus.Content.FeatheredFoe
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
             */
             
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
-
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
-
-
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
-
-
-            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
-
-
-            Color StripColor(float progress) => Color.White * Easings.easeInQuad(progress) * overallAlpha;
-
-            float StripWidth(float progress)
-            {
-                float toReturn = 0f;
-                if (progress < 0.85f)
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
-                    toReturn = Easings.easeOutCirc(LV);
-                }
-                else
-                {
-                    float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutQuad(1f - LV);
-                }
-
-                return toReturn * sineWidthMult * overallScale * 50f; //80
-            }
-
-            //float StripWidth(float progress) => Math.Clamp(120f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f;
-            //float StripWidth2(float progress) => Math.Clamp(75f * sineWidthMult * overallScale * Easings.easeInSine(progress), 20f, 100f) * 0.3f; //75
-
-
-            VertexStrip vertexStrip = new VertexStrip();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
-            myEffect.Parameters["reps"].SetValue(0.5f);
-
-
-            //UnderLayer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Orange.ToVector3() * 2.5f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStrip.DrawTrail();
-
-
-            //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.Orange.ToVector3() * 2f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
             
-            ////////////////////////////////
-            ///*/
-            //Good shit two
-
-            /* 8
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value; //
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value; //
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThunderTrail").Value; //
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
@@ -1213,10 +1144,10 @@ namespace VFXPlus.Content.FeatheredFoe
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 120f * 0.75f; //50
+                return toReturn * sineWidthMult * overallScale * 120f * 1f; //50
             }
 
             float StripWidth2(float progress)
@@ -1230,10 +1161,10 @@ namespace VFXPlus.Content.FeatheredFoe
                 else //Front half
                 {
                     float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
-                    toReturn = 1f;// Easings.easeOutSine(1f - LV);
+                    toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 40f * 0.75f; //50
+                return toReturn * overallScale * 40f * 1f; //50
             }
 
 
@@ -1245,29 +1176,29 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
-            myEffect.Parameters["reps"].SetValue(1f);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.1f); //0.02
+            myEffect.Parameters["reps"].SetValue(2f);
 
 
             //Over layer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.HotPink.ToVector3() * 2f);
+            myEffect.Parameters["ColorOne"].SetValue(Color.DodgerBlue.ToVector3() * 2f);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1.2f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
-            Color between = Color.Lerp(Color.OrangeRed, Color.Orange, 1f);
+            Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
             //UnderLayer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
             myEffect.Parameters["glowThreshold"].SetValue(1f);
             myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(Color.HotPink.ToVector3() * 4.5f); //Hotpink4.5
+            myEffect.Parameters["ColorOne"].SetValue(between.ToVector3() * 4.5f); //Hotpink4.5
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            */
+            
 
         }
 
@@ -1433,6 +1364,155 @@ namespace VFXPlus.Content.FeatheredFoe
 
     }
 
+    public class WindTrail3 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = false;
+            Projectile.timeLeft = 1000; //180
+            Projectile.extraUpdates = 0;
+        }
+
+
+
+        int timer = 0;
+        public float overallAlpha = 1f;
+        public float overallScale = 1f;
+
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.ai[0] = 1f;
+
+            int trailCount = 21;  //14
+            previousRotations.Add(Projectile.velocity.ToRotation()); //
+            previousPositions.Add(Projectile.Center + Projectile.velocity);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            //Projectile.velocity = Projectile.velocity.RotatedBy(0.045f * Projectile.ai[0]); //0.045
+
+            //float rotVal = MathF.Sin((float)timer * 0.6f) * 0.06f;
+            //Projectile.velocity = Projectile.velocity.RotatedBy(rotVal); //0.045
+
+            //Projectile.velocity = Projectile.velocity.RotatedBy(0.09f * Projectile.ai[0]); //0.045
+
+            if (timer % 4 == 0 && Main.rand.NextBool(20))
+                Projectile.ai[0] *= -1f;
+
+
+            float timeForPopInAnim = 23; //33
+            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1.3f;
+
+            Projectile.velocity.Y += 0.15f;
+
+            timer++;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawVertexTrail(false);
+            });
+            DrawVertexTrail(true);
+
+            return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawVertexTrail(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TrailGradientMap", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailBloom").Value;
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine").Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
+
+            Color StripColor(float progress) => Color.White * Easings.easeInSine(progress) * overallAlpha;
+
+            float StripWidth(float progress)
+            {
+                float toReturn = 0f;
+                if (progress < 0.85f)
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
+                    toReturn = Easings.easeOutCirc(LV);
+                }
+                else
+                {
+                    float LV = Utils.GetLerpValue(0.5f, 1f, progress, true);
+                    toReturn = 1f;// Easings.easeOutQuad(1f - LV);
+                }
+
+                return toReturn * sineWidthMult * overallScale * 30f; //80
+            }
+
+            Vector3[] colors = {
+                Color.Black.ToVector3(),
+                Color.Blue.ToVector3() * 2f,
+                Color.DodgerBlue.ToVector3() * 2f,
+                Color.DeepSkyBlue.ToVector3() * 2f,
+                Color.White.ToVector3(),
+            };
+
+            /*
+            Vector3[] colors = {
+                new Vector3(0.0f, 0.0f, 0.0f),
+                new Vector3(0.78f, 0.09f, 0.09f),
+                new Vector3(0.97f, 0.44f, 0.129f),
+                new Vector3(1.0f, 0.95f, 0.51f),
+                new Vector3(1.0f, 1.0f, 1.0f),
+            };
+            */
+            VertexStrip vertexStrip = new VertexStrip();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
+            myEffect.Parameters["reps"].SetValue(1f);
+            myEffect.Parameters["colorIntensity"].SetValue(3f);
+
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            myEffect.Parameters["numberOfColors"].SetValue(5);
+            myEffect.Parameters["gradColors"].SetValue(colors);
+
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+        }
+
+    }
 
     public class WindPulseTest : ModProjectile
     {
