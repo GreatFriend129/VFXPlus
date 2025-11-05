@@ -123,7 +123,7 @@ namespace VFXPlus.Content
             //b23.drawLayer = "UnderProjectiles";
             //d23.customData = b23;
 
-            int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+            int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<CrackTest>(), 1, 0, Main.myPlayer);
             //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * -10f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
 
 

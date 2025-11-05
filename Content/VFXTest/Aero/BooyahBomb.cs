@@ -276,7 +276,7 @@ namespace VFXPlus.Content.VFXTest.Aero
         {
             Projectile.velocity.Y += 0.25f;
 
-            int trailCount = 14;
+            int trailCount = 20;
             previousRotations.Add(Projectile.velocity.ToRotation());
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -301,13 +301,13 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.75f, true, 2, 1f, 1f);
 
-            Dust d1 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
-            d1.customData = cpb2;
-            d1.velocity = new Vector2(-0.01f, 0f);
+            //Dust d1 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
+            //d1.customData = cpb2;
+            //d1.velocity = new Vector2(-0.01f, 0f);
                         
-            Dust d2 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
-            d2.customData = cpb2;
-            d2.velocity = new Vector2(0.01f, 0f);
+            //Dust d2 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
+            //d2.customData = cpb2;
+            //d2.velocity = new Vector2(0.01f, 0f);
 
             float sparkRotOffset = Main.rand.NextFloat(6.28f);
             int sparkCount = 8;
@@ -352,6 +352,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             Dust d11 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: between2, Scale: 1.5f);
             Dust d12 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.White, Scale: 0.6f);
 
+            int windFX2 = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<CrackTest>(), 0, 0, Main.myPlayer);
 
 
 
@@ -382,7 +383,7 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
-                DrawTrail(false);
+                DrawTrail(true);
                 DrawBasicBall(false);
             });
 
@@ -484,14 +485,14 @@ namespace VFXPlus.Content.VFXTest.Aero
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
 
 
-            Color StripColor(float progress) => Color.White * Easings.easeInSine(progress) * overallAlpha;
+            Color StripColor(float progress) => Color.White * Easings.easeInCubic(progress * progress) * overallAlpha * 1f;
 
             float StripWidth(float progress)
             {
                 float toReturn = 0f;
-                if (progress < 0.5f) //back half
+                if (progress < 0.95f) //back half
                 {
-                    float LV = Utils.GetLerpValue(0f, 0.5f, progress, true);
+                    float LV = Utils.GetLerpValue(0f, 0.95f, progress, true);
                     toReturn = Easings.easeOutSine(LV);
                 }
                 else //Front half
@@ -500,15 +501,15 @@ namespace VFXPlus.Content.VFXTest.Aero
                     toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 120f * 1f; //50
+                return toReturn * sineWidthMult * overallScale * 120f * 0.85f; //50
             }
 
             float StripWidth2(float progress)
             {
                 float toReturn = 0f;
-                if (progress < 0.5f) //back half
+                if (progress < 0.95f) //back half
                 {
-                    float LV = Utils.GetLerpValue(0f, 0.5f, progress, true);
+                    float LV = Utils.GetLerpValue(0f, 0.95f, progress, true);
                     toReturn = Easings.easeOutSine(LV);
                 }
                 else //Front half
@@ -517,7 +518,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                     toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 40f * 1f; //50
+                return toReturn * overallScale * 40f * 0.85f; //50
             }
 
 
@@ -527,25 +528,28 @@ namespace VFXPlus.Content.VFXTest.Aero
             VertexStrip vertexStrip2 = new VertexStrip();
             vertexStrip2.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth2, -Main.screenPosition, includeBacksides: true);
 
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.1f); //0.02
-            myEffect.Parameters["reps"].SetValue(2f);
 
-            //Over layer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.DodgerBlue.ToVector3() * 2f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
+
+            float repPercent = (float)previousPositions.Count / 20f;
+            trailEffect.Parameters["reps"].SetValue(1f * repPercent);
+
+            //Under layer
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["ColorOne"].SetValue(Color.DodgerBlue.ToVector3() * 1f);
+            trailEffect.Parameters["glowThreshold"].SetValue(1f);
+            trailEffect.Parameters["glowIntensity"].SetValue(1.2f);
+            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
-            Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
-            //UnderLayer
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(between.ToVector3() * 4.5f); //Hotpink4.5
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.4f);
+            //Over 
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
+            trailEffect.Parameters["glowThreshold"].SetValue(1f);
+            trailEffect.Parameters["glowIntensity"].SetValue(1f);
+            trailEffect.Parameters["ColorOne"].SetValue(between.ToVector3() * 2.5f); //Hotpink4.5
+            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();

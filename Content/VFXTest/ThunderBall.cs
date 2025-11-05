@@ -1443,14 +1443,14 @@ namespace VFXPlus.Content.VFXTest
             if (timer == 0)
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
 
-            int timeForPulse = 40; //30
+            int timeForPulse = 30; //30
             if (timer <= timeForPulse)
-                overallScale = MathHelper.Lerp(0f, 1f, Easings.easeOutQuint((float)timer / (float)timeForPulse));
+                overallScale = MathHelper.Lerp(0.1f, 0.85f, Easings.easeOutCubic((float)timer / (float)timeForPulse)); //1f
 
             if (timer >= 0)
             {
-                if (timer >= (timeForPulse * 0.35f))
-                    overallAlpha -= 0.055f;
+                if (timer >= (timeForPulse * 0.45f))
+                    overallAlpha -= 0.08f;
 
                 if (overallAlpha <= 0)
                     Projectile.active = false;
@@ -1479,10 +1479,14 @@ namespace VFXPlus.Content.VFXTest
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing1").Value;
-            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.2f);
-            Main.EntitySpriteDraw(ball, drawPos, null, Color.White with { A = 0 } * overallAlpha, rot, ball.Size() / 2f, 0.125f * overallScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(ball, drawPos, null, Color.White with { A = 0 } * overallAlpha, rot, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing3").Value;
+            Texture2D ring = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowRing").Value;
+
+            Main.EntitySpriteDraw(ring, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 0.5f, 0f, ring.Size() / 2f, 0.65f * overallScale, SpriteEffects.None);
+
+            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.15f);
+            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 1.5f, rot * 1.2f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(ball, drawPos, null, Color.White with { A = 0 } * overallAlpha * 0f, -rot, ball.Size() / 2f, 0.25f * overallScale, SpriteEffects.None);
         }
 
     }
