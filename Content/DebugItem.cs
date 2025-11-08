@@ -123,8 +123,20 @@ namespace VFXPlus.Content
             //b23.drawLayer = "UnderProjectiles";
             //d23.customData = b23;
 
-            int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<CrackTest>(), 1, 0, Main.myPlayer);
-            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * -10f, ModContent.ProjectileType<WindTrail>(), 1, 0, Main.myPlayer);
+            for (int i = 220; i < 7 + Main.rand.Next(0, 4); i++) //2 //0,3
+            {
+                Dust dp = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(),
+                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.35f, 0.35f)) * Main.rand.Next(3, 20),
+                    newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.75f);
+
+                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.91f, FadeScalePower: 0.97f, FadeVelPower: 0.9f, Pixelize: true, XScale: 1f, YScale: 0.75f); //0.91
+
+                dp.customData = esb;
+            }
+
+
+            //int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
+            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<CrackTest>(), 1, 0, Main.myPlayer);
 
 
             /*

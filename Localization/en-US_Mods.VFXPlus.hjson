@@ -216,6 +216,7 @@ Projectiles: {
 	BooyahBombRecoil.DisplayName: Booyah Bomb Recoil
 	BooyahBombExplosion.DisplayName: Booyah Bomb Explosion
 	WindTrail3.DisplayName: Wind Trail3
+	CrackTest2.DisplayName: Crack Test2
 }
 
 Configs: {

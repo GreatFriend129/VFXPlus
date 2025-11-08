@@ -1116,8 +1116,8 @@ namespace VFXPlus.Content.FeatheredFoe
             */
             
             
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; //
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThunderTrail").Value; //
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinnerGlowTrail").Value; //
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/OuterLavaTrail").Value; //
 
             if (myEffect == null)
                 myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
@@ -1147,7 +1147,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 120f * 1f; //50
+                return toReturn * sineWidthMult * overallScale * 85f * 1f; //50
             }
 
             float StripWidth2(float progress)
@@ -1164,7 +1164,7 @@ namespace VFXPlus.Content.FeatheredFoe
                     toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 40f * 1f; //50
+                return toReturn * overallScale * 15f * 1f; //50
             }
 
 
@@ -1176,24 +1176,25 @@ namespace VFXPlus.Content.FeatheredFoe
 
 
             myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.1f); //0.02
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.06f); //0.02
             myEffect.Parameters["reps"].SetValue(2f);
 
+            Color between = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
+            Color between2 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.5f);
 
             //Over layer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["ColorOne"].SetValue(Color.DodgerBlue.ToVector3() * 2f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1.2f);
+            myEffect.Parameters["ColorOne"].SetValue(between.ToVector3() * 2f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.6f);
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip.DrawTrail();
 
-            Color between = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.35f);
             //UnderLayer
             myEffect.Parameters["TrailTexture"].SetValue(trailTexture2);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.Parameters["ColorOne"].SetValue(between.ToVector3() * 4.5f); //Hotpink4.5
+            myEffect.Parameters["glowThreshold"].SetValue(0.8f);
+            myEffect.Parameters["glowIntensity"].SetValue(1.6f);
+            myEffect.Parameters["ColorOne"].SetValue(between2.ToVector3() * 4.5f); //Hotpink4.5
             myEffect.CurrentTechnique.Passes["MainPS"].Apply();
             vertexStrip2.DrawTrail();
 

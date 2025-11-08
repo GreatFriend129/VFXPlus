@@ -276,7 +276,7 @@ namespace VFXPlus.Content.VFXTest.Aero
         {
             Projectile.velocity.Y += 0.25f;
 
-            int trailCount = 20;
+            int trailCount = 30;
             previousRotations.Add(Projectile.velocity.ToRotation());
             previousPositions.Add(Projectile.Center + Projectile.velocity);
 
@@ -292,6 +292,16 @@ namespace VFXPlus.Content.VFXTest.Aero
             if (timer > 5)
                 justShotVal = Math.Clamp(MathHelper.Lerp(justShotVal, -0.35f, 0.04f), 0f, 1f);
 
+            if (timer % 4 == 0)
+            {
+                Dust dp = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<ElectricSparkGlow>(), newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.85f, 1f));
+                dp.velocity += Projectile.velocity * 0.5f;
+
+                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.8f, FadeScalePower: 0.91f, FadeVelPower: 0.92f, Pixelize: false, XScale: 1f, YScale: 1f); //0.91
+                esb.killEarlyTime = 20;
+                dp.customData = esb;
+            }
+
             timer++;
         }
 
@@ -299,61 +309,75 @@ namespace VFXPlus.Content.VFXTest.Aero
         {
             Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f);
 
-            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.75f, true, 2, 1f, 1f);
+            CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.65f, true, 2, 1f, 1f);
 
             //Dust d1 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
             //d1.customData = cpb2;
             //d1.velocity = new Vector2(-0.01f, 0f);
-                        
+
             //Dust d2 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<CirclePulse2>(), Velocity: Vector2.Zero, newColor: between * 0.15f);
             //d2.customData = cpb2;
             //d2.velocity = new Vector2(0.01f, 0f);
 
+
             float sparkRotOffset = Main.rand.NextFloat(6.28f);
             int sparkCount = 8;
-            for (int i = 0; i < sparkCount; i++) //2 //0,3
+            for (int i = 220; i < sparkCount; i++) //2 //0,3
             {
-                //Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(2.5f, 10f) * sparkVelMult;
-
                 float dir = (MathHelper.TwoPi / (float)sparkCount) * i;
 
-                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(5f, 12f);
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(2f, 6.5f) * 2f;
                 dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f) + sparkRotOffset);
 
-                Dust dp = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<ElectricSparkGlow>(), dustVel, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(1f, 1.25f) * 2f);
+                Dust dp = Dust.NewDustPerfect(Projectile.Center + dustVel, ModContent.DustType<ElectricSparkGlow>(), dustVel, newColor: Color.DeepSkyBlue * 1f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 3f);
 
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.89f, FadeScalePower: 0.9f, FadeVelPower: 0.9f, Pixelize: true, XScale: 1f, YScale: 0.75f); //0.91
-
-                if (i < sparkCount / 2)
-                    esb.randomVelRotatePower = 0f;
+                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.91f, FadeScalePower: 0.93f, FadeVelPower: 0.9f, TimeBetweenFrames: 5, Pixelize: true, XScale: 1f, YScale: 0.75f); //0.91
+                esb.randomVelRotatePower = 1f;
                 dp.customData = esb;
             }
 
+
             float crossRotOffset = Main.rand.NextFloat(6.28f);
             int crossCount = 8;
-            for (int i = 0; i < crossCount; i++)
+            for (int i = 220; i < crossCount; i++)
             {
                 float dir = (MathHelper.TwoPi / (float)crossCount) * i;
 
-                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 7f);
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(2f, 5f);
                 dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f) + crossRotOffset);
 
                 Color middleBlue = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f + Main.rand.NextFloat(-0.15f, 0.15f));
 
-                Dust gd = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                Dust gd = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: middleBlue, Scale: Main.rand.NextFloat(0.55f, 0.7f));
                 gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5,
-                    preSlowPower: 0.94f, postSlowPower: 0.9f, velToBeginShrink: 1.5f, fadePower: 0.92f, shouldFadeColor: false);
+                    preSlowPower: 0.94f, postSlowPower: 0.9f, velToBeginShrink: 2f, fadePower: 0.92f, shouldFadeColor: false);
             }
 
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Thunder/ElectricExplode") with { Volume = 0.05f, Pitch = 0.35f, PitchVariance = 0.15f, MaxInstances = -1, };
             SoundEngine.PlaySound(style, Projectile.Center);
 
             Color between2 = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.15f);
-            Dust d11 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: between2, Scale: 1.5f);
-            Dust d12 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.White, Scale: 0.6f);
+            Dust d11 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: between2, Scale: 2.4f);
+            Dust d12 = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowStarSharp>(), Velocity: Vector2.Zero, newColor: Color.White, Scale: 1.2f);
 
-            int windFX2 = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<CrackTest>(), 0, 0, Main.myPlayer);
+            d11.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.85f, shouldFadeColor: true);
+            d12.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.85f, shouldFadeColor: true);
 
+            int windFX2 = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<GaussExplosionVFX>(), 0, 0, Main.myPlayer);
+            int windFX23 = Projectile.NewProjectile(null, Projectile.Center, Vector2.Zero, ModContent.ProjectileType<CrackTest>(), 0, 0, Main.myPlayer);
+
+            for (int i = 220; i < 16 + Main.rand.Next(0, 2); i++)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(10f, 10f) * 1.5f;
+
+                Color col = Color.DeepSkyBlue;
+
+                Dust pa = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<PixelatedLineSpark>(), vel,
+                    newColor: col, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 0.5f);
+
+                pa.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 8 + Main.rand.Next(-5, 5), killEarlyTime: 40,
+                    1f, 0.5f, shouldFadeColor: false);
+            }
 
 
             return base.PreKill(timeLeft);
@@ -383,7 +407,7 @@ namespace VFXPlus.Content.VFXTest.Aero
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
             {
-                DrawTrail(true);
+                DrawTrail(false);
                 DrawBasicBall(false);
             });
 
@@ -471,7 +495,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                 return;
 
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value; 
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThunderTrail").Value;
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/Trail5Loop").Value;
 
             if (trailEffect == null)
                 trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
@@ -485,7 +509,7 @@ namespace VFXPlus.Content.VFXTest.Aero
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0f;
 
 
-            Color StripColor(float progress) => Color.White * Easings.easeInCubic(progress * progress) * overallAlpha * 1f;
+            Color StripColor(float progress) => Color.White * Easings.easeInCubic(progress * progress) * overallAlpha * (1f - justShotVal);
 
             float StripWidth(float progress)
             {
@@ -518,7 +542,7 @@ namespace VFXPlus.Content.VFXTest.Aero
                     toReturn = 1f;//Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 40f * 0.85f; //50
+                return toReturn * overallScale * 70f; //50
             }
 
 
@@ -530,14 +554,14 @@ namespace VFXPlus.Content.VFXTest.Aero
 
 
             trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.035f); //0.02
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f); //0.02
 
-            float repPercent = (float)previousPositions.Count / 20f;
-            trailEffect.Parameters["reps"].SetValue(1f * repPercent);
+            float repPercent = (float)previousPositions.Count / 30f;
+            trailEffect.Parameters["reps"].SetValue(0.5f * repPercent);
 
             //Under layer
             trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            trailEffect.Parameters["ColorOne"].SetValue(Color.DodgerBlue.ToVector3() * 1f);
+            trailEffect.Parameters["ColorOne"].SetValue(Color.DeepSkyBlue.ToVector3() * 1f);
             trailEffect.Parameters["glowThreshold"].SetValue(1f);
             trailEffect.Parameters["glowIntensity"].SetValue(1.2f);
             trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
@@ -555,5 +579,99 @@ namespace VFXPlus.Content.VFXTest.Aero
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
         }
 
+    }
+
+    public class GaussExplosionVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.DamageType = DamageClass.Magic;
+            Projectile.hostile = false;
+            Projectile.penetrate = -1;
+
+            Projectile.scale = 1f;
+
+            Projectile.timeLeft = 800;
+            Projectile.tileCollide = false;
+            Projectile.width = 20;
+            Projectile.height = 20;
+        }
+
+        public override bool? CanCutTiles() => false;
+        public override bool? CanDamage() => false;
+
+        int timer = 0;
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+
+            int timeForPulse = 30;
+            if (timer <= timeForPulse)
+                overallScale = MathHelper.Lerp(0f, 1f, Easings.easeOutQuint((float)timer / (float)timeForPulse));
+
+            if (timer >= 0)
+            {
+                if (timer >= (timeForPulse * 0.15f))
+                    overallAlpha -= 0.055f;
+
+                if (overallAlpha <= 0)
+                    Projectile.active = false;
+            }
+
+            timer++;
+        }
+
+        float overallScale = 0f;
+        float overallAlpha = 1f;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawShader(false);
+            });
+            DrawShader(true);
+
+            return false;
+        }
+
+        public void DrawShader(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/NewRadialScroll", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["causticTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/WaterEnergyNoise").Value); //foam_mask_bloom
+            myEffect.Parameters["gradientTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Gradients/SofterBlueGrad").Value);
+            myEffect.Parameters["distortTexture"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/sparkNoiseloop").Value);
+            myEffect.Parameters["flowSpeed"].SetValue(1f);
+            myEffect.Parameters["distortStrength"].SetValue(0.06f);
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.01f);
+
+            myEffect.Parameters["vignetteSize"].SetValue(1f);
+            myEffect.Parameters["vignetteBlend"].SetValue(0.8f);
+            myEffect.Parameters["colorIntensity"].SetValue(2f * overallAlpha);
+
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Orbs/circle_05").Value;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            float scale = overallScale * Projectile.scale * 0.65f;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
+
+            Main.spriteBatch.Draw(Tex2, drawPos, null, Color.White, Projectile.rotation, Tex2.Size() / 2, scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, Color.White, Projectile.rotation, Tex2.Size() / 2, scale, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+        }
     }
 }

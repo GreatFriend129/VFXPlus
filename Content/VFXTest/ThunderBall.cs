@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -635,7 +636,7 @@ namespace VFXPlus.Content.VFXTest
 
         public override void SetStaticDefaults()
         {
-            Main.projFrames[Projectile.type] = 30;
+            Main.projFrames[Projectile.type] = 64;
         }
         public override void SetDefaults()
         {
@@ -652,13 +653,23 @@ namespace VFXPlus.Content.VFXTest
 
         public override void AI()
         {
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
 
             Projectile.frameCounter++;
-            if (Projectile.frameCounter >= 1)
+            if (Projectile.frameCounter >= 0)
             {
                 Projectile.frameCounter = 0;
                 Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
+                Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
             }
+
+            if (Projectile.frame >= 60)
+                Projectile.active = false;
+
+            Projectile.velocity *= 0.98f;
+
+            Projectile.velocity = Projectile.velocity.RotateRandom(0.02f);
 
             timer++;
         }
@@ -669,25 +680,41 @@ namespace VFXPlus.Content.VFXTest
         float scale = 1f;
         public override bool PreDraw(ref Color lightColor)
         {
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Anim/Smoke30Frames").Value;
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawSmoke(false);
+            });
 
+            DrawSmoke(true);
+            return false;
+        }
 
-            int reverseFrame = (30 - Projectile.frame) - 1;
+        public void DrawSmoke(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
 
             int frameHeight = Smoke.Height / Main.projFrames[Projectile.type];
-            int startY = frameHeight * reverseFrame;
+            int frameWidth = Smoke.Width / Main.projFrames[Projectile.type];
 
-            Rectangle sourceRectangle = new Rectangle(0, startY, Smoke.Width, frameHeight);
+            int startX = (Projectile.frame % 8);
+            int startY = (int)Math.Floor(Projectile.frame / 8f);
+
+            //Main.NewText((Projectile.frame % 8) + "|" + (int)Math.Floor(Projectile.frame / 8f));
+
+            Rectangle sourceRectangle = Smoke.Frame(8, 8, startX, startY);
             Vector2 origin = sourceRectangle.Size() / 2f;
 
-            Projectile.scale = 0.5f;
+            float prog = Utils.GetLerpValue(0f, 15f, timer, true);
+            float totalProg = Utils.GetLerpValue(0f, 60f, timer, true);
 
+            Color col = Color.Lerp(Color.White, Color.OrangeRed, prog);
+            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, col with { A = 0 }, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
 
-
-            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, Color.DeepSkyBlue with { A = 0 }, Projectile.rotation, origin, 1f * scale * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
-            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 }, Projectile.rotation, origin, 0.6f * scale * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
-
-            return false;
+            //Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
+            //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.OrangeRed with { A = 0 } * 1f * (1f - Easings.easeInQuad(totalProg)), 0f, Ball.Size() / 2f, prog, 0, 0f); //0.3
         }
     }
 
@@ -1443,18 +1470,43 @@ namespace VFXPlus.Content.VFXTest
             if (timer == 0)
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
 
-            int timeForPulse = 30; //30
+            int timeForPulse = 15; //15
             if (timer <= timeForPulse)
-                overallScale = MathHelper.Lerp(0.1f, 0.85f, Easings.easeOutCubic((float)timer / (float)timeForPulse)); //1f
+                overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
 
             if (timer >= 0)
             {
-                if (timer >= (timeForPulse * 0.45f))
+                if (timer >= (timeForPulse * 0.75f))
                     overallAlpha -= 0.08f;
+
+                if (timer > 20) //
+                    overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
 
                 if (overallAlpha <= 0)
                     Projectile.active = false;
             }
+
+            //Projectile.rotation = timer * (0.15f * overallScale);
+
+            Lighting.AddLight(Projectile.Center, Color.DeepSkyBlue.ToVector3() * overallScale);
+
+            /*
+            int timeForPulse = 20; //15
+            if (timer <= timeForPulse)
+                overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
+
+            if (timer >= 0)
+            {
+                if (timer >= (timeForPulse * 0.5f))
+                    overallAlpha -= 0.06f;
+
+                if (timer > 20) //
+                    overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
+
+                if (overallAlpha <= 0)
+                    Projectile.active = false;
+            }
+            */
 
             timer++;
         }
@@ -1479,16 +1531,137 @@ namespace VFXPlus.Content.VFXTest
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing3").Value;
-            Texture2D ring = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowRing").Value;
+            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing4").Value;
+            Texture2D ring = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowRing2").Value;
 
-            Main.EntitySpriteDraw(ring, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 0.5f, 0f, ring.Size() / 2f, 0.65f * overallScale, SpriteEffects.None);
+            Texture2D orb = Mod.Assets.Request<Texture2D>("Assets/Flare/flare_4Black").Value;
+            float rot2 = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.075f);
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 0.5f, rot2 * 1.5f, orb.Size() / 2f, 1.5f * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.SkyBlue with { A = 0 } * overallAlpha * 0.5f, -rot2, orb.Size() / 2f, 0.8f * overallScale * overallAlpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, Color.White with { A = 0 } * overallAlpha * 0.5f, rot2 * 0.5f, orb.Size() / 2f, 0.45f * overallScale * overallAlpha, SpriteEffects.None);
 
-            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.15f);
-            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 1.5f, rot * 1.2f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(ball, drawPos, null, Color.White with { A = 0 } * overallAlpha * 0f, -rot, ball.Size() / 2f, 0.25f * overallScale, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(ring, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 1f, 0f, ring.Size() / 2f, 0.26f * overallScale, SpriteEffects.None);
+
+            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.1f);
+            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 1.5f, rot * 1.5f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, -rot, ball.Size() / 2f, 0.25f * overallScale, SpriteEffects.None);
+
+
+            //Main.EntitySpriteDraw(ring, drawPos, null, Color.DeepSkyBlue with { A = 0 } * overallAlpha * 0.5f, 0f, ring.Size() / 2f, 0.65f * overallScale, SpriteEffects.None);
+            //float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.12f);
+            //Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, rot * 1.2f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+
         }
 
     }
+
+    public class CrackTest2 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        int timer = 0;
+
+        public override void AI()
+        {
+
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+
+            //int timeForPulse = 15; //15
+            //if (timer <= timeForPulse)
+            //    overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
+
+            //if (timer >= 0)
+            //{
+             //   if (timer >= (timeForPulse * 0.75f))
+             //       overallAlpha -= 0.08f;
+
+//                if (timer > 20) //
+  ///                  overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
+
+     ///           if (overallAlpha <= 0)
+        ///            Projectile.active = false;
+           /// }
+
+            //Projectile.rotation = timer * (0.15f * overallScale);
+
+            Lighting.AddLight(Projectile.Center, Color.DeepSkyBlue.ToVector3() * overallScale);
+
+            
+            int timeForPulse = 20; //15
+            if (timer <= timeForPulse)
+                overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
+
+            if (timer >= 0)
+            {
+                if (timer >= (timeForPulse * 0.5f))
+                    overallAlpha -= 0.06f;
+
+                if (timer > 20) //
+                    overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
+
+                if (overallAlpha <= 0)
+                    Projectile.active = false;
+            }
+            
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawCrack(false);
+            });
+
+            DrawCrack(true);
+
+            return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawCrack(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing4").Value;
+            Texture2D ring = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowRing").Value;
+
+            //Main.EntitySpriteDraw(ring, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 1f, 0f, ring.Size() / 2f, 0.26f * overallScale, SpriteEffects.None);
+
+            //float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.1f);
+            //Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 1.5f, rot * 1.5f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, -rot, ball.Size() / 2f, 0.25f * overallScale, SpriteEffects.None);
+
+
+            Main.EntitySpriteDraw(ring, drawPos, null, Color.DeepSkyBlue with { A = 0 } * overallAlpha * 0.5f, 0f, ring.Size() / 2f, 0.65f * overallScale, SpriteEffects.None);
+            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.12f);
+            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, rot * 1.2f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+
+        }
+
+    }
+
 
 }

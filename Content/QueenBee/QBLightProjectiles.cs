@@ -531,8 +531,6 @@ namespace VFXPlus.Content.QueenBee
 
     }
 
-
-
     public class SmokeTest5 : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";

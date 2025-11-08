@@ -261,6 +261,8 @@ namespace VFXPlus.Content.Dusts
             whiteLayerPower = WhiteLayerPower;
 
             drawWhiteWithAlphaZero = DrawWhiteWithAlphaZero;
+
+            sparkCurrentFrame = Main.rand.Next(0, 6);
         }
 
 
@@ -272,6 +274,8 @@ namespace VFXPlus.Content.Dusts
             fadeVelPower = FadeVelPower;
             pixelize = Pixelize;
             vec2Scale = new Vector2(XScale, YScale);
+
+            sparkCurrentFrame = Main.rand.Next(0, 6);
         }
 
     }
