@@ -1584,55 +1584,29 @@ namespace VFXPlus.Content.VFXTest
             if (timer == 0)
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
 
-            //int timeForPulse = 15; //15
-            //if (timer <= timeForPulse)
-            //    overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
+           
+            Lighting.AddLight(Projectile.Center, Color.HotPink.ToVector3() * overallScale);
 
-            //if (timer >= 0)
-            //{
-             //   if (timer >= (timeForPulse * 0.75f))
-             //       overallAlpha -= 0.08f;
+            int timeForAnim = 40;
+            float animProg = Utils.GetLerpValue(0f, timeForAnim, timer, true);
 
-//                if (timer > 20) //
-  ///                  overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
+            overallAlpha = 1f;// - animProg;
 
-     ///           if (overallAlpha <= 0)
-        ///            Projectile.active = false;
-           /// }
 
-            //Projectile.rotation = timer * (0.15f * overallScale);
-
-            Lighting.AddLight(Projectile.Center, Color.DeepSkyBlue.ToVector3() * overallScale);
-
-            
-            int timeForPulse = 20; //15
-            if (timer <= timeForPulse)
-                overallScale = MathHelper.Lerp(0.1f, 0.75f, Easings.easeOutQuad((float)timer / (float)timeForPulse)); //.1 .75 outCubic
-
-            if (timer >= 0)
-            {
-                if (timer >= (timeForPulse * 0.5f))
-                    overallAlpha -= 0.06f;
-
-                if (timer > 20) //
-                    overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.01f), 0f, 1f); //
-
-                if (overallAlpha <= 0)
-                    Projectile.active = false;
-            }
-            
+            //if (animProg == 1f)
+                //Projectile.active = false;
 
             timer++;
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawCrack(false);
+                DrawCrack(true);
             });
 
-            DrawCrack(true);
+            DrawCrack(false);
 
             return false;
         }
@@ -1645,20 +1619,36 @@ namespace VFXPlus.Content.VFXTest
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Texture2D ball = Mod.Assets.Request<Texture2D>("Assets/Ring/ThunderRing4").Value;
-            Texture2D ring = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowRing").Value;
+            Texture2D Crack = Mod.Assets.Request<Texture2D>("Assets/Crack/GlowCrack").Value;
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/MapOdd").Value;
 
-            //Main.EntitySpriteDraw(ring, drawPos, null, Color.DodgerBlue with { A = 0 } * overallAlpha * 1f, 0f, ring.Size() / 2f, 0.26f * overallScale, SpriteEffects.None);
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Compiler/SmokeColShader", AssetRequestMode.ImmediateLoad).Value;
 
-            //float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.1f);
-            //Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 1.5f, rot * 1.5f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, -rot, ball.Size() / 2f, 0.25f * overallScale, SpriteEffects.None);
+            float maskVal = 0.5f + ((float)Math.Sin(Main.timeForVisualEffects * 0.05f) * 0.5f);
+
+            Color myCol = Color.Lerp(Color.DeepPink, Color.HotPink, 0f);
+
+            myEffect.Parameters["color"].SetValue(myCol.ToVector3() * 6f); //15
+            myEffect.Parameters["glowThreshold"].SetValue(0.8f); //0.8f
+            myEffect.Parameters["glowPower"].SetValue(2.5f); //3.5
+            myEffect.Parameters["fadeProgress"].SetValue(maskVal);
+            myEffect.Parameters["endAlpha"].SetValue(1f); //* overallAlpha
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+
+            //Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            //Main.spriteBatch.Draw(Ball, drawPos, null, myCol with { A = 0 } * Easings.easeInSine(overallAlpha) * 0.25f, Projectile.rotation, Ball.Size() / 2f, Projectile.scale * overallScale * 1.45f, SE, 0f); //0.3
 
 
-            Main.EntitySpriteDraw(ring, drawPos, null, Color.DeepSkyBlue with { A = 0 } * overallAlpha * 0.5f, 0f, ring.Size() / 2f, 0.65f * overallScale, SpriteEffects.None);
-            float rot = Projectile.rotation + (float)(Main.timeForVisualEffects * 0.12f);
-            Main.EntitySpriteDraw(ball, drawPos, null, Color.LightSkyBlue with { A = 0 } * overallAlpha * 2f, rot * 1.2f, ball.Size() / 2f, 0.5f * overallScale, SpriteEffects.None);
+            //Main Tex
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
+            Main.spriteBatch.Draw(Crack, drawPos, null, myCol * overallAlpha * 1f, Projectile.rotation, Crack.Size() / 2f, Projectile.scale * overallScale * 0.25f + (maskVal * 0.2f), SpriteEffects.None, 0f); //0.3
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
         }
 
     }

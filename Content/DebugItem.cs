@@ -13,6 +13,7 @@ using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
+using VFXPlus.Content.VFXTest.Aero.TrojanForce;
 
 
 namespace VFXPlus.Content
@@ -136,7 +137,7 @@ namespace VFXPlus.Content
 
 
             //int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
-            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<CrackTest>(), 1, 0, Main.myPlayer);
+            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceBotTest>(), 1, 0, Main.myPlayer);
 
 
             /*
@@ -185,7 +186,7 @@ namespace VFXPlus.Content
                 float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
                 float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
 
-                Color thisCol = Color.Lerp(Color.LightSkyBlue, Color.DeepSkyBlue, 0.25f);
+                Color thisCol = Color.Lerp(Color.LightSkyBlue, Color.DeepSkyBlue, 1f);
                 // Color.Lerp(Color.Purple, Color.DeepPink, 0f);// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);// Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);
 
                 //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(2f, 4.5f);
@@ -195,8 +196,8 @@ namespace VFXPlus.Content
                 //fire1.timeBeforeStartAlphaFade = 5;
                 //ShaderParticleHandler.SpawnParticle(fire1);
 
-                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f);
-                FireParticle fire = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(5f, 5f), myvel, 0.75f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
+                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 0.5f;
+                FireParticle fire = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(5f, 5f), myvel, 0.5f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
                     AlphaFade: 0.95f, RotPower: 0.01f);
                 ShaderParticleHandler.SpawnParticle(fire);
 
