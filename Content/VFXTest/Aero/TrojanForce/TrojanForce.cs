@@ -885,7 +885,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             TriangleLaser,
             Dash,
             LaserSpam,
-            PlayerOrbit,
+            Idle,
             Glitching
         }
 
@@ -893,7 +893,9 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
         //How blue the colors should be 0f = pink, 1f = blue
         float dashColorProgress = 0f;
-        
+
+        float orbChargePower = 0f;
+
         float justShotPower = 0f;
 
         int timer = 0;
@@ -905,7 +907,7 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
         {
             FindTarget();
 
-            //currentState = State.Dash;
+            currentState = State.LaserSpam;
             switch (currentState)
             {
                 case State.TriangleLaser:
@@ -917,8 +919,8 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 case State.LaserSpam:
                     LaserSpam();
                     break;
-                case State.PlayerOrbit:
-                    PlayerOrbit();
+                case State.Idle:
+                    Idle();
                     break;
                 case State.Glitching:
                     Glitching();
@@ -950,9 +952,9 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
                     Vector2 dustSpawnPos = Projectile.Center + Projectile.rotation.ToRotationVector2() * -20f;
 
-                    float particleScale = isDashing ? 0.7f : 0.35f;
+                    float particleScale = isDashing ? 0.7f : 0.5f;
 
-                    FireParticle fire = new FireParticle(dustSpawnPos + Main.rand.NextVector2Circular(2f, 2f), myvel, 0.5f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
+                    FireParticle fire = new FireParticle(dustSpawnPos + Main.rand.NextVector2Circular(2f, 2f), myvel, particleScale, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
                         AlphaFade: 0.88f, RotPower: 0.01f);
                     fire.renderLayer = RenderLayer.UnderProjectiles;
                     ShaderParticleHandler.SpawnParticle(fire);
@@ -972,7 +974,6 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
         #region States
         public void SpawnIn()
         {
-
             substateTimer++;
         }
 
@@ -1137,11 +1138,122 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
 
         public void LaserSpam()
         {
+            if (!FindTarget())
+                return;
 
+            int timeBeforeSpam = 60;
+            int laserSpamTime = 70;
+            int timeBetweenShots = 5;
+
+            if (substateTimer < timeBeforeSpam)
+            {
+                if (substateTimer == 0)
+                    orbitVector = Main.rand.NextVector2CircularEdge(200f, 200f);
+
+                //Move to target
+                Vector2 goalPos = target.Center + orbitVector;
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, Projectile.DirectionTo(goalPos) * (Projectile.Distance(goalPos) / 15), 0.2f); //15 0.2
+
+                Projectile.rotation = (target.Center - Projectile.Center).ToRotation();
+
+                orbChargePower = Utils.GetLerpValue(0, timeBeforeSpam, substateTimer, true);
+
+            }
+            else if (substateTimer < timeBeforeSpam + laserSpamTime)
+            {
+                Vector2 goalPos = target.Center + orbitVector;
+
+                //Shoot
+                if (substateTimer % timeBetweenShots == 0)
+                {
+                    Vector2 toTarget = (target.Center - Projectile.Center).SafeNormalize(Vector2.UnitX);
+
+                    int laser = Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center, toTarget.RotateRandom(0.1f) * 7f, ProjectileID.NebulaBlaze1, 10, 1, Projectile.owner);
+                    Main.projectile[laser].scale *= 0.65f;
+                    Main.projectile[laser].penetrate = 1;
+
+                    //Recoil
+                    Projectile.velocity += toTarget * -2f;
+                    Projectile.rotation = toTarget.ToRotation();
+
+                    //Dust
+                    Vector2 dustPos = Projectile.Center;
+                    Color between = Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
+                    for (int i = 0; i < 1 + Main.rand.Next(1, 3); i++) //2 //0,3
+                    {
+                        Dust dp = Dust.NewDustPerfect(dustPos, ModContent.DustType<LineSpark>(),
+                            toTarget.RotatedBy(Main.rand.NextFloat(-0.3f, 0.3f)) * Main.rand.NextFloat(6f, 22f),
+                            newColor: between * 1f, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.45f);
+
+                        dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 80,
+                            1f, 0.5f);
+                    }
+
+                    for (int i = 0; i < 2 + Main.rand.Next(0, 3); i++)
+                    {
+                        Color col1 = Color.Lerp(Color.DeepPink, Color.HotPink, 0.65f);
+
+                        Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
+                        Dust dust = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: col1, Scale: Main.rand.NextFloat(0.25f, 0.3f) * 1.15f);
+                        dust.noLight = false;
+                        dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 0, postSlowPower: 0.89f,
+                            velToBeginShrink: 10f, fadePower: 0.93f, shouldFadeColor: false);
+
+                        dust.velocity += toTarget * 6f;
+                    }
+
+
+                    Vector2 vel = toTarget * 1f; //2.5
+                    Dust d = Dust.NewDustPerfect(dustPos - toTarget * 2f, ModContent.DustType<CirclePulse>(), vel, newColor: Color.HotPink * 1f);
+                    d.scale = 0.05f;
+                    CirclePulseBehavior b = new CirclePulseBehavior(0.2f, true, 2, 0.2f, 0.35f);
+                    b.drawLayer = "OverPlayers";
+                    d.customData = b;
+
+
+                    SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/laser_fire") with { Volume = .12f, Pitch = .1f, PitchVariance = .15f, MaxInstances = 1 };
+                    SoundEngine.PlaySound(style, Projectile.Center);
+
+                    SoundStyle style2 = new SoundStyle("Terraria/Sounds/Research_1") with { Pitch = .85f, PitchVariance = .2f, Volume = 0.25f };
+                    SoundEngine.PlaySound(style2, Projectile.Center);
+
+                    justShotPower = 0.35f;
+                }
+
+                Projectile.velocity = Vector2.Lerp(Projectile.velocity, Projectile.DirectionTo(goalPos) * (Projectile.Distance(goalPos) / 10), 0.05f); //15 0.2
+
+                orbChargePower = 0f;
+            }
+            else if (substateTimer == timeBeforeSpam + laserSpamTime)
+            {
+                currentState = State.Dash;
+                substateTimer = -1;
+            }
+
+            substateTimer++;
         }
 
-        public void PlayerOrbit()
+        public void Idle()
         {
+            //Every 90 frames, choose a random new location around player and try to move there
+            if (substateTimer % 40 == 0)
+                orbitVector = Main.rand.NextVector2CircularEdge(70f, 70f);
+
+            Vector2 goalPos = Owner.Center + orbitVector + new Vector2(0f, -40f);
+
+            Projectile.velocity = Vector2.Lerp(Projectile.velocity, Projectile.DirectionTo(goalPos) * (Projectile.Distance(goalPos) / 10), 0.01f); //15 0.2
+
+            Projectile.rotation = Projectile.velocity.ToRotation();
+
+            if (Projectile.velocity.Length() > 18)
+                isDashing = true;
+            else
+                isDashing = false;
+
+
+                Main.NewText(Projectile.velocity.Length());
+            //Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * 30;
+
 
             substateTimer++;
         }
@@ -1244,10 +1356,43 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
                 Main.spriteBatch.Draw(Line, linePos, null, Color.Black * 1f, MathHelper.PiOver2, Line.Size() / 2f, new Vector2(1f, 1f) * 0.5f, SE, 0f); //0.3
             }
 
+
+            //Orb on top
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawBasicBall(false);
+            });
+
             return false;
         }
 
-        
+        //I should really just make this a function in utils
+        public void DrawBasicBall(bool giveUp)
+        {
+            if (giveUp || orbChargePower == 0)
+                return;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition + Projectile.rotation.ToRotationVector2() * 25f;
+
+            //Draw Orb
+            Texture2D Orb = CommonTextures.feather_circle128PMA.Value;
+
+            Color[] cols = { Color.White * 1f, Color.HotPink * 0.525f, Color.DeepPink * 0.375f };
+            float[] scales = { 0.85f, 1.45f, 2.5f };
+
+            float orbAlpha = 1f;
+            float totalScale = Projectile.scale * 0.25f * Easings.easeInOutQuad(orbChargePower);
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.12f) * 0.1f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.22f) * 0.06f;
+
+            //Main.EntitySpriteDraw(Orb, drawPos, null, Color.DodgerBlue * orbAlpha * 0.35f, 0f, Orb.Size() / 2f, scales[2] * totalScale, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(Orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, 0f, Orb.Size() / 2f, scales[0] * totalScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, 0f, Orb.Size() / 2f, scales[1] * totalScale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(Orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, 0f, Orb.Size() / 2f, scales[2] * totalScale * sineScale2, SpriteEffects.None);
+        }
+
 
     }
 }

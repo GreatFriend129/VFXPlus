@@ -75,7 +75,7 @@ namespace VFXPlus.Content.QueenBee
             if (firstFrame)
             {
                 firstFrame = false;
-                CurrentAttack = QueenBeeState.NamaahWall;
+                CurrentAttack = QueenBeeState.RadialBurst;
             }
 
             NPC.dontTakeDamage = false;
@@ -86,7 +86,7 @@ namespace VFXPlus.Content.QueenBee
                 NPC.TargetClosest(false);
             }
 
-            CurrentAttack = QueenBeeState.NamaahWall;
+            //CurrentAttack = QueenBeeState.NamaahWall;
 
             switch (CurrentAttack)
             {
