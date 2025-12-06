@@ -92,53 +92,9 @@ namespace VFXPlus.Content
 
             }
 
-
-            
-            for (float i = -6; i > 7; i++)
-            {
-                //float prog = (float)i / shotCount;
-
-                float absI = Math.Abs(i);
-
-                float rot = (0.2f + 0.015f * absI) * i;
-
-                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(rot) * 6f;
-
-                int stinger = Projectile.NewProjectile(null, player.Center, vel, ModContent.ProjectileType<StopAndStartStinger>(), 1, 0, Main.myPlayer);
-                Main.projectile[stinger].scale = 1.15f;
-
-                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkTime = (i % 2 == 0 ? 40 : 60);
-                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowTime = 290; //90
-                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velShrinkAmount = 0.9f;
-                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).velGrowAmount = 1.14f;
-                (Main.projectile[stinger].ModProjectile as StopAndStartStinger).maxVel = 10f; //12
-            }
-
-            //Dust d2 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse2>(), velocity.SafeNormalize(Vector2.UnitX) * 2f, newColor: Color.HotPink * 0.8f);
-            //CirclePulseBehavior b2 = new CirclePulseBehavior(1.25f, true, 2, 0.15f, 0.4f);
-            //b2.drawLayer = "UnderProjectiles";
-            //d2.customData = b2;
-
-            //Dust d23 = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<CirclePulse2>(), velocity.SafeNormalize(Vector2.UnitX) * -0.01f, newColor: Color.DeepSkyBlue * 0.8f);
-            //CirclePulseBehavior b23 = new CirclePulseBehavior(2f, true, 1, 0.4f, 0.4f);
-            //b23.drawLayer = "UnderProjectiles";
-            //d23.customData = b23;
-
-            for (int i = 220; i < 7 + Main.rand.Next(0, 4); i++) //2 //0,3
-            {
-                Dust dp = Dust.NewDustPerfect(position, ModContent.DustType<ElectricSparkGlow>(),
-                    velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.35f, 0.35f)) * Main.rand.Next(3, 20),
-                    newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 1.75f);
-
-                ElectricSparkBehavior esb = new ElectricSparkBehavior(FadeAlphaPower: 0.91f, FadeScalePower: 0.97f, FadeVelPower: 0.9f, Pixelize: true, XScale: 1f, YScale: 0.75f); //0.91
-
-                dp.customData = esb;
-            }
-
-
             //int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
-            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceBotTest>(), 1, 0, Main.myPlayer);
-
+            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceDagger>(), 1, 0, Main.myPlayer);
+            //Main.projectile[windFX3].scale = 0.85f;
 
             /*
             int are5 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
@@ -186,7 +142,7 @@ namespace VFXPlus.Content
                 float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
                 float scaleFade = Main.rand.NextFloat(1.03f, 1.05f);
 
-                Color thisCol = Color.Lerp(Color.LightSkyBlue, Color.DeepSkyBlue, 1f);
+                Color thisCol = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);
                 // Color.Lerp(Color.Purple, Color.DeepPink, 0f);// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f);// Color.Lerp(Color.OrangeRed, Color.Red, 0.35f);
 
                 //Vector2 myvel = new Vector2(0f, -1.5f).RotatedByRandom(6.28f) * Main.rand.NextFloat(2f, 4.5f);
@@ -196,16 +152,17 @@ namespace VFXPlus.Content
                 //fire1.timeBeforeStartAlphaFade = 5;
                 //ShaderParticleHandler.SpawnParticle(fire1);
 
-                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 0.5f;
-                FireParticle fire = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(5f, 5f), myvel, 0.5f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
-                    AlphaFade: 0.95f, RotPower: 0.01f);
-                ShaderParticleHandler.SpawnParticle(fire);
+                //Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 1f;
+                //FireParticle fire = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(5f, 5f), myvel, 1f, thisCol, colorMult: 0.5f, bloomAlpha: 1f,
+                //    AlphaFade: 0.95f, RotPower: 0.01f);
+                //ShaderParticleHandler.SpawnParticle(fire);
 
-                //FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale, thisCol, colorMult: 0.5f, bloomAlpha: 2f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
-                //fire1.randomRotPower = 0.5f;
-                //fire1.scaleFadePower = 1.05f;
-                //fire1.timeBeforeStartAlphaFade = 20;
-                //ShaderParticleHandler.SpawnParticle(fire1);
+                //Good one
+                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 1.5f;
+                FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale * 1.5f, thisCol, colorMult: 2f, bloomAlpha: 1.65f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
+                fire1.randomRotPower = 0.5f;
+                fire1.scaleFadePower = 1.05f;
+                ShaderParticleHandler.SpawnParticle(fire1);
             }
 
 

@@ -218,6 +218,8 @@ Projectiles: {
 	WindTrail3.DisplayName: Wind Trail3
 	CrackTest2.DisplayName: Crack Test2
 	TrojanForceBotTest.DisplayName: Trojan Force Bot Test
+	TrojanForceEnergyBall.DisplayName: Trojan Force Energy Ball
+	TrojanForceDagger.DisplayName: Trojan Force Dagger
 }
 
 Configs: {

@@ -1,18 +1,22 @@
-﻿using Terraria;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using System;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
+using System.Security.Policy;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.States;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.UI;
-using static Terraria.ModLoader.ModContent;
-using Terraria.GameContent;
-using System.Security.Policy;
+using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
-using Terraria.GameContent.UI.States;
+using VFXPlus.Content.Dusts;
+using static Terraria.ModLoader.ModContent;
 
 namespace VFXPlus.Content.Dusts
 {

@@ -155,9 +155,9 @@ namespace VFXPlus
         [ReloadRequired]
         public bool StaffOfEarthToggle = true;
 
-        //[DefaultValue(true)]
-        //[ReloadRequired]
-        //public bool BetsysWrathToggle = true;
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool BetsysWrathToggle = true;
         #endregion
 
         //-----------------------------------------------------------
@@ -229,8 +229,8 @@ namespace VFXPlus
         #endregion
 
         #region Hardmode Tomes
-        //[ReloadRequired]
-        [DefaultValue(true)] //TODO
+        [DefaultValue(true)]
+        [ReloadRequired]
         public bool CrystalStormToggle = true;
 
         [DefaultValue(true)]

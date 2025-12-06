@@ -315,7 +315,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                                     SoundEngine.PlaySound(style23, projectile.Center);
 
                                     SoundStyle stylec = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_67") with { Pitch = 0f, Volume = 0.55f, PitchVariance = 0.1f, MaxInstances = -1 }; //1f
-                                    SoundEngine.PlaySound(stylec, player.Center);
+                                    SoundEngine.PlaySound(stylec, projectile.Center);
                                 }
                                 Projectile.NewProjectile(projectile.GetSource_FromThis(), vector8.X, vector8.Y, vector9.X, vector9.Y, num27, num30, projectile.knockBack, projectile.owner, 0f, num29);
                             }

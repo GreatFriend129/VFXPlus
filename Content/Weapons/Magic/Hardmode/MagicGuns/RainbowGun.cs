@@ -7,16 +7,12 @@ using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
 using VFXPlus.Content.Dusts;
 using ReLogic.Content;
 using VFXPlus.Common.Utilities;
 using Terraria.Graphics;
-using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 using VFXPlus.Common.Drawing;
-using Terraria.GameContent;
-using System.Drawing.Drawing2D;
 using Terraria.GameContent.Drawing;
 using VFXPlus.Content.Projectiles;
 
@@ -240,8 +236,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public float headCollidePower = 1f;
 
+
+        public int anchorProj = -1;
         public override void AI()
         {
+            if (anchorProj == -1 || Main.projectile[anchorProj].active == false)
+                Projectile.active = false;
+
             if (Projectile.timeLeft < 30)
                 shouldFade = true;
 

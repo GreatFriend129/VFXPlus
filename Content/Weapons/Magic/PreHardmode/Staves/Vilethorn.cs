@@ -174,7 +174,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
     }
 
 
-    //This exists literally just so we can draw it in the behind projectiles layer
+    //This exists literally just so we can draw it in the behind projectiles layer ||| Not currently used but will do so in future
     public class VilethornVFX : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";

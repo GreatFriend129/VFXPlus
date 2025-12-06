@@ -124,8 +124,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 smoke.alpha = 2;
             }
 
+            if (timer % 1 == 0 && true)// Main.rand.NextBool())
+            {
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
+
+
+                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.75f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
+                    AlphaFade: 0.91f, RotPower: 0.01f);
+                fire.renderLayer = RenderLayer.UnderProjectiles;
+
+                ShaderParticleHandler.SpawnParticle(fire);
+            }
+
             //fuck this looks good but I dont want to have to change it again
-            if (timer % 1 == 0 && timer > 3)
+            if (timer % 1 == 0 && timer > 3 && false)
             {
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
                 FireParticle fire = new FireParticle(projectile.Center, -vel, 1f, Color.Lerp(Color.Green, Color.GreenYellow, 0.25f), colorMult: 0.75f, bloomAlpha: 1f, AlphaFade: 0.9f);
@@ -361,7 +374,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Color col = Color.Lerp(CursedGreen, Color.GreenYellow, Easings.easeInCirc(progress));
 
 
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(3f * progress, 3f);
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(2.75f * progress, 2.75f);
 
 
                 if (i == previousRotations.Count - 1)

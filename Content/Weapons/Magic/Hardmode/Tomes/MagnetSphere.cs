@@ -173,10 +173,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            int a = Projectile.NewProjectile(null, startPoint + Main.rand.NextVector2Circular(15f, 15f), Vector2.Zero, ModContent.ProjectileType<MagnetSphereLightningVFX>(), 0, 0, projectile.owner);
+            
+            //Spawn the VFX projectile (separate proj so the VFX can last longer than the actual lightning projectile)
+            if (Main.myPlayer == projectile.owner)
+            {
+                int a = Projectile.NewProjectile(null, startPoint + Main.rand.NextVector2Circular(15f, 15f), Vector2.Zero, ModContent.ProjectileType<MagnetSphereLightningVFX>(), 0, 0, projectile.owner);
 
-            (Main.projectile[a].ModProjectile as MagnetSphereLightningVFX).startPoint = startPoint;
-            (Main.projectile[a].ModProjectile as MagnetSphereLightningVFX).endPoint = projectile.Center;
+                (Main.projectile[a].ModProjectile as MagnetSphereLightningVFX).startPoint = startPoint;
+                (Main.projectile[a].ModProjectile as MagnetSphereLightningVFX).endPoint = projectile.Center;
+            }
 
             return base.PreKill(projectile, timeLeft);
         }

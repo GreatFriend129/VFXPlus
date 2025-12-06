@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using Terraria.Graphics;
-using System.Reflection.Metadata;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
@@ -67,19 +68,18 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 Main.dust[num4].velocity = (Main.dust[num4].velocity + projectile.velocity) / 2f;
             }
 
-            if (timer % 2 == 0 && timer > 10)
+            if (timer % 2 == 0 && Main.rand.NextBool(2))
             {
-                Vector2 dustPos = projectile.Center;
-                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f) - projectile.velocity * 0.35f;
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.5f; //0.5
 
 
-                Color dustCol = Color.Lerp(Color.OrangeRed, Color.Orange, 0.5f);
-                float dustScale = Main.rand.NextFloat(0.4f, 0.7f) * 0.9f;
+                FireParticle fire = new FireParticle(dustPos + new Vector2(0f, 0f) + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.45f, Color.Lerp(Color.OrangeRed, Color.Red, 0f), colorMult: 0.5f, bloomAlpha: 1f,
+                    AlphaFade: 0.94f, RotPower: 0.01f);
+                fire.renderLayer = RenderLayer.UnderProjectiles;
 
-                Dust smoke = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixelAlts>(), dustVel, newColor: dustCol * 0.7f, Scale: dustScale);
-                smoke.alpha = 2;
+                ShaderParticleHandler.SpawnParticle(fire);
             }
-
 
             //Squash and stretch based off of coralite mod slime emperor 
             float firstStretchX = 1.6f;
