@@ -86,21 +86,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         int timer = 0;
         int vfxIndex = -1;
+
+        Vector2 vfxSpawnPos = Vector2.Zero;
+
+        //Whether this projectile has spawned a RainbowBack Projectile yet
+        //Used so we can anchor the VFX proj to the first one that spawns
+        bool hasSpawnedFirstProj = false;
         public override bool PreAI(Projectile projectile)
         {
             if (timer == 2)
             {
-                //Spawn the VFX projectile
-                if (Main.myPlayer == projectile.owner)
-                {
-                    int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RainbowGunVFX>(), 0, 0, projectile.owner);
-                    vfxIndex = p;
-                    Main.projectile[p].rotation = projectile.velocity.ToRotation();
 
-                    //Start the VFX proj at random color
-                    float randRainbowOffset = Main.rand.NextFloat(0f, 1f);
-                    (Main.projectile[p].ModProjectile as RainbowGunVFX).rainbowOffset = randRainbowOffset;
-                }
 
                 ParticleOrchestraSettings particleSettings = new()
                 {
@@ -141,8 +137,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                     pa.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.83f, preShrinkPower: 0.99f, postShrinkPower: 0.82f, timeToStartShrink: 10 + Main.rand.Next(-5, 5), killEarlyTime: 40,
                         0.75f, 0.45f, shouldFadeColor: false);
-
                 }
+
+                vfxSpawnPos = projectile.Center;
             }
 
             if (vfxIndex != -1)
@@ -153,6 +150,127 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             timer++;
 
+            #region vanillaAI
+            int num366 = (int)(projectile.Center.X / 16f);
+            int num367 = (int)(projectile.Center.Y / 16f);
+
+
+            //if (WorldGen.InWorld(num366, num367) && Main.tile[num366, num367] != null && Main.tile[num366, num367].liquid > 0 && Main.tile[num366, num367].shimmer())
+            if (WorldGen.InWorld(num366, num367) && Main.tile[num366, num367] != null && Main.tile[num366, num367].LiquidAmount > 0 && Main.tile[num366, num367].LiquidType == LiquidID.Shimmer)
+            {
+                projectile.Kill();
+            }
+            int num368 = 2400;
+            if (projectile.type == 250)
+            {
+                Point point2 = projectile.Center.ToTileCoordinates();
+                if (!WorldGen.InWorld(point2.X, point2.Y, 2) || Main.tile[point2.X, point2.Y] == null)
+                {
+                    projectile.Kill();
+                    return false;
+                }
+                if (projectile.owner == Main.myPlayer)
+                {
+                    projectile.localAI[0] += 1f;
+                    if (projectile.localAI[0] > 4f)
+                    {
+                        projectile.localAI[0] = 3f;
+
+                        int rainbowBack = Projectile.NewProjectile(projectile.GetSource_FromThis(), projectile.Center.X, projectile.Center.Y, projectile.velocity.X * 0.001f, projectile.velocity.Y * 0.001f, 251, projectile.damage, projectile.knockBack, projectile.owner);
+                        ///
+                        //Spawn and anchor the VFX proj to the first rainbowBack proj
+
+                        if (!hasSpawnedFirstProj)
+                        {
+                            hasSpawnedFirstProj = true;
+
+                            int p = Projectile.NewProjectile(null, vfxSpawnPos, Vector2.Zero, ModContent.ProjectileType<RainbowGunVFX>(), 0, 0, projectile.owner);
+                            vfxIndex = p;
+                            Main.projectile[p].rotation = projectile.velocity.ToRotation();
+
+                            //Start the VFX proj at random color
+                            float randRainbowOffset = Main.rand.NextFloat(0f, 1f);
+                            (Main.projectile[p].ModProjectile as RainbowGunVFX).rainbowOffset = randRainbowOffset;
+
+                            //Anchor
+                            (Main.projectile[p].ModProjectile as RainbowGunVFX).anchorProj = rainbowBack;
+
+                            (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).AddPoint(vfxSpawnPos, projectile.velocity.ToRotation());
+                        }
+
+                        ///
+                    }
+                    if (projectile.timeLeft > num368)
+                    {
+                        projectile.timeLeft = num368;
+                    }
+                }
+                float num369 = 1f;
+                if (projectile.velocity.Y < 0f)
+                {
+                    num369 -= projectile.velocity.Y / 3f;
+                }
+                projectile.ai[0] += num369;
+                if (projectile.ai[0] > 30f)
+                {
+                    projectile.velocity.Y += 0.5f;
+                    if (projectile.velocity.Y > 0f)
+                    {
+                        projectile.velocity.X *= 0.95f;
+                    }
+                    else
+                    {
+                        projectile.velocity.X *= 1.05f;
+                    }
+                }
+                float x3 = projectile.velocity.X;
+                float y3 = projectile.velocity.Y;
+                float num370 = (float)Math.Sqrt(x3 * x3 + y3 * y3);
+                num370 = 15.95f * projectile.scale / num370;
+                x3 *= num370;
+                y3 *= num370;
+                projectile.velocity.X = x3;
+                projectile.velocity.Y = y3;
+                projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) - 1.57f;
+                return false;
+            }
+            if (projectile.localAI[0] == 0f)
+            {
+                if (projectile.velocity.X > 0f)
+                {
+                    projectile.spriteDirection = -1;
+                    projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) - 1.57f;
+                }
+                else
+                {
+                    projectile.spriteDirection = 1;
+                    projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) - 1.57f;
+                }
+                projectile.localAI[0] = 1f;
+                projectile.timeLeft = num368;
+            }
+            projectile.velocity.X *= 0.98f;
+            projectile.velocity.Y *= 0.98f;
+            if (projectile.rotation == 0f)
+            {
+                projectile.alpha = 255;
+            }
+            else if (projectile.timeLeft < 10)
+            {
+                projectile.alpha = 255 - (int)(255f * (float)projectile.timeLeft / 10f);
+            }
+            else if (projectile.timeLeft > num368 - 10)
+            {
+                int num371 = num368 - projectile.timeLeft;
+                projectile.alpha = 255 - (int)(255f * (float)num371 / 10f);
+            }
+            else
+            {
+                projectile.alpha = 0;
+            }
+            #endregion
+
+            return false;
             return base.PreAI(projectile);
         }
 
@@ -192,7 +310,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return true;
+            return false;
         }
     }
 
@@ -236,7 +354,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public float headCollidePower = 1f;
 
-
+        
         public int anchorProj = -1;
         public override void AI()
         {
@@ -312,7 +430,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         public List<float> l_rotations = new List<float>();
         public override bool PreDraw(ref Color lightColor)
         {
-            if (l_positions.Count == 0 || l_rotations.Count == 0 || true)
+            if (l_positions.Count == 0 || l_rotations.Count == 0)
                 return false;
 
             float ease1 = shouldFade ? Easings.easeOutQuad(true_alpha) : Easings.easeInOutBack(true_alpha, 0f, 5f);
@@ -370,7 +488,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(true);
+                DrawTrail(false);
             });
             DrawTrail(true);
 

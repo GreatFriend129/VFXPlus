@@ -92,9 +92,18 @@ namespace VFXPlus.Content
 
             }
 
-            //int windFX2 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 10f, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
-            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceDagger>(), 1, 0, Main.myPlayer);
+            //int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<FireSpawner>(), 1, 0, Main.myPlayer);
+            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceDagger>(), 1, 0, Main.myPlayer);
             //Main.projectile[windFX3].scale = 0.85f;
+
+
+            for (int i = 0; i < 2; i++)
+            {
+                //Good one
+                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(6.28f) * Main.rand.NextFloat(6f, 12f) * 1f;
+
+                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, myvel, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
+            }
 
             /*
             int are5 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, player.whoAmI);
@@ -158,8 +167,8 @@ namespace VFXPlus.Content
                 //ShaderParticleHandler.SpawnParticle(fire);
 
                 //Good one
-                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 1.5f;
-                FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale * 1.5f, thisCol, colorMult: 2f, bloomAlpha: 1.65f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
+                Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(0.2f) * Main.rand.NextFloat(8f, 14f) * 1.75f;
+                FireParticle fire1 = new FireParticle(Main.MouseWorld, myvel, fireScale * 1.75f, thisCol, colorMult: 2f, bloomAlpha: 1.65f, AlphaFade: alphaFade, VelFade: 0.87f, RotPower: 0.02f);
                 fire1.randomRotPower = 0.5f;
                 fire1.scaleFadePower = 1.05f;
                 ShaderParticleHandler.SpawnParticle(fire1);
@@ -184,14 +193,21 @@ namespace VFXPlus.Content
 
             }
 
-            for (int i = 220; i < 5; i++)
+            for (int i = 220; i < 6; i++)
             {
                 float prog = (float)i / 5f;
 
-                Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
+                //Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
+                //float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                //FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                //fire.scaleFadePower = 1.1f;
+                //ShaderParticleHandler.SpawnParticle(fire);
+
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.5f) * Main.rand.NextFloat(2f, 28f); //30
                 float myScale = Main.rand.NextFloat(1.25f, 1.5f);
-                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f * 1.5f, myScale * 1.5f, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f, VelFade: 0.8f);
                 fire.scaleFadePower = 1.1f;
+                
                 ShaderParticleHandler.SpawnParticle(fire);
 
 

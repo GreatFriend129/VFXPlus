@@ -38,8 +38,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 previousHead = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 55; //60
 
-                int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStaffVFX>(), 0, 0, projectile.owner);
-                vfxIndex = p;
+                if (Main.myPlayer == projectile.owner)
+                {
+                    int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStaffVFX>(), 0, 0, projectile.owner);
+                    vfxIndex = p;
+                }
 
                 float circlePulseSize = 0.6f;
 

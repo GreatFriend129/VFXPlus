@@ -65,7 +65,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
+            if (timer == 0 && Main.myPlayer == projectile.owner)
             {
                 Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<LifeDrainVFX>(), 0, 0, Main.player[projectile.owner].whoAmI);
             }

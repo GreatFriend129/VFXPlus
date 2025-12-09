@@ -638,6 +638,16 @@ namespace VFXPlus.Content.VFXTest
         {
             Main.projFrames[Projectile.type] = 64;
         }
+
+        private float velFade = 0.87f;
+
+        //Scale is multiplied by this every frame
+        public float scaleFadePower = 1f;
+        private float rotPower = 0.02f;
+
+        public float randomRotPower = 0.25f;
+        private float initialVelMag = 0f;
+
         public override void SetDefaults()
         {
             Projectile.width = 80;
@@ -649,12 +659,20 @@ namespace VFXPlus.Content.VFXTest
             Projectile.hostile = false;
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
+
+            Projectile.extraUpdates = 0;
+            Projectile.scale = 1f;
+
+            //Projectile.frame = 10;
         }
 
         public override void AI()
         {
             if (timer == 0)
+            {
+                initialVelMag = Projectile.velocity.Length();
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
+            }
 
             Projectile.frameCounter++;
             if (Projectile.frameCounter >= 0)
@@ -662,14 +680,33 @@ namespace VFXPlus.Content.VFXTest
                 Projectile.frameCounter = 0;
                 Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
                 Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
+
+                if (Main.rand.NextBool(3))
+                {
+                    Projectile.frame = (Projectile.frame + 1) % Main.projFrames[Projectile.type];
+                }
             }
 
             if (Projectile.frame >= 60)
                 Projectile.active = false;
 
-            Projectile.velocity *= 0.98f;
 
-            Projectile.velocity = Projectile.velocity.RotateRandom(0.02f);
+            Projectile.rotation += Projectile.velocity.X * 0.25f * rotPower * (Projectile.velocity.X > 0 ? 1f : -1f);
+            Projectile.velocity *= velFade;
+
+            Projectile.scale *= scaleFadePower;
+
+            if (Projectile.scale <= 0.2)
+                Projectile.scale -= 0.02f;
+
+            if (randomRotPower > 0f)
+            {
+                //Ratio of current velocity over starting velocity
+                float velPower = Projectile.velocity.Length() / initialVelMag;
+                Projectile.velocity = Projectile.velocity.RotateRandom(randomRotPower * velPower);
+            }
+
+
 
             timer++;
         }
@@ -682,10 +719,10 @@ namespace VFXPlus.Content.VFXTest
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawSmoke(false);
+                DrawSmoke(true);
             });
 
-            DrawSmoke(true);
+            DrawSmoke(false);
             return false;
         }
 
@@ -694,7 +731,9 @@ namespace VFXPlus.Content.VFXTest
             if (giveUp)
                 return;
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kBrighter1").Value;
+            //Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
+            //Texture2D SmokeTop = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kTop").Value;
 
             int frameHeight = Smoke.Height / Main.projFrames[Projectile.type];
             int frameWidth = Smoke.Width / Main.projFrames[Projectile.type];
@@ -710,8 +749,11 @@ namespace VFXPlus.Content.VFXTest
             float prog = Utils.GetLerpValue(0f, 15f, timer, true);
             float totalProg = Utils.GetLerpValue(0f, 60f, timer, true);
 
-            Color col = Color.Lerp(Color.White, Color.OrangeRed, prog);
-            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, col with { A = 0 }, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
+            Color col = Color.Purple;// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f);
+            Color colTop = Color.Lerp(Color.White, Color.Purple, 0.5f);
+
+            Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, col with { A = 0 } * 1.5f, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
+            //Main.spriteBatch.Draw(SmokeTop, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } * 0.5f, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
 
             //Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
             //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.OrangeRed with { A = 0 } * 1f * (1f - Easings.easeInQuad(totalProg)), 0f, Ball.Size() / 2f, prog, 0, 0f); //0.3
@@ -1653,5 +1695,104 @@ namespace VFXPlus.Content.VFXTest
 
     }
 
+    public class FireSpawner : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+            Projectile.width = Projectile.height = 30;
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        int timer = 0;
+
+        public override void AI()
+        {
+            Projectile.velocity = Vector2.Zero;
+
+            //Lighting.AddLight(Projectile.Center, Color.HotPink.ToVector3() * overallScale);
+
+
+            for (int i = 0; i < 6; i++)
+            {
+                float prog = (float)i / 5f;
+
+                //Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
+                //float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                //FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                //fire.scaleFadePower = 1.1f;
+                //ShaderParticleHandler.SpawnParticle(fire);
+
+                Vector2 vel = new Vector2(0f, -1f).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.5f) * Main.rand.NextFloat(2f, 28f); //30
+                float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f * 1.5f, myScale * 1.5f, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f, VelFade: 0.8f);
+                fire.scaleFadePower = 1.1f;
+
+                ShaderParticleHandler.SpawnParticle(fire);
+
+
+                //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);
+                //ShaderParticleHandler.SpawnParticle(fire);
+            }
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawOrb(true);
+            });
+
+            DrawOrb(false);
+
+            return false;
+        }
+
+        public void DrawOrb(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Vector2 originPoint = Main.MouseWorld - Main.screenPosition + new Vector2(0f, -100f);
+
+            //Border
+            Texture2D Border = Mod.Assets.Request<Texture2D>("Assets/BorderGlow").Value;
+            Vector2 borderScale = new Vector2(1.778f, 1f) * 2f;
+            Main.EntitySpriteDraw(Border, originPoint, null, Color.OrangeRed with { A = 0 } * 0.75f, 0f, Border.Size() / 2f, borderScale, SpriteEffects.None);
+
+
+
+            //Orb
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Color[] cols = { Color.OrangeRed * 0.525f, Color.OrangeRed * 0.525f, Color.Orange * 0.375f };
+            float[] scales = { 0.85f, 1.6f, 2.5f };
+
+            float orbAlpha = 0.15f;
+            float orbScale = 9f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[0] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[1] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, cols[2] with { A = 0 } * orbAlpha, 0f, orb.Size() / 2f, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+        }
+
+    }
 
 }

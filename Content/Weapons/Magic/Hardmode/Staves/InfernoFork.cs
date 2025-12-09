@@ -221,7 +221,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {
             if (timer == 0)
             {
-                vfxBlastIndex = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, projectile.owner);
+                if (Main.myPlayer == projectile.owner)
+                    vfxBlastIndex = Projectile.NewProjectile(projectile.GetSource_FromThis(), projectile.Center, Vector2.Zero, ModContent.ProjectileType<InfernoForkVFX>(), 0, 0, projectile.owner);
 
                 CirclePulseBehavior cpb2 = new CirclePulseBehavior(0.6f, true, 1, 0.9f, 0.9f);
 

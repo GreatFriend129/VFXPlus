@@ -36,8 +36,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            //Spawn tendril visuals projectile
-            if (timer == 0)
+            //Spawn tendril vfx projectile
+            if (timer == 0 && Main.myPlayer == projectile.owner)
             {
                 int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowflameTendrilVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
@@ -45,7 +45,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             }
 
             //Update tendril coords
-            (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
+            if (Main.projectile[tendril_index] != null)
+                (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
 
             #region vanilla AI without dust 
 

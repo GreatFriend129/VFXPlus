@@ -34,7 +34,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
+            if (timer == 0 && Main.myPlayer == projectile.owner)
             {
                 int a = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RazorpineVFX>(), 0, 0, projectile.owner);
                 vfxProjIndex = a;

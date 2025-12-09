@@ -65,12 +65,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 Vector2 vfxPos = projectile.Center + new Vector2(0f, projectile.height / 2);
 
-                int p = Projectile.NewProjectile(projectile.GetSource_FromThis(), vfxPos, Vector2.Zero, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, projectile.owner);
-                vfx_child_index = p;
-                Main.projectile[p].rotation = -MathHelper.PiOver2;
+                if (Main.myPlayer == projectile.owner)
+                {
+                    int p = Projectile.NewProjectile(projectile.GetSource_FromThis(), vfxPos, Vector2.Zero, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, projectile.owner);
+                    vfx_child_index = p;
+                    Main.projectile[p].rotation = -MathHelper.PiOver2;
 
-                //Sink projectile a little further into ground
-                Main.projectile[p].Center += new Vector2(0f, 9f);
+                    //Sink projectile a little further into ground
+                    Main.projectile[p].Center += new Vector2(0f, 9f);
+                }
 
                 //Play extra sound
                 SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/hero_fury_charm_burst") with { Volume = 0.75f, Pitch = 0.05f, PitchVariance = 0.15f, MaxInstances = 1 }; 

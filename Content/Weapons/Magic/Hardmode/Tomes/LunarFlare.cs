@@ -90,7 +90,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             //}
             if (projectile.ai[1] == -1f)
             {
-                if (projectile.ai[0] == 0f)
+                //Spawn Explosion VFX
+                if (projectile.ai[0] == 0f && Main.myPlayer == projectile.owner)
                 {
                     Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<LunarExplosionAnim>(), 0, 0f);
                 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Runtime.InteropServices;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Graphics;
@@ -135,6 +136,35 @@ namespace VFXPlus.Content.VFXTest
         public bool dashActive = false;
         public override void DrawPlayer(Camera camera)
         {
+            Vector2 playerPosition = Player.position + new Vector2(0f, Player.gfxOffY);
+
+            //Border
+            for (int i = 0; i < 4; i++)
+            {
+                float dist = 4f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy((MathHelper.TwoPi / 4f) * i);
+                Vector2 offsetDrawPos = playerPosition + offset.RotatedBy(Main.timeForVisualEffects * 0.1f);
+
+                //CustomShadowColor = Color.SkyBlue with { A = 0 };
+
+                if (i == 0)
+                    CustomShadowColor = Color.DeepSkyBlue;
+                if (i == 1)
+                    CustomShadowColor = Color.DeepSkyBlue;
+                if (i == 2)
+                    CustomShadowColor = Color.DeepPink;
+                if (i == 3)
+                    CustomShadowColor = Color.DeepPink;
+
+                CustomShadowColor = CustomShadowColor with { A = 0 };
+
+                Main.PlayerRenderer.DrawPlayer(camera, Player, offsetDrawPos, Player.fullRotation, Player.fullRotationOrigin, 0.15f);
+            }
+            CustomShadowColor = Color.White;
+
+
+
             if (!dashActive)
                 return;
 
@@ -215,7 +245,7 @@ namespace VFXPlus.Content.VFXTest
             {
                 Projectile.velocity.Y = player.velocity.Y * 0.25f;
 
-                startingVel = new Vector2(25f, 0f).RotatedBy(dashDirection);
+                startingVel = new Vector2(25f, 0f).RotatedBy(dashDirection); //25
             }
 
             Projectile.velocity.X = Vector2.Lerp(startingVel, startingVel.SafeNormalize(Vector2.UnitX), Easings.easeOutQuad(easingProgress)).X;

@@ -220,6 +220,7 @@ Projectiles: {
 	TrojanForceBotTest.DisplayName: Trojan Force Bot Test
 	TrojanForceEnergyBall.DisplayName: Trojan Force Energy Ball
 	TrojanForceDagger.DisplayName: Trojan Force Dagger
+	FireSpawner.DisplayName: Fire Spawner
 }
 
 Configs: {
