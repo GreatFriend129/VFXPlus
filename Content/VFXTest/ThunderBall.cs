@@ -20,6 +20,7 @@ using VFXPlus.Common.Drawing;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Particles;
 using VFXPLus.Common;
+using static Terraria.GameContent.Animations.IL_Actions.Sprites;
 using static tModPorter.ProgressUpdate;
 
 namespace VFXPlus.Content.VFXTest
@@ -731,9 +732,9 @@ namespace VFXPlus.Content.VFXTest
             if (giveUp)
                 return;
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kBrighter1").Value;
-            //Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
-            //Texture2D SmokeTop = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kTop").Value;
+            //Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kBrighter1").Value;
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
+            Texture2D SmokeTop = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1kTopBlur3").Value;
 
             int frameHeight = Smoke.Height / Main.projFrames[Projectile.type];
             int frameWidth = Smoke.Width / Main.projFrames[Projectile.type];
@@ -749,11 +750,11 @@ namespace VFXPlus.Content.VFXTest
             float prog = Utils.GetLerpValue(0f, 15f, timer, true);
             float totalProg = Utils.GetLerpValue(0f, 60f, timer, true);
 
-            Color col = Color.Purple;// Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f);
-            Color colTop = Color.Lerp(Color.White, Color.Purple, 0.5f);
+            Color col = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f);
+            Color colTop = Color.Lerp(Color.White, Color.DeepSkyBlue, 0.5f);
 
             Main.spriteBatch.Draw(Smoke, Projectile.Center - Main.screenPosition, sourceRectangle, col with { A = 0 } * 1.5f, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
-            //Main.spriteBatch.Draw(SmokeTop, Projectile.Center - Main.screenPosition, sourceRectangle, Color.White with { A = 0 } * 0.5f, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
+            Main.spriteBatch.Draw(SmokeTop, Projectile.Center - Main.screenPosition, sourceRectangle, colTop with { A = 0 } * 0.5f, Projectile.rotation, origin, 1f * Easings.easeOutCirc(prog) * Projectile.scale, SpriteEffects.FlipHorizontally, 0f);
 
             //Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
             //Main.spriteBatch.Draw(Ball, Projectile.Center - Main.screenPosition, null, Color.OrangeRed with { A = 0 } * 1f * (1f - Easings.easeInQuad(totalProg)), 0f, Ball.Size() / 2f, prog, 0, 0f); //0.3
@@ -1758,6 +1759,64 @@ namespace VFXPlus.Content.VFXTest
             });
 
             DrawOrb(false);
+
+            #region DrawBar
+
+
+            Texture2D BarTex = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/CyverCannonBar").Value;
+            Texture2D BarBorder = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/CyverCannonBarBorderGlow").Value;
+            Texture2D BarFill = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/CyverCannonBarFill").Value;
+            Texture2D BarBorderFull = ModContent.Request<Texture2D>("VFXPlus/Content/VFXTest/CyverCannonBarBorder").Value;
+
+            float fillPercent = 1f;
+            float barRot = 0f;
+
+            Vector2 barVec2Scale = new Vector2(1.1f, 1f) * 2.5f;
+
+            Color Ored = Color.Lerp(Color.OrangeRed, Color.Red, 0.25f);
+
+            float sineAlpha = (float)(Math.Sin(Main.timeForVisualEffects * 0.15f)) * 0.15f;
+            float sine2 = ((float)(Math.Sin(Main.timeForVisualEffects * 0.15f)) * 0.5f) + 0.5f;
+
+            Vector2 barPos = Main.MouseWorld - Main.screenPosition + new Vector2(0f, 120f) + Main.rand.NextVector2Circular(2f + (sine2 * 2f), 2f + (sine2 * 2f));
+
+
+            Main.spriteBatch.Draw(BarBorder, barPos, null, Color.Orange with { A = 0 } * 0.15f, barRot, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None, 0f);
+
+            //Border
+            if (fillPercent >= 1f)
+            {
+
+                Main.spriteBatch.Draw(BarBorder, barPos, null, Ored with { A = 0 } * 1.5f * (0.2f + sineAlpha), barRot, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None, 0f);
+            }
+
+            //BaseBar
+            Main.spriteBatch.Draw(BarTex, barPos, null, Color.White, barRot, BarTex.Size() / 2f, barVec2Scale, SpriteEffects.None, 0f);
+
+
+            int fillAmount = (fillPercent > 0.99f) ? BarFill.Width : (int)(BarFill.Width * fillPercent);
+            Rectangle fillFrame = new Rectangle(0, 0, fillAmount, BarFill.Height);
+
+            if (fillPercent >= 1f)
+            {
+                float sinVal = (float)(Math.Sin(Main.timeForVisualEffects * 0.1f)) * 0.07f;
+            }
+
+
+            Vector2 fillScale = new Vector2(1.1f, 1f) * 2.5f;
+            Color fillColor = Color.Lerp(Ored, Color.White, sine2);
+
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 randPos = barPos + Main.rand.NextVector2Circular(1.5f, 1.5f);
+
+                Main.spriteBatch.Draw(BarTex, randPos, fillFrame, fillColor with { A = 0 } * 0.25f, barRot, BarFill.Size() / 2f, fillScale, SpriteEffects.None, 0f);
+            }
+
+            Main.spriteBatch.Draw(BarFill, barPos, fillFrame, fillColor with { A = 0 } * 1f, barRot, BarFill.Size() / 2f, fillScale, SpriteEffects.None, 0f);
+
+            #endregion
+
 
             return false;
         }

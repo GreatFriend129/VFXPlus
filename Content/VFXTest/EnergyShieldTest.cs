@@ -139,7 +139,7 @@ namespace VFXPlus.Content.VFXTest
             Vector2 playerPosition = Player.position + new Vector2(0f, Player.gfxOffY);
 
             //Border
-            for (int i = 0; i < 4; i++)
+            for (int i = 220; i < 4; i++)
             {
                 float dist = 4f;
 

@@ -221,6 +221,7 @@ Projectiles: {
 	TrojanForceEnergyBall.DisplayName: Trojan Force Energy Ball
 	TrojanForceDagger.DisplayName: Trojan Force Dagger
 	FireSpawner.DisplayName: Fire Spawner
+	BurdenOfFleshTest.DisplayName: Burden Of Flesh Test
 }
 
 Configs: {
