@@ -43,7 +43,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Trimarang);
+            return lateInstantiation && (entity.type == ProjectileID.Trimarang) && false;
         }
 
         public List<Vector2> previousPositions = new List<Vector2>();

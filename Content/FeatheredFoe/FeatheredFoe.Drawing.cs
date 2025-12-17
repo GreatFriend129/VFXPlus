@@ -49,6 +49,8 @@ namespace VFXPlus.Content.FeatheredFoe
 
             DrawWindDrill(-1, Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.25f) * 0.35f); //33
 
+            Utils.DrawBorderStringBig(spriteBatch, "Please ignore me, I am a side project", NPC.Center - screenPos + new Vector2(-40f, -110f), Color.White, scale: 0.25f);
+
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderNPCs, () =>
             {
                 DrawDashAfterImage();

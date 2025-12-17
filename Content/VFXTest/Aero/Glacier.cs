@@ -21,6 +21,7 @@ using Terraria.GameContent.Drawing;
 namespace VFXPlus.Content.VFXTest.Aero
 {
 
+    /*
     public class Glacier : ModItem
     {
         public override string Texture => "Terraria/Images/Projectile_0";
@@ -234,5 +235,6 @@ namespace VFXPlus.Content.VFXTest.Aero
         }
 
     }
+    */
 
 }

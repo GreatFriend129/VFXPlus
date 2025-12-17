@@ -13,7 +13,6 @@ using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
-using VFXPlus.Content.VFXTest.Aero.TrojanForce;
 
 
 namespace VFXPlus.Content
@@ -50,9 +49,16 @@ namespace VFXPlus.Content
             {
                 //ShaderParticleHandler.RemoveParticle();
                 Vector2 pos = Main.MouseWorld;
-                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<QueenBee.ReduxQueenBee>());
+                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
                 return false;
             }
+            else 
+            {
+                Vector2 pos = Main.MouseWorld;
+                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<ReduxQueenBee>());
+                return false;
+            }
+
 
             for (int iaa = -3; iaa < -4; iaa++)
             {

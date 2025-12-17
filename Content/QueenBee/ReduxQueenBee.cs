@@ -45,6 +45,7 @@ namespace VFXPlus.Content.QueenBee
             NPC.width = 80;
             NPC.height = 80;
             NPC.damage = 0;
+            NPC.defense = 8;
 
             NPC.boss = true;
             NPC.noGravity = true;

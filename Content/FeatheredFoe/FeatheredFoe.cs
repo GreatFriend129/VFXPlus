@@ -102,7 +102,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
             //Trispin, Dive, UmbrellaRain, CornerTravelShot, Martlet, Madison, Offscreen, Maelstrom
 
-            CurrentAttack = FeatheredFoeState.WindDirShot;
+            //CurrentAttack = FeatheredFoeState.WindDirShot;
 
             //Main.NewText("ignore me!");
 

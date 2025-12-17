@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -1319,3 +1320,4 @@ namespace VFXPlus.Content.VFXTest.Aero.CavernSword
         }
     }
 }
+*/

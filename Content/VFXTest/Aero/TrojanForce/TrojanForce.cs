@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿/*
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -1862,48 +1863,49 @@ namespace VFXPlus.Content.VFXTest.Aero.TrojanForce
             
 
             // 26 trail positions
-            /*
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/FireEdge").Value;
+            
+            //Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/FireEdge").Value;
 
-            trailEffect ??= ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+            //trailEffect ??= ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
 
             //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousRotations.ToArray();
+            //Vector2[] pos_arr = previousPositions.ToArray();
+            //float[] rot_arr = previousRotations.ToArray();
 
-            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f) * 0.15f;
+            //float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f) * 0.15f;
 
-            Color StripColor(float progress) => Color.White * (progress * progress);
-            float StripWidthUnder(float progress) => 20f * Easings.easeOutCubic(progress) * overallScale * sineWidthMult * 0.5f;
-            float StripWidthOver(float progress) => 12f * Easings.easeOutCubic(progress) * overallScale * sineWidthMult * 0.5f;
+            //Color StripColor(float progress) => Color.White * (progress * progress);
+            //float StripWidthUnder(float progress) => 20f * Easings.easeOutCubic(progress) * overallScale * sineWidthMult * 0.5f;
+            //float StripWidthOver(float progress) => 12f * Easings.easeOutCubic(progress) * overallScale * sineWidthMult * 0.5f;
 
-            VertexStrip vertexStripUnder = new VertexStrip();
-            vertexStripUnder.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthUnder, -Main.screenPosition, includeBacksides: true);
+            //VertexStrip vertexStripUnder = new VertexStrip();
+            //vertexStripUnder.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthUnder, -Main.screenPosition, includeBacksides: true);
 
-            VertexStrip vertexStripOver = new VertexStrip();
-            vertexStripOver.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthOver, -Main.screenPosition, includeBacksides: true);
+            //VertexStrip vertexStripOver = new VertexStrip();
+            //vertexStripOver.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthOver, -Main.screenPosition, includeBacksides: true);
 
-            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            trailEffect.Parameters["progress"].SetValue(timer * 0.05f * 0f);
-            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            trailEffect.Parameters["reps"].SetValue(1f);
+            //trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            //trailEffect.Parameters["progress"].SetValue(timer * 0.05f * 0f);
+            //trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            //trailEffect.Parameters["reps"].SetValue(1f);
 
             //UnderLayer
-            trailEffect.Parameters["ColorOne"].SetValue(Color.DeepPink.ToVector3() * 1f);
-            trailEffect.Parameters["glowThreshold"].SetValue(1f);
-            trailEffect.Parameters["glowIntensity"].SetValue(1f);
-            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStripUnder.DrawTrail();
+            //trailEffect.Parameters["ColorOne"].SetValue(Color.DeepPink.ToVector3() * 1f);
+            //trailEffect.Parameters["glowThreshold"].SetValue(1f);
+            //trailEffect.Parameters["glowIntensity"].SetValue(1f);
+            //trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStripUnder.DrawTrail();
 
             //Over layer
-            trailEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 1f);
-            trailEffect.Parameters["glowThreshold"].SetValue(1f); //0.7
-            trailEffect.Parameters["glowIntensity"].SetValue(1f); //2
-            trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStripOver.DrawTrail();
+            //trailEffect.Parameters["ColorOne"].SetValue(Color.Black.ToVector3() * 1f);
+            //trailEffect.Parameters["glowThreshold"].SetValue(1f); //0.7
+            //trailEffect.Parameters["glowIntensity"].SetValue(1f); //2
+            //trailEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            //vertexStripOver.DrawTrail();
 
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            */
+            //Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            
         }
     }
 }
+*/

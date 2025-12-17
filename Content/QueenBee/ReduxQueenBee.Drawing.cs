@@ -46,6 +46,7 @@ namespace VFXPlus.Content.QueenBee
 
             DrawOphaTelegraph();
 
+            Utils.DrawBorderStringBig(spriteBatch, "Please ignore me, I am a side project", NPC.Center - screenPos + new Vector2(0f, -210f), Color.White, scale: 0.5f);
             Utils.DrawBorderStringBig(spriteBatch, "" + attackSpeed, NPC.Center - screenPos + new Vector2(0f, -110f), Color.White, scale: 1f);
 
             Vector2 drawPos = NPC.Center - Main.screenPosition;// + (Main.rand.NextVector2Circular(7f, 7f) * randomShakePower);

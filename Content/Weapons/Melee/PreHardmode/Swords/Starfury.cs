@@ -20,6 +20,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 {
     
+    //Not currently enabled
     public class Starfury : GlobalItem 
     {
         public override bool InstancePerEntity => true;
