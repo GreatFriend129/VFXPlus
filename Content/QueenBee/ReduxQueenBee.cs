@@ -66,6 +66,10 @@ namespace VFXPlus.Content.QueenBee
         public int substate = 0;
         public int attackReps = 0;
 
+        //0f = base | 1f = MAX SPEED
+        float attackSpeed = 0f;
+
+
         bool isDashing = false;
         bool firstFrame = true;
         public override void AI()
@@ -77,6 +81,15 @@ namespace VFXPlus.Content.QueenBee
                 firstFrame = false;
                 CurrentAttack = QueenBeeState.RadialBurst;
             }
+
+            
+            attackSpeed = (NPC.lifeMax - NPC.life) / (float)NPC.lifeMax;
+
+            if (attackSpeed < 0.5f)
+                attackSpeed = 0f;
+
+            //
+            //CurrentAttack = QueenBeeState.NamaahWall;
 
             NPC.dontTakeDamage = false;
             NPC.hide = false;

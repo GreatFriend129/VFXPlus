@@ -97,12 +97,12 @@ namespace VFXPlus.Content
             //Main.projectile[windFX3].scale = 0.85f;
 
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 220; i < 2; i++)
             {
                 //Good one
                 Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(6.28f) * Main.rand.NextFloat(6f, 12f) * 1f;
 
-                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, myvel, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
+                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, myvel, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
             }
 
             /*
@@ -193,7 +193,7 @@ namespace VFXPlus.Content
 
             }
 
-            for (int i = 220; i < 6; i++)
+            for (int i = 0; i < 6; i++)
             {
                 float prog = (float)i / 5f;
 

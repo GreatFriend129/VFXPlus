@@ -43,8 +43,17 @@ namespace VFXPlus.Content.QueenBee
 
             //Max Speed = 25tbd | 30 tad | 35 dash speed //|(MathF.Abs(distToPlayerY) < 5f && timer > (float)timeBeforeDash / 2f) | basic movement 10f
 
-            int timeBeforeDash = 50;
-            int timeAfterDash = 40;
+            
+            //1f attackSpeed maybe too much but lol
+
+            int timeBeforeDash = 50 - (int)(25 * attackSpeed);
+            int timeAfterDash = 40 - (int)(10 * attackSpeed);
+            float dashSpeed = 25 + (int)(10 * attackSpeed);
+            float moveSpeed = 5f + (int)(5f * attackSpeed);
+
+            //If queen bee is near the same Y value as the player and this percentage of timeBeforeDash has passed, she can dash early
+            float earlyDashTime = timeBeforeDash / (float)(1f + attackSpeed);
+            
 
             //Move to player side
             if (substate == 0)
@@ -57,11 +66,11 @@ namespace VFXPlus.Content.QueenBee
                     vanillaDashVec = new Vector2(500f * vanillaDashSide, 0f);
                 }
 
-                BasicMovement(player.Center + vanillaDashVec, 5f, 540);
+                BasicMovement(player.Center + vanillaDashVec, moveSpeed, 540);
 
                 float distToPlayerY = (player.Center.Y - NPC.Center.Y);
 
-                if (timer == timeBeforeDash)// || (MathF.Abs(distToPlayerY) < 5f && timer > (float)timeBeforeDash / 2f))
+                if (timer == timeBeforeDash|| (MathF.Abs(distToPlayerY) < 7f && timer > earlyDashTime)) //5
                 {
                     Dust d2 = Dust.NewDustPerfect(NPC.Center + new Vector2(0f, 20f), ModContent.DustType<CirclePulse>(), new Vector2(-2f * vanillaDashSide, 0f), newColor: Color.Goldenrod * 0.3f);
                     CirclePulseBehavior b2 = new CirclePulseBehavior(1.75f, true, 2, 0.2f, 0.4f);
@@ -85,7 +94,7 @@ namespace VFXPlus.Content.QueenBee
             else if (substate == 1)
             {
                 isDashing = true;
-                NPC.velocity = new Vector2(-25f * vanillaDashSide, 0f);
+                NPC.velocity = new Vector2(-dashSpeed * vanillaDashSide, 0f);
 
                 int trailCount = 8;
                 dashTrailPositions.Add(NPC.Center);
@@ -127,9 +136,11 @@ namespace VFXPlus.Content.QueenBee
 
             //Max Speed = 25tbd | 30 tad | 35 dash speed //|(MathF.Abs(distToPlayerY) < 5f && timer > (float)timeBeforeDash / 2f) | basic movement 10f
 
-            int timeBeforeSpawnWall = 10;
-            int timeBeforeDash = 75; //60 //Dash starts after timeBeforeSpawnWall + timeBeforeDash
-            int timeAfterDash = 50;
+
+            int timeBeforeSpawnWall = 10 - (int)(4 * attackSpeed);
+            int timeBeforeDash = 85 - (int)(25 * attackSpeed); //75 //Dash starts after timeBeforeSpawnWall + timeBeforeDash
+            int timeAfterDash = 50 - (int)(15 * attackSpeed);
+            float dashSpeed = 20f + (int)(7 * attackSpeed);
 
             //Move to player side
             if (substate == 0)
@@ -153,7 +164,7 @@ namespace VFXPlus.Content.QueenBee
                     {
                         float prog = (float)j / (float)beeCount;
 
-                        Vector2 spawnPos = NPC.Center + new Vector2(430f, 0f).RotatedBy(MathHelper.TwoPi * prog);// + Main.rand.NextVector2Circular(200f, 200f);
+                        Vector2 spawnPos = NPC.Center + new Vector2(130f, 0f).RotatedBy(MathHelper.TwoPi * prog); //430
 
                         int bee = NPC.NewNPC(null, (int)spawnPos.X, (int)spawnPos.Y, ModContent.NPCType<WalledDashBee>());
                         (Main.npc[bee].ModNPC as WalledDashBee).isHittable = false;
@@ -191,7 +202,7 @@ namespace VFXPlus.Content.QueenBee
                 }
 
                 isDashing = true;
-                NPC.velocity = new Vector2(-20f * wallDashSide, 0f);
+                NPC.velocity = new Vector2(-dashSpeed * wallDashSide, 0f);
 
                 int trailCount = 10;
                 dashTrailPositions.Add(NPC.Center);
@@ -228,17 +239,21 @@ namespace VFXPlus.Content.QueenBee
         int shotCounter = 0;
         public void StingerSweep()
         {
+            //attackSpeed = 0.5f;
+
+            int timeBeforeShots = 80 - (int)(attackSpeed * 15); //60 base
+            int timeBetweenShots = 5 - (int)(attackSpeed * 2); //5 base
+            int shotCount = 16; //16
+            float angleBetweenShots = MathHelper.PiOver4 * 0.25f;
+
             if (timer == 0)
             {
                 NPC.velocity = Vector2.Zero;
-                sweepGoalPos = new Vector2(210f * sweepGoalSide, -120f); //175
+                sweepGoalPos = new Vector2(210f * sweepGoalSide, -120f);
             }
 
-            //float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
-            //BasicMovement(player.Center + sweepGoalPos, hoverSpeed, 480f);
-
             //Hover near player
-            if (timer < 60)
+            if (timer < timeBeforeShots)
             {
                 FacePlayer();
 
@@ -253,9 +268,9 @@ namespace VFXPlus.Content.QueenBee
             }
 
             //Start shooting
-            if (timer >= 60)
+            if (timer >= timeBeforeShots)
             {
-                if (shotCounter % 5 == 0)
+                if (shotCounter % timeBetweenShots == 0)
                 {
                     float rot = (MathHelper.Pi + MathHelper.PiOver4) + sweepAngle;
 
@@ -278,9 +293,6 @@ namespace VFXPlus.Content.QueenBee
                         Dust dust = Dust.NewDustPerfect(spawnPos + randomStart, DustID.t_Honey, vel * 0.65f + randomStart, Scale: Main.rand.NextFloat(1f, 1.75f));
 
                         dust.noGravity = true;
-
-                        //dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
-                        //    rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: true);
                     }
 
                     Color GPCCol = Color.Lerp(Color.OrangeRed, Color.DarkGoldenrod, 0.95f);
@@ -293,13 +305,12 @@ namespace VFXPlus.Content.QueenBee
                             rotPower: 0.15f, preSlowPower: 0.95f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.88f, shouldFadeColor: false);
                     }
 
-                    sweepAngle -= MathHelper.PiOver4 * 0.25f * sweepGoalSide;
-
+                    sweepAngle -= angleBetweenShots * sweepGoalSide;
                 }
                 shotCounter++;
             }
 
-            if (timer == 140)
+            if (timer == (timeBeforeShots + (timeBetweenShots * shotCount)))
             {
                 sweepGoalSide *= -1;
                 sweepAngle = 0;
@@ -309,7 +320,7 @@ namespace VFXPlus.Content.QueenBee
                 attackReps++;
                 if (attackReps == 2)
                 {
-                    sweepGoalSide *= -1;
+                    //sweepGoalSide *= -1;
                     ChooseNextAttack();
                 }
             }
@@ -320,6 +331,16 @@ namespace VFXPlus.Content.QueenBee
         int radialBurstSide = 1;
         public void RadialBurst()
         {
+            //attackSpeed = 1f; //1.5 valid attackSpeed
+
+            int timeBeforeShots = 80 - (int)(attackSpeed * 40); //80 base
+            int timeBetweenShots = 30 - (int)(attackSpeed * 20); //30 base
+            int timeAfterShots = 80 - (int)(attackSpeed * 40); //80 base
+
+            //Make sure that timeAfterShots isnt less than 2 * timeBetweenShots unless you want less than 3 burts
+
+            float moveSpeedMult = 1f + (attackSpeed);
+
             if (timer == 0)
             {
                 if (attackReps == 0)
@@ -327,20 +348,19 @@ namespace VFXPlus.Content.QueenBee
 
                 NPC.velocity = Vector2.Zero;
 
-                radialBurstPos = new Vector2(225f * radialBurstSide, -120f); //175
+                radialBurstPos = new Vector2(225f * radialBurstSide, -130f); //225 -120
 
             }
 
             //Hover above player
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 5f : 3f);
 
-            BasicMovement(player.Center + radialBurstPos, hoverSpeed, 480f);
+            BasicMovement(player.Center + radialBurstPos, hoverSpeed * moveSpeedMult, 480f);
 
             FacePlayer();
 
 
-            int timeBetweenShots = 30;
-            if (timer == 80 || timer == 80 + timeBetweenShots || timer == 80 + timeBetweenShots + timeBetweenShots)
+            if (timer == timeBeforeShots || timer == timeBeforeShots + timeBetweenShots || timer == timeBeforeShots + timeBetweenShots + timeBetweenShots)
             {
                 Vector2 spawnPos = NPC.Center + new Vector2(-20f * radialBurstSide, 40f);
 
@@ -400,7 +420,7 @@ namespace VFXPlus.Content.QueenBee
                 NPC.velocity += new Vector2(6f * radialBurstSide, -6f);
             }
 
-            if (timer == 160)
+            if (timer == timeBeforeShots + timeAfterShots)
             {
                 radialBurstSide *= -1;
                 timer = -1;
@@ -416,10 +436,11 @@ namespace VFXPlus.Content.QueenBee
 
         int wallSide = 1;
         public void NamaahWall()
-        {
-            int timeBeforeSpawn = 60;
-            int timeAfterSpawn = 200;
-            
+        {            
+            int timeBeforeSpawn = 60 - (int)(15 * attackSpeed);
+            int timeAfterSpawn = 200 - (int)(75 * attackSpeed);
+            float beeVelocity = 4f + (int)(2.75f * attackSpeed);
+
             float hoverSpeed = (NPC.Distance(player.Center) > 500 ? 9f : 3f);
 
             BasicMovement(player.Center + new Vector2(0f, -200f), hoverSpeed, 1240f); //150
@@ -446,7 +467,7 @@ namespace VFXPlus.Content.QueenBee
                         int bee = NPC.NewNPC(null, (int)adjustedPos.X, (int)adjustedPos.Y, ModContent.NPCType<HittableBee>());
                         (Main.npc[bee].ModNPC as HittableBee).isHittable = shouldBeHittable;
 
-                        Main.npc[bee].velocity = new Vector2(4f * wallSide, 0f * (j % 2 == 0 ? -1f : 1f));//4 | 0.65
+                        Main.npc[bee].velocity = new Vector2(beeVelocity * wallSide, 0f * (j % 2 == 0 ? -1f : 1f));//4 | 0.65
                         Main.npc[bee].scale = 1.15f;
                     }
                 }
@@ -460,7 +481,7 @@ namespace VFXPlus.Content.QueenBee
                 if (attackReps == 2)
                 {
                     ChooseNextAttack();
-                    timer = -200;
+                    //timer = -200;
                 }
             }
 
@@ -473,9 +494,12 @@ namespace VFXPlus.Content.QueenBee
             //Move to a random point on circle in certain angle range above player
             //Shoot out bees in 6 directions
 
-            int timeToMove = 60;
-            int timeBeforeRelease = 40;
-            int timeAfterRelease = 120;
+            int timeToMove = 60 - (int)(15 * attackSpeed);
+            int timeBeforeRelease = 40 - (int)(10 * attackSpeed);
+            int timeAfterRelease = 140 - (int)(40 * attackSpeed);
+
+            //How long until the shot bees move perpendicular to the way they were shot out
+            int timeBeforeSecondDir = 60 - (int)(25 * attackSpeed); 
 
             if (timer == 0)
                 ophaPos = new Vector2(0f, -200f).RotatedByRandom(MathHelper.PiOver4);
@@ -522,7 +546,7 @@ namespace VFXPlus.Content.QueenBee
 
                             (Main.npc[bee].ModNPC as OphanaimBee).secondDirection = new Vector2(0f, ophSide).RotatedBy(rot);
                             (Main.npc[bee].ModNPC as OphanaimBee).secondSpeed = 6f;
-                            (Main.npc[bee].ModNPC as OphanaimBee).timeBeforeSecondDirection = 60;
+                            (Main.npc[bee].ModNPC as OphanaimBee).timeBeforeSecondDirection = timeBeforeSecondDir;
                             (Main.npc[bee].ModNPC as OphanaimBee).velFadeAmount = 0.85f;
 
                             Main.npc[bee].velocity = new Vector2(5 + (12f * i), 0f).RotatedBy(rot);

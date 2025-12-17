@@ -1725,27 +1725,29 @@ namespace VFXPlus.Content.VFXTest
 
             //Lighting.AddLight(Projectile.Center, Color.HotPink.ToVector3() * overallScale);
 
+            Projectile.timeLeft = 1000;
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 6; i++) //6
             {
                 float prog = (float)i / 5f;
 
-                //Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
-                //float myScale = Main.rand.NextFloat(1.25f, 1.5f);
-                //FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
-                //fire.scaleFadePower = 1.1f;
-                //ShaderParticleHandler.SpawnParticle(fire);
-
                 Vector2 vel = new Vector2(0f, -1f).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.5f) * Main.rand.NextFloat(2f, 28f); //30
                 float myScale = Main.rand.NextFloat(1.25f, 1.5f);
-                FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f * 1.5f, myScale * 1.5f, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f, VelFade: 0.8f);
-                fire.scaleFadePower = 1.1f;
+                FireParticleOther fire = new FireParticleOther(Main.MouseWorld, vel * 1.5f * 1.5f, myScale * 1.5f, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f, VelFade: 0.8f);
+                fire.scaleFadePower = 1.1f;//1.1f;
 
                 ShaderParticleHandler.SpawnParticle(fire);
 
+                /*
+                float prog = (float)i / 5f;
 
-                //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);
-                //ShaderParticleHandler.SpawnParticle(fire);
+                Vector2 vel = new Vector2(0f, -1f).SafeNormalize(Vector2.UnitX).RotatedByRandom(0.5f) * Main.rand.NextFloat(2f, 28f); //30
+                float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                FireParticleOther fire = new FireParticleOther(Main.MouseWorld, vel * 1.5f * 1.5f, myScale * 1.5f, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f, VelFade: 0.8f);
+                fire.scaleFadePower = 1.1f;
+
+                ShaderParticleHandler.SpawnParticle(fire);
+                */
             }
 
             timer++;
@@ -1774,14 +1776,15 @@ namespace VFXPlus.Content.VFXTest
             Vector2 barVec2Scale = new Vector2(1.1f, 1f) * 2.5f;
 
             Color Ored = Color.Lerp(Color.OrangeRed, Color.Red, 0.25f);
+            Color Ored2 = Color.Lerp(Color.OrangeRed, Color.Red, 0.45f);
 
             float sineAlpha = (float)(Math.Sin(Main.timeForVisualEffects * 0.15f)) * 0.15f;
             float sine2 = ((float)(Math.Sin(Main.timeForVisualEffects * 0.15f)) * 0.5f) + 0.5f;
 
-            Vector2 barPos = Main.MouseWorld - Main.screenPosition + new Vector2(0f, 120f) + Main.rand.NextVector2Circular(2f + (sine2 * 2f), 2f + (sine2 * 2f));
+            Vector2 barPos = Main.MouseWorld - Main.screenPosition + new Vector2(0f, 120f) + Main.rand.NextVector2Circular(3f + (sine2 * 2f), 3f + (sine2 * 2f));
 
 
-            Main.spriteBatch.Draw(BarBorder, barPos, null, Color.Orange with { A = 0 } * 0.15f, barRot, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(BarBorder, barPos, null, Ored with { A = 0 } * 0.15f, barRot, BarBorder.Size() / 2f, barVec2Scale, SpriteEffects.None, 0f);
 
             //Border
             if (fillPercent >= 1f)
@@ -1804,7 +1807,7 @@ namespace VFXPlus.Content.VFXTest
 
 
             Vector2 fillScale = new Vector2(1.1f, 1f) * 2.5f;
-            Color fillColor = Color.Lerp(Ored, Color.White, sine2);
+            Color fillColor = Color.Lerp(Ored2, Color.White * 0.5f, sine2);
 
             for (int i = 0; i < 4; i++)
             {
