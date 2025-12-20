@@ -1,1 +1,9 @@
-Pretend there is a description here.
+VFX+ is a mod that aims to remake much of Terraria’s visual effects from the ground up without impacting functionality.
+
+The mod currently reworks the VFX (and often SFX too) of nearly every single Mage weapon, with other classes and changes coming in the future.
+
+Every individual weapon change can be turned on or off via the config.
+
+VFX+ should be compatible with most mods (Yes, including Calamity), just don’t expect it to play nice with anything that heavily reworks vanilla weapons.
+
+Multiplayer is untested at this point but should be mostly fine, although ALL players will need the mod enabled. 
