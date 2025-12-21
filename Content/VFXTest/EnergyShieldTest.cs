@@ -11,6 +11,7 @@ using VFXPlus.Content.Dusts;
 
 namespace VFXPlus.Content.VFXTest
 {
+    /*
     [AutoloadEquip(EquipType.Shield)] // Load the spritesheet you create as a shield for the player when it is equipped.
     public class EnergyShield : ModItem
     {
@@ -310,6 +311,7 @@ namespace VFXPlus.Content.VFXTest
         }
 
     }
+    */
 }
 
     
