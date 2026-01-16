@@ -222,6 +222,7 @@ Projectiles: {
 	TrojanForceDagger.DisplayName: Trojan Force Dagger
 	FireSpawner.DisplayName: Fire Spawner
 	BurdenOfFleshTest.DisplayName: Burden Of Flesh Test
+	AngleGlow.DisplayName: Angle Glow
 }
 
 Configs: {

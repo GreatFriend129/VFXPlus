@@ -48,15 +48,15 @@ namespace VFXPlus.Content
             if (player.altFunctionUse == 2)
             {
                 //ShaderParticleHandler.RemoveParticle();
-                Vector2 pos = Main.MouseWorld;
-                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
+                //Vector2 pos = Main.MouseWorld;
+                //NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<FeatheredFoeBoss>());
                 return false;
             }
             else 
             {
-                Vector2 pos = Main.MouseWorld;
-                NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<ReduxQueenBee>());
-                return false;
+                //Vector2 pos = Main.MouseWorld;
+                //NPC.NewNPC(null, (int)pos.X, (int)pos.Y, ModContent.NPCType<ReduxQueenBee>());
+                //return false;
             }
 
 
@@ -98,7 +98,7 @@ namespace VFXPlus.Content
 
             }
 
-            //int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<FireSpawner>(), 1, 0, Main.myPlayer);
+            int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<AngleGlow>(), 1, 0, Main.myPlayer);
             //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceDagger>(), 1, 0, Main.myPlayer);
             //Main.projectile[windFX3].scale = 0.85f;
 
