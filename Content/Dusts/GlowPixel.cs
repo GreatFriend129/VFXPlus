@@ -1,10 +1,11 @@
-﻿   using Terraria;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using System;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+   using Terraria;
 using Terraria.Graphics.Shaders;
+using Terraria.ModLoader;
 using Terraria.UI;
+using VFXPlus.Common;
 using static Terraria.ModLoader.ModContent;
 
 namespace VFXPlus.Content.Dusts
@@ -14,51 +15,134 @@ namespace VFXPlus.Content.Dusts
 	{
 		public override string Texture => "VFXPlus/Content/Dusts/Textures/PixelGlow";
 
-		public override void OnSpawn(Dust dust)
-		{
-			dust.customData = false;
-			dust.noGravity = true;
-			dust.frame = new Rectangle(0, 0, 64, 64);
-		}
+        public override void OnSpawn(Dust dust)
+        {
+            dust.noGravity = true;
+            dust.frame = new Rectangle(0, 0, 64, 64);
 
-		public override Color? GetAlpha(Dust dust, Color lightColor)
-		{
-			return dust.color;
-		}
+            dust.fadeIn = 0f;
+        }
 
-		public override bool Update(Dust dust)
-		{
-			dust.color.A = 0;
-			dust.scale *= 0.94f;
-			dust.position += dust.velocity; 
+        public override Color? GetAlpha(Dust dust, Color lightColor)
+        {
+            return dust.color;
+        }
+
+        public override bool Update(Dust dust)
+        {
+            if (dust.customData == null)
+            {
+                dust.customData = new GlowPixelBehavior(TimeForFadeIn: 6, TimeBeforeFadeOut: 14, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f);
+            }
+
+            GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
+
+            if (behavior.timer == 0)
+                behavior.initialVelLength = dust.velocity.Length();
+
+            if (behavior.timer <= behavior.timeForFadeIn)
+            {
+                float prog = (float)behavior.timer / (float)behavior.timeForFadeIn;
+
+                behavior.dustAlpha = Easings.easeInQuad(prog);
+
+                dust.velocity *= behavior.earlyVelFadePower;
+            }
 
 
-			dust.velocity *= 0.95f;
+            if (behavior.timer > behavior.timeBeforeFadeOut)
+            {
+                dust.velocity *= behavior.velFadePower;
+                dust.scale *= behavior.scaleFadePower;
+                behavior.dustAlpha *= behavior.alphaFadePower;
+                dust.color *= behavior.colorFadePower;
 
-			if (!dust.noLight && dust.scale > 0.2f)
-				Lighting.AddLight(dust.position, dust.color.R * dust.scale * 0.002f, dust.color.G * dust.scale * 0.002f, dust.color.B * dust.scale * 0.002f);
+
+                if (dust.scale < 0.05f)
+                    dust.active = false;
+
+                if (behavior.dustAlpha < 0.05f)
+                    dust.active = false;
+            }
+
+            if (behavior.randomVelRotatePower > 0)
+            {
+                //Ratio of current velocity over starting velocity
+                float dustVelPower = dust.velocity.Length() / behavior.initialVelLength;
+                dust.velocity = dust.velocity.RotateRandom(behavior.randomVelRotatePower * dustVelPower);
+            }
+
+            dust.position += dust.velocity;
+
+            if (!dust.noLight && dust.scale > 0.2f)
+                Lighting.AddLight(dust.position, dust.color.R * dust.scale * 0.002f, dust.color.G * dust.scale * 0.002f, dust.color.B * dust.scale * 0.002f);
+
+            dust.rotation += dust.velocity.X * behavior.rotPower;
+
+            behavior.timer++;
 
 
-			if (dust.alpha != 0)
-				dust.color *= 0.95f;
-
-			if (dust.scale < 0.05f)
-			{
-				dust.active = false;
-			}
-
-			dust.rotation += dust.velocity.X * 0.01f;
-
-			return false;
-		}
+            return false;
+        }
         public override bool PreDraw(Dust dust)
         {
-            Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = 0 }, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+            GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
+
+            if (behavior.drawBlack)
+                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, Color.Black * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+            else
+                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = 0 } * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+
             return false;
         }
     }
 
-	public class GlowPixelFast : GlowPixel
+    public class GlowPixelBehavior
+    {
+        public float dustAlpha = 0f;
+        public int timer = 0;
+
+        public float initialVelLength = 0f;
+
+        //
+        public int timeForFadeIn = 6;
+
+        //After this many frames. The dust will begin to fade out.
+        public int timeBeforeFadeOut = 14;
+
+        //How much the dust velocity should fade before 'timeBeforeFadeOut'
+        public float earlyVelFadePower = 1f;
+
+        public float velFadePower = 1f;
+
+        public float scaleFadePower = 1f;
+
+        public float alphaFadePower = 1f;
+
+        //How much the color (not alpha) should fade
+        public float colorFadePower = 1f;
+
+        //How much this dust should randomly turn 
+        public float randomVelRotatePower = 0;
+
+        //For some reason, if you try to set any dust's color to black it will instantly kill itself upon spawning, so use this instead
+        public bool drawBlack = false;
+
+		//How much this dust will rotate based on its xvelocity
+		public float rotPower = 0.01f;
+
+        public GlowPixelBehavior(int TimeForFadeIn = 6, int TimeBeforeFadeOut = 14, float VelFadePower = 0.92f, float ScaleFadePower = 1f, float AlphaFadePower = 0.9f, float ColorFadePower = 0.9f)
+        {
+            timeForFadeIn = TimeForFadeIn;
+            timeBeforeFadeOut = TimeBeforeFadeOut;
+            velFadePower = VelFadePower;
+            scaleFadePower = ScaleFadePower;
+            alphaFadePower = AlphaFadePower;
+            colorFadePower = ColorFadePower;
+        }
+    }
+
+    public class GlowPixelFast : GlowPixel
     {
 		public override bool Update(Dust dust)
 		{

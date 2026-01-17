@@ -223,6 +223,7 @@ Projectiles: {
 	FireSpawner.DisplayName: Fire Spawner
 	BurdenOfFleshTest.DisplayName: Burden Of Flesh Test
 	AngleGlow.DisplayName: Angle Glow
+	AngleGlowTest.DisplayName: Angle Glow Test
 }
 
 Configs: {

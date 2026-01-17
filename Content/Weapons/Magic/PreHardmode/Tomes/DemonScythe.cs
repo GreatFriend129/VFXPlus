@@ -79,7 +79,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             }
 
 
-            if (timer % 1 == 0 && Main.rand.NextBool())
+            if (timer % 1 == 0 && Main.rand.NextBool() && false)
             {
                 Vector2 offset2 = projectile.rotation.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-20, 20);
                 Vector2 vel2 = projectile.rotation.ToRotationVector2().RotatedByRandom(0.15f) * Main.rand.NextFloat(2, 7);
@@ -92,6 +92,30 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 d2.velocity += projectile.velocity * 0.25f;
                 d2.velocity *= 0.25f;
             }
+
+            if (timer % 2 == 0)
+            {
+                Vector2 randomPos = Main.rand.NextVector2Circular(0f, 15f).RotatedBy(projectile.velocity.ToRotation()) * projectile.scale;
+
+                Vector2 randomStart = Main.rand.NextVector2Circular(1f, 1f) * 0f;
+
+                Dust dust = Dust.NewDustPerfect(projectile.Center + randomPos, ModContent.DustType<GlowPixel>(), randomStart, newColor: newPurple * 1.15f, Scale: Main.rand.NextFloat(0.3f, 0.45f)); //1.5
+                dust.velocity += projectile.velocity * 0.5f;
+                //dust.rotation = Main.rand.NextFloat(6.28f);
+
+                dust.noLight = true;
+
+                //GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 2, TimeBeforeFadeOut: 10, VelFadePower: 0.89f, ScaleFadePower: 1f, AlphaFadePower: 0.9f, ColorFadePower: 0.9f);
+                //gpb.earlyVelFadePower = 0.9f;
+
+                //dust.customData = gpb;
+
+
+                GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 3, TimeBeforeFadeOut: 11, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f, ColorFadePower: 0.9f);
+                gpb.randomVelRotatePower = 0.02f;
+                dust.customData = gpb;
+            }
+
 
             float progress = Math.Clamp(timer / 50f, 0f, 1f);
             fadeInAlpha = MathHelper.Lerp(0f, 1f, progress);
@@ -252,6 +276,18 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
 
             }
 
+            //Ring
+            Texture2D RingTex = Mod.Assets.Request<Texture2D>("Assets/Slash/FadeRingB").Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
+
+            float ringRot = (float)Main.timeForVisualEffects * 0.6f * projectile.direction;
+
+            float ringScale = 0.135f * projectile.scale * overallScale; //125
+            float ringAlpha = fadeInAlpha * 2f;
+
+            Main.EntitySpriteDraw(RingTex, drawPos, null, darkPurple with { A = 0 } * ringAlpha, ringRot, RingTex.Size() / 2f, ringScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(RingTex, drawPos, null, darkPurple with { A = 0 } * ringAlpha, ringRot + MathHelper.PiOver4, RingTex.Size() / 2f, ringScale * 1.1f, SpriteEffects.None);
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

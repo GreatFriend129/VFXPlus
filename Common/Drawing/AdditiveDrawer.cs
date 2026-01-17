@@ -14,6 +14,7 @@ using ReLogic.Content;
 using VFXPlus.Common.Interfaces;
 using VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns;
 using VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves;
+using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 
 
 namespace VFXPlus.Common.Drawing
@@ -70,7 +71,7 @@ namespace VFXPlus.Common.Drawing
                     {
                         switch (p.type)
                         {
-                            /*
+                            
                             case ProjectileID.Bullet:
                                 if (p.TryGetGlobalProjectile(out MusketBallProjOverride globalMB))
                                     globalMB.DrawAdditive(Main.spriteBatch);
@@ -127,7 +128,7 @@ namespace VFXPlus.Common.Drawing
                                 if (p.TryGetGlobalProjectile(out LuminiteBulletProjOverride globalLB))
                                     globalLB.DrawAdditive(Main.spriteBatch);
                                 break;
-                            */
+                            
                         }
 
                     }

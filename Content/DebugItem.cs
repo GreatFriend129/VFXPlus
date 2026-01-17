@@ -10,7 +10,6 @@ using VFXPlus.Content.Dusts;
 using VFXPlus.Content.FeatheredFoe;
 using VFXPlus.Content.Particles;
 using VFXPlus.Content.Projectiles;
-using VFXPlus.Content.QueenBee;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
 
@@ -73,33 +72,8 @@ namespace VFXPlus.Content
                 }
             }
 
-            float beeCount = 10f * 0f; //20 | 10f min 20f max
-            Vector2 randStart = Main.rand.NextVector2Unit();
-            for (float i = 0; i < beeCount; i++)
-            {
-                float prog = (float)i / beeCount;
 
-                float rot = MathHelper.TwoPi * prog;
-
-                Vector2 offsetPos = randStart.RotatedBy(rot) * 325f;
-                Vector2 spawnPos = player.Center + offsetPos;
-
-
-                bool shouldBeHittable = (rot < MathHelper.PiOver4 * 1f || rot > MathHelper.TwoPi - MathHelper.PiOver4 * 1f);
-
-                int bee = NPC.NewNPC(null, (int)spawnPos.X, (int)spawnPos.Y, ModContent.NPCType<AsgoreBee>());
-                (Main.npc[bee].ModNPC as AsgoreBee).isHittable = shouldBeHittable;
-                (Main.npc[bee].ModNPC as AsgoreBee).centerPos = player.Center;
-                (Main.npc[bee].ModNPC as AsgoreBee).centerOffset = offsetPos;
-                (Main.npc[bee].ModNPC as AsgoreBee).inwardSpeed = 1.5f; //1.5
-                (Main.npc[bee].ModNPC as AsgoreBee).rotSpeed = 0.013f * 0f; //0.03 | 0.013
-
-                Main.npc[bee].scale = 1.15f;
-
-            }
-
-            int windFX2 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<AngleGlow>(), 1, 0, Main.myPlayer);
-            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 8f, ModContent.ProjectileType<TrojanForceDagger>(), 1, 0, Main.myPlayer);
+            int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<AngleGlowTest>(), 1, 0, Main.myPlayer);
             //Main.projectile[windFX3].scale = 0.85f;
 
 
@@ -133,23 +107,6 @@ namespace VFXPlus.Content
             (Main.projectile[are6].ModProjectile as H3Impact).pixelize = false;
             (Main.projectile[are6].ModProjectile as H3Impact).additive = false;
             */
-
-            for (int i = 220; i < 5; i++)
-            {
-                float prog = (float)i / 5f;
-
-                Color col = Color.Lerp(Color.Red, Color.OrangeRed, 1f);
-
-                float velMult = Main.rand.NextFloat(2f, 6f);
-                Vector2 randomStart = Main.rand.NextVector2CircularEdge(2f, 2f);
-                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, new Vector2(0f, -12f).RotatedByRandom(0.35f) * Main.rand.NextFloat(0.75f, 4.25f), ModContent.ProjectileType<SmokeTest5>(), 0, 0, Main.myPlayer);
-
-                (Main.projectile[smoke].ModProjectile as SmokeTest5).col = Color.Lerp(Color.OrangeRed, Color.LightGoldenrodYellow, 0f + Main.rand.NextFloat(0f));// new Color(100, 220, 5);
-
-                Main.projectile[smoke].rotation = Main.rand.NextFloat(6.28f);
-                Main.projectile[smoke].scale = 0.5f;// * Main.rand.NextFloat(0.5f, 1f);
-                Main.projectile[smoke].velocity *= 0.75f;
-            }
 
             for (int i = 220; i < 2; i++)
             {
@@ -199,7 +156,7 @@ namespace VFXPlus.Content
 
             }
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 220; i < 6; i++)
             {
                 float prog = (float)i / 5f;
 
@@ -229,20 +186,6 @@ namespace VFXPlus.Content
             //FlashSystem.SetCAFlashEffect(0.08f, 35, 1f, 0.5f, true);
 
 
-            //return false;
-
-
-            float gap = 22.5f;
-            for (int i = 220; i < 20; i++)
-            {
-                Vector2 spawnPos = player.Center + new Vector2(0f, gap * i);
-                Vector2 vel = new Vector2(7f, 0f);// * Main.rand.NextFloat(0.98f, 1.02f);
-                int are2 = Projectile.NewProjectile(null, spawnPos, vel, ModContent.ProjectileType<BeeDrawingTest>(), 10, 0, player.whoAmI);
-                Main.projectile[are2].scale = 1.125f;
-            }
-
-            //Vector2 velAAA = new Vector2(8f, 0f);
-            //int are3 = Projectile.NewProjectile(null, player.Center, velocity.SafeNormalize(Vector2.UnitX) * 2f, ModContent.ProjectileType<StingerTest>(), 0, 0, player.whoAmI);
 
             return false;
 

@@ -1857,4 +1857,121 @@ namespace VFXPlus.Content.VFXTest
 
     }
 
+    public class AngleGlowTest : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        int timer = 0;
+
+        public override void AI()
+        {
+            if (timer == 0)
+            {
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+                //Projectile.spriteDirection = Main.rand.NextBool() ? 1 : -1;
+            }
+
+
+            int timeForFade = 30;
+
+            float fadeProg = Utils.GetLerpValue(0f, timeForFade, timer, true);
+
+            overallAlpha = Easings.easeOutQuart(1f - fadeProg); //quad
+            overallScale = Easings.easeOutQuart(1f - fadeProg);
+
+            if (overallAlpha == 0f)
+                Projectile.Kill();
+
+            Projectile.rotation += 0.4f * Projectile.spriteDirection * Easings.easeInQuad(1f - fadeProg);
+
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawCrack(true);
+            });
+
+            DrawCrack(false);
+
+            return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawCrack(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/AngleGlow", AssetRequestMode.ImmediateLoad).Value;
+
+            /*
+            myEffect.Parameters["totalAngle"].SetValue(MathHelper.PiOver4); 
+
+            myEffect.Parameters["centerColor"].SetValue(Color.Gold.ToVector3() * 1f); 
+            myEffect.Parameters["edgeColor"].SetValue(Color.DarkGoldenrod.ToVector3() * 2f); 
+
+            myEffect.Parameters["edgeBlendLength"].SetValue(0.14f); 
+            myEffect.Parameters["edgeBlendStrength"].SetValue(13f);
+            myEffect.Parameters["centerOpacity"].SetValue(0.7f);
+            myEffect.Parameters["totalOpacity"].SetValue(1f);
+            */
+
+            float angle = MathHelper.PiOver2 * 1f;// + MathF.Sin((float)Main.timeForVisualEffects * 0.1f) * 0.5f;
+            myEffect.Parameters["totalAngle"].SetValue(angle * overallScale);
+
+            myEffect.Parameters["centerColor"].SetValue(Color.Goldenrod.ToVector3() * 1f);
+            myEffect.Parameters["edgeColor"].SetValue(Color.DarkGoldenrod.ToVector3() * 2.0f);
+
+            myEffect.Parameters["edgeBlendLength"].SetValue(0.14f);
+            myEffect.Parameters["edgeBlendStrength"].SetValue(13f);
+            myEffect.Parameters["centerOpacity"].SetValue(0.65f);
+            myEffect.Parameters["totalOpacity"].SetValue(overallAlpha);
+
+            //float rot1 = (float)Main.timeForVisualEffects * 0.1f;
+            //float rot2 = (float)Main.timeForVisualEffects * 0.1f;
+            //float rot3 = (float)Main.timeForVisualEffects * 0.1f;
+            //float rot4 = (float)Main.timeForVisualEffects * 0.1f;
+            //float rot5 = (float)Main.timeForVisualEffects * 0.1f;
+
+            //Main Tex
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 200f, SpriteEffects.None, 0f); //0.3
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation + MathHelper.Pi, Tex.Size() / 2f, 200f, SpriteEffects.None, 0f); //0.3
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation - MathHelper.PiOver2, Tex.Size() / 2f, 200f, SpriteEffects.None, 0f); //0.3
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation + MathHelper.PiOver2, Tex.Size() / 2f, 200f, SpriteEffects.None, 0f); //0.3
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+        }
+
+    }
+
 }
