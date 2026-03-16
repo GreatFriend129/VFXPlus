@@ -118,24 +118,51 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (timer == 0)
                 return false;
 
-            Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
-            Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
+                Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
+
+                Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10) + new Vector2(0f, 0f);
+                float drawRot = projectile.velocity.ToRotation();
+                Vector2 drawOrigin = spike.Size() / 2f;
+
+                //Vanilla has 1.2 scale for bullets, so normalize this to 1f
+                float adjustedScale = projectile.scale * (5f / 6f);
+
+                Color spikeCol = isBlue ? Color.DodgerBlue : Color.DeepPink;
+                Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+
+                Color orbCol = isBlue ? Color.DeepSkyBlue : Color.DeepPink;
+                Vector2 orbScale = new Vector2(1f, 0.3f * totalScale) * 0.7f * adjustedScale;
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+
+            });
+
+            ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
+                if (projectile.active == false)
+                    totalAlpha = 0f;
+
+                Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
+
+                Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -12);
+                float drawRot = proj.velocity.ToRotation();
+                Vector2 drawOrigin = spike.Size() / 2f;
+
+                //Vanilla has 1.2 scale for bullets, so normalize this to 1f
+                float adjustedScale = proj.scale * (5f / 6f);
+                Vector2 drawScale = new Vector2(adjustedScale * 2f, adjustedScale * totalScale * 0.9f) * 0.5f;
+
+                Color thisCol = isBlue ? Color.DeepSkyBlue : Color.DeepPink;
 
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10);
-            float drawRot = projectile.velocity.ToRotation();
-            Vector2 drawOrigin = spike.Size() / 2f;
+                Main.spriteBatch.Draw(spike, drawPos, null, thisCol * 2f * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.5f, SpriteEffects.None, 0f);
 
-            //Vanilla has 1.2 scale for bullets, so normalize this to 1f
-            float adjustedScale = projectile.scale * (5f / 6f);
-
-            Color spikeCol = isBlue ? Color.DodgerBlue : Color.DeepPink;
-            Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
-            Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
-
-            Color orbCol = isBlue ? Color.DeepSkyBlue : Color.DeepPink;
-            Vector2 orbScale = new Vector2(1f, 0.3f * totalScale) * 0.7f * adjustedScale;
-            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+            });
 
             return false;
         }
@@ -149,7 +176,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
 
-            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10);
+            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10) + new Vector2(0f, 0f);
             float drawRot = proj.velocity.ToRotation();
             Vector2 drawOrigin = spike.Size() / 2f;
 
@@ -159,7 +186,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Color col = isBlue ? Color.SkyBlue : Color.HotPink;
 
-            sb.Draw(spike, drawPos, null, col * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
+            //sb.Draw(spike, drawPos, null, col * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
             sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.5f, SpriteEffects.None, 0f);
 
             trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);

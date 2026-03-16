@@ -527,6 +527,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             myEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3());
             myEffect.Parameters["satPower"].SetValue(0.8f); //higher power -> less affected by background 
 
+            Texture2D ThinGlowLine = Mod.Assets.Request<Texture2D>("Assets/Trails/EvenThinnerGlowLine").Value;
             myEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.ThinGlowLine.Value);
             myEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.spark_06.Value);
             myEffect.Parameters["sampleTexture3"].SetValue(CommonTextures.Extra_196_Black.Value);

@@ -123,6 +123,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Color spikeCol = Color.Brown;
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f * easedJustHitPower, adjustedScale * 1.5f * totalScale) * 0.5f;
+                
                 Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
                 Color orbCol = Color.Red;

@@ -1,20 +1,22 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using ReLogic.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
@@ -241,4 +243,386 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         }
 
     }
+
+    public class ToIWTornadoOverride : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.DD2ApprenticeStorm) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TomeOfInfiniteWisdomToggle;
+        }
+
+
+        float initialAnimProgress = 0f;
+
+        float overallScale = 1f;
+        float overallAlpha = 1f;
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            #region TrailStuff
+            Vector2 ProjectileBottom = projectile.Center + new Vector2(0f, projectile.height / 2f);
+
+            if (timer != 0)
+            {
+                ProjectileBottom.Y = MathHelper.Lerp(ProjectileBottom.Y, projectile.localAI[2], 0.75f);
+            }
+            
+            int numberOfPoints = 20;
+            float tornadoHeight = 220 * projectile.scale;
+
+            trailPositions.Clear();
+            trailRotations.Clear();
+
+            Vector2 previousPos = Vector2.Zero;
+
+            for (int i = 0; i < numberOfPoints; i++)
+            {
+                float prog = (float)i / (float)(numberOfPoints - 1);
+
+                float offsetMult = Easings.easeOutQuad(GeneralUtilities.FadeLinear(prog, 0.4f, 0.6f));
+
+                float sinVal = (float)Math.Sin(timer * 0.02f) * 1f;
+
+                float offsetMult2 = Easings.easeInQuad(GeneralUtilities.FadeLinear(prog, 0.6f, 0.4f));
+
+                Vector2 offset = new Vector2(50f * offsetMult * Math.Sign(projectile.velocity.X) * overallAlpha, -tornadoHeight * prog);
+                //offset.X += -50 * (offsetMult2) * sinVal;
+
+                trailPositions.Add(ProjectileBottom + offset);
+
+                if (i == 0)
+                    trailRotations.Add(-MathHelper.PiOver2);
+                else
+                    trailRotations.Add((offset - previousPos).ToRotation());
+
+                previousPos = offset;
+            }
+            #endregion
+
+
+            //Store the y
+            projectile.localAI[2] = ProjectileBottom.Y;
+
+            //Main.NewText(projectile.localAI[2]);
+
+            //Dust
+            if (timer % 1 == 0 && false)
+            {
+                Vector2 velA = new Vector2(0f, -1f).RotatedByRandom(0.15f) * Main.rand.NextFloat(2.5f, 5f); //30
+                velA.X += projectile.velocity.X * 0.75f;
+                float myScaleA = Main.rand.NextFloat(1f, 1.25f);
+                FireParticle fireA = new FireParticle(ProjectileBottom, velA * 1.5f * 1.5f, 0.5f, new Color(84, 71, 55), colorMult: 0.5f, bloomAlpha: 0f, AlphaFade: 0.88f, VelFade: 0.9f);
+                fireA.scaleFadePower = 1.28f;
+
+                ShaderParticleHandler.SpawnParticle(fireA);
+            }
+
+            Color smokeCol = Color.Lerp(new Color(84, 71, 55), Color.Tan, 0.65f);
+            if (timer % 1 == 0)
+            {
+
+                Vector2 thisVel = new Vector2(projectile.velocity.X, -4f).RotateRandom(0.25f);
+                Dust dad = Dust.NewDustPerfect(ProjectileBottom + projectile.velocity, ModContent.DustType<MediumSmoke>(), Velocity: thisVel,
+                    newColor: smokeCol * 1.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f);
+                dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.01f, 0.15f); //12 28
+                dad.rotation = Main.rand.NextFloat(6.28f);
+            }
+
+            if (timer % 1 == 0 && false)
+            {
+                Color dustCol = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+
+                Vector2 lineVel = new Vector2(-2f * Math.Sign(projectile.velocity.X), -1f).RotateRandom(0.25f) * Main.rand.NextFloat(1f, 3f);
+
+                Dust p = Dust.NewDustPerfect(ProjectileBottom + projectile.velocity, ModContent.DustType<WindLine>(),
+                    lineVel, newColor: Color.Tan * 1f, Scale: 1.5f);
+
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 2, ShrinkYScalePower: 0.75f, 0.5f, 0.35f, true);//, WhiteCoreIntensity: 0.15f);
+                wlb.drawWhiteCore = false;
+                //wlb.renderLayer = RenderLayer.UnderNPCs;
+                p.customData = wlb;
+            }
+
+
+
+            float fadeInProgress = Math.Clamp((float)timer / 35f, 0f, 1f);
+            overallAlpha = Easings.easeInOutQuad(fadeInProgress);
+
+            timer++;
+
+            #region VanillaAI
+            float num = 300f;
+            SlotId val;
+            //if (projectile.soundDelay == 0)
+            //{
+            //    projectile.soundDelay = -1;
+            //    float[] array = projectile.localAI;
+            //    val = SoundEngine.PlayTrackedSound(in SoundID.DD2_BookStaffTwisterLoop, base.Center);
+            //    array[1] = ((SlotId)(ref val)).ToFloat();
+            //}
+            //ActiveSound activeSound = SoundEngine.GetActiveSound(SlotId.FromFloat(this.localAI[1]));
+            //if (activeSound != null)
+            //{
+            //    activeSound.Position = base.Center;
+            //    activeSound.Volume = 1f - Math.Max(this.ai[0] - (num - 15f), 0f) / 15f;
+            //}
+            //else
+            //{
+            //    float[] array2 = this.localAI;
+            //    val = SlotId.Invalid;
+            //    array2[1] = ((SlotId)(ref val)).ToFloat();
+            //}
+            if (projectile.localAI[0] >= 16f && projectile.ai[0] < num - 15f)
+            {
+                projectile.ai[0] = num - 15f;
+            }
+            projectile.ai[0] += 1f;
+            if (projectile.ai[0] >= num)
+            {
+                projectile.Kill();
+            }
+            Vector2 top = projectile.Top;
+            Vector2 bottom = projectile.Bottom;
+            Vector2 vector = Vector2.Lerp(top, bottom, 0.5f);
+            Vector2 vector2 = new Vector2(0f, bottom.Y - top.Y);
+            vector2.X = vector2.Y * 0.2f;
+            int num2 = 16;
+            int num3 = 160;
+            for (int i = 0; i < 1; i++)
+            {
+                Vector2 vector3 = new Vector2(projectile.Center.X - (float)(num2 / 2), projectile.position.Y + (float)projectile.height - (float)num3);
+                if (Collision.SolidCollision(vector3, num2, num3) || Collision.WetCollision(vector3, num2, num3))
+                {
+                    if (projectile.velocity.Y > 0f)
+                    {
+                        projectile.velocity.Y = 0f;
+                    }
+                    if (projectile.velocity.Y > -4f)
+                    {
+                        projectile.velocity.Y -= 2f;
+                    }
+                    else
+                    {
+                        projectile.velocity.Y -= 4f;
+                        projectile.localAI[0] += 2f;
+                    }
+                    if (projectile.velocity.Y < -16f)
+                    {
+                        projectile.velocity.Y = -16f;
+                    }
+                    continue;
+                }
+                projectile.localAI[0] -= 1f;
+                if (projectile.localAI[0] < 0f)
+                {
+                    projectile.localAI[0] = 0f;
+                }
+                if (projectile.velocity.Y < 0f)
+                {
+                    projectile.velocity.Y = 0f;
+                }
+                if (projectile.velocity.Y < 4f)
+                {
+                    projectile.velocity.Y += 2f;
+                }
+                else
+                {
+                    projectile.velocity.Y += 4f;
+                }
+                if (projectile.velocity.Y > 16f)
+                {
+                    projectile.velocity.Y = 16f;
+                }
+            }
+
+            //Trailing dust
+            if (projectile.ai[0] < num - 30f && true) //&& false
+            {
+                for (int j = 0; j < 1; j++)
+                {
+                    float value = -1f;
+                    float value2 = 0.9f;
+                    float amount = Main.rand.NextFloat();
+                    Vector2 vector4 = new Vector2(MathHelper.Lerp(0.1f, 1f, Main.rand.NextFloat()), MathHelper.Lerp(value, value2, amount));
+                    vector4.X *= MathHelper.Lerp(2.2f, 0.6f, amount);
+                    vector4.X *= -1f;
+                    Vector2 vector5 = new Vector2(6f, 10f);
+                    Vector2 vector6 = vector + vector2 * vector4 * 0.5f + vector5;
+                    Dust dust = Main.dust[Dust.NewDust(vector6, 0, 0, 274)];
+                    dust.position = vector6;
+                    dust.fadeIn = 1.3f;
+                    dust.scale = 0.87f * 0f;
+                    dust.alpha = 211;
+                    if (vector4.X > -1.2f)
+                    {
+                        dust.velocity.X = 1f + Main.rand.NextFloat();
+                    }
+                    dust.noGravity = true;
+                    dust.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
+                    dust.velocity.X += projectile.velocity.X * 2.1f;
+                    dust.noLight = true;
+
+
+                    //Custom Dust
+                    Color col = Main.rand.NextBool(4) ? Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f) : Color.Tan;
+
+
+                    int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowFlare>(), newColor: col, Scale: 0.35f);
+                    //int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowPixelCross>(), newColor: col, Scale: 0.25f);
+
+                    Dust d = Main.dust[sa];
+                    d.position = vector6;
+                    d.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
+                    d.velocity.X += projectile.velocity.X * 2.1f;
+
+                    //d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5, postSlowPower: 0.9f, velToBeginShrink: 2f, fadePower: 0.9f, shouldFadeColor: false);
+                }
+            }
+
+            //Dust at bottom
+            Vector2 vector7 = projectile.Bottom + new Vector2(-25f, -25f);
+            for (int k = 0; k < 4; k++)
+            {
+                Dust dust2 = Dust.NewDustDirect(vector7, 50, 25, 31, projectile.velocity.X, -2f, 100);
+                dust2.fadeIn = 1.1f;
+                dust2.noGravity = true;
+            }
+
+            //Paper Gores 
+            for (int l = 0; l < 1; l++)
+            {
+                if (Main.rand.Next(5) == 0)
+                {
+                    Gore gore = Gore.NewGoreDirect(projectile.GetSource_FromThis(), projectile.TopLeft + Main.rand.NextVector2Square(0f, 1f) * projectile.Size, new Vector2(projectile.velocity.X * 1.5f, (0f - Main.rand.NextFloat()) * 16f), Utils.SelectRandom<int>(Main.rand, 1007, 1008, 1008));
+                    gore.timeLeft = 60;
+                    gore.alpha = 50;
+                    gore.velocity.X += projectile.velocity.X;
+                }
+            }
+            for (int m = 0; m < 1; m++)
+            {
+                if (Main.rand.Next(7) == 0)
+                {
+                    Gore gore2 = Gore.NewGoreDirect(projectile.GetSource_FromThis(), projectile.TopLeft + Main.rand.NextVector2Square(0f, 1f) * projectile.Size, new Vector2(projectile.velocity.X * 1.5f, (0f - Main.rand.NextFloat()) * 16f), Utils.SelectRandom<int>(Main.rand, 1007, 1008, 1008));
+                    gore2.timeLeft = 0;
+                    gore2.alpha = 80;
+                }
+            }
+            for (int n = 0; n < 1; n++)
+            {
+                if (Main.rand.Next(7) == 0)
+                {
+                    Gore gore3 = Gore.NewGoreDirect(projectile.GetSource_FromThis(), projectile.TopLeft + Main.rand.NextVector2Square(0f, 1f) * projectile.Size, new Vector2(projectile.velocity.X * 1.5f, (0f - Main.rand.NextFloat()) * 16f), Utils.SelectRandom<int>(Main.rand, 1007, 1008, 1008));
+                    gore3.timeLeft = 0;
+                    gore3.alpha = 80;
+                }
+            }
+            #endregion
+
+            return false;
+            return base.PreAI(projectile);
+        }
+
+
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            Color LCcopy = lightColor;
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
+            {
+                DrawTornado(projectile, LCcopy, giveUp: false);
+            });
+            DrawTornado(projectile, LCcopy, giveUp: true);
+
+            return false;
+        }
+
+        public List<float> trailRotations = new List<float>();
+        public List<Vector2> trailPositions = new List<Vector2>();
+        Effect myEffect = null;
+        public void DrawTornado(Projectile projectile, Color lightCol, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            //Fix strange additive spritebatch bleed through
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+
+            Texture2D TrailTexture1 = Mod.Assets.Request<Texture2D>("Assets/Trails/OuterLavaTrailUp").Value; //
+            //Texture2D TrailTexture1 = Mod.Assets.Request<Texture2D>("Assets/TTest").Value; //
+
+            Texture2D TrailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value; //T_Random_59
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/TornadoShader", AssetRequestMode.ImmediateLoad).Value;
+
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.02f;
+
+
+            Color StripColor(float progress) => Color.Lerp(lightCol, Color.White, 0.5f) * overallAlpha * (1f - Utils.GetLerpValue(0.8f, 1f, progress, true));
+
+            float StripWidth(float progress)
+            {
+                return Easings.easeOutQuad(progress) * 60f;
+            }
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+            vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            Color betweenBlue = Color.Lerp(Color.Tan, Color.DeepSkyBlue, 0.5f);
+            Color betweenTan = Color.Lerp(Color.Beige, Color.Tan, 0.2f);
+
+            float sine1 = 0.5f + (float)Math.Cos(Main.timeForVisualEffects * 0.1f) * 0.5f;
+            float sine2 = 0.35f + (float)Math.Sin(Main.timeForVisualEffects * 0.05f) * -0.1f;
+
+            //Color between1 = Color.Lerp(Color.Tan, Color.DeepSkyBlue, 0.5f);
+            //Color between2 = Color.Lerp(Color.Tan, Color.LightSkyBlue, 0.75f);
+
+
+            Color between1 = Color.Lerp(betweenTan, Color.LightSkyBlue, Easings.easeInCubic(sine1) * 0f);
+            Color between2 = Color.Lerp(Color.Tan, Color.White, 0.2f);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f * Math.Sign(projectile.velocity.X)); //0.02
+            myEffect.Parameters["fadeWidth"].SetValue(0.35f); //0.02
+
+            myEffect.Parameters["TrailTexture1"].SetValue(TrailTexture1);
+            myEffect.Parameters["tex1FlowSpeed"].SetValue(new Vector2(0.3f, -2.5f));
+            myEffect.Parameters["tex1Zoom"].SetValue(new Vector2(2f, 0.63f));//2.0
+            myEffect.Parameters["tex1Color"].SetValue(between1.ToVector3() * 1.25f * 1f);
+            myEffect.Parameters["tex1ColorMirrorMult"].SetValue(0.6f);
+
+
+
+            myEffect.Parameters["TrailTexture2"].SetValue(TrailTexture2);
+            myEffect.Parameters["tex2FlowSpeed"].SetValue(new Vector2(0.3f, -1.37f));
+            myEffect.Parameters["tex2Zoom"].SetValue(new Vector2(2.0f, 0.3f));
+            myEffect.Parameters["tex2Color"].SetValue(between2.ToVector3() * 0.65f * 1f);
+            myEffect.Parameters["tex2ColorMirrorMult"].SetValue(0f);
+
+            myEffect.Parameters["sineTimeSpeed"].SetValue(2.0f); //0.02
+            myEffect.Parameters["sineMult"].SetValue(1.0f); //0.02
+            myEffect.Parameters["startingCurveAmount"].SetValue(0.0f); //0.02
+
+
+            myEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            
+
+            return true;
+        }
+
+    }
+
 }

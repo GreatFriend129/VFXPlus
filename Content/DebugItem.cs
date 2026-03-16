@@ -58,31 +58,23 @@ namespace VFXPlus.Content
                 //return false;
             }
 
+            Vector2 thisVel = new Vector2(0f, -4f).RotateRandom(0.25f);
+            Dust dad = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: thisVel,
+                newColor: Color.Tan with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f));
+            dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
+            dad.rotation = Main.rand.NextFloat(6.28f);
 
-            for (int iaa = -3; iaa < -4; iaa++)
-            {
-                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedBy(iaa * MathHelper.PiOver4 * 1.25f) * -10f;
-                float curvePower = iaa * 0.05f; //0.1 | 0.2
+            //int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 5f, ModContent.ProjectileType<AngleGlowTest2>(), 1, 0, Main.myPlayer);
+            ///Main.projectile[windFX3].scale = 0.85f;
 
-                int curveFeather = Projectile.NewProjectile(null, Main.MouseWorld, vel, ModContent.ProjectileType<CurvingFeather>(), 1, 0, Main.myPlayer);
-
-                if (Main.projectile[curveFeather].ModProjectile is CurvingFeather cf)
-                {
-                    cf.curveValue = curvePower;
-                }
-            }
-
-
-            int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<AngleGlowTest>(), 1, 0, Main.myPlayer);
-            //Main.projectile[windFX3].scale = 0.85f;
-
+            return false;
 
             for (int i = 220; i < 2; i++)
             {
                 //Good one
                 Vector2 myvel = new Vector2(0f, -1.75f).RotatedByRandom(6.28f) * Main.rand.NextFloat(6f, 12f) * 1f;
 
-                //int smoke = Projectile.NewProjectile(null, Main.MouseWorld, myvel, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
+                int smoke = Projectile.NewProjectile(null, Main.MouseWorld, myvel, ModContent.ProjectileType<WindAnimTest>(), 1, 0, Main.myPlayer);
             }
 
             /*

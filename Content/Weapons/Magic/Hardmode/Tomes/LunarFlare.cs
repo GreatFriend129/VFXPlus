@@ -47,6 +47,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     previousPositions.RemoveAt(0);
             }
 
+            if (timer > 5 * projectile.extraUpdates)
+                justShotVal = Math.Clamp(MathHelper.Lerp(justShotVal, -0.35f, 0.05f/ projectile.extraUpdates), 0f, 1f);
+
             float timeForPopInAnim = 160;
             float animProgress = Math.Clamp((timer + 30) / timeForPopInAnim, 0f, 1f);
 
@@ -55,7 +58,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             if (projectile.ai[1] != -1)
                 Lighting.AddLight(projectile.Center, Color.Aqua.ToVector3() * projectile.scale * 1f); //0.030
 
-            if (timer % 5 == 0 && Main.rand.NextBool(2) && projectile.ai[1] != -1)
+            if (timer % 8 == 0 && Main.rand.NextBool(2) && projectile.ai[1] != -1)
             {
                 Color between = Color.Lerp(Color.Aquamarine, Color.Aqua, Main.rand.NextFloat());
 
@@ -151,6 +154,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             return false;
         }
 
+        float justShotVal = 1f;
+
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -168,8 +173,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + new Vector2(0f, 0f);
 
-            Main.EntitySpriteDraw(line, drawPos, null, Color.White with { A = 0 } * 0.8f, rot, line.Size() / 2f, 1f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(line, drawPos, null, Color.Aquamarine with { A = 0 } * 0.8f, rot, line.Size() / 2f, 2f * new Vector2(1f, 0.55f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.White with { A = 0 } * 0.8f, rot, line.Size() / 2f, 1f * new Vector2(0.55f, 0.55f * drawScale), SpriteEffects.None);
+            Main.EntitySpriteDraw(line, drawPos, null, Color.Aquamarine with { A = 0 } * 0.8f, rot, line.Size() / 2f, 2f * new Vector2(0.55f, 0.55f * drawScale), SpriteEffects.None);
+
+            //Draw Gash
+            Texture2D gash = CommonTextures.SoulSpike.Value;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.12f) * 0.1f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.22f) * 0.06f;
+
+            Color between = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.5f);
+
+            Vector2 gashScale = new Vector2(2f * Easings.easeOutCubic(1f - justShotVal) * sineScale2, 0.45f * sineScale1) * projectile.scale;
+            Main.EntitySpriteDraw(gash, drawPos, null, between with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 2f, SpriteEffects.None);
+            Main.EntitySpriteDraw(gash, drawPos, null, Color.White with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 1f, SpriteEffects.None);
+
 
             return false;
         }
@@ -199,9 +217,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale1 * scale * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * orbAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2 * new Vector2(1f, 0.45f * drawScale), SpriteEffects.None);
 
 
             Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value; //Flare
@@ -219,7 +237,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Vector2 offset = Main.rand.NextVector2Circular(5f, 4f + (10f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
+                Vector2 offset = Main.rand.NextVector2Circular(2.5f, 2f + (2f * (1f - progress))).RotatedBy(projectile.velocity.ToRotation());
 
                 Vector2 innerScale = new Vector2(1f, 0.15f * progress * drawScale) * progress;
 

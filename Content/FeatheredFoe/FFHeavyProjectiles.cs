@@ -407,8 +407,11 @@ namespace VFXPlus.Content.FeatheredFoe
                 //prog = Easings.easeOutCubic(prog);
 
                 //End Color <--> Start color
-                Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
-                Color col = Color.Lerp(between * 1f, Color.LightSkyBlue, Easings.easeOutSine(prog));
+                //Color between = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
+                //Color col = Color.Lerp(between * 1f, Color.LightSkyBlue, Easings.easeOutSine(prog));
+                Color darkPurple = new Color(42, 2, 82) * 1f;
+                Color between = Color.Lerp(Color.Purple, Color.SkyBlue, 0f);
+                Color col = Color.Lerp(darkPurple, Color.MediumPurple, Easings.easeOutSine(prog));
 
 
                 float customAlphaProg = MathF.Pow(prog, 3.5f);

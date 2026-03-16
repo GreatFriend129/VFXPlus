@@ -112,7 +112,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             float easedJustHitPower = Easings.easeOutCirc(1f - justTileCollidePower);
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower);
+            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower) + new Vector2(0f, 0f);
             float drawRot = projectile.velocity.ToRotation();
             Vector2 drawOrigin = spike.Size() / 2f;
 
@@ -141,7 +141,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
 
-            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower);
+            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower) + new Vector2(0f, 0f);
             float drawRot = proj.velocity.ToRotation();
             Vector2 drawOrigin = spike.Size() / 2f;
 
@@ -179,6 +179,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 Vector2 dustVel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-2f, 2f)) * Main.rand.NextFloat(1f, 3f);
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixel>(), dustVel, newColor: Color.DodgerBlue, Alpha: 70);
+                d.scale *= 0.75f;
+                d.velocity *= 0.75f;
             }
 
             //Particles on trail

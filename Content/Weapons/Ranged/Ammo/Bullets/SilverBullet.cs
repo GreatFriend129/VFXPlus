@@ -29,7 +29,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.SilverBullet) && false;
+            return lateInstantiation && (entity.type == ProjectileID.SilverBullet);
         }
 
         float randomTrailSpeed = 1f;
@@ -144,7 +144,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
 
-            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10);
+            Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10) + new Vector2(0f, 0f);
             float drawRot = proj.velocity.ToRotation();
             Vector2 drawOrigin = spike.Size() / 2f;
 

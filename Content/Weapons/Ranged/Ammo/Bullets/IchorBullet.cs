@@ -103,6 +103,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (timer == 0)
                 return false;
 
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawBullet(projectile);
+            });
+
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
             Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
 
@@ -116,13 +121,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Color spikeColor = Color.Lerp(Color.Orange, Color.OrangeRed, 0.85f);
             Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale * 0.75f) * 0.5f;
-            Main.EntitySpriteDraw(spike, drawPos, null, spikeColor with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(spike, drawPos, null, spikeColor with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
 
             //Color darkerGoldenrod = Color.Lerp(Color.DarkGoldenrod, Color.Orange, 0.5f);
             Color orbColor = Color.Lerp(Color.Orange, Color.OrangeRed, 0.1f);
             Vector2 orbScale = new Vector2(1f, 0.3f * totalScale * 0.75f) * 0.7f * adjustedScale;
-            Main.EntitySpriteDraw(orb, drawPos, null, orbColor with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(orb, drawPos, null, orbColor with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
             return false;
         }
@@ -146,11 +151,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Color outerSpikeCol = Color.Lerp(Color.DarkGoldenrod, Color.Orange, 1f);
 
-            sb.Draw(spike, drawPos, null, outerSpikeCol * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
-            sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.55f, SpriteEffects.None, 0f);
+            //sb.Draw(spike, drawPos, null, outerSpikeCol * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
+            //sb.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.55f, SpriteEffects.None, 0f);
 
             trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
         }
+
+        public void DrawBullet(Projectile projectile)
+        {
+
+        }
+
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {            

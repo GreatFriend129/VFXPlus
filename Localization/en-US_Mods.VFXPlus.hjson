@@ -224,6 +224,9 @@ Projectiles: {
 	BurdenOfFleshTest.DisplayName: Burden Of Flesh Test
 	AngleGlow.DisplayName: Angle Glow
 	AngleGlowTest.DisplayName: Angle Glow Test
+	AngleGlowTest2.DisplayName: Angle Glow Test2
+	LunarTrailTest.DisplayName: Lunar Trail Test
+	FlowTest.DisplayName: Flow Test
 }
 
 Configs: {

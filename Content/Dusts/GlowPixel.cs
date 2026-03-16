@@ -86,6 +86,11 @@ namespace VFXPlus.Content.Dusts
         }
         public override bool PreDraw(Dust dust)
         {
+            if (dust.customData == null)
+            {
+                dust.customData = new GlowPixelBehavior(TimeForFadeIn: 6, TimeBeforeFadeOut: 14, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f);
+            }
+
             GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
 
             if (behavior.drawBlack)

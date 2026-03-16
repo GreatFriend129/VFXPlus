@@ -56,10 +56,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = new Color(255, 111, 20) * totalAlpha;
+            trail1.trailColor = new Color(255, 111, 20) * totalAlpha * 0f;
 
 
-            trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
+            trail1.trailTime = randomTimeOffset + (timer * 0.04f * randomTrailSpeed); //0.05
             trail1.trailRot = projectile.velocity.ToRotation();
             trail1.trailPos = projectile.Center + projectile.velocity;
             trail1.TrailLogic();
@@ -122,23 +122,32 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 if (projectile.active == false)
                     totalAlpha = 0f;
 
-                Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/SoulSpike").Value;
+                Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/SoulSpikePMA").Value;
                 Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
 
+                Texture2D spikeBlack = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/SoulSpikePMA").Value;
 
-                Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -12);
+
+                Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -12) + new Vector2(0f, 0f);
                 float drawRot = projectile.velocity.ToRotation();
                 Vector2 drawOrigin = spike.Size() / 2f;
 
                 //Vanilla has 1.2 scale for bullets, so normalize this to 1f
                 float adjustedScale = projectile.scale * (5f / 6f);
-                Vector2 drawScale = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
+                //Vector2 drawScale = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
 
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
-                Main.EntitySpriteDraw(spike, drawPos, null, Color.OrangeRed with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+
+                //Main.EntitySpriteDraw(spikeBlack, drawPos, null, Color.Black with { A = 255 } * 0.25f * totalAlpha, drawRot, spikeBlack.Size() / 2f, outSpikeScale, SpriteEffects.None);
+
+                //Main.EntitySpriteDraw(spike, drawPos, null, Color.OrangeRed with { A = 255 } * 0.25f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+
+                Color darker = Color.Lerp(Color.OrangeRed, Color.Red, 0f);
+                Main.EntitySpriteDraw(spike, drawPos, null, darker with { A = 100 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+
 
                 Vector2 orbScale = new Vector2(1f, 0.3f * totalScale) * 0.7f * adjustedScale;
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, new Color(255, 90, 10) with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, new Color(255, 90, 10) with { A = 100 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
             });
 
