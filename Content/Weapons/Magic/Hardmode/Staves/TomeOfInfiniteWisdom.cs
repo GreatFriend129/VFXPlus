@@ -10,6 +10,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
@@ -253,6 +254,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return lateInstantiation && (entity.type == ProjectileID.DD2ApprenticeStorm) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.TomeOfInfiniteWisdomToggle;
         }
 
+        SlotId soundSlot;
+        SoundStyle soundStyleTwister = SoundID.DD2_BookStaffTwisterLoop with 
+        {
+            PauseBehavior = PauseBehavior.PauseWithGame,
+            IsLooped = true
+        };
+
 
         float initialAnimProgress = 0f;
 
@@ -268,7 +276,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 ProjectileBottom.Y = MathHelper.Lerp(ProjectileBottom.Y, projectile.localAI[2], 0.75f);
             }
-            
+
+
+            float leanProgress = Easings.easeOutQuad(Utils.GetLerpValue(0, 40, timer, true));
+
             int numberOfPoints = 20;
             float tornadoHeight = 220 * projectile.scale;
 
@@ -287,7 +298,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 float offsetMult2 = Easings.easeInQuad(GeneralUtilities.FadeLinear(prog, 0.6f, 0.4f));
 
-                Vector2 offset = new Vector2(50f * offsetMult * Math.Sign(projectile.velocity.X) * overallAlpha, -tornadoHeight * prog);
+                //50
+                Vector2 offset = new Vector2(45f * offsetMult * Math.Sign(projectile.velocity.X) * Easings.easeInSine(overallAlpha) * leanProgress, -tornadoHeight * prog);
                 //offset.X += -50 * (offsetMult2) * sinVal;
 
                 trailPositions.Add(ProjectileBottom + offset);
@@ -304,21 +316,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             //Store the y
             projectile.localAI[2] = ProjectileBottom.Y;
-
-            //Main.NewText(projectile.localAI[2]);
-
-            //Dust
-            if (timer % 1 == 0 && false)
-            {
-                Vector2 velA = new Vector2(0f, -1f).RotatedByRandom(0.15f) * Main.rand.NextFloat(2.5f, 5f); //30
-                velA.X += projectile.velocity.X * 0.75f;
-                float myScaleA = Main.rand.NextFloat(1f, 1.25f);
-                FireParticle fireA = new FireParticle(ProjectileBottom, velA * 1.5f * 1.5f, 0.5f, new Color(84, 71, 55), colorMult: 0.5f, bloomAlpha: 0f, AlphaFade: 0.88f, VelFade: 0.9f);
-                fireA.scaleFadePower = 1.28f;
-
-                ShaderParticleHandler.SpawnParticle(fireA);
-            }
-
+            
+            //Smoke at bottom
             Color smokeCol = Color.Lerp(new Color(84, 71, 55), Color.Tan, 0.65f);
             if (timer % 1 == 0)
             {
@@ -330,25 +329,51 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 dad.rotation = Main.rand.NextFloat(6.28f);
             }
 
-            if (timer % 1 == 0 && false)
+            if (timer % 1 == 0 && overallAlpha >= 0.5f)
             {
-                Color dustCol = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+                for (int i = 0; i < 1; i++)
+                {
+                    Vector2 dustPos = projectile.Center + Main.rand.NextVector2Circular(40, 105f);
+                    Vector2 dustVel = new Vector2(3f * Math.Sign(projectile.velocity.X), 0f) * Main.rand.NextFloat(1f, 1.5f);
+                    Color dustCol = Main.rand.NextBool(4) ? Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f) : Color.Tan;
 
-                Vector2 lineVel = new Vector2(-2f * Math.Sign(projectile.velocity.X), -1f).RotateRandom(0.25f) * Main.rand.NextFloat(1f, 3f);
+                    
+                    dustVel.X += projectile.velocity.X * 1f;
 
-                Dust p = Dust.NewDustPerfect(ProjectileBottom + projectile.velocity, ModContent.DustType<WindLine>(),
-                    lineVel, newColor: Color.Tan * 1f, Scale: 1.5f);
 
-                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 2, ShrinkYScalePower: 0.75f, 0.5f, 0.35f, true);//, WhiteCoreIntensity: 0.15f);
-                wlb.drawWhiteCore = false;
-                //wlb.renderLayer = RenderLayer.UnderNPCs;
-                p.customData = wlb;
+                    Dust d = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowPixel>(), dustVel, newColor: dustCol, Scale: Main.rand.NextFloat(0.25f, 0.35f));
+                    d.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
+
+                    int timeBeforeFade = Main.rand.Next(5, 10);
+
+                    GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 3, TimeBeforeFadeOut: timeBeforeFade, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f, ColorFadePower: 0.9f);
+                    //gpb.earlyVelFadePower = Main.rand.NextFloat(0.f, 0.95f);
+                    d.customData = gpb;
+                    
+
+                    //Dust d = Dust.NewDustPerfect(dustPos, ModContent.DustType<GlowFlare>(), dustVel, newColor: dustCol, Scale: 0.35f);
+                    //d.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
+                }
+            }
+
+            //Looping sound
+            //Had some issues with having the vanilla code handle it so we're just gonna redo it ourselves
+            if (!SoundEngine.TryGetActiveSound(soundSlot, out var _))
+            {
+                var tracker = new ProjectileAudioTracker(projectile);
+                soundSlot = SoundEngine.PlaySound(soundStyleTwister, projectile.Center, soundInstance => {
+                    soundInstance.Position = projectile.Center;
+                    soundInstance.Volume = 1f - Math.Max(projectile.ai[0] - (300f - 15f), 0f) / 15f;
+
+                    return tracker.IsActiveAndInGame();
+                });
             }
 
 
 
             float fadeInProgress = Math.Clamp((float)timer / 35f, 0f, 1f);
             overallAlpha = Easings.easeInOutQuad(fadeInProgress);
+            overallAlpha *= 1f - Utils.GetLerpValue(285, 300, projectile.ai[0], true);
 
             timer++;
 
@@ -438,7 +463,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             }
 
             //Trailing dust
-            if (projectile.ai[0] < num - 30f && true) //&& false
+            if (projectile.ai[0] < num - 30f) //&& false
             {
                 for (int j = 0; j < 1; j++)
                 {
@@ -469,21 +494,29 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     Color col = Main.rand.NextBool(4) ? Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f) : Color.Tan;
 
 
-                    int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowFlare>(), newColor: col, Scale: 0.35f);
+                    ///int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowPixel>(), newColor: col, Scale: 0.35f);
+                    //int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowFlare>(), newColor: col, Scale: 0.35f);
                     //int sa = Dust.NewDust(vector6, 0, 0, ModContent.DustType<GlowPixelCross>(), newColor: col, Scale: 0.25f);
 
-                    Dust d = Main.dust[sa];
-                    d.position = vector6;
-                    d.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
-                    d.velocity.X += projectile.velocity.X * 2.1f;
+                    ///Dust d = Main.dust[sa];
+                    ///d.position = vector6;
+                    ///d.velocity.Y = Main.rand.NextFloat() * -0.5f - 1.3f;
+                    ///d.velocity.X += projectile.velocity.X * 2.1f * 1f;
 
                     //d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5, postSlowPower: 0.9f, velToBeginShrink: 2f, fadePower: 0.9f, shouldFadeColor: false);
+
+                    int timeBeforeFade = Main.rand.Next(8, 14);
+
+                    GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 3, TimeBeforeFadeOut: timeBeforeFade, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f, ColorFadePower: 0.9f);
+                    gpb.earlyVelFadePower = Main.rand.NextFloat(0.88f, 0.95f);
+
+                    //d.customData = gpb;
                 }
             }
 
             //Dust at bottom
             Vector2 vector7 = projectile.Bottom + new Vector2(-25f, -25f);
-            for (int k = 0; k < 4; k++)
+            for (int k = 0; k < 2; k++) //4
             {
                 Dust dust2 = Dust.NewDustDirect(vector7, 50, 25, 31, projectile.velocity.X, -2f, 100);
                 dust2.fadeIn = 1.1f;
@@ -522,14 +555,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             #endregion
 
             return false;
-            return base.PreAI(projectile);
         }
 
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Color LCcopy = lightColor;
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.OverPlayers, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
                 DrawTornado(projectile, LCcopy, giveUp: false);
             });
@@ -547,22 +579,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 return;
 
             //Fix strange additive spritebatch bleed through
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            //Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
 
             Texture2D TrailTexture1 = Mod.Assets.Request<Texture2D>("Assets/Trails/OuterLavaTrailUp").Value; //
-            //Texture2D TrailTexture1 = Mod.Assets.Request<Texture2D>("Assets/TTest").Value; //
-
             Texture2D TrailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value; //T_Random_59
 
             if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/TornadoShader", AssetRequestMode.ImmediateLoad).Value;
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/TornadoShaderPosterized", AssetRequestMode.ImmediateLoad).Value;
 
 
             float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.02f;
 
-
-            Color StripColor(float progress) => Color.Lerp(lightCol, Color.White, 0.5f) * overallAlpha * (1f - Utils.GetLerpValue(0.8f, 1f, progress, true));
+            Color StripColor(float progress) => Color.Lerp(lightCol, Color.White, 0.5f) * overallAlpha * (1f - Utils.GetLerpValue(0.8f, 1f, progress, true)) * projectile.Opacity;
 
             float StripWidth(float progress)
             {
@@ -573,28 +602,27 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             VertexStripFixed vertexStrip = new VertexStripFixed();
             vertexStrip.PrepareStrip(trailPositions.ToArray(), trailRotations.ToArray(), StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
 
-            Color betweenBlue = Color.Lerp(Color.Tan, Color.DeepSkyBlue, 0.5f);
-            Color betweenTan = Color.Lerp(Color.Beige, Color.Tan, 0.2f);
-
+            
             float sine1 = 0.5f + (float)Math.Cos(Main.timeForVisualEffects * 0.1f) * 0.5f;
             float sine2 = 0.35f + (float)Math.Sin(Main.timeForVisualEffects * 0.05f) * -0.1f;
 
-            //Color between1 = Color.Lerp(Color.Tan, Color.DeepSkyBlue, 0.5f);
-            //Color between2 = Color.Lerp(Color.Tan, Color.LightSkyBlue, 0.75f);
 
-
-            Color between1 = Color.Lerp(betweenTan, Color.LightSkyBlue, Easings.easeInCubic(sine1) * 0f);
+            Color tan1 = new Color(237, 225, 204);
             Color between2 = Color.Lerp(Color.Tan, Color.White, 0.2f);
 
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            //Everybody say thank you lucille karma!!! (fix required when pixelizing)
+            Matrix view = Matrix.Identity;
+            Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(view * projectionMatrix);
             myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f * Math.Sign(projectile.velocity.X)); //0.02
             myEffect.Parameters["fadeWidth"].SetValue(0.35f); //0.02
 
             myEffect.Parameters["TrailTexture1"].SetValue(TrailTexture1);
             myEffect.Parameters["tex1FlowSpeed"].SetValue(new Vector2(0.3f, -2.5f));
-            myEffect.Parameters["tex1Zoom"].SetValue(new Vector2(2f, 0.63f));//2.0
-            myEffect.Parameters["tex1Color"].SetValue(between1.ToVector3() * 1.25f * 1f);
-            myEffect.Parameters["tex1ColorMirrorMult"].SetValue(0.6f);
+            myEffect.Parameters["tex1Zoom"].SetValue(new Vector2(2f, 0.63f));
+            myEffect.Parameters["tex1Color"].SetValue(tan1.ToVector3() * 1.15f * 1f);
+            myEffect.Parameters["tex1ColorMirrorMult"].SetValue(0.6f); 
 
 
 
@@ -604,23 +632,20 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             myEffect.Parameters["tex2Color"].SetValue(between2.ToVector3() * 0.65f * 1f);
             myEffect.Parameters["tex2ColorMirrorMult"].SetValue(0f);
 
-            myEffect.Parameters["sineTimeSpeed"].SetValue(2.0f); //0.02
-            myEffect.Parameters["sineMult"].SetValue(1.0f); //0.02
-            myEffect.Parameters["startingCurveAmount"].SetValue(0.0f); //0.02
+            myEffect.Parameters["sineTimeSpeed"].SetValue(2.0f); 
+            myEffect.Parameters["sineMult"].SetValue(1.0f); 
+            myEffect.Parameters["startingCurveAmount"].SetValue(0.0f); 
+
+            myEffect.Parameters["posterizationSteps"].SetValue(6.0f);
+            myEffect.Parameters["hueShiftIntensity"].SetValue(0.0f);
 
 
             myEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
-
+           
             vertexStrip.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-        }
 
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            
-
-            return true;
         }
 
     }

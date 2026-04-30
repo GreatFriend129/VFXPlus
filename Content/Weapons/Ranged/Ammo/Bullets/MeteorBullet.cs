@@ -59,7 +59,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = col * totalAlpha * 0.75f;
+            trail1.trailColor = col * totalAlpha * 0.75f * 1f;
 
             trail1.timesToDraw = 2;
 
@@ -115,6 +115,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
 
                 Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower);
+                drawPos += new Vector2(0f, 0f);
+
                 float drawRot = projectile.velocity.ToRotation();
                 Vector2 drawOrigin = spike.Size() / 2f;
 
@@ -124,12 +126,22 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Color spikeCol = Color.Brown;
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f * easedJustHitPower, adjustedScale * 1.5f * totalScale) * 0.5f;
                 
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 0 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 50 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
                 Color orbCol = Color.Red;
-                Vector2 orbScale = new Vector2(1f * easedJustHitPower, 0.3f * totalScale) * 0.7f * adjustedScale;
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 0 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Vector2 orbScale = new Vector2(1f * easedJustHitPower, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 50 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
+
+                Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
+
+                Vector2 drawScale2 = new Vector2(adjustedScale * 2f * easedJustHitPower, adjustedScale * totalScale) * 0.5f;
+
+                Color col = new Color(244, 40, 60);
+
+                drawPos += new Vector2(0f, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, col with { A = 50 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 50 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
             });
 
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
@@ -143,6 +155,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
 
                 Vector2 drawPos = proj.Center - Main.screenPosition + (proj.velocity.SafeNormalize(Vector2.UnitX) * -10 * easedJustHitPower);
+                drawPos += new Vector2(0f, 100f);
+
                 float drawRot = proj.velocity.ToRotation();
                 Vector2 drawOrigin = spike.Size() / 2f;
 
@@ -152,8 +166,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Color col = new Color(244, 40, 60);
 
-                Main.spriteBatch.Draw(spike, drawPos, null, col * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.5f, SpriteEffects.None, 0f);
+                //Main.spriteBatch.Draw(spike, drawPos, null, col * totalAlpha, drawRot, drawOrigin, drawScale, SpriteEffects.None, 0f);
+                //Main.spriteBatch.Draw(spike, drawPos, null, Color.White * totalAlpha, drawRot, drawOrigin, drawScale * 0.5f, SpriteEffects.None, 0f);
 
             });
 

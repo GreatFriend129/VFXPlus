@@ -159,6 +159,38 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             if (giveUp)
                 return;
+
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLessGlow").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -46);
+            float drawRot = projectile.rotation - MathHelper.PiOver2;
+
+            Vector2 TexOrigin = Tex.Size() / 2f;
+            Vector2 Tex2Origin = Tex2.Size() / 2f;
+
+            float opacity = 1f;// Easings.easeInCirc(projectile.Opacity);
+
+            Color color1 = Color.DeepPink with { A = 50 } * opacity;
+            Color color2 = Color.White with { A = 50 } * opacity;
+            Color color3 = Color.HotPink with { A = 50 } * opacity;
+
+            Vector2 lineScale = new Vector2(projectile.scale, projectile.scale * 1.15f) * overallScale;
+            Vector2 InnerLineScale = new Vector2(2f, 0.4f * opacity) * projectile.scale * overallScale;
+
+
+            Main.spriteBatch.Draw(Tex2, drawPos + drawRot.ToRotationVector2() * -25f, null, Color.DeepPink * 0.35f, drawRot, Tex2Origin, lineScale * 0.3f, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.Draw(Tex2, drawPos + drawRot.ToRotationVector2() * -15f, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.6f, drawRot, Tex2Origin, new Vector2(lineScale.X * 0.12f, lineScale.Y * 0.04f), SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 50 } * 0.6f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.45f, InnerLineScale.Y * 0.5f), SpriteEffects.None, 0f);
+
+
+            /*
             Texture2D Tex = CommonTextures.Flare.Value;
             Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
 
@@ -179,7 +211,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 InnerLineScale = new Vector2(2f, 0.35f * projectile.Opacity) * projectile.scale * overallScale;
             Main.spriteBatch.Draw(Tex, drawPos, null, Color.HotPink with { A = 0 } * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f); //0.3
             Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 } * 0.7f, drawRot, TexOrigin, InnerLineScale * 0.3f, SpriteEffects.None, 0f); //0.3
-
+            */
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

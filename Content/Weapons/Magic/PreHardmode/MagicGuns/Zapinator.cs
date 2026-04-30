@@ -135,75 +135,35 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
         float overallScale = 0f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            /*
-            Texture2D Tex = CommonTextures.Flare.Value;
-            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -30);
-            float drawRot = projectile.rotation - MathHelper.PiOver2;
-
-            Vector2 TexOrigin = Tex.Size() / 2f;
-            Vector2 Tex2Origin = Tex2.Size() / 2f;
-
-            float opacity = 1f;
-
-            Color color1 = Color.DodgerBlue with { A = 0 } * opacity;
-            Color color2 = Color.White with { A = 0 } * opacity;
-            Color color3 = Color.DeepSkyBlue with { A = 0 } * opacity;
-
-
-            float sineScale = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.30f) * 0.08f;
-            float sineScale2 = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.18f) * 0.04f;
-
-            Vector2 lineScale = new Vector2(projectile.scale, projectile.scale * sineScale2) * overallScale * sineScale;
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, lineScale * 0.15f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.9f, drawRot, Tex2Origin, lineScale * 0.1f, SpriteEffects.None, 0f);
-
-            Vector2 InnerLineScale = new Vector2(2.1f, 0.4f * Easings.easeInCirc(projectile.Opacity) * sineScale) * projectile.scale * sineScale2;
-            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.9f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 } * 0.7f, drawRot, TexOrigin, InnerLineScale * 0.4f, SpriteEffects.None, 0f);
-            */
-
             Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLessGlow").Value;
             Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Vector2 drawPosOffset = (projectile.velocity.SafeNormalize(Vector2.UnitX) * -30);
-
-
+            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -46);
             float drawRot = projectile.rotation - MathHelper.PiOver2;
 
             Vector2 TexOrigin = Tex.Size() / 2f;
             Vector2 Tex2Origin = Tex2.Size() / 2f;
 
-            float opacity = 1f;
+            float opacity = 1f;// Easings.easeOutQuad(projectile.Opacity);
 
-            Color color1 = Color.DodgerBlue with { A = 0 } * opacity;
-            Color color2 = Color.White with { A = 0 } * opacity;
-            Color color3 = Color.DeepSkyBlue with { A = 0 } * opacity;
+            Color color1 = Color.Blue with { A = 50 } * opacity;
+            Color color2 = Color.White with { A = 50 } * opacity;
+            Color color3 = Color.DeepSkyBlue with { A = 50 } * opacity;
 
-            float sineScale = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.30f) * 0.05f;
-            float sineScale2 = 1f + MathF.Sin((float)Main.timeForVisualEffects * 0.18f) * 0.025f;
-
-            //Vector2 lineScale = new Vector2(projectile.scale, projectile.scale * sineScale2) * overallScale * sineScale;
-            Vector2 lineScale = new Vector2(projectile.scale * 0.75f, projectile.scale) * overallScale * sineScale;
-
-            Vector2 InnerLineScale = new Vector2(2.1f, 0.5f * Easings.easeInCirc(projectile.Opacity) * sineScale) * projectile.scale * sineScale2;
-
-            //Dark Undercol
-            Main.spriteBatch.Draw(Tex2, drawPos + drawPosOffset * 1.75f, null, Color.Blue * 0.5f, drawRot, Tex2Origin, lineScale * 0.3f, SpriteEffects.None, 0f);
-
-            Main.spriteBatch.Draw(Tex2, drawPos + drawPosOffset * 1.75f, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos + drawPosOffset * 1.75f, null, color2 * 0.7f, drawRot, Tex2Origin, new Vector2(lineScale.X * 0.1f, lineScale.Y * 0.03f), SpriteEffects.None, 0f);
+            Vector2 lineScale = new Vector2(projectile.scale, projectile.scale * 1.15f) * overallScale;
+            Vector2 InnerLineScale = new Vector2(2f, 0.4f * opacity) * projectile.scale * overallScale;
 
 
-            Main.spriteBatch.Draw(Tex, drawPos + drawPosOffset, null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + drawPosOffset, null, Color.White with { A = 0 } * 1f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.4f, InnerLineScale.Y * 0.4f), SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos + drawRot.ToRotationVector2() * -15f, null, Color.DodgerBlue * 0.5f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
 
+            Main.spriteBatch.Draw(Tex2, drawPos + drawRot.ToRotationVector2() * -15f, null, color1 * 0.45f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.65f, drawRot, Tex2Origin, new Vector2(lineScale.X * 0.12f, lineScale.Y * 0.04f), SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 50 } * 0.6f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.45f, InnerLineScale.Y * 0.5f), SpriteEffects.None, 0f);
 
             return false;
-
         }
 
         public override void OnKill(Projectile projectile, int timeLeft)

@@ -9,6 +9,9 @@ using Terraria.ModLoader;
 
 namespace VFXPlus.Common
 {
+    //This caused some strange crashes I can't replicate so I just removed it
+
+    /*
     //Heavily based off Infernum's Screen Flash system
     public class FlashSystem : ModSystem
     {
@@ -252,4 +255,5 @@ namespace VFXPlus.Common
             graphicsDevice.Clear(flushColor.Value);
         }
     }
+    */
 }

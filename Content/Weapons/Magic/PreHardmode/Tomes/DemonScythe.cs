@@ -79,7 +79,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
             }
 
 
-            if (timer % 1 == 0 && Main.rand.NextBool() && false)
+            if (timer % 1 == 0 && Main.rand.NextBool())
             {
                 Vector2 offset2 = projectile.rotation.ToRotationVector2().RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-20, 20);
                 Vector2 vel2 = projectile.rotation.ToRotationVector2().RotatedByRandom(0.15f) * Main.rand.NextFloat(2, 7);
@@ -93,7 +93,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
                 d2.velocity *= 0.25f;
             }
 
-            if (timer % 2 == 0)
+            if (timer % 2 == 0 && false)
             {
                 Vector2 randomPos = Main.rand.NextVector2Circular(0f, 15f).RotatedBy(projectile.velocity.ToRotation()) * projectile.scale;
 

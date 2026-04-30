@@ -170,7 +170,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         public void Draw(Projectile projectile)
         {
             Texture2D line = CommonTextures.Flare.Value;
-
+            //Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLessGlow").Value;
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
@@ -183,6 +183,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 float startScale = projectile.ai[2] + sineScale;
 
                 Color col = Color.Lerp(Color.Orange, Color.Gold, 0.25f);
+                Color col2 = Color.Lerp(Color.Orange, Color.Gold, 0.55f); //0.65
 
                 float easedFadeValue = progress * progress;
 
@@ -190,15 +191,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
                 Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
 
+
+                Vector2 lineScale3 = new Vector2(1.25f, 0.25f + 0.4f * progress); //
+
+                Main.EntitySpriteDraw(line, AfterImagePos + new Vector2(0f, 0f), null, col2 with { A = 125 } * 0.5f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale3 * startScale, SpriteEffects.None);
+
+                //old 2
                 
                 //Main
-                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 125 } * 0.5f * easedFadeValue,
-                    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
+                //Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 125 } * 0.5f * easedFadeValue,
+                //    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
                 //White
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 125 } * 0.25f * easedFadeValue,
-                    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
+                //Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 125 } * 0.25f * easedFadeValue * 1f,
+                //    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
+                
 
                 //old
                 /*

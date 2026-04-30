@@ -333,8 +333,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             //Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 50 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 50 } * 0.4f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.16f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 70 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha * 0.95f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 70 } * 0.4f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.16f * true_alpha * 0.95f, SpriteEffects.None);
 
 
             #endregion

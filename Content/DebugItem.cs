@@ -58,11 +58,13 @@ namespace VFXPlus.Content
                 //return false;
             }
 
-            Vector2 thisVel = new Vector2(0f, -4f).RotateRandom(0.25f);
-            Dust dad = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: thisVel,
-                newColor: Color.Tan with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f));
-            dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
-            dad.rotation = Main.rand.NextFloat(6.28f);
+            //Vector2 thisVel = new Vector2(0f, -4f).RotateRandom(0.25f);
+            //Dust dad = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: thisVel,
+            //    newColor: Color.Tan with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f));
+            //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
+            //dad.rotation = Main.rand.NextFloat(6.28f);
+
+            int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, Vector2.Zero, ModContent.ProjectileType<TornadoTestPosterized>(), 1, 0, Main.myPlayer);
 
             //int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 5f, ModContent.ProjectileType<AngleGlowTest2>(), 1, 0, Main.myPlayer);
             ///Main.projectile[windFX3].scale = 0.85f;

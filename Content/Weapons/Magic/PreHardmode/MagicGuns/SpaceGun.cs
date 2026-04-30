@@ -167,9 +167,9 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
             float opacity = 1f;// Easings.easeInCirc(projectile.Opacity);
 
-            Color color1 = Color.Green with { A = 0 } * opacity;
-            Color color2 = Color.White with { A = 0 } * opacity;
-            Color color3 = Color.LawnGreen with { A = 0 } * opacity;
+            Color color1 = Color.Green with { A = 50 } * opacity;
+            Color color2 = Color.White with { A = 50 } * opacity;
+            Color color3 = Color.LawnGreen with { A = 50 } * opacity;
 
             Vector2 lineScale = new Vector2(projectile.scale * 0.75f, projectile.scale) * overallScale;
             Vector2 InnerLineScale = new Vector2(1.65f, 0.3f * opacity) * projectile.scale * overallScale;
@@ -183,7 +183,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
 
             Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 0 } * 0.7f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.4f, InnerLineScale.Y * 0.3f), SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 50 } * 0.7f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.4f, InnerLineScale.Y * 0.3f), SpriteEffects.None, 0f);
 
         }
 

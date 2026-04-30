@@ -227,6 +227,9 @@ Projectiles: {
 	AngleGlowTest2.DisplayName: Angle Glow Test2
 	LunarTrailTest.DisplayName: Lunar Trail Test
 	FlowTest.DisplayName: Flow Test
+	TornadoTestFF.DisplayName: Tornado Test F F
+	TornadoTestGreen.DisplayName: Tornado Test Green
+	TornadoTestPosterized.DisplayName: Tornado Test Posterized
 }
 
 Configs: {

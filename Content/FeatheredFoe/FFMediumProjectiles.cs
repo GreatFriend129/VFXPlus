@@ -307,7 +307,7 @@ namespace VFXPlus.Content.FeatheredFoe
         }
 
     }
-    public class TornadoTest : ModProjectile
+    public class TornadoTestFF : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 

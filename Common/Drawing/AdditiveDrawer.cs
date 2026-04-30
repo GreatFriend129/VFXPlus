@@ -75,7 +75,10 @@ namespace VFXPlus.Common.Drawing
                             case ProjectileID.Bullet:
                                 if (p.TryGetGlobalProjectile(out MusketBallProjOverride globalMB))
                                     globalMB.DrawAdditive(Main.spriteBatch);
+                                if (p.TryGetGlobalProjectile(out MusketBallProjOverrideOld globalMBO))
+                                    globalMBO.DrawAdditive(Main.spriteBatch);
                                 break;
+
                             case ProjectileID.SilverBullet:
                                 if (p.TryGetGlobalProjectile(out SilverBulletProjOverride globalSB))
                                     globalSB.DrawAdditive(Main.spriteBatch);

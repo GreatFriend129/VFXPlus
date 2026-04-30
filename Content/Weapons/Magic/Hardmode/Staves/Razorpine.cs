@@ -37,7 +37,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (timer == 0 && Main.myPlayer == projectile.owner)
             {
                 int a = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<RazorpineVFX>(), 0, 0, projectile.owner);
-                vfxProjIndex = a;
+
+                //Used ai[2] to store the vfx projectile index as it is unused
+                projectile.ai[2] = a;
             }
 
             if (timer % 10 == 0 && Main.rand.NextBool())
@@ -57,10 +59,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override void PostAI(Projectile projectile)
         {
-            if (vfxProjIndex == -1)
-                return;
 
-            Projectile myVFX = Main.projectile[vfxProjIndex];
+            //if (projectile.ai[2] == -1)
+            //    return;
+
+            Projectile myVFX = Main.projectile[(int)projectile.ai[2]];
 
             myVFX.Center = projectile.Center;
             myVFX.rotation = projectile.rotation;
@@ -88,13 +91,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            if (vfxProjIndex != -1)
-            {
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).isAttached = false;
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).stuckInPower = 1f;
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).justHitPower = 1.65f;
+            Projectile vfxProj = Main.projectile[(int)projectile.ai[2]];
 
-                Main.projectile[vfxProjIndex].Center += projectile.velocity;
+            if (vfxProj.active && vfxProj.type == ModContent.ProjectileType<RazorpineVFX>())
+            {
+                (vfxProj.ModProjectile as RazorpineVFX).isAttached = false;
+                (vfxProj.ModProjectile as RazorpineVFX).stuckInPower = 1f;
+                (vfxProj.ModProjectile as RazorpineVFX).justHitPower = 1.65f;
+
+                vfxProj.Center += projectile.velocity;
             }
 
             return base.PreKill(projectile, timeLeft);
@@ -102,11 +107,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            if (vfxProjIndex != -1)
+            Projectile vfxProj = Main.projectile[(int)projectile.ai[2]];
+
+            if (vfxProj.active && vfxProj.type == ModContent.ProjectileType<RazorpineVFX>())
             {
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).stuckInNPC = true;
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).npcWeAreStuckIn = target.whoAmI;
-                (Main.projectile[vfxProjIndex].ModProjectile as RazorpineVFX).relativePosition = projectile.Center - target.Center;
+                (vfxProj.ModProjectile as RazorpineVFX).stuckInNPC = true;
+                (vfxProj.ModProjectile as RazorpineVFX).npcWeAreStuckIn = target.whoAmI;
+                (vfxProj.ModProjectile as RazorpineVFX).relativePosition = projectile.Center - target.Center;
             }
 
 

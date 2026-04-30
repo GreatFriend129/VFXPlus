@@ -48,7 +48,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             foreach (Projectile p in Main.projectile)
             {
-                //Separate 
                 if (p.type == ModContent.ProjectileType<RainbowGunVFX>())
                 {
                     if (p.owner == player.whoAmI)
@@ -85,7 +84,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         }
 
         int timer = 0;
-        int vfxIndex = -1;
 
         Vector2 vfxSpawnPos = Vector2.Zero;
 
@@ -96,13 +94,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         {
             if (timer == 2)
             {
-
-
+                //Rainbow Rod particles
                 ParticleOrchestraSettings particleSettings = new()
                 {
                     PositionInWorld = projectile.Center,
                     MovementVector = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2) * 20f //30
-
                 };
                 ParticleOrchestrator.RequestParticleSpawn(true, ParticleOrchestraType.RainbowRodHit, particleSettings);
 
@@ -142,10 +138,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 vfxSpawnPos = projectile.Center;
             }
 
-            if (vfxIndex != -1)
+            if (hasSpawnedFirstProj)
             {
                 //Add point to VFX Proj
-                (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).AddPoint(projectile.Center, projectile.velocity.ToRotation());
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as RainbowGunVFX).AddPoint(projectile.Center, projectile.velocity.ToRotation());
             }
 
             timer++;
@@ -185,7 +181,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                             hasSpawnedFirstProj = true;
 
                             int p = Projectile.NewProjectile(null, vfxSpawnPos, Vector2.Zero, ModContent.ProjectileType<RainbowGunVFX>(), 0, 0, projectile.owner);
-                            vfxIndex = p;
+                            projectile.ai[2] = p;
                             Main.projectile[p].rotation = projectile.velocity.ToRotation();
 
                             //Start the VFX proj at random color
@@ -195,7 +191,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                             //Anchor
                             (Main.projectile[p].ModProjectile as RainbowGunVFX).anchorProj = rainbowBack;
 
-                            (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).AddPoint(vfxSpawnPos, projectile.velocity.ToRotation());
+                            (Main.projectile[p].ModProjectile as RainbowGunVFX).AddPoint(vfxSpawnPos, projectile.velocity.ToRotation());
                         }
 
                         ///
@@ -271,7 +267,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             #endregion
 
             return false;
-            return base.PreAI(projectile);
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -281,12 +276,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-            if (vfxIndex != -1)
+            if (hasSpawnedFirstProj)
             {
-                (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).isAttached = false;
-                (Main.projectile[vfxIndex].ModProjectile as RainbowGunVFX).headCollidePower = 2f;
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as RainbowGunVFX).isAttached = false;
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as RainbowGunVFX).headCollidePower = 2f;
 
-                Main.projectile[vfxIndex].timeLeft = timeLeft + timer;
+                Main.projectile[(int)projectile.ai[2]].timeLeft = timeLeft + timer;
             }
 
             return base.PreKill(projectile, timeLeft);
