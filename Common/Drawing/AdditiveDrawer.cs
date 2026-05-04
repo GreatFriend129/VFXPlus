@@ -14,7 +14,6 @@ using ReLogic.Content;
 using VFXPlus.Common.Interfaces;
 using VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns;
 using VFXPlus.Content.Weapons.Magic.PreHardmode.GemStaves;
-using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 
 
 namespace VFXPlus.Common.Drawing
@@ -69,6 +68,7 @@ namespace VFXPlus.Common.Drawing
                     //Only check class projectiles to filter most projectiles out
                     if (p.DamageType == DamageClass.Ranged)
                     {
+                        /*
                         switch (p.type)
                         {
                             
@@ -131,9 +131,10 @@ namespace VFXPlus.Common.Drawing
                                 if (p.TryGetGlobalProjectile(out LuminiteBulletProjOverride globalLB))
                                     globalLB.DrawAdditive(Main.spriteBatch);
                                 break;
+                                
                             
                         }
-
+                        */
                     }
                     else if (p.DamageType == DamageClass.Magic)
                     {
