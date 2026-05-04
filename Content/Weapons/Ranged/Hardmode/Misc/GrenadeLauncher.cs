@@ -182,7 +182,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 d.velocity += projectile.velocity * -0.1f;
 
                 Dust d2 = Dust.NewDustPerfect(projectile.Center + projectile.velocity * 0.5f, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.8f) * 0f,
-                    newColor: between with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.4f);
+                    newColor: between with { A = 25 }, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.4f);
                 d2.customData = new MediumSmokeBehavior(Main.rand.Next(4, 10), 0.98f, 0.01f, 0.35f); //12 28
                 d2.rotation = Main.rand.NextFloat(6.28f);
                 d2.velocity += projectile.velocity * -0.1f;
@@ -855,7 +855,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 if (i == previousRotations.Count - 1)
                     flareScale = new Vector2(0.65f * Xscale, 0.55f * progress) * scale;
 
-                Main.EntitySpriteDraw(flare, AfterImagePos, null, trailCol with { A = 0 } * progress * 0.8f,
+                Main.EntitySpriteDraw(flare, AfterImagePos, null, trailCol with { A = (byte)(50 * progress) } * progress * 0.8f,
                     previousRotations[i], flare.Size() / 2f, flareScale, 0);
             }
 
@@ -885,7 +885,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         {
             if (projectile.type == ProjectileID.GrenadeI || projectile.type == ProjectileID.GrenadeII)
             {
-                ProjectileExtensions.DoBaseRocketExplosionFX(projectile, storedPosition);
+                ProjectileExtensions.DoNewRocketExplosionFX(projectile, storedPosition);
 
                 if (projectile.type == ProjectileID.GrenadeII && projectile.owner == Main.myPlayer)
                     TileExplosion(projectile);

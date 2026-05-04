@@ -184,9 +184,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             Color between = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.5f);
 
-            Vector2 gashScale = new Vector2(2f * Easings.easeOutCubic(1f - justShotVal) * sineScale2, 0.45f * sineScale1) * projectile.scale;
-            Main.EntitySpriteDraw(gash, drawPos, null, between with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 2f, SpriteEffects.None);
-            Main.EntitySpriteDraw(gash, drawPos, null, Color.White with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 1f, SpriteEffects.None);
+            //Vector2 gashScale = new Vector2(2f * Easings.easeOutCubic(1f - justShotVal) * sineScale2, 0.45f * sineScale1) * projectile.scale;
+            //Main.EntitySpriteDraw(gash, drawPos, null, between with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 2f, SpriteEffects.None);
+            //Main.EntitySpriteDraw(gash, drawPos, null, Color.White with { A = 0 } * Easings.easeInQuad(justShotVal) * 1f, 0f, gash.Size() / 2f, gashScale * 1f, SpriteEffects.None);
 
 
             return false;

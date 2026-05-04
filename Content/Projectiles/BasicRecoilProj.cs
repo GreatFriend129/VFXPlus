@@ -86,12 +86,17 @@ namespace VFXPlus.Content.Projectiles
             Projectile.velocity = Vector2.Zero;
 
             //Kill proj if player is done with item use
-            if (Player.itemAnimation <= 1)
+            if (Player.itemAnimation <= 1 && gunID != ItemID.PainterPaintballGun)
                 Projectile.active = false;
 
             //Or if we have reached the end of the animation for a long time
             if (timer == AnimationTime * 2f)
                 Projectile.active = false;
+
+            if (gunID == ItemID.PainterPaintballGun)
+                if (Player.itemTime + Player.reuseDelay == 0)
+                    Projectile.active = false;
+
 
             //Store the shot angle
             if (timer == 0 && Projectile.owner == Main.myPlayer)

@@ -230,6 +230,12 @@ Projectiles: {
 	TornadoTestFF.DisplayName: Tornado Test F F
 	TornadoTestGreen.DisplayName: Tornado Test Green
 	TornadoTestPosterized.DisplayName: Tornado Test Posterized
+	ExplosionPulse.DisplayName: Explosion Pulse
+	PaintballGunPulse.DisplayName: Paintball Gun Pulse
+	ExplosionPulseAlt.DisplayName: Explosion Pulse Alt
+	PaintballGunPulseBIG.DisplayName: Paintball Gun Pulse B I G
+	OnyxPulse.DisplayName: Onyx Pulse
+	JackOFaceNew.DisplayName: Jack O Face New
 }
 
 Configs: {
@@ -661,6 +667,11 @@ Configs: {
 
 		LastPrismPrideColor: {
 			Label: Last Prism Pride Color
+			Tooltip: ""
+		}
+
+		painballversion: {
+			Label: painballversion
 			Tooltip: ""
 		}
 	}

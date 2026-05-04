@@ -1,24 +1,25 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using VFXPlus.Content.VFXTest;
-using VFXPlus.Content.Projectiles;
-using Terraria.Graphics;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Gores;
+using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.VFXTest;
+using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
@@ -406,9 +407,210 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
             }
 
+            int pulse = Projectile.NewProjectile(null, effectPos + new Vector2(0f, 0f), Vector2.Zero, ModContent.ProjectileType<OnyxPulse>(), 0, 0, Main.myPlayer);
+
+
             return false;// base.PreKill(projectile, timeLeft);
         }
 
     }
+
+    public class OnyxPulse : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        int timer = 0;
+
+        float progress = 0f;
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+
+            float timeForPulse = 22f;
+            float myProg = Utils.GetLerpValue(0f, timeForPulse, (float)timer, true);
+
+            //Easings.easeOutSine(myProg);
+
+            progress = myProg;
+
+            if (progress > 0.99f)
+            {
+                progress = 1f;
+                Projectile.active = false;
+            }
+
+            timer++;
+        }
+
+        Effect myEffect = null;
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawEffect(false);
+            });
+
+            DrawEffect(true);
+
+            return false;
+        }
+
+        public void DrawEffect(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RadialPulse", AssetRequestMode.ImmediateLoad).Value;
+
+
+            myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value); //Trail_2 0.45 totalAlpha
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+            myEffect.Parameters["progress"].SetValue(progress);//0.42f
+
+            //Ring values
+            myEffect.Parameters["ringRadiusStart"].SetValue(0f);
+            myEffect.Parameters["ringThicknessStart"].SetValue(1f * progress);// * Easings.easeOutQuint(progress)); //0.5
+            myEffect.Parameters["ringPower"].SetValue(0.25f);
+            myEffect.Parameters["ringMult"].SetValue(2f);
+            myEffect.Parameters["ringWaveSpeed"].SetValue(0.6f);
+            myEffect.Parameters["ringWaveStrength"].SetValue(0.25f);
+            myEffect.Parameters["ringWaveLength"].SetValue(41f);
+
+            //Caustic values
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+            Color purple3 = new Color(121, 7, 179);
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                darkPurple.ToVector3() * 1f,
+                purple3.ToVector3(),
+                purple.ToVector3()
+            };
+
+
+            myEffect.Parameters["gradColors"].SetValue(gradCols);
+            myEffect.Parameters["numberOfColors"].SetValue(gradCols.Length);
+            myEffect.Parameters["finalColIntensity"].SetValue(2.0f); //3.0
+            myEffect.Parameters["posterizationSteps"].SetValue(4.0f);
+
+            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 0.65f);
+            myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
+
+
+            myEffect.Parameters["zoom"].SetValue(2f); //7f
+            myEffect.Parameters["flowSpeed"].SetValue(3f);
+
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
+
+            float rot = (float)Main.timeForVisualEffects * 0.1f;
+
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 160 * new Vector2(1f, 1f) * overallScale, SpriteEffects.None, 0f); //0.3
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            //V1
+            /*
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RadialPulse", AssetRequestMode.ImmediateLoad).Value;
+
+
+            myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Noise_1").Value); //Trail_2 0.45 totalAlpha
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+            myEffect.Parameters["progress"].SetValue(progress);//0.42f
+
+            //Ring values
+            myEffect.Parameters["ringRadiusStart"].SetValue(0f);
+            myEffect.Parameters["ringThicknessStart"].SetValue(0.5f * progress);// * Easings.easeOutQuint(progress)); //0.5
+            myEffect.Parameters["ringPower"].SetValue(0.15f);
+            myEffect.Parameters["ringMult"].SetValue(2f);
+            myEffect.Parameters["ringWaveSpeed"].SetValue(0.6f);
+            myEffect.Parameters["ringWaveStrength"].SetValue(0.5f);
+            myEffect.Parameters["ringWaveLength"].SetValue(21f * 0f);
+
+            //Caustic values
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                new Color(28, 3, 51).ToVector3() * 1f,
+                new Color(54, 15, 90).ToVector3() * 1f,
+                new Color(82, 32, 129).ToVector3(),
+                new Color(96, 31, 158).ToVector3(),
+                new Color(106, 50, 159).ToVector3()
+            };
+
+            
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+            Color purple3 = new Color(121, 7, 179);
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                darkPurple.ToVector3(),
+                purple3.ToVector3(),
+                purple.ToVector3()
+            };
+
+            myEffect.Parameters["gradColors"].SetValue(gradCols);
+            myEffect.Parameters["numberOfColors"].SetValue(gradCols.Length);
+            myEffect.Parameters["finalColIntensity"].SetValue(3.0f); //3.0
+            myEffect.Parameters["posterizationSteps"].SetValue(0.0f);
+
+            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 0.65f);
+            myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
+
+
+            myEffect.Parameters["zoom"].SetValue(2f); //7f
+            myEffect.Parameters["flowSpeed"].SetValue(3f);
+
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
+
+            float rot = (float)Main.timeForVisualEffects * 0.1f;
+
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 160 * new Vector2(1f, 1f) * overallScale, SpriteEffects.None, 0f); //0.3
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            */
+        }
+    }
+
 
 }

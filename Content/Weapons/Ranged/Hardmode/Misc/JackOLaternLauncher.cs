@@ -113,8 +113,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/FlareImpact") with { Volume = 0.15f, Pitch = -0.8f, MaxInstances = 1 };
             //SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .025f, Pitch = .65f, PitchVariance = .05f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style2, player.Center);
+            //SoundStyle style2 = new SoundStyle("AerovelenceMod/Sounds/Effects/TF2/rescue_ranger_fire") with { Volume = .025f, Pitch = .65f, PitchVariance = .05f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style2, player.Center);
 
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/FlareImpact") with { Volume = 0.2f, Pitch = -0.8f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, player.Center);
@@ -562,4 +562,104 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             return false;
         }
     }
+
+    public class JackOFaceNew : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.friendly = false;
+            Projectile.hostile = false;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+
+            Projectile.width = 10;
+            Projectile.height = 10;
+            Projectile.aiStyle = -1;
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 100;
+            Projectile.scale = 1f;
+
+            Projectile.hide = true;
+        }
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            overPlayers.Add(index);
+            base.DrawBehind(index, behindNPCsAndTiles, behindNPCs, behindProjectiles, overPlayers, overWiresUI);
+        }
+
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+
+        int timer = 0;
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.rotation += Main.rand.NextFloat(-0.25f, 0.25f);
+
+            if (overallAlpha < 1f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.11f), 0f, 1f);
+            else
+            {
+                maskVal = Math.Clamp(MathHelper.Lerp(maskVal, -0.25f, 0.11f), 0f, 1f);
+                overallScale = Math.Clamp(MathHelper.Lerp(overallScale, -0.25f, 0.11f), 0f, 1f);
+            }
+
+            if (overallScale <= 0f)
+                Projectile.active = false;
+
+            timer++;
+        }
+
+        float maskVal = 1f;
+
+        float overallAlpha = 0f;
+        float overallScale = 1f;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Texture2D Face = Mod.Assets.Request<Texture2D>("Content/Weapons/Ranged/Hardmode/Misc/JackFaceGlow").Value;
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Mask/JackOMask4").Value;
+            //Texture2D Mask = ModContent.Request<Texture2D>("Playground/Content/ReduxPrime/Assets/AdjustedMask", AssetRequestMode.ImmediateLoad).Value;
+
+
+            float scale = overallAlpha + 0.25f * (1 - overallScale);
+
+            Color betweenOr = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
+
+            //Main.spriteBatch.Draw(Face, Projectile.Center - Main.screenPosition, null, betweenOr with { A = 0 } * overallScale, Projectile.rotation, Face.Size() / 2, Projectile.scale * 1.65f * scale, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Face, Projectile.Center - Main.screenPosition, null, betweenOr with { A = 0 } * overallScale, Projectile.rotation, Face.Size() / 2, Projectile.scale * 1.65f * scale, SpriteEffects.None, 0f);
+
+
+            Effect myEffect = ModContent.Request<Effect>("Playground/Effects/Filter/Dissolve", AssetRequestMode.ImmediateLoad).Value;
+
+            float maskProg = Utils.GetLerpValue(0, 120, timer, true);
+            myEffect.Parameters["progress"].SetValue(Easings.easeOutQuad(maskProg));
+
+            //myEffect.Parameters["progress"].SetValue(1f - maskVal);
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+            myEffect.Parameters["zoom"].SetValue(1f);
+
+            myEffect.Parameters["innerCol"].SetValue(new Vector3(1f, 1f, 1f));
+            myEffect.Parameters["outerCol"].SetValue(betweenOr.ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+
+            myEffect.Parameters["mainTexWidth"].SetValue(Face.Width / 1f);
+            myEffect.Parameters["mainTexHeight"].SetValue(Face.Height / 1f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.spriteBatch.Draw(Face, Projectile.Center - Main.screenPosition, null, betweenOr with { A = 0 } * overallScale, Projectile.rotation, Face.Size() / 2, Projectile.scale * 1.65f * scale, SpriteEffects.None, 0f);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            return false;
+        }
+    }
+
 }

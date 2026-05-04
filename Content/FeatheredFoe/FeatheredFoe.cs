@@ -52,8 +52,10 @@ namespace VFXPlus.Content.FeatheredFoe
 
         public List<FeatheredFoeState> attackOptions = new List<FeatheredFoeState>();
 
-
-        public override void SetStaticDefaults() { }
+        public override void SetStaticDefaults()
+        {
+            NPCID.Sets.NPCBestiaryDrawOffset[Type] = new NPCID.Sets.NPCBestiaryDrawModifiers { Hide = true };
+        }
 
         public override bool CheckActive() { return false; }
 
