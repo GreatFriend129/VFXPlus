@@ -31,7 +31,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return lateInstantiation && (entity.type == ProjectileID.ClingerStaff) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ClingerStaffToggle;
         }
 
-        int vfx_child_index = 0;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -68,11 +67,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 if (Main.myPlayer == projectile.owner)
                 {
                     int p = Projectile.NewProjectile(projectile.GetSource_FromThis(), vfxPos, Vector2.Zero, ModContent.ProjectileType<ClingerStaffVFX>(), 0, 0, projectile.owner);
-                    vfx_child_index = p;
                     Main.projectile[p].rotation = -MathHelper.PiOver2;
 
                     //Sink projectile a little further into ground
                     Main.projectile[p].Center += new Vector2(0f, 9f);
+
+                    //Store the index of the vfx projectile in ai[2] for syncing
+                    projectile.ai[2] = p;
+                    
+                    projectile.netUpdate = true;
                 }
 
                 //Play extra sound
@@ -87,8 +90,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             //Let child know we have detatched
-            if (Main.projectile[vfx_child_index] != null)
-                (Main.projectile[vfx_child_index].ModProjectile as ClingerStaffVFX).isAttached = false;
+            if (Main.projectile[(int)projectile.ai[2]] != null)
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as ClingerStaffVFX).isAttached = false;
 
             return base.PreKill(projectile, timeLeft);
         }

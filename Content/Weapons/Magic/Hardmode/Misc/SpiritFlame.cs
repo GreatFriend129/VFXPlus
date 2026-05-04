@@ -16,7 +16,6 @@ using Terraria.GameContent;
 using System.Threading;
 using VFXPlus.Common.Drawing;
 using VFXPlus.Content.Particles;
-using VFXPlus.Content.QueenBee;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc

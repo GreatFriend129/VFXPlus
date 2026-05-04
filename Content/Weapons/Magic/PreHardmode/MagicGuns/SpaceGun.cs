@@ -156,7 +156,7 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
             if (giveUp)
                 return;
 
-            Texture2D Tex = CommonTextures.Flare.Value;
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLessGlow").Value;
             Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Flare/CyverLaserPMA").Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -30);
@@ -167,20 +167,24 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.MagicGuns
 
             float opacity = 1f;// Easings.easeInCirc(projectile.Opacity);
 
-            Color color1 = Color.Green with { A = 0 } * opacity;
-            Color color2 = Color.White with { A = 0 } * opacity;
-            Color color3 = Color.LawnGreen with { A = 0 } * opacity;
+            Color color1 = Color.Green with { A = 50 } * opacity;
+            Color color2 = Color.White with { A = 50 } * opacity;
+            Color color3 = Color.LawnGreen with { A = 50 } * opacity;
 
             Vector2 lineScale = new Vector2(projectile.scale * 0.75f, projectile.scale) * overallScale;
-
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, lineScale * 0.15f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex2, drawPos, null, color2 * 0.7f, drawRot, Tex2Origin, lineScale * 0.1f, SpriteEffects.None, 0f);
-
             Vector2 InnerLineScale = new Vector2(1.65f, 0.3f * opacity) * projectile.scale * overallScale;
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 } * 0.7f, drawRot, TexOrigin, InnerLineScale * 0.4f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos, null, Color.DarkGreen * 0.35f, drawRot, Tex2Origin, lineScale * 0.3f, SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.35f, drawRot, Tex2Origin, lineScale * 0.25f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(Tex2, drawPos, null, color1 * 0.75f, drawRot, Tex2Origin, lineScale * 0.15f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex2, drawPos + new Vector2(0f, 0f), null, color2 * 0.7f, drawRot, Tex2Origin, new Vector2(lineScale.X * 0.1f, lineScale.Y * 0.03f), SpriteEffects.None, 0f);
+
+
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, color3 * 0.7f, drawRot, TexOrigin, InnerLineScale, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 50 } * 0.7f, drawRot, TexOrigin, new Vector2(InnerLineScale.X * 0.4f, InnerLineScale.Y * 0.3f), SpriteEffects.None, 0f);
+
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

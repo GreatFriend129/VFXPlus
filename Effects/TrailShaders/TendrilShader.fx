@@ -72,11 +72,11 @@ technique BasicColorDrawing
 {
     pass DefaultPass
     {
-        VertexShader = compile vs_2_0 MainVS();
+        VertexShader = compile vs_3_0 MainVS(); //2_0
     }
     pass MainPS
     {
-        PixelShader = compile ps_2_0 White();
+        PixelShader = compile ps_3_0 White(); //2_0
         //VertexShader = compile vs_2_0 MainVS(); //-
     }
 };

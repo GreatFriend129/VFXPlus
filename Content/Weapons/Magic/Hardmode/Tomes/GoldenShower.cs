@@ -22,8 +22,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
     
     public class GoldenShower : GlobalItem 
     {
-        //I think we need this?
-        public override bool InstancePerEntity => true;
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
             return lateInstatiation && (item.type == ItemID.GoldenShower) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.GoldenShowerToggle;
@@ -36,8 +34,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         }
 
 
-        //We only want to play sfx on first shot of weapon (Golden Shower does 3 per cast)
-        int shotCount = 0;
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/ENV_water_splash_01") with { Volume = 0.2f, Pitch = 0.95f, PitchVariance = .25f, MaxInstances = 1 };
@@ -174,7 +170,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         public void Draw(Projectile projectile)
         {
             Texture2D line = CommonTextures.Flare.Value;
-
+            //Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/FlareLessGlow").Value;
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
@@ -186,7 +182,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
                 float startScale = projectile.ai[2] + sineScale;
 
-                Color col = Color.Orange;
+                Color col = Color.Lerp(Color.Orange, Color.Gold, 0.25f);
+                Color col2 = Color.Lerp(Color.Orange, Color.Gold, 0.55f); //0.65
 
                 float easedFadeValue = progress * progress;
 
@@ -194,8 +191,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
                 Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
 
-                //Black
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.4f * easedFadeValue,
+
+                Vector2 lineScale3 = new Vector2(1.25f, 0.25f + 0.4f * progress); //
+
+                Main.EntitySpriteDraw(line, AfterImagePos + new Vector2(0f, 0f), null, col2 with { A = 125 } * 0.5f * easedFadeValue,
+                    previousRotations[i], line.Size() / 2f, lineScale3 * startScale, SpriteEffects.None);
+
+                //old 2
+                
+                //Main
+                //Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 125 } * 0.5f * easedFadeValue,
+                //    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
+
+                //White
+                //Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 125 } * 0.25f * easedFadeValue * 1f,
+                //    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
+                
+
+                //old
+                /*
+                Main.EntitySpriteDraw(line, AfterImagePos + new Vector2(0f, 0f), null, Color.Black * 0.4f * easedFadeValue,
                     projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
 
                 //Main
@@ -203,9 +218,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
                 //White
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * easedFadeValue,
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.25f * easedFadeValue,
                     previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
+                */
             }
 
         }

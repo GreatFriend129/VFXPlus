@@ -32,7 +32,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             return lateInstantiation && (entity.type == ProjectileID.ShadowFlame) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ShadowflameHexDollToggle;
         }
 
-        int tendril_index = 0;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -41,12 +40,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowflameTendrilVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
-                tendril_index = p;
+
+                //Store the index of the tendril projectile in ai[2] which is unused by this projectile
+                projectile.ai[2] = p;
             }
 
             //Update tendril coords
-            if (Main.projectile[tendril_index] != null)
-                (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
+            if (Main.projectile[(int)projectile.ai[2]] != null)
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as ShadowflameTendrilVFX).AddTendrilPosition(projectile.Center, projectile.velocity.ToRotation());
 
             #region vanilla AI without dust 
 
@@ -108,8 +109,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
             //Let tendril know we have detatched
-            if (Main.projectile[tendril_index] != null)
-                (Main.projectile[tendril_index].ModProjectile as ShadowflameTendrilVFX).isAttached = false;
+            if (Main.projectile[(int)projectile.ai[2]] != null)
+                (Main.projectile[(int)projectile.ai[2]].ModProjectile as ShadowflameTendrilVFX).isAttached = false;
 
             //return false;
             return base.PreKill(projectile, timeLeft);

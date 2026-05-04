@@ -28,7 +28,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             return lateInstantiation && (entity.type == ProjectileID.ShadowBeamFriendly) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.ShadowbeamStaffToggle;
         }
 
-        int vfxIndex = -1;
+        //projectile.ai[0] holds the index of the VFX projectile
+
         Vector2 previousHead;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
@@ -41,7 +42,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 if (Main.myPlayer == projectile.owner)
                 {
                     int p = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ShadowbeamStaffVFX>(), 0, 0, projectile.owner);
-                    vfxIndex = p;
+
+                    projectile.ai[0] = p;
+                    projectile.netUpdate = true;
                 }
 
                 float circlePulseSize = 0.6f;
@@ -98,7 +101,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             //Add node and disconnect proj
             AddNewNode(projectile);
 
-            (Main.projectile[vfxIndex].ModProjectile as ShadowbeamStaffVFX).isAttached = false;
+            (Main.projectile[(int)projectile.ai[0]].ModProjectile as ShadowbeamStaffVFX).isAttached = false;
 
             Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: Color.Purple, Scale: 1.25f);
             d1.rotation = projectile.velocity.ToRotation();
@@ -176,14 +179,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         public void AddNewNode(Projectile projectile)
         {
-            if (vfxIndex == -1)
+            if (projectile.ai[0] == -1)
             {
                 Main.NewText("vfxIndex is -1 | I don't know how this would ever happen");
                 return;
             }
 
             ShadowbeamNode sbn = new ShadowbeamNode(previousHead, projectile.Center);
-            (Main.projectile[vfxIndex].ModProjectile as ShadowbeamStaffVFX).nodes.Add(sbn);
+            (Main.projectile[(int)projectile.ai[0]].ModProjectile as ShadowbeamStaffVFX).nodes.Add(sbn);
             previousHead = projectile.Center;
         }
 

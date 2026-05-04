@@ -78,6 +78,8 @@ namespace VFXPlus
 
         public static readonly Asset<Texture2D> SoulSpike = ModContent.Request<Texture2D>(PixelLoc + "SoulSpike", AssetRequestMode.ImmediateLoad);
 
+        public static readonly Asset<Texture2D> SoulSpikePMA = ModContent.Request<Texture2D>(PixelLoc + "SoulSpikePMA", AssetRequestMode.ImmediateLoad);
+
         #endregion
 
         #region TrailFolder

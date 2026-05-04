@@ -307,13 +307,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 Vector2 newVec2 = new Vector2(XScale, 0.5f * size2);
                 Vector2 newVec22 = new Vector2(XScale, 0.13f * size2);
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.Black * 0.7f * progress,
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos + new Vector2(0f, 0f), null, Color.Black * 0.7f * progress,
                     previousRotations[i], AfterImage.Size() / 2f, newVec2 * 0.6f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f,
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 50 } * 1f,
                        previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 50 } * 0.75f * progress,
                        previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
 
             }
@@ -333,8 +333,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             //Main.EntitySpriteDraw(Glow, drawPos, null, Color.Black * 0.3f * true_alpha, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * 0.3f * true_alpha, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 0 } * 0.75f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 0 } * 0.45f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.16f * true_alpha, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol2 with { A = 70 } * 0.7f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale2 * 0.25f * true_alpha * 0.95f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, orbCol3 with { A = 70 } * 0.4f, projectile.velocity.ToRotation(), Glow.Size() / 2f, finalDrawScale * scale3 * 0.16f * true_alpha * 0.95f, SpriteEffects.None);
 
 
             #endregion

@@ -1,21 +1,22 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.Graphics;
-using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Misc;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
@@ -98,17 +99,15 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
         }
 
         int timer = 0;
-        int vfxIndex = -1;
         public override bool PreAI(Projectile projectile)
         {
-            if (vfxIndex == -1)
+            if (timer == 0 && Main.myPlayer == projectile.owner)
             {
                 Vector2 offset = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 29f; //25
                 int p = Projectile.NewProjectile(null, offset, Vector2.Zero, ModContent.ProjectileType<HeatRayVFX>(), 0, 0, projectile.owner);
                 Main.projectile[p].rotation = projectile.velocity.ToRotation();
-                vfxIndex = p;
+                projectile.ai[2] = p;
             }
-
 
             if (timer % 3 == 0 && Main.rand.NextBool())
             {
@@ -139,7 +138,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             timer++;
 
             return false;
-            return base.PreAI(projectile);
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -149,8 +147,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void OnKill(Projectile projectile, int timeLeft)
         {
-            if (vfxIndex != -1)
-                (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;
+            Projectile vfxProj = Main.projectile[(int)projectile.ai[2]];
+
+            if (vfxProj.active && vfxProj.type == ModContent.ProjectileType<HeatRayVFX>())
+            {
+                (vfxProj.ModProjectile as HeatRayVFX).endPos = projectile.Center;
+            }
             
             //Dust
             for (int i = 0; i < 4 + Main.rand.Next(0, 2); i++)
@@ -185,29 +187,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                     sa.velocity.Y *= -1;
             }
 
-            //Smoke
-            Color colBetween = Color.Lerp(Color.OrangeRed, Color.Orange, 0.35f);
-            for (int i = 220; i < 15; i++)
-            {
-                float prog = (float)i / 15f;
-
-                Color col = Color.Lerp(colBetween, Color.Black, 1f - prog);
-
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 2.5f) * 1f,
-                    newColor: col with { A = 0 } * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.75f); //GlowPixelAlts looks interesting too
-                d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18) + 5, 0.92f, 0.01f, 0.15f); //12 28
-
-                //d.velocity += projectile.oldVelocity * -0.5f * (prog);
-            }
-
-            for (int i = 220; i < 17; i++)
-            {
-                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.85f) * Main.rand.NextFloat(2f, 12f);
-                float myScale = Main.rand.NextFloat(0.6f, 0.95f);
-                FireParticle fire = new FireParticle(projectile.Center, -vel, myScale, Color.Lerp(Color.OrangeRed, Color.Red, 0.25f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
-                ShaderParticleHandler.SpawnParticle(fire);
-            }
-
             for (int i = 0; i < 3; i++)
             {
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.55f) * Main.rand.NextFloat(2f, 15f);
@@ -216,8 +195,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 ShaderParticleHandler.SpawnParticle(fire);
             }
 
-            if (vfxIndex != -1)
-                (Main.projectile[vfxIndex].ModProjectile as HeatRayVFX).endPos = projectile.Center;
 
             base.OnKill(projectile, timeLeft);
         }
@@ -232,7 +209,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
         public override void SetStaticDefaults()
         {
-            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 9000;
         }
 
         public override bool? CanDamage() => false;

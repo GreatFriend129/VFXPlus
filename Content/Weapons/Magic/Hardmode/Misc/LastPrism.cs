@@ -56,7 +56,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     p.customData = new WindLineBehavior(VelFadePower: 0.92f, TimeToStartShrink: 11, YScale: 0.5f);
                 }
 
-                FlashSystem.SetCAFlashEffect(0.4f, 25, 1f, 0.75f, true);
+                //FlashSystem.SetCAFlashEffect(0.4f, 25, 1f, 0.75f, true);
 
                 Main.player[projectile.owner].GetModPlayer<ScreenShakePlayer>().ScreenShakePower = 60f;
 
