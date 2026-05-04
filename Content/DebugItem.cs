@@ -12,8 +12,6 @@ using VFXPlus.Content.Particles;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
-using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
-using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
 
 
 namespace VFXPlus.Content
