@@ -280,8 +280,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
                 previousPositions.RemoveAt(0);
 
 
-            float fadeInTime = Math.Clamp((timer + 16f) / 35f, 0f, 1f);
-            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 2f);
+            float fadeInTime = Math.Clamp((timer + 13f) / 30f, 0f, 1f);
+            overallScale = 1f;// Easings.easeInOutBack(fadeInTime, 0f, 2f);
 
             if (timer % 5 == 0 && Main.rand.NextFloat() < 0.05f)
             {
@@ -338,7 +338,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             if (projectile.ai[0] >= 15f)
             {
                 projectile.ai[0] = 15f;
-                projectile.velocity.Y += 0.1f;
+                projectile.velocity.Y += 0.1f; //.1
             }
 
             // The projectile is rotated to face the direction of travel
@@ -420,25 +420,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
                 if (toReturn < 0.15f)
                     toReturn = 0f;
 
-                return toReturn * overallScale * 2.5f * 1f; //120
-
-
-                //float toReturn = 0f;
-                if (progress < 0.85f) //back half
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
-                    toReturn = Easings.easeInCubic(LV);
-                }
-                else //Front half
-                {
-                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
-                    toReturn = Easings.easeOutQuad(1f - LV);
-                }
-
-                //if (toReturn < 0.25f)
-                //    toReturn = 0f;
-
-                return toReturn * overallScale * 31f; //120
+                return toReturn * overallScale * 2.25f * 1f; //2.5
 
             }
 

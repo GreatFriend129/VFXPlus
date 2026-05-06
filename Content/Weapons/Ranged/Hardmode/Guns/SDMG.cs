@@ -31,7 +31,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
@@ -39,6 +39,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
+
+            float volumeMult = 0.4f;
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.35f * volumeMult, Pitch = 0.4f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, player.Center);
+
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RapidShot2") with { Volume = 0.35f * volumeMult, Pitch = 0.2f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style3, player.Center);
+
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_41") with { Volume = 0.15f * volumeMult, Pitch = -.05f, PitchVariance = .1f, };
+            SoundEngine.PlaySound(style4, player.Center);
+
+            SoundStyle style5 = new SoundStyle("AerovelenceMod/Sounds/Effects/Tech/CyverBurst") with { Volume = 0.35f * volumeMult, Pitch = .35f, PitchVariance = 0.2f, MaxInstances = 1 };
+            SoundEngine.PlaySound(style5, player.Center);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
             {

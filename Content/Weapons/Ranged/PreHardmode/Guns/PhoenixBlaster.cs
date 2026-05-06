@@ -31,7 +31,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity);
         }
@@ -45,20 +45,21 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.PhoenixBlaster,
                     AnimTime: 18,
-                    NormalXOffset: 24f,
-                    DestXOffset: 18f,
+                    NormalXOffset: 16f,
+                    DestXOffset: 10f,
                     YRecoilAmount: 0.15f,
                     HoldOffset: new Vector2(0f, 2f),
-                    TipPos: new Vector2(30f, -3f),
-                    StarPos: new Vector2(25f, -3f)
+                    TipPos: new Vector2(22f, -3f),
+                    StarPos: new Vector2(17f, -3f)
                     );
 
                 held.timeToStartFade = 3;
             }
+            Main.projectile[gun].scale = 0.85f;
 
             //Explosion
             int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(40f, -3f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
+            Vector2 muzzlePos = position + new Vector2(32f, -3f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
 
             //Vector2 muzzlePos = position + velocity.SafeNormalize(Vector2.UnitX) * 50f;
             for (int i = 0; i < 6; i++) //16
@@ -99,6 +100,9 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/PhoenixShot") with { Volume = 1f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
 
             return true;
         }

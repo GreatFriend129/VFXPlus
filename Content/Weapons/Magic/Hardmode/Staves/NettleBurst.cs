@@ -46,12 +46,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.07f); //14
                 float pitch2 = -0.4f + (projectile.ai[1] * 0.07f); //14
+                float pitch3 = 0f + (projectile.ai[1] * 0.11f); //14
 
                 SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .025f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; 
                 SoundEngine.PlaySound(style, projectile.Center);
 
                 SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.07f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
                 SoundEngine.PlaySound(style2, projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.15f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
+                SoundEngine.PlaySound(style3, projectile.Center);
             }
 
 

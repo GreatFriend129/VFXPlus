@@ -34,7 +34,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             entity.noUseGraphic = true;
             base.SetDefaults(entity); 
         }
@@ -102,6 +102,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<PurpleCasing>());
+
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ONYXBlast") with { Volume = 1f, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
 
             return true;
         }
@@ -303,7 +307,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             projectile.maxPenetrate = -1;
             projectile.penetrate = -1;
             projectile.Damage();
-            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
             Vector2 vector20 = projectile.Center + Vector2.One * -20f;
             int num94 = 40;
             int num95 = num94;
@@ -508,8 +512,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
                 darkPurple.ToVector3() * 1f,
-                purple3.ToVector3(),
-                purple.ToVector3()
+                purple.ToVector3(),
+                purple3.ToVector3()
             };
 
 
@@ -518,7 +522,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             myEffect.Parameters["finalColIntensity"].SetValue(2.0f); //3.0
             myEffect.Parameters["posterizationSteps"].SetValue(4.0f);
 
-            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 0.65f);
+            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 0.65f); //.45
             myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
 
 
