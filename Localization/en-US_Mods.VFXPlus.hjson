@@ -236,6 +236,9 @@ Projectiles: {
 	PaintballGunPulseBIG.DisplayName: Paintball Gun Pulse B I G
 	OnyxPulse.DisplayName: Onyx Pulse
 	JackOFaceNew.DisplayName: Jack O Face New
+	SwordTrailTest.DisplayName: Sword Trail Test
+	SwordTrailTest2.DisplayName: Sword Trail Test2
+	BloodButchererSwingFX.DisplayName: Blood Butcherer Swing F X
 }
 
 Configs: {

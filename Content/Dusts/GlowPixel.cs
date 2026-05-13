@@ -93,10 +93,12 @@ namespace VFXPlus.Content.Dusts
 
             GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
 
+			float alphaToUse = behavior.colorAlpha == -1 ? 0 : behavior.colorAlpha;
+
             if (behavior.drawBlack)
                 Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, Color.Black * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
             else
-                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = 0 } * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = (byte)alphaToUse } * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
 
             return false;
         }
@@ -136,6 +138,8 @@ namespace VFXPlus.Content.Dusts
 		//How much this dust will rotate based on its xvelocity
 		public float rotPower = 0.01f;
 
+		public int colorAlpha = -1;
+
         public GlowPixelBehavior(int TimeForFadeIn = 6, int TimeBeforeFadeOut = 14, float VelFadePower = 0.92f, float ScaleFadePower = 1f, float AlphaFadePower = 0.9f, float ColorFadePower = 0.9f)
         {
             timeForFadeIn = TimeForFadeIn;
@@ -144,6 +148,100 @@ namespace VFXPlus.Content.Dusts
             scaleFadePower = ScaleFadePower;
             alphaFadePower = AlphaFadePower;
             colorFadePower = ColorFadePower;
+        }
+    }
+
+    //Perhaps the worst possible name for this but I can't think of anything better
+    public class GlowPixelCircle : ModDust
+    {
+        public override string Texture => "VFXPlus/Content/Dusts/Textures/GlowCircle";
+
+        public override void OnSpawn(Dust dust)
+        {
+            dust.noGravity = true;
+            dust.frame = new Rectangle(0, 0, 64, 64);
+
+            dust.fadeIn = 0f;
+        }
+
+        public override Color? GetAlpha(Dust dust, Color lightColor)
+        {
+            return dust.color;
+        }
+
+        public override bool Update(Dust dust)
+        {
+            if (dust.customData == null)
+            {
+                dust.customData = new GlowPixelBehavior(TimeForFadeIn: 6, TimeBeforeFadeOut: 14, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f);
+            }
+
+            GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
+
+            if (behavior.timer == 0)
+                behavior.initialVelLength = dust.velocity.Length();
+
+            if (behavior.timer <= behavior.timeForFadeIn)
+            {
+                float prog = (float)behavior.timer / (float)behavior.timeForFadeIn;
+
+                behavior.dustAlpha = Easings.easeInQuad(prog);
+
+                dust.velocity *= behavior.earlyVelFadePower;
+            }
+
+
+            if (behavior.timer > behavior.timeBeforeFadeOut)
+            {
+                dust.velocity *= behavior.velFadePower;
+                dust.scale *= behavior.scaleFadePower;
+                behavior.dustAlpha *= behavior.alphaFadePower;
+                dust.color *= behavior.colorFadePower;
+
+
+                if (dust.scale < 0.05f)
+                    dust.active = false;
+
+                if (behavior.dustAlpha < 0.05f)
+                    dust.active = false;
+            }
+
+            if (behavior.randomVelRotatePower > 0)
+            {
+                //Ratio of current velocity over starting velocity
+                float dustVelPower = dust.velocity.Length() / behavior.initialVelLength;
+                dust.velocity = dust.velocity.RotateRandom(behavior.randomVelRotatePower * dustVelPower);
+            }
+
+            dust.position += dust.velocity;
+
+            if (!dust.noLight && dust.scale > 0.2f)
+                Lighting.AddLight(dust.position, dust.color.R * dust.scale * 0.002f, dust.color.G * dust.scale * 0.002f, dust.color.B * dust.scale * 0.002f);
+
+            dust.rotation += dust.velocity.X * behavior.rotPower;
+
+            behavior.timer++;
+
+
+            return false;
+        }
+        public override bool PreDraw(Dust dust)
+        {
+            if (dust.customData == null)
+            {
+                dust.customData = new GlowPixelBehavior(TimeForFadeIn: 6, TimeBeforeFadeOut: 14, VelFadePower: 0.92f, ScaleFadePower: 1f, AlphaFadePower: 0.9f);
+            }
+
+            GlowPixelBehavior behavior = (dust.customData as GlowPixelBehavior);
+
+            float alphaToUse = behavior.colorAlpha == -1 ? 0 : behavior.colorAlpha;
+
+            if (behavior.drawBlack)
+                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, Color.Black * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+            else
+                Main.spriteBatch.Draw(Texture2D.Value, dust.position - Main.screenPosition, dust.frame, dust.color with { A = (byte)alphaToUse } * behavior.dustAlpha, dust.rotation, dust.frame.Size() / 2f, dust.scale, SpriteEffects.None, 0f);
+
+            return false;
         }
     }
 

@@ -417,7 +417,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
                     toReturn = Easings.easeOutQuad(1f - LV);
                 }
 
-                if (toReturn < 0.15f)
+                if (toReturn < 0.13f)
                     toReturn = 0f;
 
                 return toReturn * overallScale * 2.25f * 1f; //2.5

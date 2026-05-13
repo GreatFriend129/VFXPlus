@@ -51,7 +51,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_41") with { Volume = 0.15f * volumeMult, Pitch = -.05f, PitchVariance = .1f, };
             SoundEngine.PlaySound(style4, player.Center);
 
-            SoundStyle style5 = new SoundStyle("AerovelenceMod/Sounds/Effects/Tech/CyverBurst") with { Volume = 0.35f * volumeMult, Pitch = .35f, PitchVariance = 0.2f, MaxInstances = 1 };
+            SoundStyle style5 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/TechBlip") with { Volume = 0.4f * volumeMult, Pitch = .35f, PitchVariance = 0.2f, MaxInstances = 1 };
             SoundEngine.PlaySound(style5, player.Center);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
