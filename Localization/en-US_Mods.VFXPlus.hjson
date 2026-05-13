@@ -239,6 +239,8 @@ Projectiles: {
 	SwordTrailTest.DisplayName: Sword Trail Test
 	SwordTrailTest2.DisplayName: Sword Trail Test2
 	BloodButchererSwingFX.DisplayName: Blood Butcherer Swing F X
+	BloodButchererSwingFX2.DisplayName: Blood Butcherer Swing F X2
+	BloodButchererSwingFX3.DisplayName: Blood Butcherer Swing F X3
 }
 
 Configs: {

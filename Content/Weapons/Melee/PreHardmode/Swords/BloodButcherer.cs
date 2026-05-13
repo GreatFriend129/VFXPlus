@@ -5,6 +5,7 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -41,8 +42,11 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             float adjustedItemScale = player.GetAdjustedItemScale(item); // Get the melee scale of the player and item.
-            Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BloodButchererSwingFX>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
+            Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BloodButchererSwingFX3>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
             //return false;
+
+            //Swing FX 2 better with easeInOutQuad | but fx 1 better with linear ease
+
             return false;
         }
 
@@ -63,6 +67,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
             float lerpVal = Utils.GetLerpValue(0, player.itemAnimationMax - 1, timer, true);
             float easedRotation = MathHelper.Lerp(startingRot, endingRot, Easings.easeInOutQuad(lerpVal)); //Quad
+            //float easedRotation = MathHelper.Lerp(startingRot, endingRot, lerpVal); //Quad
 
             //Main.NewText(lerpVal);
 
@@ -135,7 +140,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             int trailCount = (int)(Projectile.ai[1] / 3f) * 1; //30
             //previousRotations.Add(Projectile.rotation + MathHelper.PiOver2 + MathHelper.PiOver4 * 0.5f);
             //previousPositions.Add(Projectile.Center + offset);
-            previousRotations.Add(player.itemRotation + MathHelper.PiOver4);
+            previousRotations.Add(player.itemRotation + MathHelper.PiOver4 * player.direction);
             previousPositions.Add(player.itemLocation - player.Center);
 
 
@@ -202,7 +207,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             VertexStripFixed vertexStrip = new VertexStripFixed();
 
             float StripWidth(float progress) => 70f; //80
-            Color StripColor(float progress) => Color.Red with { A = 255 };
+            Color StripColor(float progress) => new Color(255, 0, 0) with { A = 255 };
             Color StripColor2(float progress) => Color.White with { A = 255 } * 0f * progress;
 
 
@@ -219,6 +224,286 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             vertexStrip.DrawTrail();
 
 
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+
+        }
+
+
+    }
+
+    public class BloodButchererSwingFX2 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 1000;
+
+            Projectile.width = Projectile.height = 10;
+        }
+
+        int timer = 0;
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override void AI()
+        {
+            //Pos is wrong on first frame if you switch swing dir TODO
+            
+            Projectile.localAI[0]++; // Current time that the projectile has been alive.
+            Player player = Main.player[Projectile.owner];
+            float percentageOfLife = Projectile.localAI[0] / (Projectile.ai[1] * 1f); // The current time over the max time.
+            float direction = Projectile.ai[0];
+            float velocityRotation = Projectile.velocity.ToRotation();
+            float adjustedRotation = MathHelper.Pi * direction * percentageOfLife + velocityRotation + direction * MathHelper.Pi + player.fullRotation;
+            Projectile.rotation = adjustedRotation; // Set the rotation to our to the new rotation we calculated.
+
+            Projectile.Center = player.RotatedRelativePoint(player.MountedCenter) - Projectile.velocity;
+            Projectile.scale = 1f;
+
+            if (Projectile.localAI[0] >= Projectile.ai[1] * 1f)
+            {
+                Projectile.Kill();
+            }
+
+            Vector2 offset = Projectile.rotation.ToRotationVector2() * 10f;
+
+            int trailCount = (int)(Projectile.ai[1] / 3f) * 1; //30
+            //previousRotations.Add(Projectile.rotation + MathHelper.PiOver2 + MathHelper.PiOver4 * 0.5f);
+            //previousPositions.Add(Projectile.Center + offset);
+            previousRotations.Add(player.itemRotation + MathHelper.PiOver4 * player.direction);
+            previousPositions.Add(player.itemLocation - player.Center);
+
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            timer++;
+        }
+
+        Effect trailEffect = null;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (timer == 0)
+                return false;
+
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderNPCs, () =>
+            {
+                DrawTrail(false);
+            });
+            DrawTrail(true);
+
+            return false;
+        }
+
+        float trailWidth = 1f;
+        public void DrawTrail(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Main.spriteBatch.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            pos_arr = Array.ConvertAll(pos_arr, n => n + Projectile.Center);
+
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/SwordTrailShader2", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/SwordSmear1").Value;
+            Texture2D noiseTexture = Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value;
+
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f);
+            trailEffect.Parameters["reps"].SetValue(1f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(4.0f);
+
+            trailEffect.Parameters["noiseScale"].SetValue(new Vector2(0.5f, 1.0f));
+            trailEffect.Parameters["noiseIntensity"].SetValue(1.0f);
+
+            trailEffect.Parameters["totalMult"].SetValue(0.75f);
+
+            Matrix transform = Matrix.CreateTranslation(new Vector3(Vector2.Zero, 0f));
+            Matrix view = Matrix.Identity;
+            Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(transform * view * projectionMatrix);
+
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            float StripWidth(float progress) => 70f; //70
+            Color StripColor(float progress) => new Color(255, 0, 0) with { A = 255 };
+
+
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["NoiseTexture"].SetValue(noiseTexture);
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+
+        }
+
+
+    }
+
+    public class BloodButchererSwingFX3 : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 1000;
+
+            Projectile.width = Projectile.height = 10;
+        }
+
+        int timer = 0;
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override void AI()
+        {
+            //Pos is wrong on first frame if you switch swing dir TODO
+
+            Projectile.localAI[0]++; // Current time that the projectile has been alive.
+            Player player = Main.player[Projectile.owner];
+            float percentageOfLife = Projectile.localAI[0] / (Projectile.ai[1] * 1f); // The current time over the max time.
+            float direction = Projectile.ai[0];
+            float velocityRotation = Projectile.velocity.ToRotation();
+            float adjustedRotation = MathHelper.Pi * direction * percentageOfLife + velocityRotation + direction * MathHelper.Pi + player.fullRotation;
+            Projectile.rotation = adjustedRotation; // Set the rotation to our to the new rotation we calculated.
+
+            Projectile.Center = player.RotatedRelativePoint(player.MountedCenter) - Projectile.velocity;
+            Projectile.scale = 1f;
+
+            if (Projectile.localAI[0] >= Projectile.ai[1] * 1f)
+            {
+                Projectile.Kill();
+            }
+
+            Vector2 offset = Projectile.rotation.ToRotationVector2() * 10f;
+
+            int trailCount = (int)(Projectile.ai[1] / 3f) * 1; //30
+            //previousRotations.Add(Projectile.rotation + MathHelper.PiOver2 + MathHelper.PiOver4 * 0.5f);
+            //previousPositions.Add(Projectile.Center + offset);
+            previousRotations.Add(player.itemRotation + MathHelper.PiOver4 * player.direction);
+            previousPositions.Add(player.itemLocation - player.Center);
+
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            timer++;
+        }
+
+        Effect trailEffect = null;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (timer == 0)
+                return false;
+
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderNPCs, () =>
+            {
+                DrawTrail(false);
+            });
+            DrawTrail(true);
+
+            return false;
+        }
+
+        float trailWidth = 1f;
+        public void DrawTrail(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            Main.spriteBatch.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            pos_arr = Array.ConvertAll(pos_arr, n => n + Projectile.Center);
+
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/SwordTrailShader3", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/SwordSmear1").Value;
+            Texture2D noiseTexture = Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value;
+            Texture2D flowTexture = Mod.Assets.Request<Texture2D>("Assets/Noise/Test/T_Random_54Stretch").Value;
+
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f);
+            trailEffect.Parameters["reps"].SetValue(1f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(4.0f);
+
+            trailEffect.Parameters["noiseScale"].SetValue(new Vector2(0.5f, 1.0f));
+            trailEffect.Parameters["noiseIntensity"].SetValue(1.0f);
+
+            trailEffect.Parameters["flowScale"].SetValue(new Vector2(0.5f, 1.0f));
+            trailEffect.Parameters["flowSpeed"].SetValue(2f);
+            trailEffect.Parameters["flowYOffset"].SetValue(0f);
+
+
+            trailEffect.Parameters["finalColMult"].SetValue(2.0f);
+            trailEffect.Parameters["totalMult"].SetValue(1f);
+
+            Matrix transform = Matrix.CreateTranslation(new Vector3(Vector2.Zero, 0f));
+            Matrix view = Matrix.Identity;
+            Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(transform * view * projectionMatrix);
+
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            float StripWidth(float progress) => 70f; //70
+            Color StripColor(float progress) => new Color(255, 0, 0) with { A = 255 };
+
+
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["NoiseTexture"].SetValue(noiseTexture);
+            trailEffect.Parameters["FlowTexture"].SetValue(flowTexture);
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+            vertexStrip.DrawTrail();
 
             Main.pixelShader.CurrentTechnique.Passes[0].Apply();
 
