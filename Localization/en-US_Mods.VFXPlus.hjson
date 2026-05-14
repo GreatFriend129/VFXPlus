@@ -241,6 +241,12 @@ Projectiles: {
 	BloodButchererSwingFX.DisplayName: Blood Butcherer Swing F X
 	BloodButchererSwingFX2.DisplayName: Blood Butcherer Swing F X2
 	BloodButchererSwingFX3.DisplayName: Blood Butcherer Swing F X3
+	AdamantiteSwingFX.DisplayName: Adamantite Swing F X
+	CobaltSwingFX.DisplayName: Cobalt Swing F X
+	MythrilSwingFX.DisplayName: Mythril Swing F X
+	OrichalcumSwingFX.DisplayName: Orichalcum Swing F X
+	PalladiumSwingFX.DisplayName: Palladium Swing F X
+	TitaniumSwingFX.DisplayName: Titanium Swing F X
 }
 
 Configs: {

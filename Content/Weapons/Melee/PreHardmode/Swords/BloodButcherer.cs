@@ -477,6 +477,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             trailEffect.Parameters["flowScale"].SetValue(new Vector2(0.5f, 1.0f));
             trailEffect.Parameters["flowSpeed"].SetValue(2f);
             trailEffect.Parameters["flowYOffset"].SetValue(0f);
+            trailEffect.Parameters["flowGammaBoost"].SetValue(0f);
 
 
             trailEffect.Parameters["finalColMult"].SetValue(2.0f);

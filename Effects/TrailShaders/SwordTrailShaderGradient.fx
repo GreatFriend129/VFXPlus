@@ -20,6 +20,12 @@ float2 flowScale;
 //Adds a flat amount to the flowTexture's brightness
 float flowGammaBoost = 0.0;
 
+//The colors of the gradient
+float3 gradColors[10];
+
+//The number of colors in the gradient
+float numberOfColors = 5;
+
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
@@ -104,6 +110,20 @@ float3 Posterize(float3 inputCol)
     return hsv2rgb(hsvCol);
 }
 
+//Converts grayscale value to respective gradient color
+float3 blendColors(float gray)
+{
+    float segment = 1.0 / float(numberOfColors - 1);
+    float scaledGray = gray / segment;
+    
+    int i = int(floor(scaledGray));
+    i = clamp(i, 0, numberOfColors - 2);
+    
+    float t = (gray - float(i) * segment) / segment;
+
+    return lerp(gradColors[i], gradColors[i + 1], t);
+}
+
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
     VertexShaderOutput output = (VertexShaderOutput) 0;
@@ -137,9 +157,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
     finalColAVG = smoothstep(0.0, 1.0, finalColAVG);
     
 
-    float4 toPosterize = in_color * float4(input.Color.rgb, 1.0);
+    float4 toPosterize = in_color;
+    //if (chainCoords.y < 0.01 && length(toPosterize.rgb != 0.0))
+    //    toPosterize.rgb = float3(1.0, 1.0, 1.0);
     
     toPosterize.rgb = Posterize(toPosterize.rgb);
+    
+    toPosterize.rgb = blendColors(toPosterize.r);
     
     float alpha = 1.0;
     
