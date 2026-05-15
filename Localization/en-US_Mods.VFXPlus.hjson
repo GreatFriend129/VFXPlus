@@ -247,6 +247,8 @@ Projectiles: {
 	OrichalcumSwingFX.DisplayName: Orichalcum Swing F X
 	PalladiumSwingFX.DisplayName: Palladium Swing F X
 	TitaniumSwingFX.DisplayName: Titanium Swing F X
+	BloodButchererSwingFXDrawn.DisplayName: Blood Butcherer Swing F X Drawn
+	BaseSwordProj.DisplayName: Base Sword Proj
 }
 
 Configs: {

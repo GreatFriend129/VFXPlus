@@ -192,7 +192,7 @@ namespace VFXPlus.Content.Weapons.Melee.Hardmode.Swords
             Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
-            pos_arr = Array.ConvertAll(pos_arr, n => n + Projectile.Center + new Vector2(0f, 0f));
+            pos_arr = Array.ConvertAll(pos_arr, n => n + Projectile.Center);
 
 
             if (trailEffect == null)
