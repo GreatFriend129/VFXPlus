@@ -31,6 +31,8 @@ namespace VFXPlus.Content.Projectiles
             Projectile.ignoreWater = true;
             Projectile.tileCollide = false;
 
+            Projectile.extraUpdates = 4;
+
             Projectile.penetrate = -1;
             Projectile.timeLeft = 1000;
 
@@ -56,37 +58,45 @@ namespace VFXPlus.Content.Projectiles
         {
             Player player = Main.player[Projectile.owner];
 
+            int adjustedAnimTime = (player.itemAnimationMax * Projectile.MaxUpdates) - timer;
+            int adjustedAnimMaxTime = player.itemAnimationMax * Projectile.MaxUpdates;
+
+            //Main.NewText(adjustedAnimMaxTime + "|" + adjustedAnimTime);
+
             #region Calculate pos and rot
-            float vanillaRot = ((float)player.itemAnimation / (float)player.itemAnimationMax - 0.5f) * (float)(-player.direction) * 3.5f - (float)player.direction * 0.3f;
+            float vanillaRot = ((float)adjustedAnimTime / (float)adjustedAnimMaxTime - 0.5f) * (float)(-player.direction) * 3.5f - (float)player.direction * 0.3f;
 
             float startingRot = (0.5f) * (float)(-player.direction) * 3.5f - (float)player.direction * 0.3f;
-            float endingRot = ((float)1f / (float)player.itemAnimationMax - 0.5f) * (float)(-player.direction) * 3.5f - (float)player.direction * 0.3f;
+            float endingRot = ((float)1f / (float)adjustedAnimMaxTime - 0.5f) * (float)(-player.direction) * 3.5f - (float)player.direction * 0.3f;
 
-            float lerpVal = Utils.GetLerpValue(0, player.itemAnimationMax - 1, timer, true);
+            float lerpVal = Utils.GetLerpValue(0, adjustedAnimMaxTime - 1, timer, true);
             float easedRotation = MathHelper.Lerp(startingRot, endingRot, Easings.easeInOutQuad(lerpVal));
             //float easedRotation = MathHelper.Lerp(startingRot, endingRot, lerpVal);
 
 
-            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
+
+            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, (timer * 0.05f) + easedRotation + MathHelper.ToRadians(-135) * player.direction);
 
             Projectile.Center = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
-
-            Vector2 dir = (Projectile.Center - player.MountedCenter).SafeNormalize(Vector2.UnitX);
-            //Projectile.Center = player.MountedCenter + dir * 8f;
-            //Projectile.Center -= new Vector2(3f * player.direction, 0f);
-
             Projectile.rotation = easedRotation;
 
             player.heldProj = Projectile.whoAmI;
 
-            player.SetCompositeArmFront(false, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
+            //player.SetCompositeArmFront(false, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
 
             #endregion
 
-            Main.NewText((Projectile.Center - player.MountedCenter).Length());
+            Vector2 namrl = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.None, easedRotation + MathHelper.ToRadians(-135) * player.direction);
+
+
+            if (timer == 2 || timer == 50 || timer == 90)
+            {
+                Main.NewText(player.MountedCenter - namrl);
+            }
+
 
             #region HandAnimation
-            
+
             if (1f - Easings.easeInOutQuad(lerpVal) < 0.333f)
             {
                 player.bodyFrame.Y = player.bodyFrame.Height * 3;
@@ -103,7 +113,7 @@ namespace VFXPlus.Content.Projectiles
             #endregion
 
 
-            if (timer >= itemAnimationTime - 1)
+            if (timer >= adjustedAnimMaxTime - 1)
             {
                 Projectile.Kill();
             }
@@ -111,9 +121,14 @@ namespace VFXPlus.Content.Projectiles
             Vector2 offset = (Projectile.rotation - MathHelper.PiOver4 * player.direction).ToRotationVector2() * player.direction;
             offset *= info.positionOffset;
 
-            int trailCount = (int)(Projectile.ai[1] / 2.5f) * 1; // /3
+            Vector2 compositeArmCenter = player.MountedCenter + new Vector2(-4f * player.direction, -2f);
+
+            Main.NewText((Projectile.Center - compositeArmCenter).Length());
+
+
+            int trailCount = 8 * Projectile.MaxUpdates; //8
             previousRotations.Add(Projectile.rotation + MathHelper.PiOver4 * player.direction);
-            previousPositions.Add(Projectile.Center - player.MountedCenter + offset);
+            previousPositions.Add(Projectile.Center - compositeArmCenter + offset);
 
 
             if (previousRotations.Count > trailCount)
@@ -122,13 +137,24 @@ namespace VFXPlus.Content.Projectiles
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
+
+            Dust d = Dust.NewDustPerfect(player.MountedCenter + new Vector2(-4f * player.direction, -2f), DustID.Adamantite, Scale: 0.5f);
+            d.noGravity = true;
+            d.velocity = Vector2.Zero;
+
+            Dust d2 = Dust.NewDustPerfect(namrl, DustID.Cobalt, Scale: 0.5f);
+            d2.noGravity = true;
+            d2.velocity = Vector2.Zero;
+
             timer++;
         }
 
         Effect trailEffect = null;
         public override bool PreDraw(ref Color lightColor)
         {
-            if (timer == 0)
+            Player player = Main.player[Projectile.owner];
+
+            if (timer == 0 || player.itemAnimation <= 1)
                 return false;
 
 
@@ -138,7 +164,6 @@ namespace VFXPlus.Content.Projectiles
             });
             DrawTrail(true);
 
-            Player player = Main.player[Projectile.owner];
 
             //Debug
             //Vector2 offsetPos = (Projectile.rotation - MathHelper.PiOver4 * player.direction).ToRotationVector2() * 200f * player.direction;
@@ -170,13 +195,18 @@ namespace VFXPlus.Content.Projectiles
             if (giveUp)
                 return;
 
+            Player player = Main.player[Projectile.owner];
+            Vector2 compositeArmCenter = player.MountedCenter + new Vector2(-4f * player.direction, -2f);
+
+            //Main.NewText(Projectile.Center.Distance(Main.player[Projectile.owner].MountedCenter));
+
             Main.spriteBatch.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             //Convert lists to arrays for use in vertex strip
             Vector2[] pos_arr = previousPositions.ToArray();
             float[] rot_arr = previousRotations.ToArray();
 
-            pos_arr = Array.ConvertAll(pos_arr, n => n + Projectile.Center);
+            pos_arr = Array.ConvertAll(pos_arr, n => n + compositeArmCenter);
 
 
             if (trailEffect == null)
