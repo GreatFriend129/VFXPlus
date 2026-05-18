@@ -3,24 +3,23 @@
 sampler uImage0 : register(s0);
 sampler uImage1 : register(s1);
 float progress;
-float4 ColorOne;
 matrix WorldViewProjection;
 float4 uShaderSpecificData;
 float fadeAmount = 0.0;
-
 struct VertexShaderInput
 {
-    float2 TextureCoordinates : TEXCOORD0;
     float4 Position : POSITION0;
     float4 Color : COLOR0;
+    float3 TextureCoordinates : TEXCOORD0;
 };
 
 struct VertexShaderOutput
 {
-    float2 TextureCoordinates : TEXCOORD0;
     float4 Position : SV_POSITION;
     float4 Color : COLOR0;
+    float3 TextureCoordinates : TEXCOORD0; //float 3 b/c z is going to be the trail width 
 };
+
 texture TrailTexture;
 sampler tent = sampler_state
 {
@@ -43,22 +42,24 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 White(VertexShaderOutput input) : COLOR0
 {
-    float x = (input.TextureCoordinates.x + progress) % 1;
-    float2 noisecoords = float2(x, input.TextureCoordinates.y);
+    float2 baseCoords = input.TextureCoordinates.xy;
+    
+    //Fix trail appearing jaggy if the width changes with trail progress
+    baseCoords.y = (baseCoords.y - 0.5) / input.TextureCoordinates.z + 0.5;
+    
+    float x = (baseCoords.x + progress) % 1;
+    float2 noisecoords = float2(x, baseCoords.y);
     float brightness = tex2D(tent, noisecoords).r;
-    float4 color = ColorOne;
+    float4 color = input.Color;
     color *= sqrt(brightness);
     return color * sqrt(input.TextureCoordinates.x);
 }
 
 technique BasicColorDrawing
 {
-    pass DefaultPass
-    {
-        VertexShader = compile vs_2_0 MainVS();
-    }
     pass MainPS
     {
+        VertexShader = compile vs_2_0 MainVS();
         PixelShader = compile ps_2_0 White();
     }
 };

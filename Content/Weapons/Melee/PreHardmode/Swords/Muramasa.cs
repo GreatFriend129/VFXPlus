@@ -47,14 +47,14 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             //Always start with black probably
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                Color.DarkBlue.ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.85f).ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.5f).ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.25f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.75f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.55f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f).ToVector3(),
             };
 
 
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 8f, 0f, 62f, 4f, 1f, 1f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 12f, 0f, 62f, 6, 4f, 1f, 1f);
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
 
             return false;

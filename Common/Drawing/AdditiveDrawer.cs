@@ -99,10 +99,6 @@ namespace VFXPlus.Common.Drawing
                                 if (p.TryGetGlobalProjectile(out ExplodingBulletProjOverride globalEB))
                                     globalEB.DrawAdditive(Main.spriteBatch);
                                 break;
-                            case ProjectileID.BulletHighVelocity:
-                                if (p.TryGetGlobalProjectile(out HighVelocityBulletProjOverride globalHVB))
-                                    globalHVB.DrawAdditive(Main.spriteBatch);
-                                break;
                             case ProjectileID.CrystalBullet:
                                 if (p.TryGetGlobalProjectile(out CrystalBulletProjOverride globalCB))
                                     globalCB.DrawAdditive(Main.spriteBatch);
@@ -110,10 +106,6 @@ namespace VFXPlus.Common.Drawing
                             case ProjectileID.CursedBullet:
                                 if (p.TryGetGlobalProjectile(out CursedBulletProjOverride globalCurB))
                                     globalCurB.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.IchorBullet:
-                                if (p.TryGetGlobalProjectile(out IchorBulletProjOverride globalIB))
-                                    globalIB.DrawAdditive(Main.spriteBatch);
                                 break;
                             case ProjectileID.ChlorophyteBullet:
                                 if (p.TryGetGlobalProjectile(out ChlorophyteBullet globalChB))

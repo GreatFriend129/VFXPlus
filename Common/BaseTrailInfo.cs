@@ -55,6 +55,8 @@ namespace VFXPlus.Common
         //Want to use when pixelizing
         public bool useEffectMatrix = false;
 
+        public bool fadeOut = false;
+
         //------------------
         public int trailPointLimit = 60;
 
@@ -143,8 +145,10 @@ namespace VFXPlus.Common
 
         public virtual Color ColorFunction(float progress)
         {
-            //This should only matter if you are using basic effect
-            return trailColor;
+            if (fadeOut)
+                return trailColor * Easings.easeOutCubic(progress);
+            else
+                return trailColor;
         }
 
         #endregion
@@ -202,7 +206,6 @@ namespace VFXPlus.Common
             //TODO: do i need to put reps param or no idr
 
             customEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            customEffect.Parameters["ColorOne"].SetValue(trailColor.ToVector4());
 
             int width = Main.graphics.GraphicsDevice.Viewport.Width;
             int height = Main.graphics.GraphicsDevice.Viewport.Height;
@@ -225,7 +228,7 @@ namespace VFXPlus.Common
 
             customEffect.CurrentTechnique.Passes["MainPS"].Apply();
 
-            VertexStrip vertexStrip = new VertexStrip();
+            VertexStripFixed vertexStrip = new VertexStripFixed();
             if (trailPositions != null)
             {
                 if (relativeToPlayer)

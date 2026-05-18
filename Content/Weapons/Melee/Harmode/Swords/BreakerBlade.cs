@@ -44,19 +44,19 @@ namespace VFXPlus.Content.Weapons.Melee.Hardmode.Swords
             float adjustedItemScale = player.GetAdjustedItemScale(item); // Get the melee scale of the player and item.
             int trail = Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
 
-            Main.NewText(adjustedItemScale);
+            //Main.NewText(adjustedItemScale);
 
             //Always start with black probably
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                new Color(133, 133, 133).ToVector3(),
                 new Color(146, 133, 104).ToVector3(),
-                new Color(161, 161, 161).ToVector3(),
                 new Color(187, 172, 138).ToVector3(),
+                new Color(133, 133, 133).ToVector3(),
+                new Color(161, 161, 161).ToVector3(),
             };
 
 
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 0f, 0f, 120f, 4f, 1f, 0.35f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 0f, 0f, 120f, 7, 4f, 1f, 1f);
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
 
             return false;

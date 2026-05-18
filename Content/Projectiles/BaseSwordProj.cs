@@ -74,15 +74,14 @@ namespace VFXPlus.Content.Projectiles
             //float easedRotation = MathHelper.Lerp(startingRot, endingRot, lerpVal);
 
 
-
-            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, (timer * 0.05f) + easedRotation + MathHelper.ToRadians(-135) * player.direction);
+            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
 
             Projectile.Center = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
             Projectile.rotation = easedRotation;
 
             player.heldProj = Projectile.whoAmI;
 
-            //player.SetCompositeArmFront(false, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
+            player.SetCompositeArmFront(false, Player.CompositeArmStretchAmount.Full, easedRotation + MathHelper.ToRadians(-135) * player.direction);
 
             #endregion
 
@@ -91,7 +90,7 @@ namespace VFXPlus.Content.Projectiles
 
             if (timer == 2 || timer == 50 || timer == 90)
             {
-                Main.NewText(player.MountedCenter - namrl);
+                //Main.NewText(player.MountedCenter - namrl);
             }
 
 
@@ -123,10 +122,10 @@ namespace VFXPlus.Content.Projectiles
 
             Vector2 compositeArmCenter = player.MountedCenter + new Vector2(-4f * player.direction, -2f);
 
-            Main.NewText((Projectile.Center - compositeArmCenter).Length());
+            //Main.NewText((Projectile.Center - compositeArmCenter).Length());
 
 
-            int trailCount = 8 * Projectile.MaxUpdates; //8
+            int trailCount = info.trailLength * Projectile.MaxUpdates; //8
             previousRotations.Add(Projectile.rotation + MathHelper.PiOver4 * player.direction);
             previousPositions.Add(Projectile.Center - compositeArmCenter + offset);
 
@@ -138,6 +137,7 @@ namespace VFXPlus.Content.Projectiles
                 previousPositions.RemoveAt(0);
 
 
+            /*
             Dust d = Dust.NewDustPerfect(player.MountedCenter + new Vector2(-4f * player.direction, -2f), DustID.Adamantite, Scale: 0.5f);
             d.noGravity = true;
             d.velocity = Vector2.Zero;
@@ -145,7 +145,7 @@ namespace VFXPlus.Content.Projectiles
             Dust d2 = Dust.NewDustPerfect(namrl, DustID.Cobalt, Scale: 0.5f);
             d2.noGravity = true;
             d2.velocity = Vector2.Zero;
-
+            */
             timer++;
         }
 
@@ -174,14 +174,14 @@ namespace VFXPlus.Content.Projectiles
 
             Texture2D Sword = TextureAssets.Item[info.itemID].Value;
 
-            Vector2 swordPos = Projectile.Center - Main.screenPosition;
+            Vector2 swordPos = Projectile.Center - Main.screenPosition + new Vector2(0f, player.gfxOffY);
 
             Vector2 swordOrigin = new Vector2(player.direction == 1 ? 0f : Sword.Width, Sword.Height);
             swordOrigin += new Vector2(info.originOffset * player.direction, -info.originOffset);
 
             SpriteEffects fx = player.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            Main.spriteBatch.Draw(Sword, Projectile.Center - Main.screenPosition, null, lightColor, Projectile.rotation, swordOrigin, Projectile.scale, fx, 0f);
+            Main.spriteBatch.Draw(Sword, swordPos, null, lightColor, Projectile.rotation, swordOrigin, Projectile.scale, fx, 0f);
 
             #endregion
 
@@ -196,7 +196,7 @@ namespace VFXPlus.Content.Projectiles
                 return;
 
             Player player = Main.player[Projectile.owner];
-            Vector2 compositeArmCenter = player.MountedCenter + new Vector2(-4f * player.direction, -2f);
+            Vector2 compositeArmCenter = player.MountedCenter + new Vector2(-4f * player.direction, -2f) + new Vector2(0f, player.gfxOffY);
 
             //Main.NewText(Projectile.Center.Distance(Main.player[Projectile.owner].MountedCenter));
 
@@ -277,6 +277,8 @@ namespace VFXPlus.Content.Projectiles
 
         public float trailWidth = 70f;
 
+        public int trailLength = 8;
+
         //Shader info
         public Vector3[] gradientColors;
 
@@ -298,12 +300,13 @@ namespace VFXPlus.Content.Projectiles
         public float totalMult = 1f;
 
         //Basic Constructor
-        public SwordProjInfo(int ItemID, Vector3[] GradientColors, float PositionOffset, float OriginOffset, float TrailWidth = 70, float PosterizationSteps = 4.0f)
+        public SwordProjInfo(int ItemID, Vector3[] GradientColors, float PositionOffset, float OriginOffset, float TrailWidth = 70, int TrailLength = 8, float PosterizationSteps = 4.0f)
         {
             itemID = ItemID;
             positionOffset = PositionOffset;
             originOffset = OriginOffset;
             trailWidth = TrailWidth;
+            trailLength = TrailLength;
             gradientColors = GradientColors;
             posterizationSteps = PosterizationSteps;
 
@@ -323,12 +326,13 @@ namespace VFXPlus.Content.Projectiles
             flowTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Test/T_Random_54Stretch").Value;
         }
 
-        public SwordProjInfo(int ItemID, Vector3[] GradientColors, float PositionOffset, float OriginOffset, float TrailWidth = 70, float PosterizationSteps = 4.0f, float FinalColMult = 1f, float TotalMult = 1f)
+        public SwordProjInfo(int ItemID, Vector3[] GradientColors, float PositionOffset, float OriginOffset, float TrailWidth = 70, int TrailLength = 8, float PosterizationSteps = 4.0f, float FinalColMult = 1f, float TotalMult = 1f)
         {
             itemID = ItemID;
             positionOffset = PositionOffset;
             originOffset = OriginOffset;
             trailWidth = TrailWidth;
+            trailLength = TrailLength;
             gradientColors = GradientColors;
             posterizationSteps = PosterizationSteps;
 

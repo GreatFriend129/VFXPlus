@@ -45,16 +45,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             SoundStyle style1 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/shotgun-firing-3-14483") with { Volume = 0.1f * overallVol, Pitch = -0.2f, };
             SoundEngine.PlaySound(style1, position);
 
-
             SoundStyle style22 = new SoundStyle("VFXPlus/Sounds/Effects/Vanilla/Item_40") with { Volume = 0.50f * overallVol, Pitch = -0.2f, PitchVariance = 0.05f, MaxInstances = -1 };
             SoundEngine.PlaySound(style22, position);
 
+            //SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/HuntingRifle2") with { Volume = .15f, PitchVariance = 0.1f };
+            //SoundEngine.PlaySound(style3, position);
 
             //SoundStyle style1 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperNew2") with { Volume = 0.5f, Pitch = 0.1f, PitchVariance = 0.1f, MaxInstances = -1};
             //SoundEngine.PlaySound(style1, position);
 
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/AltRevolverShoot") with { Volume = 0.15f, Pitch = 0f, PitchVariance = 0.1f };
-            //SoundEngine.PlaySound(style, position);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/AltRevolverShoot") with { Volume = 0.1f, Pitch = 0f, PitchVariance = 0.1f };
+            SoundEngine.PlaySound(style, position);
 
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 

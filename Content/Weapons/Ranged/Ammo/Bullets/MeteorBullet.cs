@@ -55,13 +55,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value; //spark_07_Black |Extra_196_Black
             trail1.trailPointLimit = 120 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(20 * totalAlpha * Easings.easeOutCubic(1f - justTileCollidePower));
+            trail1.trailWidth = (int)(10 * totalAlpha * Easings.easeOutCubic(1f - justTileCollidePower)); //20
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = col * totalAlpha * 0.75f * 1f;
-
-            trail1.timesToDraw = 2;
+            trail1.trailColor = col with { A = 50 } * totalAlpha * 1f;
+            trail1.fadeOut = true;
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
             trail1.trailRot = projectile.velocity.ToRotation();
@@ -102,8 +101,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (timer == 0)
                 return false;
 
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
+                trail1.TrailDrawing(Main.spriteBatch, false);
+
                 //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
                 if (projectile.active == false)
                     totalAlpha = 0f;
@@ -126,11 +128,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Color spikeCol = Color.Brown;
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f * easedJustHitPower, adjustedScale * 1.5f * totalScale) * 0.5f;
                 
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 50 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 75 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
                 Color orbCol = Color.Red;
                 Vector2 orbScale = new Vector2(1f * easedJustHitPower, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 50 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 75 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
 
                 Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
@@ -140,8 +142,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Color col = new Color(244, 40, 60);
 
                 drawPos += new Vector2(0f, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, col with { A = 50 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 50 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, col with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
             });
 
             ModContent.GetInstance<AdditivePixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
@@ -180,7 +182,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
         {
             if (proj == null)
                 return;
-            trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
+            //trail1.TrailDrawing(Main.spriteBatch, doAdditiveReset: false);
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
