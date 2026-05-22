@@ -340,7 +340,6 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 0.9f, 0.35f, true);
                 //wlb.randomVelRotatePower = 0.2f;
-                wlb.drawWhiteCore = true;
                 p.customData = wlb;
             }
 
@@ -400,7 +399,7 @@ namespace VFXPlus.Content.FeatheredFoe
 
                 WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 0.9f, 0.35f, true);
                 //wlb.randomVelRotatePower = 0.2f;
-                wlb.drawWhiteCore = false;
+                wlb.whiteCoreIntensity = 0f;
                 p.customData = wlb;
             }
 
@@ -498,7 +497,6 @@ namespace VFXPlus.Content.FeatheredFoe
                                 newColor: dustCol, Scale: Main.rand.NextFloat(0.75f, 1f));
 
                             WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 1f, 0.5f, true);
-                            wlb.drawWhiteCore = true;
                             p.customData = wlb;
                         }
                     }

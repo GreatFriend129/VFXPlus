@@ -53,15 +53,15 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             }
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_06").Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 130 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(11 * totalAlpha); //17
+            trail1.trailWidth = (int)(9 * totalAlpha); //17
             trail1.trailMaxLength = 130 + trailRandomLengthOffset; 
 
             trail1.shouldSmooth = false;
             trail1.fadeOut = true;
 
-            Color trailCol = CursedGreen with { A = 100 };
+            Color trailCol = CursedGreen with { A = 100 } * 0f;
             trail1.trailColor = trailCol * totalAlpha * 1f;
             trail1.timesToDraw = 1;
 
@@ -72,7 +72,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.TrailLogic();
 
 
-            if (timer > 5 && timer % 3 == 0 && Main.rand.NextBool(3))
+            if (timer > 5 && timer % 3 == 0 && Main.rand.NextBool(3) && false)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
@@ -89,7 +89,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
 
 
-                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.25f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
+                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.5f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
                     AlphaFade: 0.91f, RotPower: 0.01f);
                 fire.renderLayer = RenderLayer.UnderProjectiles;
 
@@ -122,9 +122,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 trail1.TrailDrawing(Main.spriteBatch, false);
 
-                Color darkest = new Color(87, 153, 0);// new Color(95, 168, 0);
-                Color middle = new Color(98, 173, 0);
-                Color brightest = new Color(109, 189, 4);
+                Color darkest = new Color(69, 130, 0);
+                Color middle = new Color(87, 153, 0);
+                Color brightest = new Color(87, 153, 0);
 
                 //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
                 if (projectile.active == false)
@@ -155,7 +155,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
 
-                drawPos += new Vector2(0f, -0f);
+                drawPos += new Vector2(0f, 0f);
                 Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
                 Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
             });

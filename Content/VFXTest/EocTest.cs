@@ -252,7 +252,7 @@ namespace VFXPlus.Content.VFXTest
                                 newColor: dustCol, Scale: Main.rand.NextFloat(0.5f, 0.75f));
 
                             WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.75f, 1f, 0.5f, true);
-                            wlb.drawWhiteCore = false;
+                            wlb.whiteCoreIntensity = 0f;
                             p.customData = wlb;
                         }
                     }

@@ -53,7 +53,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                     Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(1.5f) * Main.rand.NextFloat(10f, 30f);
 
                     Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<WindLine>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1.5f);
-                    p.customData = new WindLineBehavior(VelFadePower: 0.92f, TimeToStartShrink: 11, YScale: 0.5f);
+                    p.customData = new WindLineBehavior(VelFadePower: 0.92f, TimeToStartShrink: 11, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: true);
                 }
 
                 //FlashSystem.SetCAFlashEffect(0.4f, 25, 1f, 0.75f, true);
@@ -136,7 +136,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                         Dust p = Dust.NewDustPerfect(dustPos, ModContent.DustType<WindLine>(), vel,
                             newColor: rainbow, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1f);
-                        p.customData = new WindLineBehavior(VelFadePower: 0.92f, TimeToStartShrink: 5, YScale: 0.5f);
+                        p.customData = new WindLineBehavior(VelFadePower: 0.92f, TimeToStartShrink: 11, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: true);
 
 
                         if (i == 0)

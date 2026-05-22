@@ -1,18 +1,19 @@
-﻿using Terraria;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using System;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
+using System.Security.Policy;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.UI;
-using static Terraria.ModLoader.ModContent;
-using Terraria.GameContent;
-using System.Security.Policy;
 using VFXPlus.Common.Drawing;
-using Terraria.GameContent.UI.States;
+using static Terraria.GameContent.Animations.IL_Actions.Sprites;
+using static Terraria.ModLoader.ModContent;
 
 namespace VFXPlus.Content.Dusts
 {
@@ -40,7 +41,7 @@ namespace VFXPlus.Content.Dusts
 		{
             if (dust.customData == null)
             {
-                dust.customData = new WindLineBehavior();
+                dust.customData = new WindLineBehavior(VelFadePower: 0.95f, TimeToStartShrink: 15, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 1f, Pixelize: true);
             }
 
             if (dust.alpha == 0)
@@ -51,11 +52,15 @@ namespace VFXPlus.Content.Dusts
             if (dust.customData is WindLineBehavior wlb)
             {
                 if (dust.alpha >= wlb.timeToStartShrink)
+                {
+                    wlb.vec2Scale.X = wlb.vec2Scale.X * wlb.shrinkXScalePower;
                     wlb.vec2Scale.Y = wlb.vec2Scale.Y * wlb.shrinkYScalePower;
+
+                }
 
                 dust.velocity *= wlb.velFadePower;
 
-                if (wlb.vec2Scale.Y <= 0.07f || dust.fadeIn <= 0.02f)
+                if (wlb.vec2Scale.X <= 0.07f || wlb.vec2Scale.Y <= 0.07f || dust.fadeIn <= 0.02f)
                     dust.active = false;
 
 
@@ -118,10 +123,9 @@ namespace VFXPlus.Content.Dusts
             {
                 Vector2 scale = dust.scale * new Vector2(wlb.vec2Scale.X, wlb.vec2Scale.Y * 0.5f);
 
-                Main.spriteBatch.Draw(Tex, drawPos, null, col with { A = 0 } * 0.9f, dust.rotation, origin, scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, drawPos, null, col with { A = (byte)wlb.colorAlpha } * 0.9f, dust.rotation, origin, scale, SpriteEffects.None, 0f);
 
-                if (wlb.drawWhiteCore)
-                    Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = 0 }, dust.rotation, origin, scale * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = (byte)wlb.colorAlpha } * wlb.whiteCoreIntensity, dust.rotation, origin, scale * 0.5f, SpriteEffects.None, 0f);
             }
         }
     }
@@ -133,7 +137,8 @@ namespace VFXPlus.Content.Dusts
 
         //Behavior - - - - - - - -
 
-        //How much should the yScale shirnk (when timer > timeToStartShrink)
+        //How much should the xScale/yScale shirnk (when timer > timeToStartShrink)
+        public float shrinkXScalePower = 0.9f;
         public float shrinkYScalePower = 0.9f;
 
         //How much should the velocity fade
@@ -152,12 +157,24 @@ namespace VFXPlus.Content.Dusts
         //Drawing - - - - - - - -
         public bool pixelize = false;
 
-        public bool drawWhiteCore = true;
+        public float whiteCoreIntensity = 1f;
 
 		public Vector2 vec2Scale = new Vector2(1f, 1f);
 
+        public RenderLayer renderLayer = RenderLayer.Dusts;
+
+        public int colorAlpha = 0;
 
         //Basic constructor
+        /// <summary>
+        /// Custom behavior for a WindLine dust. Assign dust.customData to one of these (only works for a WindLine dust).
+        /// </summary>
+        /// <param name="VelFadePower"> How fast the velocity of the dust fades. 1f = no fade </param>
+        /// <param name="TimeToStartShrink"> Number of frames before the dust's YScale starts shrinking. </param>
+        /// <param name="ShrinkYScalePower"> How fast the dust's YScale shrinks once 'TimeToStartShrink' frames have passed. </param>
+        /// <param name="XScale"> The dust's base XScale.  </param>
+        /// <param name="YScale"> The dust's base YScale. </param>
+        /// <param name="Pixelize"> Whether to Pixelize this dust or not. </param>
         public WindLineBehavior(float VelFadePower = 0.95f, int TimeToStartShrink = 15, float ShrinkYScalePower = 0.5f, float XScale = 1f, float YScale = 1f, bool Pixelize = true) 
         {
             velFadePower = VelFadePower;
@@ -165,6 +182,34 @@ namespace VFXPlus.Content.Dusts
             shrinkYScalePower = ShrinkYScalePower;
             vec2Scale = new Vector2(XScale, YScale);
             pixelize = Pixelize;
+        }
+
+
+        //Kitchen Sink Contrusctor
+        /// <summary>
+        /// Custom behavior for a WindLine dust. Assign dust.customData to one of these (only works for a WindLine dust).
+        /// </summary>
+        /// <param name="VelFadePower"> How fast the velocity of the dust fades. 1f = no fade </param>
+        /// <param name="TimeToStartShrink"> Number of frames before the dust's YScale starts shrinking. </param>
+        /// <param name="ShrinkYScalePower"> How fast the dust's YScale shrinks once 'TimeToStartShrink' frames have passed. </param>
+        /// <param name="XScale"> The dust's base XScale.  </param>
+        /// <param name="YScale"> The dust's base YScale. </param>
+        /// <param name="Pixelize"> Whether to Pixelize this dust or not. </param>
+        /// <param name="WhiteCoreIntensity"> How intense the white core of the dust should draw. </param>
+        /// <param name="RandomVelRotatePower"> Causes the dust's velocity to rotate by a random amount each frame. </param>
+        /// <param name="KillEarlyTime"> Automatically kills the dust after this many frames. </param>
+        public WindLineBehavior(float VelFadePower = 0.95f, int TimeToStartShrink = 15, float ShrinkYScalePower = 0.5f, float XScale = 1f, float YScale = 1f, bool Pixelize = true,
+            float WhiteCoreIntensity = 1f, float RandomVelRotatePower = 0f, int KillEarlyTime = 300)
+        {
+            velFadePower = VelFadePower;
+            timeToStartShrink = TimeToStartShrink;
+            shrinkYScalePower = ShrinkYScalePower;
+            vec2Scale = new Vector2(XScale, YScale);
+            pixelize = Pixelize;
+
+            whiteCoreIntensity = WhiteCoreIntensity;
+            randomVelRotatePower = RandomVelRotatePower;
+            killEarlyTime = KillEarlyTime;
         }
     }
 }
