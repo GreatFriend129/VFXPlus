@@ -61,15 +61,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailColor = trailCol with { A = 75 } * totalAlpha * 0.7f * 1f;
             trail1.timesToDraw = 1;
             trail1.useEffectMatrix = true;
-            trail1.pinchHead = timer > 50;
+            trail1.pinchHead = true;
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
             trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -50f);
-            trail1.TrailLogic();
+            trail1.trailPos = projectile.Center + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -50f) + new Vector2(0f, 0f);
+            
+            if (timer > 5) 
+                trail1.TrailLogic();
 
 
-            if (timer > 0 && timer % 4 == 0 && Main.rand.NextBool(3))
+            if (timer > 0 && (timer + (int)randomTimeOffset) % 4 == 0 && Main.rand.NextBool(3))
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
@@ -80,29 +82,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             }
 
-            if ((timer - 2) % 6 == 0 && Main.rand.NextBool(2) && timer > 0)
+            if ((timer + (int)randomTimeOffset) % 6 == 0 && Main.rand.NextBool(2) && timer > 5)
             {
                 float rot = projectile.velocity.ToRotation();
 
-                Vector2 pos = projectile.Center + new Vector2(-projectile.velocity.Length(), Main.rand.NextFloat(-10f, 10f)).RotatedBy(rot);
+                Vector2 pos = projectile.Center + new Vector2(-projectile.velocity.Length() * 3f, Main.rand.NextFloat(-10f, 10f)).RotatedBy(rot);
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(10f, 18f);
-
-                //Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<MuraLineBasic>(), vel * 0.8f, newColor: Color.DarkGoldenrod, Scale: Main.rand.NextFloat(0.3f, 0.65f) * 0.65f);
-                //dp.alpha = 12;
 
                 Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<WindLine>(), vel, newColor: Color.DarkGoldenrod, Scale: Main.rand.NextFloat(0.75f, 1f));
 
-                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.9f, TimeToStartShrink: 5, ShrinkYScalePower: 0.8f, XScale: 2f, YScale: Main.rand.NextFloat(0.75f, 1f), true, KillEarlyTime: 10);
-                //wlb.shrinkXScalePower = 0.5f;
-
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.9f, TimeToStartShrink: 5, ShrinkYScalePower: 0.75f, XScale: 2f, YScale: Main.rand.NextFloat(0.75f, 1f), true, KillEarlyTime: 10);
                 wlb.colorAlpha = 50;
                 wlb.whiteCoreIntensity = 0.5f;
                 dp.customData = wlb;
-
-                //Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<LineSpark>(), vel,
-                //newColor: Color.Yellow, Scale: Main.rand.NextFloat(0.45f, 0.65f) * 0.3f);
-                //dp.customData = DustBehaviorUtil.AssignBehavior_LSBase(velFadePower: 0.88f, preShrinkPower: 0.99f, postShrinkPower: 0.8f, timeToStartShrink: 5 + Main.rand.Next(-5, 5), killEarlyTime: 80,
-                // 1.35f, 0.5f); //80
             }
 
             //Quickly fade in 
@@ -258,7 +250,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 float velFadePower = Main.rand.NextFloat(0.9f, 0.93f);
                 int shrinkTime = Main.rand.Next(4, 8);
 
-                p.customData = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: true);
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: true);
+                wlb.colorAlpha = 50;
+                wlb.whiteCoreIntensity = 0.5f;
+
+                p.customData = wlb;
             }
 
             for (int i = 220; i < 4 + Main.rand.Next(0, 3); i++)

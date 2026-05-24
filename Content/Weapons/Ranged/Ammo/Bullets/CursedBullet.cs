@@ -61,7 +61,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.shouldSmooth = false;
             trail1.fadeOut = true;
 
-            Color trailCol = CursedGreen with { A = 100 } * 0f;
+            Color trailCol = CursedGreen with { A = 100 } * 1f;
             trail1.trailColor = trailCol * totalAlpha * 1f;
             trail1.timesToDraw = 1;
 
@@ -83,7 +83,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             }
 
-            if (timer % 1 == 0 && Main.rand.NextBool() && false)
+            if (timer % 1 == 0 && Main.rand.NextBool())
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
