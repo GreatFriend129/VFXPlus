@@ -3,6 +3,7 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using System;
 using Microsoft.Xna.Framework.Graphics;
+using System.Threading;
 
 namespace VFXPlus.Content.Dusts
 {
@@ -12,21 +13,42 @@ namespace VFXPlus.Content.Dusts
 
         public override void OnSpawn(Dust dust)
 		{
+            dust.customData = new RenderTargetDustBehavoir();
 		}
 
 		public override bool Update(Dust dust)
 		{
-            dust.noGravity = true;
+            RenderTargetDustBehavoir behavoir = (RenderTargetDustBehavoir)dust.customData;
+
+            if (behavoir.timer == 0)
+                dust.rotation = Main.rand.NextFloat(6.28f);
+
+            //Frame
+            behavoir.animFrameTimer++;
+            if (behavoir.animFrameTimer++ >= 0)
+            {
+                behavoir.animFrameTimer = 0;
+                behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+                behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+
+                if (Main.rand.NextBool(3))
+                {
+                    behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+                }
+            }
 
             dust.position += dust.velocity;
-            dust.velocity *= 0.92f;
-            dust.scale *= 0.98f;
-            dust.alpha += 15;
+            dust.position += dust.velocity;
 
-            if (dust.scale < 0.25f)
+            //dust.velocity *= 0.97f;
+            //dust.scale *= 0.95f;
+
+            if (dust.scale < 0.05f || behavoir.timer >= 100 || behavoir.animFrame >= 60)
             {
                 dust.active = false;
             }
+
+            behavoir.timer++;
             return false;
 
 		}
@@ -36,4 +58,11 @@ namespace VFXPlus.Content.Dusts
             return false;
         }
 	}
+
+    public class RenderTargetDustBehavoir
+    {
+        public int timer = 0;
+        public int animFrame = 0;
+        public int animFrameTimer = 0;
+    }
 }

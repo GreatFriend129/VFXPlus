@@ -40,7 +40,7 @@ namespace VFXPlus.Common.Drawing
             if (Main.dedServ)
                 return;
 
-            renderTarget.Dispose();
+            //renderTarget.Dispose();
 
             On_Main.CheckMonoliths -= PrepareTarget;
             On_Main.DrawDust -= DrawTarget;
@@ -59,11 +59,27 @@ namespace VFXPlus.Common.Drawing
             Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
             Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix); 
-            
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
+
+            Texture2D tex = CommonTextures.feather_circle128PMA.Value;
+
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
+            int frameHeight = Smoke.Height / 64;
+            int frameWidth = Smoke.Width / 64;
+
             foreach (Dust d in Main.dust.Where(d => d.type == ModContent.DustType<RenderTargetDustTest>() && d.active))
             {
-                Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, d.position - Main.screenPosition, new Rectangle(0, 0, 2, 2), Color.White, 0, new Vector2(1f, 1f), d.scale, 0, 0);
+                RenderTargetDustBehavoir behavoir = (RenderTargetDustBehavoir)d.customData;
+
+                int startX = (behavoir.animFrame % 8);
+                int startY = (int)Math.Floor(behavoir.animFrame / 8f);
+                Rectangle sourceRectangle = Smoke.Frame(8, 8, startX, startY);
+                Vector2 origin = sourceRectangle.Size() / 2f;
+
+                Main.spriteBatch.Draw(Smoke, d.position - Main.screenPosition, sourceRectangle, Color.White, d.rotation, origin, d.scale, 0, 0);
+
+
+                //Main.spriteBatch.Draw(tex, d.position - Main.screenPosition, null, Color.White, 0, tex.Size() / 2f, d.scale, 0, 0);
             }
             Main.spriteBatch.End();
 
@@ -83,6 +99,7 @@ namespace VFXPlus.Common.Drawing
         {
             orig(self);
 
+            /*
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RadialScrollOneCol", AssetRequestMode.ImmediateLoad).Value;
 
             myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Starbasesnow").Value);
@@ -95,10 +112,34 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["zoom"].SetValue(2f);
             myEffect.Parameters["flowSpeed"].SetValue(1.5f);
 
-            myEffect.Parameters["radius"].SetValue(0.7f);
-            myEffect.Parameters["edgeBlendDist"].SetValue(0.15f); //14
-            myEffect.Parameters["insideBlendDist"].SetValue(0.07f);
+            myEffect.Parameters["radius"].SetValue(1f);
+            myEffect.Parameters["edgeBlendDist"].SetValue(0f); //14
+            myEffect.Parameters["insideBlendDist"].SetValue(0f);
             myEffect.Parameters["distortIntensity"].SetValue(0.03f);
+            */
+
+            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/NebulaGalaxy", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["zoom"].SetValue(40.0f);
+            myEffect.Parameters["time"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+
+            Vector4[] cols =
+            {
+                new Color(23, 168, 209).ToVector4(),
+                new Color(244, 83, 251).ToVector4(),
+            };
+
+
+            Vector4[] cols2 =
+            {
+                Color.Aqua.ToVector4()  * 1f,
+                Color.Aquamarine.ToVector4() * 0.75f,
+                Color.DeepSkyBlue.ToVector4() * 0.5f,
+                Color.DodgerBlue.ToVector4() * 0.25f
+            };
+
+            myEffect.Parameters["Colors"].SetValue(cols2);
+            myEffect.Parameters["layers"].SetValue(cols2.Length);
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.TransformationMatrix);
 

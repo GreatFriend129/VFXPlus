@@ -465,6 +465,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
+            Dust.NewDustPerfect(projectile.Center + projectile.velocity * 1f, ModContent.DustType<PaintSplotch>(), newColor: ballColor, Scale: 1f);
+
 
             return true;
         }
