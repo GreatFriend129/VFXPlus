@@ -467,8 +467,34 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
         {
             Dust.NewDustPerfect(projectile.Center + projectile.velocity * 1f, ModContent.DustType<PaintSplotch>(), newColor: ballColor, Scale: 1f);
 
+            int variant = Main.rand.Next(1, 5);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Water/inkHit0" + variant) with { Volume = 0.15f, PitchVariance = 0.15f, MaxInstances = -1};
+            SoundEngine.PlaySound(style, projectile.Center);
 
-            return true;
+            SoundEngine.PlaySound(SoundID.Dig with { Volume = 0.2f, PitchVariance = 0.05f}, projectile.Center);
+
+            //Vanilla Code
+            Color newColor4 = Main.hslToRgb(projectile.ai[1], 1f, 0.5f);
+            newColor4.A = 200;
+            for (int num174 = 0; num174 < 10; num174++)
+            {
+                int num176 = Dust.NewDust(projectile.position, projectile.width, projectile.height, ModContent.DustType<SnowDustCopy>(), 0f, 0f, 0, newColor4);
+                Main.dust[num176].noGravity = true;
+                Dust dust176 = Main.dust[num176];
+                Dust dust334 = dust176;
+                dust334.velocity *= 1.2f;
+                Main.dust[num176].scale = 0.9f;
+                dust176 = Main.dust[num176];
+                dust334 = dust176;
+                dust334.velocity -= projectile.oldVelocity * 0.3f;
+                num176 = Dust.NewDust(new Vector2(projectile.position.X + 4f, projectile.position.Y + 4f), projectile.width - 8, projectile.height - 8, ModContent.DustType<SnowDustCopy>(), 0f, 0f, 0, newColor4, 1.1f);
+                Main.dust[num176].noGravity = true;
+                dust176 = Main.dust[num176];
+                dust334 = dust176;
+                dust334.velocity *= 2f;
+            }
+
+            return false;
         }
 
     }

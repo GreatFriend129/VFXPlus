@@ -181,6 +181,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                 d.customData = new GlowFlareBehavior(GlowThreshold: 0.6f, GlowPower: 2.5f, TotalBoost: 1f);
             }
 
+            Dust.NewDustPerfect(projectile.Center + projectile.velocity * 1f, ModContent.DustType<PaintSplotch>(), newColor: Color.Lerp(Color.Red, Color.DarkRed, 0.5f), Scale: 1f);
+
             return true;
         }
     }

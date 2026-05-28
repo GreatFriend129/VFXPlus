@@ -118,6 +118,7 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["distortIntensity"].SetValue(0.03f);
             */
 
+            
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/NebulaGalaxy", AssetRequestMode.ImmediateLoad).Value;
 
             myEffect.Parameters["zoom"].SetValue(40.0f);
@@ -125,22 +126,36 @@ namespace VFXPlus.Common.Drawing
 
             Vector4[] cols =
             {
-                new Color(23, 168, 209).ToVector4(),
-                new Color(244, 83, 251).ToVector4(),
+                new Color(23, 168, 209).ToVector4() * 1.5f,
+                new Color(244, 83, 251).ToVector4() * 1.5f,
             };
 
 
             Vector4[] cols2 =
             {
-                Color.Aqua.ToVector4()  * 1f,
-                Color.Aquamarine.ToVector4() * 0.75f,
-                Color.DeepSkyBlue.ToVector4() * 0.5f,
+                Color.Aqua.ToVector4()  * 0.85f,
+                Color.Aquamarine.ToVector4() * 0.65f,
+                Color.DeepSkyBlue.ToVector4() * 0.35f,
                 Color.DodgerBlue.ToVector4() * 0.25f
             };
 
             myEffect.Parameters["Colors"].SetValue(cols2);
             myEffect.Parameters["layers"].SetValue(cols2.Length);
+            
 
+            /*
+            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/Galaxy2", AssetRequestMode.ImmediateLoad).Value;
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+
+            myEffect.Parameters["NUM_LAYERS"].SetValue(8f);
+            myEffect.Parameters["Velocity"].SetValue(0.015f);
+            myEffect.Parameters["StarGlow"].SetValue(0.025f);
+            myEffect.Parameters["StarSize"].SetValue(2.0f);
+            myEffect.Parameters["Zoom"].SetValue(50.0f);
+
+            myEffect.Parameters["color1"].SetValue(new Color(51, 77, 230).ToVector3());
+            myEffect.Parameters["color2"].SetValue(new Color(0, 255, 228).ToVector3()); //            myEffect.Parameters["color2"].SetValue(new Color(230, 150, 230).ToVector3());
+            */
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
             Main.spriteBatch.Draw(renderTarget, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White);
