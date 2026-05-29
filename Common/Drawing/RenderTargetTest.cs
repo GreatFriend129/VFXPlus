@@ -23,6 +23,7 @@ namespace VFXPlus.Common.Drawing
     public class RendertargetTest : ModSystem
     {
         public RenderTarget2D renderTarget;
+        public RenderTarget2D outlineTarget;
 
         public override void Load()
         {
@@ -30,6 +31,7 @@ namespace VFXPlus.Common.Drawing
                 return;
 
             Main.QueueMainThreadAction(() => renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight));
+            Main.QueueMainThreadAction(() => outlineTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight));
 
             On_Main.CheckMonoliths += PrepareTarget;
             On_Main.DrawDust += DrawTarget;
@@ -61,7 +63,7 @@ namespace VFXPlus.Common.Drawing
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
 
-            Texture2D tex = CommonTextures.feather_circle128PMA.Value;
+            Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Circle").Value;
 
             Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
             int frameHeight = Smoke.Height / 64;
@@ -76,15 +78,16 @@ namespace VFXPlus.Common.Drawing
                 Rectangle sourceRectangle = Smoke.Frame(8, 8, startX, startY);
                 Vector2 origin = sourceRectangle.Size() / 2f;
 
-                Main.spriteBatch.Draw(Smoke, d.position - Main.screenPosition, sourceRectangle, Color.White, d.rotation, origin, d.scale, 0, 0);
+                //Main.spriteBatch.Draw(Smoke, (d.position - Main.screenPosition) * 0.5f, sourceRectangle, Color.White, d.rotation, origin, d.scale * 0.5f, 0, 0);
 
 
-                //Main.spriteBatch.Draw(tex, d.position - Main.screenPosition, null, Color.White, 0, tex.Size() / 2f, d.scale, 0, 0);
+                Main.spriteBatch.Draw(tex, (d.position - Main.screenPosition) * 0.5f, null, Color.White, 0, tex.Size() / 2f, d.scale * 0.5f, 0, 0);
             }
             Main.spriteBatch.End();
 
             Main.graphics.GraphicsDevice.SetRenderTargets(bindings);
 
+            //Draw shader to RT
 
             //Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
@@ -100,6 +103,7 @@ namespace VFXPlus.Common.Drawing
             orig(self);
 
             /*
+             * Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RadialScrollOneCol", AssetRequestMode.ImmediateLoad).Value;
 
             myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Starbasesnow").Value);
@@ -118,7 +122,7 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["distortIntensity"].SetValue(0.03f);
             */
 
-            
+            /*
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/NebulaGalaxy", AssetRequestMode.ImmediateLoad).Value;
 
             myEffect.Parameters["zoom"].SetValue(40.0f);
@@ -139,26 +143,34 @@ namespace VFXPlus.Common.Drawing
                 Color.DodgerBlue.ToVector4() * 0.25f
             };
 
-            myEffect.Parameters["Colors"].SetValue(cols2);
-            myEffect.Parameters["layers"].SetValue(cols2.Length);
-            
+            myEffect.Parameters["Colors"].SetValue(cols);
+            myEffect.Parameters["layers"].SetValue(cols.Length);
+            */
 
-            /*
+            Texture2D scroll1 = Mod.Assets.Request<Texture2D>("Assets/Smoke/SpaceDust1").Value;
+            Texture2D scroll2 = Mod.Assets.Request<Texture2D>("Assets/Smoke/SpaceDust2").Value;
+
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/Galaxy2", AssetRequestMode.ImmediateLoad).Value;
             myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+
+            myEffect.Parameters["ScrollTexture1"].SetValue(scroll1);
+            myEffect.Parameters["ScrollTexture2"].SetValue(scroll2);
+
 
             myEffect.Parameters["NUM_LAYERS"].SetValue(8f);
             myEffect.Parameters["Velocity"].SetValue(0.015f);
             myEffect.Parameters["StarGlow"].SetValue(0.025f);
-            myEffect.Parameters["StarSize"].SetValue(2.0f);
             myEffect.Parameters["Zoom"].SetValue(50.0f);
 
-            myEffect.Parameters["color1"].SetValue(new Color(51, 77, 230).ToVector3());
-            myEffect.Parameters["color2"].SetValue(new Color(0, 255, 228).ToVector3()); //            myEffect.Parameters["color2"].SetValue(new Color(230, 150, 230).ToVector3());
-            */
+            myEffect.Parameters["color1"].SetValue(new Color(51, 77, 230).ToVector4());
+            myEffect.Parameters["color2"].SetValue(new Color(0, 255, 228).ToVector4()); //            myEffect.Parameters["color2"].SetValue(new Color(230, 150, 230).ToVector3());
+            myEffect.Parameters["scrollColor1"].SetValue(new Color(51, 77, 230).ToVector4() * 1f);
+            myEffect.Parameters["scrollColor2"].SetValue(new Color(0, 255, 228).ToVector4() * 1f);
+
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.spriteBatch.Draw(renderTarget, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White);
+            //Main.spriteBatch.Draw(renderTarget, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White);
+            Main.spriteBatch.Draw(renderTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1f, 0, 0);
 
             Main.spriteBatch.End();
         }
