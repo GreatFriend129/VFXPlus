@@ -249,6 +249,7 @@ Projectiles: {
 	TitaniumSwingFX.DisplayName: Titanium Swing F X
 	BloodButchererSwingFXDrawn.DisplayName: Blood Butcherer Swing F X Drawn
 	BaseSwordProj.DisplayName: Base Sword Proj
+	GalaxyTest.DisplayName: Galaxy Test
 }
 
 Configs: {

@@ -40,8 +40,8 @@ namespace VFXPlus.Content.Dusts
             dust.position += dust.velocity;
             dust.position += dust.velocity;
 
-            //dust.velocity *= 0.97f;
-            //dust.scale *= 0.95f;
+            dust.velocity *= 0.95f; //0.95f
+            dust.scale *= 0.95f;
 
             if (dust.scale < 0.05f || behavoir.timer >= 100 || behavoir.animFrame >= 60)
             {

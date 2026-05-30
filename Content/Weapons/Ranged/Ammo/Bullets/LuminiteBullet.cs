@@ -57,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Color trailCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.4f) * 1f;
             trail1.trailColor = trailCol * totalAlpha * 1f;
-            trail1.timesToDraw = 2;
+            trail1.timesToDraw = 0;
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
@@ -65,6 +65,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailPos = projectile.Center + projectile.velocity;
             trail1.TrailLogic();
 
+
+            if (timer > 2)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    Dust daa = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RenderTargetDustTest>(), projectile.velocity * 0.5f, Scale: Main.rand.NextFloat(0.85f, 1.15f));
+                    daa.velocity = projectile.velocity.RotateRandom(0.2f) * Main.rand.NextFloat(0.85f, 1.15f);
+                }
+
+                //daa.rotation = projectile.velocity.ToRotation();
+            }
 
             if (timer > 0 && timer % 5 == 0 && Main.rand.NextBool(3))
             {
@@ -156,7 +167,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             //Dont draw on frame one
-            if (timer == 0)
+            if (timer == 0 || true)
                 return false;
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
@@ -185,7 +196,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
         Projectile proj = null;
         public void DrawAdditive(SpriteBatch sb)
         {
-            if (proj == null)
+            if (proj == null || true)
                 return;
 
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;

@@ -14,7 +14,6 @@ float4 color2;
 float4 scrollColor1;
 float4 scrollColor2;
 
-
 texture ScrollTexture1;
 sampler tex1Sampler = sampler_state
 {
@@ -80,27 +79,6 @@ float gtz(float input)
     return max(0, sign(input));
 }
 
-float check(float2 from)
-{
-    float2 DIRECTIONS[8];
-    DIRECTIONS[0] = float2(1.0, 0.0);
-    DIRECTIONS[1] = float2(0.0, 1.0);
-    DIRECTIONS[2] = float2(-1.0, 0.0);
-    DIRECTIONS[3] = float2(0.0, -1.0);
-    DIRECTIONS[4] = float2(1.0, 1.0);
-    DIRECTIONS[5] = float2(-1.0, -1.0);
-    DIRECTIONS[6] = float2(-1.0, 1.0);
-    DIRECTIONS[7] = float2(1.0, -1.0);
-    
-    float result = 0.0;
-    for (int i = 0; i < 8; i++)
-    {
-        result += tex2D(uImage0, from + DIRECTIONS[i] * 160.0).a;
-    }
-    return gtz(result);
-}
-
-
 float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
 {
 
@@ -117,7 +95,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
         float depth = frac(i + t);
         float scale = lerp(Zoom, .5, depth);
         float fade = depth * smoothstep(1., .9, depth);
-        col += StarLayer(uv * scale + i * 453.2 - progress * .05 + M) * fade;
+        col += StarLayer(uv * scale + i * 453.2 - progress * .05 + M) * fade * 1.5;
     }
     float4 toReturn = float4(col, 1.0);
 	
@@ -129,22 +107,6 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     toReturn += dustCol2 * scrollColor2;
 	
     toReturn *= pow(baseCol.a, 1.0);
-    
-    //toReturn = lerp(toReturn, float4(1.0, 1.0, 1.0, 1.0), check(uv) * (1.0 - gtz(baseCol.a)));
-    
-    float width = 0.003;
-    float4 outline_color = float4(1.0, 1.0, 1.0, 1.0);
-    
-    float4 line_neg_y = float4(outline_color.rgb, tex2D(uImage0, float2(uv.x, uv.y - width)).a);
-    float4 line_pos_y = float4(outline_color.rgb, tex2D(uImage0, float2(uv.x, uv.y + width)).a);
-    float4 line_neg_x = float4(outline_color.rgb, tex2D(uImage0, float2(uv.x - width, uv.y)).a);
-    float4 line_pos_x = float4(outline_color.rgb, tex2D(uImage0, float2(uv.x + width, uv.y)).a);
-    float4 outline_y = lerp(line_neg_y, line_pos_y, line_pos_y);
-    float4 outline_x = lerp(line_neg_x, line_pos_x, line_pos_x);
-    float4 outline = lerp(outline_y, outline_x, outline_x);
-    
-    toReturn = lerp(toReturn, outline, (1.0 - baseCol.a));
-    
     return toReturn;
 }
     
