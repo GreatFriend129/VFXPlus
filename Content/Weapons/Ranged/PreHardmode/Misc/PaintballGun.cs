@@ -646,8 +646,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
             Color purple3 = new Color(121, 7, 179);
 
-            if (timer == 0)
-                color = purple;
+            //if (timer == 0)
+            //    color = purple;
             
             float timeForPulse = 30f;
             float myProg = Utils.GetLerpValue(0f, timeForPulse, (float)timer, true);
@@ -721,7 +721,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             myEffect.Parameters["posterizationSteps"].SetValue(2.0f);
 
             myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha);
-            myEffect.Parameters["fadeStrength"].SetValue(1f); //.35
+            myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
 
 
             myEffect.Parameters["zoom"].SetValue(2f); //7f
@@ -733,7 +733,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
             float rot = (float)Main.timeForVisualEffects * 0.1f;
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 150 * new Vector2(0.35f, 0.8f) * overallScale, SpriteEffects.None, 0f); //150
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 150 * new Vector2(0.8f, 0.8f) * overallScale, SpriteEffects.None, 0f); //150 | 0.35 0.8
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);

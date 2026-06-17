@@ -13,6 +13,12 @@ float numberOfColors = 5;
 //Higher number = more zoomed out
 float zoom = 1.0;
 
+float screenWidth;
+float screenHeight;
+float width;
+float height;
+float2 offset;
+
 // Get random value
 float random(in float2 st)
 {

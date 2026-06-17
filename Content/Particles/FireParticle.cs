@@ -117,7 +117,7 @@ namespace VFXPlus.Content.Particles
                 Vector2 drawPos = Center - Main.screenPosition;
 
                 Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
-                Main.spriteBatch.Draw(Ball, drawPos, null, myColor with { A = 0 } * Easings.easeInSine(Alpha) * 0.25f * BloomAlpha, Rotation, Ball.Size() / 2f, Scale * 0.435f, 0, 0f); //0.3
+                Main.spriteBatch.Draw(Ball, drawPos, null, myColor with { A = 50 } * Easings.easeInSine(Alpha) * 0.25f * BloomAlpha, Rotation, Ball.Size() / 2f, Scale * 0.435f, 0, 0f); //0.3
             });
         }
 

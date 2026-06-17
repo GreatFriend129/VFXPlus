@@ -250,6 +250,8 @@ Projectiles: {
 	BloodButchererSwingFXDrawn.DisplayName: Blood Butcherer Swing F X Drawn
 	BaseSwordProj.DisplayName: Base Sword Proj
 	GalaxyTest.DisplayName: Galaxy Test
+	LunarCrack.DisplayName: Lunar Crack
+	PinkCrack.DisplayName: Pink Crack
 }
 
 Configs: {

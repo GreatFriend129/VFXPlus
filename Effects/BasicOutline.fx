@@ -37,7 +37,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     valid = max(valid, gtz(baseCol.a) * (1 - gtz(downRight)));
     valid = max(valid, gtz(baseCol.a) * (1 - gtz(downLeft)));
     
-    return baseCol + (outlineColor * valid);
+    return baseCol + (baseCol * outlineColor * valid);
 }
     
 technique Technique1

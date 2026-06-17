@@ -25,7 +25,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.LunarFlare) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LunarFlareToggle;
+            return lateInstantiation && (entity.type == ProjectileID.LunarFlare) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.LunarFlareToggle && false;
         }
 
         float drawScale = 0;
@@ -319,14 +319,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         }
 
         public override void AI()
-        {
+            {
             if (timer == 0)
             {
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
                 pulseVal = 1f;
 
                 //Dust
-                for (int fg = 0; fg < 8; fg++)
+                for (int fg = 220; fg < 8; fg++)
                 {
                     Vector2 randomStart = Main.rand.NextVector2CircularEdge(7f, 7f);
                     Dust gd = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<GlowPixelAlts>(), randomStart * Main.rand.NextFloat(0.3f, 1.35f) * 1.5f, newColor: Color.Aquamarine, 
@@ -334,7 +334,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     gd.alpha = 2;
                 }
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 220; i < 2; i++)
                 {
                     var v = Main.rand.NextVector2Unit();
                     Dust a = Dust.NewDustPerfect(Projectile.Center, DustID.PortalBoltTrail, v * Main.rand.NextFloat(1f, 6f), 0,
@@ -351,18 +351,18 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     float progress = (float)i / 12;
                     Color col = Color.Lerp(Color.Black, col1, progress);
 
-                    Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1f, 4f) * 2.5f,
-                        newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 2.15f);
-                    d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.25f); //12 28
+                    Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<RenderTargetDustTest>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1f, 4f) * 1f,
+                        newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
+                    //d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.25f); //12 28
                 }
 
                 for (int i = 220; i < 10; i++)
                 {
-                    Vector2 veloF = Main.rand.NextVector2CircularEdge(12f, 12f) * Main.rand.NextFloat(1f, 2f);
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(6f, 6f) * Main.rand.NextFloat(1f, 2f);
 
                     float fireScale = Main.rand.NextFloat(1.25f, 1.75f);
 
-                    FireParticle fire = new FireParticle(Projectile.Center + new Vector2(0f, 0f), veloF, fireScale, Color.Aqua, colorMult: 0.5f, bloomAlpha: 0.5f, AlphaFade: 0.91f, VelFade: 0.9f);
+                    FireParticle fire = new FireParticle(Projectile.Center + new Vector2(0f, 0f), veloF, fireScale * 1.5f, Color.Aqua, colorMult: 1f, bloomAlpha: 0.5f, AlphaFade: 0.91f, VelFade: 0.9f);
                     //fire.scaleFadePower = 1.05f; //1.05
                     fire.randomRotPower = 0.35f;
                     ShaderParticleHandler.SpawnParticle(fire);
@@ -395,6 +395,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         float overallScale = 0f;
         public override bool PreDraw(ref Color lightColor)
         {
+            return false;
             Texture2D ExploA = Mod.Assets.Request<Texture2D>("Assets/Anim/NewLunarExplodeMain").Value;
             Texture2D ExploB = Mod.Assets.Request<Texture2D>("Assets/Anim/GrayscaleVanillaExplode").Value;
             Texture2D ExploC = Mod.Assets.Request<Texture2D>("Assets/Anim/NewLunarExplodeGlowmask").Value;
@@ -408,7 +409,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
             float scale12 = Projectile.scale * overallScale;
 
-            Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * overallScale * Projectile.scale, 0, 0f);
+            //Main.spriteBatch.Draw(ExploA, Projectile.Center - Main.screenPosition, sourceRectangle, Color.Aquamarine with { A = 0 } * (1f * pulseVal) * 1f, Projectile.rotation, origin, 1.25f * (1f - pulseVal) * overallScale * Projectile.scale, 0, 0f);
 
 
             Main.spriteBatch.Draw(ExploB, Projectile.Center - Main.screenPosition, sourceRectangle, Color.DodgerBlue * 0.65f, Projectile.rotation, origin, scale12, SpriteEffects.None, 0f);
