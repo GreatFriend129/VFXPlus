@@ -114,7 +114,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
         float fade = depth * smoothstep(1., .9, depth);
         col += StarLayer(uv * scale + i * 453.2 - progress * .05 + M) * fade * 1.5;
     }
-    float4 toReturn = float4(col * 0.0, 1.0);
+    float4 toReturn = float4(col * 1.0, 1.0);
 	
     float4 dustCol1 = tex2D(tex1Sampler, (uv * 3.0) + M2);
     float4 dustCol2 = tex2D(tex2Sampler, uv + M2 * 2);

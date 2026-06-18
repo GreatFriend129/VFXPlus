@@ -319,7 +319,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
         }
 
         public override void AI()
-            {
+        {
             if (timer == 0)
             {
                 Projectile.rotation = Main.rand.NextFloat(6.28f);
@@ -352,7 +352,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     Color col = Color.Lerp(Color.Black, col1, progress);
 
                     Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<RenderTargetDustTest>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(1f, 4f) * 1f,
-                        newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
+                        newColor: col with { A = 0 } * 0.5f, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.85f);
                     //d.customData = new MediumSmokeBehavior(Main.rand.Next(4, 18), 0.98f, 0.01f, 0.25f); //12 28
                 }
 

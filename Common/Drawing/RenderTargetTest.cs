@@ -69,7 +69,7 @@ namespace VFXPlus.Common.Drawing
             Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Circle").Value;
             //Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/StarlightNoGlow").Value;
 
-            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/smokeFlipbook1k").Value;
+            Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/SmokeFull1k").Value; //SmokeFull1k |smokeFlipbook1k
             int frameHeight = Smoke.Height / 64;
             int frameWidth = Smoke.Width / 64;
 
@@ -118,11 +118,11 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["offset"].SetValue(Main.LocalPlayer.position * 0.11f);
             */
             
-            Texture2D scroll1 = Mod.Assets.Request<Texture2D>("Assets/Starbasesnow").Value; //Starbasesnow
+            Texture2D scroll1 = Mod.Assets.Request<Texture2D>("Assets/Crack/LunarSpaceDust1").Value; //Starbasesnow
             Texture2D scroll2 = Mod.Assets.Request<Texture2D>("Assets/Crack/LunarSpaceDust1").Value;
 
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/Galaxy2", AssetRequestMode.ImmediateLoad).Value;
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.05f);//.02
             myEffect.Parameters["offset"].SetValue(Main.LocalPlayer.position * 0.11f);
 
             myEffect.Parameters["ScrollTexture1"].SetValue(scroll1);
@@ -135,10 +135,12 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["Zoom"].SetValue(50.0f);
 
             Color starCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.35f);
+            //Color starCol = Color.Lerp(Color.DeepPink, Color.HotPink, 1f);
+
 
             myEffect.Parameters["color1"].SetValue(starCol.ToVector4() * 0.25f);
             myEffect.Parameters["color2"].SetValue(starCol.ToVector4() * 1f);
-            myEffect.Parameters["scrollColor1"].SetValue(Color.White.ToVector4() * 0.35f * 2.5f);
+            myEffect.Parameters["scrollColor1"].SetValue(Color.White.ToVector4() * 0.35f * 2.5f * 0.75f);
             myEffect.Parameters["scrollColor2"].SetValue(Color.White.ToVector4() * 1f * 1f);
             
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.EffectMatrix);
@@ -158,7 +160,7 @@ namespace VFXPlus.Common.Drawing
 
             Effect myEffect2 = ModContent.Request<Effect>("VFXPlus/Effects/BasicOutline", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect2.Parameters["outlineColor"].SetValue(Color.White.ToVector4()); //DeepPink
+            myEffect2.Parameters["outlineColor"].SetValue(Color.White.ToVector4() * 1f); //DeepPink
             myEffect2.Parameters["outlineThickness"].SetValue(2f); //2f
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect2, Main.GameViewMatrix.EffectMatrix);
