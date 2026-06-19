@@ -252,6 +252,7 @@ Projectiles: {
 	GalaxyTest.DisplayName: Galaxy Test
 	LunarCrack.DisplayName: Lunar Crack
 	PinkCrack.DisplayName: Pink Crack
+	LunarBulletTest.DisplayName: Lunar Bullet Test
 }
 
 Configs: {

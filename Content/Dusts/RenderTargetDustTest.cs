@@ -20,8 +20,8 @@ namespace VFXPlus.Content.Dusts
 		{
             RenderTargetDustBehavoir behavoir = (RenderTargetDustBehavoir)dust.customData;
 
-            //if (behavoir.timer == 0)
-            //    dust.rotation = Main.rand.NextFloat(6.28f);
+            if (behavoir.timer == 0)
+                dust.rotation = Main.rand.NextFloat(6.28f);
 
             //Frame
             behavoir.animFrameTimer++;
@@ -30,7 +30,12 @@ namespace VFXPlus.Content.Dusts
                 behavoir.animFrameTimer = 0;
                 behavoir.animFrame = (behavoir.animFrame + 1) % 64;
                 behavoir.animFrame = (behavoir.animFrame + 1) % 64;
-                behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+                //behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+
+                if (Main.rand.NextBool())
+                {
+                    behavoir.animFrame = (behavoir.animFrame + 1) % 64;
+                }
 
                 if (Main.rand.NextBool(3))
                 {

@@ -15,6 +15,7 @@ using System.Threading;
 using ReLogic.Content;
 using VFXPlus.Common.Interfaces;
 using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 
 #endregion
 
@@ -66,7 +67,8 @@ namespace VFXPlus.Common.Drawing
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.EffectMatrix);
 
-            Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Circle").Value;
+            //Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Circle").Value;
+            Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
             //Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/StarlightNoGlow").Value;
 
             Texture2D Smoke = Mod.Assets.Request<Texture2D>("Assets/Smoke/SmokeFull1k").Value; //SmokeFull1k |smokeFlipbook1k
@@ -86,8 +88,18 @@ namespace VFXPlus.Common.Drawing
                 //Main.spriteBatch.Draw(Smoke, (d.position - Main.screenPosition) * 1f, sourceRectangle, Color.White, d.rotation, origin, d.scale * 1f, 0, 0);
 
 
-                Main.spriteBatch.Draw(tex, (d.position - Main.screenPosition) * 1f, null, Color.White, d.rotation, tex.Size() / 2f, new Vector2(1.25f, d.scale * 0.5f) * 1f, 0, 0);
+                //Main.spriteBatch.Draw(tex, (d.position - Main.screenPosition) * 1f, null, Color.White, d.rotation, tex.Size() / 2f, new Vector2(1.25f, d.scale * 0.5f) * 1f, 0, 0);
+                Main.spriteBatch.Draw(tex, (d.position - Main.screenPosition) * 1f, null, Color.White, d.rotation, tex.Size() / 2f, d.scale * 1f, 0, 0);
+
+                Main.spriteBatch.Draw(tex, (d.position - Main.screenPosition) * 1f, null, Color.White, d.rotation, tex.Size() / 2f, d.scale * 1f, 0, 0);
             }
+
+            foreach (Projectile p in Main.projectile.Where(p => p.type == ModContent.ProjectileType<LunarBulletTest>() && p.active))
+            {
+
+                (p.ModProjectile as LunarBulletTest).DrawVertexTrail(false);
+            }
+
             Main.spriteBatch.End();
 
             Main.graphics.GraphicsDevice.SetRenderTargets(bindings);
@@ -131,7 +143,7 @@ namespace VFXPlus.Common.Drawing
 
             myEffect.Parameters["NUM_LAYERS"].SetValue(8f);
             myEffect.Parameters["Velocity"].SetValue(0.015f);
-            myEffect.Parameters["StarGlow"].SetValue(0.015f); //0.025 |5
+            myEffect.Parameters["StarGlow"].SetValue(0.03f); //0.015 |5
             myEffect.Parameters["Zoom"].SetValue(50.0f);
 
             Color starCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.35f);
@@ -160,8 +172,8 @@ namespace VFXPlus.Common.Drawing
 
             Effect myEffect2 = ModContent.Request<Effect>("VFXPlus/Effects/BasicOutline", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect2.Parameters["outlineColor"].SetValue(Color.White.ToVector4() * 1f); //DeepPink
-            myEffect2.Parameters["outlineThickness"].SetValue(2f); //2f
+            myEffect2.Parameters["outlineColor"].SetValue(Color.White.ToVector4() * 2f); //DeepPink
+            myEffect2.Parameters["outlineThickness"].SetValue(2f  * 0f); //2f
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect2, Main.GameViewMatrix.EffectMatrix);
 

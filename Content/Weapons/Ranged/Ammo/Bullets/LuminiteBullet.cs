@@ -46,18 +46,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 trailRandomLengthOffset = Main.rand.Next(0, 35);
                 randomTrailSpeed = Main.rand.NextFloat(0.85f, 1.15f);
             }
-            Color trailCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.4f) * 1f;
+            //Color trailCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.4f) * 1f;
 
+            Color trailCol = Color.Lerp(Color.SkyBlue, Color.Aqua, 0.4f) * 1f;
 
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 150 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(10 * totalAlpha * totalScale); //15
+            trail1.trailWidth = (int)(10 * totalAlpha * totalScale); //10
             trail1.trailMaxLength = 300 + trailRandomLengthOffset;
 
             trail1.shouldSmooth = false;
 
-            trail1.trailColor = trailCol with { A = 50 } * totalAlpha * 0.7f * 1f;
+            trail1.trailColor = trailCol with { A = 50 } * totalAlpha * 0.6f * 1f;
             trail1.timesToDraw = 1;
             trail1.useEffectMatrix = true;
             trail1.pinchHead = true;
@@ -87,7 +88,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Vector2 pos = projectile.Center + new Vector2(-projectile.velocity.Length() * 3f, Main.rand.NextFloat(-10f, 10f)).RotatedBy(rot);
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(10f, 18f);
 
-                Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<WindLine>(), vel, newColor: Color.DeepSkyBlue, Scale: Main.rand.NextFloat(0.65f, 0.85f));
+                Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<WindLine>(), vel, newColor: trailCol, Scale: Main.rand.NextFloat(0.65f, 0.85f));
 
                 int KillEarlyTime = Main.rand.Next(8, 14);
 
@@ -97,7 +98,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 dp.customData = wlb;
             }
 
-            if (timer > 2)
+            if (timer > 2 && false)
             {
                 for (int i = 0; i < 1; i++)
                 {
@@ -250,7 +251,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
         public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
         {
-            Color trailCol = Color.Lerp(Color.SkyBlue, Color.DeepSkyBlue, 0.5f);
+            Color trailCol = Color.Lerp(Color.SkyBlue, Color.Aqua, 0.5f);
             //for (int i = 0; i < 3 + Main.rand.Next(0, 3); i++) //2 //0,3
             //{
             //    Vector2 pos = projectile.Center;
@@ -262,13 +263,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //        1.15f, 0.75f); //80
             //}
 
-            for (int i = 20; i < 2 + Main.rand.Next(0, 3); i++) //2 //0,3
+            for (int i = 0; i < 6 + Main.rand.Next(0, 3); i++) //2 //0,3
             {
-                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.4f, 0.4f)) * Main.rand.NextFloat(5f, 15f);
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(Main.rand.NextFloat(-0.1f, 0.1f)) * Main.rand.NextFloat(5f, 15f);
 
-                Dust dp = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<MuraLineBasic>(), vel * -0.5f, newColor: trailCol, Scale: Main.rand.NextFloat(0.3f, 0.65f) * 0.65f);
-                dp.alpha = 10 + Main.rand.Next(-5, 5);
-
+                Dust dp = Dust.NewDustPerfect(projectile.Center + projectile.velocity, ModContent.DustType<RenderTargetDustTest>(), vel * -0.5f, newColor: trailCol, Scale: 0.65f);
+                dp.position += dp.velocity;
             }
 
             base.OnHitNPC(projectile, target, hit, damageDone);
@@ -283,5 +283,123 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
 
     }
+
+    public class LunarBulletTest : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = true;
+            Projectile.friendly = false;
+
+            Projectile.tileCollide = false;
+            Projectile.timeLeft = 2250; //180
+            Projectile.extraUpdates = 2;
+        }
+
+
+
+        int timer = 0;
+        public float overallAlpha = 1f;
+        public float overallScale = 1f;
+
+        public override void AI()
+        {
+            int trailCount = 40;  //60
+            Vector2 trailPos = Projectile.Center + Projectile.velocity;
+            previousRotations.Add(Projectile.velocity.ToRotation()); //
+            previousPositions.Add(trailPos);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            float timeForPopInAnim = 23; //33
+            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1f;
+
+            timer++;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(ref Color lightColor)
+        {
+            
+            return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawVertexTrail(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/ThinnerGlowTrailClear").Value; //
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("Playground/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+
+            float sineWidthMult = 1f;// 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.3f) * 0.1f;
+
+
+            Color StripColor(float progress) => Color.White;
+
+            float StripWidth(float progress)
+            {
+                float toReturn = 0f;
+                if (progress < 0.85f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
+                    toReturn = Easings.easeInOutSine(LV);
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
+                    toReturn = Easings.easeOutSine(1f - LV);
+                }
+
+                return toReturn * sineWidthMult * overallScale * 20f;
+            }
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            //VertexStrip vertexStrip = new VertexStrip();
+            //VertexStrip vertexStrip2 = new VertexStrip();
+
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(0f); //0.02
+            myEffect.Parameters["reps"].SetValue(1f);
+            myEffect.Parameters["posterizationSteps"].SetValue(0.0f);
+
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["ColorOne"].SetValue(Color.White.ToVector3());
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+            vertexStrip.DrawTrail();
+
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+        }
+
+    }
+
 
 }
