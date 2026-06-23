@@ -1,8 +1,11 @@
-sampler uImage0 : register(s0);
+sampler2D uImage0 : register(s0);
 
 float progress = 0.0;
 float posterizationSteps = 4.0;
-float zoom;
+float zoom1;
+float zoom2;
+
+
 
 float screenWidth;
 float screenHeight;
@@ -11,17 +14,19 @@ float height;
 float2 offset;
 
 texture ScrollTexture1;
-sampler tex1Sampler = sampler_state
+sampler2D tex1Sampler = sampler_state
 {
-    Texture = (ScrollTexture1);
+    Filter = MIN_MAG_MIP_POINT;
+    Texture = <ScrollTexture1>;
     AddressU = Wrap;
     AddressV = Wrap;
 };
 
 texture ScrollTexture2;
-sampler tex2Sampler = sampler_state
+sampler2D tex2Sampler = sampler_state
 {
-    Texture = (ScrollTexture2);
+    Filter = MIN_MAG_MIP_POINT;
+    Texture = <ScrollTexture2>;
     AddressU = Wrap;
     AddressV = Wrap;
 };
@@ -67,25 +72,51 @@ float3 Posterize(float3 inputCol)
 float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
 {
     float2 uv = screenSpace.xy;
-    uv.x *= 1.875;
-    uv.y *= 1.055;
+    
+    float4 baseCol = tex2D(uImage0, screenSpace.xy);
+
+    float2 NebulaUV = float2(uv.x + sin(progress * 0.07), uv.y - cos(progress * 0.07)); //44
+    float4 NebulaCol = tex2D(tex1Sampler, NebulaUV * zoom1);
+    
+    float2 PlanetsUV = float2(uv.x + sin(progress * 0.04), uv.y - cos(progress * 0.04)); //44
+    float4 PlanetsCol = tex2D(tex2Sampler, PlanetsUV * zoom2);
+    
+    float4 trueCol = PlanetsCol;//
+    
+    if (PlanetsCol.a == 0)
+        trueCol += NebulaCol;
+    
+    trueCol.rgb = Posterize(trueCol.rgb);
+    return float4(trueCol.rgb, 1.0) * baseCol.a;
+
+    
+    
+    
+    
+    
+    
+    
+    //uv.x *= 1.875;
+    //uv.y *= 1.055;
     //uv.x *= screenWidth / 1024;
     //uv.y *= screenHeight / 1024;
     
-    float2 newOffset = offset;
+    //float2 newOffset = offset;
 
-    newOffset.x /= 1024;
-    newOffset.y /= 1024;
-    newOffset += float2(cos(progress * 0.05), sin(progress * 0.05)) * 0.25;
+    //newOffset.x /= 1024;
+    //newOffset.y /= 1024;
+    //newOffset += float2(cos(progress * 0.05), sin(progress * 0.05)) * 0.25;
     
-    uv = uv + newOffset;
-    uv = uv % 1;
-    
+    //uv = uv + newOffset;
+    //uv = uv % 1;
+    /*
     float4 baseCol = tex2D(uImage0, screenSpace.xy);
     	
     float2 M = float2(0.0, 0.0);
-    M -= float2(M.x + sin(progress * 0.22), M.y - cos(progress * 0.22));
-    M *= 0;
+    M -= float2(M.x + sin(progress * 0.22), M.y - cos(progress * 0.22)); //44
+    
+    float2 M2 = float2(0.0, 0.0);
+    M2 -= float2(M2.x + sin(progress * 0.04), M2.y - cos(progress * 0.04));
     
     float4 dustCol1 = tex2D(tex1Sampler, (uv * zoom) + M) * 0.75;
     float val1 = (dustCol1.rgb) / 3.0;
@@ -97,11 +128,11 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     float val2 = (dustCol2.rgb) / 3.0;
     float3 dustCol2bright = dustCol2.rgb + (val2 > 0.4 ? ((val2 - 0.4) * 2.5) : float3(0, 0, 0));
     
-    float3 combined = dustCol1 * 2.0;//    +dustCol2bright;
-    //combined = Posterize(combined);
+    float3 combined = dustCol1 * 1.5;//    +dustCol2bright;
+    combined = Posterize(combined);
     
-    return float4(combined, 1.0) * baseCol.a;
-
+    return float4(combined * baseCol.a, 1.0) * baseCol.a;
+    */
 }
     
 technique Technique1

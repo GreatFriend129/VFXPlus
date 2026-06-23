@@ -17,17 +17,17 @@ float4 scrollColor2;
 float2 offset;
 
 texture ScrollTexture1;
-sampler tex1Sampler = sampler_state
+sampler2D tex1Sampler = sampler_state
 {
-    Texture = (ScrollTexture1);
+    Texture = <ScrollTexture1>;
     AddressU = Wrap;
     AddressV = Wrap;
 };
 
 texture ScrollTexture2;
-sampler tex2Sampler = sampler_state
+sampler2D tex2Sampler = sampler_state
 {
-    Texture = (ScrollTexture2);
+    Texture = <ScrollTexture2>;
     AddressU = Wrap;
     AddressV = Wrap;
 };
@@ -88,6 +88,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     float2 uv = screenSpace.xy;
     float4 baseCol = tex2D(uImage0, uv);
     
+    
     float2 newOffset = offset;
 
     newOffset.x /= 1024;
@@ -97,7 +98,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     
     
     float2 M = float2(0.0, 0.0);
-    M -= float2(M.x + sin(progress * 0.44), M.y - cos(progress * 0.44));
+    M -= float2(M.x + sin(progress * 0.22), M.y - cos(progress * 0.22)); //44
     
     float2 M2 = float2(0.0, 0.0);
     M2 -= float2(M2.x + sin(progress * 0.04), M2.y - cos(progress * 0.04));
@@ -112,16 +113,16 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
         float depth = frac(i);
         float scale = lerp(Zoom, .5, depth);
         float fade = depth * smoothstep(1., .9, depth);
-        col += StarLayer(uv * scale + i * 453.2 - progress * .05 + M) * fade * 1.5;
+        col += StarLayer(screenSpace.xy * scale + i * 453.2 - progress * .05 + M) * fade * 1.5;
     }
     float4 toReturn = float4(col * 1.0, 1.0);
-	
+	    
     float4 dustCol1 = tex2D(tex1Sampler, (uv * 3.0) + M2);
-    float4 dustCol2 = tex2D(tex2Sampler, uv + M2 * 2);
+    float4 dustCol2 = tex2D(tex2Sampler, (uv * 3.0) + M * 0.2);
     
 
-    toReturn += dustCol1 * scrollColor1 * 1.5;
-    //toReturn += dustCol2 * scrollColor2 * 1.5;
+    toReturn += dustCol1 * scrollColor1 * 1;//1.25 | 1.5 star
+    //toReturn += dustCol2 * scrollColor2 * 1.25;
 	
     toReturn *= pow(baseCol.a, 1.0);
     return toReturn;

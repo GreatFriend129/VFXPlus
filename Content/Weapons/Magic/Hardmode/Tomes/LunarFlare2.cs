@@ -208,7 +208,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 return;
 
             Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine3").Value; //ThinGlowLine3
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LavaTrailV1").Value; //RL3
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/LintyTrail").Value; //RL3
             //Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Lightning5").Value; //
 
 
@@ -257,7 +257,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * overallScale * 25; //30
+                return toReturn * overallScale * 9; //30
             }
 
 

@@ -3,6 +3,9 @@ sampler uImage0 : register(s0);
 float4 outlineColor;
 float outlineThickness;
 
+bool blendBorder = true;
+
+
 // returns 1 if input > 0, else 0
 float gtz(float input)
 {
@@ -37,6 +40,9 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     valid = max(valid, gtz(baseCol.a) * (1 - gtz(downRight)));
     valid = max(valid, gtz(baseCol.a) * (1 - gtz(downLeft)));
     
+    if (valid == 1 && !blendBorder)
+        return (outlineColor * valid);
+    return baseCol;
     return baseCol + (baseCol * outlineColor * valid);
 }
     

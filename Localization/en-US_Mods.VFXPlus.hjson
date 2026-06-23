@@ -253,6 +253,7 @@ Projectiles: {
 	LunarCrack.DisplayName: Lunar Crack
 	PinkCrack.DisplayName: Pink Crack
 	LunarBulletTest.DisplayName: Lunar Bullet Test
+	LuminiteBulletTrail.DisplayName: Luminite Bullet Trail
 }
 
 Configs: {

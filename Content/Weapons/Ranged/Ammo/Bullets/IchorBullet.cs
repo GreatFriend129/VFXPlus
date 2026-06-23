@@ -60,7 +60,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.fadeOut = true;
 
             Color darkerGoldenrod = Color.Lerp(Color.OrangeRed, Color.Orange, 0.8f); //9
-            trail1.trailColor = darkerGoldenrod with { A = 50 } * totalAlpha; //Color.DarkGoldenrod
+            trail1.trailColor = darkerGoldenrod with { A = 75 } * totalAlpha * 0.8f; //Color.DarkGoldenrod
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);

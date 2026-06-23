@@ -50,13 +50,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             }
 
             //Trail1 Info Dump
-            trail1.trailTexture = CommonTextures.Extra_196_Black.Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
+
             trail1.trailPointLimit = 120 + trailRandomLengthOffset;
             trail1.trailWidth = (int)(10 * totalAlpha);
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = new Color(255, 111, 20) with { A = 50 } * totalAlpha * 1f;
+            trail1.trailColor = new Color(255, 111, 20) with { A = 75 } * totalAlpha * 0.5f;
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.04f * randomTrailSpeed); //0.05
@@ -154,11 +155,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
 
-                Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
+                Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.45f;
 
                 drawPos += new Vector2(0f, 0f);
                 Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.55f, SpriteEffects.None, 0f);
             });
 
             return false;
