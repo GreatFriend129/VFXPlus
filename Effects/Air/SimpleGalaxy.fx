@@ -5,6 +5,8 @@ float zoom1;
 
 float2 offset;
 
+float4 exceptionColor;
+
 texture ScrollTexture1;
 sampler2D tex1Sampler = sampler_state
 {
@@ -56,6 +58,13 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     
     //if (OverCol.a == 0)
     //    trueCol += OverCol;
+    
+    //return baseCol * (1.0 - baseCol.g);
+    
+    if (baseCol.a * (1.0 - baseCol.g) > 0.0)
+    {
+        return float4(exceptionColor.rgb, 1.0) * baseCol.a;
+    }
     
     return float4(trueCol.rgb, 1.0) * baseCol.a;
 

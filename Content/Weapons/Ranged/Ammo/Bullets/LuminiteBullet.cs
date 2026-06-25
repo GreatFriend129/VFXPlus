@@ -679,6 +679,16 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
+            if (timer > 4 && (timer % 3 == 0 && Main.rand.NextBool(2)))
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
+
+                Dust d = Dust.NewDustPerfect(Projectile.Center, ModContent.DustType<RenderTargetDustTest>(), vel, newColor: Color.Aqua, Scale: Main.rand.NextFloat(0.35f, 0.45f) * 1f);
+                d.velocity -= Projectile.velocity.RotatedByRandom(0.1f) * 0.75f;
+                d.velocity *= 0.35f;
+
+            }
+
             float timeForPopInAnim = 23; //33
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
 
