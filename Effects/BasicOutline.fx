@@ -42,7 +42,6 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     
     if (valid == 1 && !blendBorder)
         return (outlineColor * valid);
-    return baseCol;
     return baseCol + (baseCol * outlineColor * valid);
 }
     

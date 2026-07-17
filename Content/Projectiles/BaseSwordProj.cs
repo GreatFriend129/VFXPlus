@@ -157,12 +157,13 @@ namespace VFXPlus.Content.Projectiles
             if (timer == 0 || player.itemAnimation <= 1)
                 return false;
 
+            Color thisLightColor = lightColor;
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                DrawTrail(false, thisLightColor);
             });
-            DrawTrail(true);
+            DrawTrail(true, thisLightColor);
 
 
             //Debug
@@ -190,7 +191,7 @@ namespace VFXPlus.Content.Projectiles
         }
 
         float trailWidth = 1f;
-        public void DrawTrail(bool giveUp = false)
+        public void DrawTrail(bool giveUp, Color lightColor)
         {
             if (giveUp)
                 return;
@@ -245,7 +246,7 @@ namespace VFXPlus.Content.Projectiles
             VertexStripFixed vertexStrip = new VertexStripFixed();
 
             float StripWidth(float progress) => info.trailWidth;
-            Color StripColor(float progress) => Color.White;
+            Color StripColor(float progress) => lightColor;
 
 
             vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
@@ -321,7 +322,7 @@ namespace VFXPlus.Content.Projectiles
             finalColMult = 1f;
             totalMult = 1f;
 
-            trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/SwordSmear1").Value;
+            trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/SwordSmear").Value;
             noiseTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Trail_2").Value;
             flowTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Test/T_Random_54Stretch").Value;
         }

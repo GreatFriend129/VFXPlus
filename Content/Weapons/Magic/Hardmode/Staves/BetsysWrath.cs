@@ -183,7 +183,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             if (giveUp)
                 return;
 
-            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/FireBallBlur").Value;
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
             Texture2D FireBallPixel = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
             Texture2D Glow = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
 
@@ -195,13 +195,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Color betweenGold = Color.Lerp(Color.Gold, Color.OrangeRed, 0.6f);//0.75
 
             Vector2 off = rot.ToRotationVector2() * -10f * totalScale;
-            Main.EntitySpriteDraw(Glow, drawPos, null, Color.OrangeRed with { A = 0 } * overallAlpha * 0.2f, rot + MathHelper.PiOver2, Glow.Size() / 2f, totalScale * 1.3f, SpriteEffects.None);
+            Main.EntitySpriteDraw(Glow, drawPos, null, Color.OrangeRed with { A = 45 } * overallAlpha * 0.15f, rot + MathHelper.PiOver2, Glow.Size() / 2f, totalScale * 1f, SpriteEffects.None);
 
 
             Color outerCol = Color.Orange * 0.4f;
             for (int i = 0; i < 1; i++)
             {
-                Main.EntitySpriteDraw(FireBall, drawPos + off, null, outerCol with { A = 0 } * overallAlpha, rot + MathHelper.PiOver2, FireBall.Size() / 2f, totalScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, drawPos + off, null, outerCol with { A = 45 } * overallAlpha, rot + MathHelper.PiOver2, FireBall.Size() / 2f, totalScale, SpriteEffects.None);
             }
 
             #region after image
@@ -219,21 +219,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Color col = Color.Lerp(Color.Purple * 3f, betweenGold, Easings.easeOutQuad(progress)) * progress * 0.7f;
 
                 Vector2 size2 = (1f - (progress * 0.15f)) * totalScale;
-                Main.EntitySpriteDraw(FireBallPixel, pos + Main.rand.NextVector2Circular(10f, 10f) * (1f - progress), null, col with { A = 0 } * 0.85f * overallAlpha * colVal,
+                Main.EntitySpriteDraw(FireBallPixel, pos + Main.rand.NextVector2Circular(10f, 10f) * (1f - progress), null, col with { A = 45 } * 0.85f * overallAlpha * colVal,
                         previousRotations[i] + MathHelper.PiOver2, FireBallPixel.Size() / 2f, size2, SpriteEffects.None);
 
                 Vector2 vec2Scale = new Vector2(0.25f, 1.15f) * size;
 
-                Main.EntitySpriteDraw(FireBall, pos + Main.rand.NextVector2Circular(0f, 0f) * (1f - progress), null, col with { A = 0 } * 1.25f * overallAlpha * colVal,
+                Main.EntitySpriteDraw(FireBall, pos + Main.rand.NextVector2Circular(0f, 0f) * (1f - progress), null, col with { A = 45 } * 1.25f * overallAlpha * colVal,
                         previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, vec2Scale * 1.5f, SpriteEffects.None);
             }
             #endregion
 
             Vector2 v2scale = new Vector2(1f, 1f);
 
-            Main.EntitySpriteDraw(FireBall, drawPos + off + off + Main.rand.NextVector2Circular(2f, 2f), null, betweenGold with { A = 0 } * overallAlpha * 0.75f, rot + MathHelper.PiOver2, FireBall.Size() / 2f, totalScale * v2scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(FireBall, drawPos + off + off + Main.rand.NextVector2Circular(2f, 2f), null, betweenGold with { A = 45 } * overallAlpha * 0.75f, rot + MathHelper.PiOver2, FireBall.Size() / 2f, totalScale * v2scale, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(FireBall, drawPos + off, null, Color.White with { A = 0 } * overallAlpha, rot + MathHelper.PiOver2, FireBall.Size() / 2f, v2scale * totalScale * 0.6f, SpriteEffects.None);
+            Main.EntitySpriteDraw(FireBall, drawPos + off, null, Color.White with { A = 45 } * overallAlpha, rot + MathHelper.PiOver2, FireBall.Size() / 2f, v2scale * totalScale * 0.6f, SpriteEffects.None);
 
         }
 

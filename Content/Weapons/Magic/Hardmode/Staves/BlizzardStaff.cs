@@ -170,7 +170,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
 
-            Texture2D line = CommonTextures.SoulSpike.Value;
+            Texture2D line = CommonTextures.SoulSpikePMA.Value;
 
             Color between = Color.Lerp(Color.LightSkyBlue, Color.SkyBlue, 0.75f);
             Color between2 = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 1f);
@@ -197,11 +197,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Vector2 lineScale2 = new Vector2(0.5f, (0.25f * progress) * drawScale * 2f); //0.2f
 
                 //Main
-                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, col with { A = 0 } * 0.15f * easedFadeValue, //0.25
+                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, col with { A = 100 } * 0.25f * easedFadeValue, //0.25
                     previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
 
                 //White
-                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, col with { A = 0 } * 0.5f * easedFadeValue, //1f
+                Main.EntitySpriteDraw(line, AfterImagePos - offset, null, col with { A = 100 } * 0.55f * easedFadeValue, //1f
                     previousRotations[i] + MathHelper.PiOver2, line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
 
             }

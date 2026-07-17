@@ -15,6 +15,7 @@ using VFXPlus.Content.VFXTest.Aero;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
 using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
+using VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows;
 using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
 
 
@@ -68,13 +69,27 @@ namespace VFXPlus.Content
             //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
             //dad.rotation = Main.rand.NextFloat(6.28f);
 
-            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ModContent.ProjectileType<LunarBulletTest>(), 1, 0, Main.myPlayer);
+            //Dust daa = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<PulseInOutDust>(), Velocity: Main.rand.NextVector2CircularEdge(0f, 0f), newColor: Color.Silver with { A = 120 });
+            //daa.scale = 1.5f;
+            //daa.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 15, 0.25f, 0.75f, Pixelize: true);
+
+
+            for (int i = 220; i < 24; i++)
+            {
+                Color dustCol = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+
+                Dust d = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<PulseInOutDust>(), Velocity: Main.rand.NextVector2CircularEdge(6f, 6f), newColor: dustCol with { A = 120 });
+                //d.scale = 0.25f;
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 138, 0f, 1f, Pixelize: true);
+                d.rotation = Main.rand.NextFloat(6.28f);
+            }
+
+            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ModContent.ProjectileType<LunarBulletTest>(), 1, 0, Main.myPlayer);
 
             //int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
             //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
 
-            //int windFX3 = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 5f, ModContent.ProjectileType<AngleGlowTest2>(), 1, 0, Main.myPlayer);
-            ///Main.projectile[windFX3].scale = 0.85f;
+            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<NewBloodRainProj>(), 1, 0, Main.myPlayer);
 
             return false;
 

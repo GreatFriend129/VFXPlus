@@ -2,23 +2,15 @@ matrix WorldViewProjection;
 
 float progress;
 
-//How many times the texture repeats
-float reps = 1.0;
-
 float posterizationSteps = 0.0;
 
-float finalColMult = 1.0;
 float totalMult = 1.0;
+
+float2 scrollScale;
+float scrollSpeed = 1.0;
 
 float2 noiseScale;
 float noiseIntensity = 1.0;
-
-float flowSpeed = 1.0;
-float flowYOffset = 0.0;
-float2 flowScale;
-
-//Adds a flat amount to the flowTexture's brightness
-float flowGammaBoost = 0.0;
 
 //The colors of the gradient
 float3 gradColors[10];
@@ -55,17 +47,6 @@ texture NoiseTexture;
 sampler noiseTex = sampler_state
 {
     texture = <NoiseTexture>;
-    magfilter = POINT;
-    minfilter = POINT;
-    mipfilter = POINT;
-    AddressU = wrap;
-    AddressV = wrap;
-};
-
-texture FlowTexture;
-sampler flowTex = sampler_state
-{
-    texture = <FlowTexture>;
     magfilter = POINT;
     minfilter = POINT;
     mipfilter = POINT;
@@ -146,34 +127,23 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
     
     float yOffset = tex2D(noiseTex, float2((baseCoords.x * noiseScale.x) + progress, baseCoords.y * noiseScale.y)).r;
         
-    float2 chainCoords = float2(baseCoords.x * reps, baseCoords.y - (yOffset * 0.03 * noiseIntensity));
+    float2 scrollCoords = float2(baseCoords.x * scrollScale.x + (progress * scrollSpeed * 2.0), (baseCoords.y * scrollScale.y) - (yOffset * 0.03 * noiseIntensity));
         
-    float4 in_color = tex2D(trailTex, chainCoords);
-    float4 flowScroll = tex2D(flowTex, float2((baseCoords.x * flowScale.x) + progress * flowSpeed, flowYOffset + (baseCoords.y * flowScale.y)));
-    flowScroll.rgb = saturate(flowScroll.rgb + float3(flowGammaBoost, flowGammaBoost, flowGammaBoost));
+    float4 trailColor = tex2D(trailTex, scrollCoords);
     
-    //Remove black from result
-    float finalColAVG = length(in_color.rgb);
-    finalColAVG = smoothstep(0.0, 1.0, finalColAVG);
+    trailColor.rgb = Posterize(trailColor.rgb);
     
-
-    float4 toPosterize = in_color;
-    //if (chainCoords.y < 0.01 && length(toPosterize.rgb != 0.0))
-    //    toPosterize.rgb = float3(1.0, 1.0, 1.0);
-    
-    toPosterize.rgb = Posterize(toPosterize.rgb);
-    
-    toPosterize.rgb = blendColors(toPosterize.r);
+    trailColor.rgb = blendColors(trailColor.r);
     
     float alpha = 1.0;
     
-    if (length(toPosterize.rgb) == 0.0)
+    if (length(trailColor.rgb) == 0.0)
         alpha = 0.0;
     
     if (posterizationSteps <= 0.0)
-        return float4(toPosterize.rgb * flowScroll.rgb * finalColMult, alpha * length(toPosterize.rgb)) * totalMult * input.Color;
+        return float4(trailColor.rgb, alpha * length(trailColor.rgb)) * totalMult * input.Color;
     else
-        return float4(toPosterize.rgb * flowScroll.rgb * finalColMult, alpha * input.Color.a) * totalMult * input.Color;
+        return float4(trailColor.rgb, alpha * input.Color.a) * totalMult * input.Color;
     
 }
 

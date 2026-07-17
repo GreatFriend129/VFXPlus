@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using static tModPorter.ProgressUpdate;
-using System.Runtime.Intrinsics.Arm;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
+using static tModPorter.ProgressUpdate;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
@@ -187,15 +188,219 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
         }
     }
 
-    public class BloodRainBowVFX : ModProjectile
+    public class NewBloodRainProj : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
-        public override void SetStaticDefaults()
+
+        public override void SetDefaults()
         {
-            //Make sure to draw projectile even if its position is off screen
-            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 7500;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = true;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 1000;
+
+            Projectile.width = Projectile.height = 10;
         }
+
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+        int timer = 0;
+
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
+        public override void AI()
+        {
+            Player player = Main.player[Projectile.owner];
+
+            int trailCount = 20; //8
+            previousRotations.Add(Projectile.velocity.ToRotation());
+            previousPositions.Add(Projectile.Center);
+
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            Projectile.velocity.Y += 0.13f;
+
+            Projectile.rotation = Projectile.velocity.ToRotation();
+
+            timer++;
+        }
+
+        Effect trailEffect = null;
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Player player = Main.player[Projectile.owner];
+
+            Color thisLightColor = lightColor;
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(true, thisLightColor);
+                DrawTrailSworded(false, thisLightColor);
+            });
+            DrawTrailSworded(true, thisLightColor);
+            DrawTrail(true, thisLightColor);
+
+            return false;
+        }
+
+        public void DrawTrail(bool giveUp, Color lightColor)
+        {
+            if (giveUp)
+                return;
+
+            Player player = Main.player[Projectile.owner];
+
+
+            Main.spriteBatch.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/PosterizedTrailShader", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/GooeyPixelTrail").Value;
+            Texture2D noiseTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Trail_2").Value;
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                Color.DarkRed.ToVector3(),
+                new Color(200, 0, 0).ToVector3(),
+            };
+
+
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(2.0f);
+
+            trailEffect.Parameters["scrollScale"].SetValue(new Vector2(0.5f, 1f));
+            trailEffect.Parameters["scrollSpeed"].SetValue(1.5f);
+
+            trailEffect.Parameters["noiseScale"].SetValue(new Vector2(1f, 1f));
+            trailEffect.Parameters["noiseIntensity"].SetValue(1f);
+
+            trailEffect.Parameters["totalMult"].SetValue(1f);
+
+            trailEffect.Parameters["gradColors"].SetValue(gradCols);
+            trailEffect.Parameters["numberOfColors"].SetValue(gradCols.Length);
+
+            Matrix transform = Matrix.CreateTranslation(new Vector3(Vector2.Zero, 0f));
+            Matrix view = Matrix.Identity;
+            Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(transform * view * projectionMatrix);
+
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            float StripWidth(float progress) => 12f * Easings.easeOutCubic(progress);
+            Color StripColor(float progress) => lightColor;
+
+
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["NoiseTexture"].SetValue(noiseTexture);
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+
+        }
+
+        public void DrawTrailSworded(bool giveUp, Color lightColor)
+        {
+            if (giveUp)
+                return;
+
+            Player player = Main.player[Projectile.owner];
+
+
+            Main.spriteBatch.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/SwordTrailShaderGradient", AssetRequestMode.ImmediateLoad).Value;
+
+            Texture2D trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/LavaTrailV1").Value;
+            Texture2D noiseTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Trail_2").Value;
+            Texture2D flowTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Test/T_Random_54StretchLoop").Value;
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                Color.Red.ToVector3(),
+                Color.Red.ToVector3(),
+            };
+
+
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f);
+            trailEffect.Parameters["reps"].SetValue(3f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(3.0f);
+
+            trailEffect.Parameters["noiseScale"].SetValue(new Vector2(2f, 0.25f));
+            trailEffect.Parameters["noiseIntensity"].SetValue(1f);
+
+            trailEffect.Parameters["flowScale"].SetValue(new Vector2(1f, 1f));
+            trailEffect.Parameters["flowSpeed"].SetValue(1f);
+            trailEffect.Parameters["flowYOffset"].SetValue(0f);
+            trailEffect.Parameters["flowGammaBoost"].SetValue(0f);
+
+            trailEffect.Parameters["finalColMult"].SetValue(2f);
+            trailEffect.Parameters["totalMult"].SetValue(1f);
+
+            trailEffect.Parameters["gradColors"].SetValue(gradCols);
+            trailEffect.Parameters["numberOfColors"].SetValue(gradCols.Length);
+
+            Matrix transform = Matrix.CreateTranslation(new Vector3(Vector2.Zero, 0f));
+            Matrix view = Matrix.Identity;
+            Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(transform * view * projectionMatrix);
+
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            float StripWidth(float progress) => 30f * Easings.easeOutCubic(progress);
+            Color StripColor(float progress) => lightColor;
+
+
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+            trailEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            trailEffect.Parameters["NoiseTexture"].SetValue(noiseTexture);
+            trailEffect.Parameters["FlowTexture"].SetValue(flowTexture);
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+            vertexStrip.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+
+        }
+
+
+    }
+
+    public class BloodRainBowVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
 
         //Safety Checks
         public override bool? CanDamage() => false;
@@ -229,7 +434,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawPortal(false);
             });
@@ -253,9 +458,9 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             Vector2 v2Scale = new Vector2(1f * easedScale, 0.25f + (easedScale * 0.75f)) * Projectile.scale * 1.25f;
 
 
-            Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.DarkRed with { A = 0 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.25f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, portalPos, null, Color.Red with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 0 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.5f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.DarkRed with { A = 60 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.Red with { A = 60 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 60 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.5f, SpriteEffects.None);
 
         }
     }

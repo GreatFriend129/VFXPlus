@@ -567,7 +567,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             float timeForPopInAnim = 23; //33
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f);
 
-            overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1.75f)) * 1f;
+            overallScale = MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1f)) * 1f;
 
             timer++;
         }
@@ -616,7 +616,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                     toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 7; //20 | 8
+                return toReturn * sineWidthMult * overallScale * 8; //7
             }
 
 

@@ -47,16 +47,22 @@ namespace VFXPlus.Content.Weapons.Melee.Hardmode.Swords
             //Main.NewText(adjustedItemScale);
 
             //Always start with black probably
+            //Vector3[] gradCols = {
+            //    Color.Black.ToVector3(),
+            //    new Color(146, 133, 104).ToVector3(),
+            //    new Color(187, 172, 138).ToVector3(),
+            //    new Color(133, 133, 133).ToVector3(),
+            //    new Color(161, 161, 161).ToVector3(),
+            //};
+
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                new Color(146, 133, 104).ToVector3(),
-                new Color(187, 172, 138).ToVector3(),
-                new Color(133, 133, 133).ToVector3(),
-                new Color(161, 161, 161).ToVector3(),
+                Color.LightSeaGreen.ToVector3(),
+                Color.LightSeaGreen.ToVector3(),
             };
 
 
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 0f, 0f, 120f, 7, 4f, 1f, 1f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 0f, 0f, 120f, 7, 3f, 1.5f, 1f);
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
 
             return false;

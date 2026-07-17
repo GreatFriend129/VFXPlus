@@ -45,12 +45,21 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             int trail = Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
 
             //Always start with black probably
+            /*
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.75f).ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.55f).ToVector3(),
                 Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f).ToVector3(),
-                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.15f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.55f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.75f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 1f).ToVector3(),
+            };
+            */
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.55f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 0.75f).ToVector3(),
+                Color.Lerp(Color.DodgerBlue, Color.Blue, 1f).ToVector3(),
             };
 
 

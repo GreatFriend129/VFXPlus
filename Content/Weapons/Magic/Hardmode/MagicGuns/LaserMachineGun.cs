@@ -347,8 +347,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             if (projectile.ai[1] == 1)
                 return;
             
-            Texture2D line = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
-            Texture2D line2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D line = CommonTextures.SoulSpikePMA.Value;
+            Texture2D line2 = CommonTextures.Flare.Value;
 
             Vector2 posOffset = new Vector2(-15f, 0f).RotatedBy(projectile.velocity.ToRotation());
 

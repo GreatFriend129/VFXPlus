@@ -22,13 +22,13 @@ using VFXPlus.Content.Projectiles;
 namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 {
 
-    public class WoodenSwordItemOverride : GlobalItem
+    public class PlatinumSwordItemOverride : GlobalItem
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Item item, bool lateInstatiation)
         {
-            return lateInstatiation && (item.type == ItemID.WoodenSword);
+            return lateInstatiation && (item.type == ItemID.PlatinumBroadsword);
         }
 
         public override void SetDefaults(Item entity)
@@ -43,37 +43,23 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
             float adjustedItemScale = player.GetAdjustedItemScale(item); // Get the melee scale of the player and item.
-            int trail = Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
+            int trail = Projectile.NewProjectile(player.GetSource_FromThis(), player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
 
-            //Main.NewText(adjustedItemScale);
+            Color darkest = new Color(72, 73, 114);
+            Color middle = new Color(128, 151, 184);
+            Color bright = new Color(181, 194, 217);
 
-            //                new Color(114, 81, 56).ToVector3(),
-
-            Color a = new Color(114, 81, 56);
-            Color b = new Color(151, 107, 75);
-            Color c = new Color(191, 143, 111);
-
-            //Always start with black probably
-            
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                Color.Lerp(a, b, 0.75f).ToVector3(),
-                Color.Lerp(b, c, 0.05f).ToVector3(),
-
+                new Color(72, 73, 114).ToVector3(),
+                new Color(128, 151, 184).ToVector3(),
+                new Color(181, 194, 217).ToVector3(),
             };
-            
 
-            /*
-            Vector3[] gradCols = {
-                Color.Black.ToVector3(),
-                Color.Red.ToVector3(),
-                Color.Blue.ToVector3(),
-            };
-            */
-            //Main.NewText(Color.Lerp(Color.SaddleBrown, Color.SandyBrown, 0.66f));
+            //Red new Color(224, 12, 81).ToVector3(),
 
 
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 10f, 0f, 34f, 4, 2f, 1f, 1f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 8f, 0f, 50f, 4, 3f, 1f, 1f);
             info.flowSpeed = 0f;
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
 

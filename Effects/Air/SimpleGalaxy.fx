@@ -54,7 +54,7 @@ float4 PixelShaderFunction(float4 screenSpace : TEXCOORD0) : COLOR0
     float2 OverUV3 = float2(uv.x + sin(progress * 0.05), uv.y - cos(progress * 0.05));
     float4 OverCol3 = tex2D(tex3Sampler, (OverUV3 * zoom1) + actualOffset * 1.15);
     
-    float4 trueCol = (UnderCol * 0.0) + OverCol + MiddleCol + OverCol3;
+    float4 trueCol = (UnderCol * 1.0) + OverCol + MiddleCol + OverCol3;
     
     //if (OverCol.a == 0)
     //    trueCol += OverCol;

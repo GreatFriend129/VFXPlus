@@ -45,22 +45,23 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 projectile.light = 0f;
 
                 randomTimeOffset = Main.rand.NextFloat(0f, 10f);
-                trailRandomLengthOffset = Main.rand.Next(0, 35);
+                trailRandomLengthOffset = Main.rand.Next(0, 45);
                 randomTrailSpeed = Main.rand.NextFloat(0.85f, 1.15f);
+
             }
 
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
 
-            trail1.trailPointLimit = 120 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(10 * totalAlpha);
-            trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
+            trail1.trailPointLimit = 110 + trailRandomLengthOffset;
+            trail1.trailWidth = (int)(11 * totalAlpha);
+            trail1.trailMaxLength = 110 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = new Color(255, 111, 20) with { A = 75 } * totalAlpha * 0.5f;
+            trail1.trailColor = new Color(255, 95, 18) with { A = 35 } * Easings.easeInQuad(totalAlpha) * 0.45f;
 
 
-            trail1.trailTime = randomTimeOffset + (timer * 0.04f * randomTrailSpeed); //0.05
+            trail1.trailTime = randomTimeOffset + (timer * 0.02f * randomTrailSpeed); //0.05
             trail1.trailRot = projectile.velocity.ToRotation();
             trail1.trailPos = projectile.Center + projectile.velocity;
             trail1.TrailLogic();
@@ -125,7 +126,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 trail1.TrailDrawing(Main.spriteBatch, false);
 
-                Color darkest = Color.Lerp(Color.OrangeRed, Color.Orange, 0.25f);
+                Color darkest = new Color(255, 74, 5);
                 Color middle = new Color(255, 90, 10);
                 Color brightest = new Color(255, 111, 20);
 

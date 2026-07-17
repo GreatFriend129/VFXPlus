@@ -44,76 +44,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
         }
 
     }
+
     public class VilethornBaseShotOverride : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornBase) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle && false;
-        }
-
-
-        public float scale = 0f;
-        public float alpha = 1f;
-        int timer = 0;
-        public override bool PreAI(Projectile projectile)
-        {
-            if (timer == 8)
-            {
-                float pitch = 0.2f + (projectile.ai[1] * 0.12f);
-                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
-                float pitch3 = 0.4f + (projectile.ai[1] * 0.12f);
-
-                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .015f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; 
-                SoundEngine.PlaySound(style, projectile.Center);
-
-                //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                //SoundEngine.PlaySound(style2, projectile.Center);
-
-                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.15f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
-                SoundEngine.PlaySound(style3, projectile.Center);
-            }
-
-
-            float timeForPopInAnim = 30;
-            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
-
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 3f));
-
-            if (scale == 1f)
-                alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
-
-            timer++;
-            return true;
-        }
-
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-            Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
-
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    float myAlpha = projectile.Opacity * alpha;
-
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 0.85f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
-                }
-            });
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
-
-            return false;            
-        }
-    }
-
-    public class VilethornBaseShotOverride2 : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
@@ -134,60 +66,30 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
                 float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
                 float pitch3 = 0.4f + (projectile.ai[1] * 0.12f);
 
-                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .015f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .01f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
                 SoundEngine.PlaySound(style, projectile.Center);
 
                 //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
                 //SoundEngine.PlaySound(style2, projectile.Center);
 
-                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.15f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
+                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.1f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
                 SoundEngine.PlaySound(style3, projectile.Center);
             }
 
 
-            if (timer >= 2 && timer <= 9 && timer % 3 == 0) //7
+            if (timer >= 2 && timer <= 9 && timer % 3 == 0) 
             {
-                for (int i = 0; i < 1; i++) //5 + Main.rand.Next(1, 3)
-                {
+                Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f);
 
-                    Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
-                    Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f);
+                Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<PulseInOutDust>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                    newColor: new Color(163, 51, 255) with { A = 20 }, Scale: Main.rand.NextFloat(0.4f, 0.5f) * projectile.scale * 1.25f);
+                p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
+                p.velocity *= 0.85f;
+                p.rotation = MathHelper.PiOver4;
+                p.noLight = false;
 
-                    
-                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowPixel>(), vel * Main.rand.NextFloat(0.8f, 1.05f), 
-                        newColor: new Color(163, 51, 255), Scale: Main.rand.NextFloat(0.8f, 1.2f) * projectile.scale * 0.75f); //3
-
-                    //new Color(172, 71, 255)
-                    //new Color(45, 1, 70)
-                    p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
-                    p.velocity *= 0.85f;
-                    p.rotation = MathHelper.PiOver4;
-
-                    GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 1, TimeBeforeFadeOut: 7, VelFadePower: 0.9f, ScaleFadePower: 0.85f, AlphaFadePower: 0.9f, ColorFadePower: 1f);
-                    gpb.earlyVelFadePower = Main.rand.NextFloat(0.92f, 0.95f);
-                    gpb.randomVelRotatePower = 0.1f;
-                    gpb.colorAlpha = 20;
-
-                    p.customData = gpb;
-                    
-
-                    /*
-                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowPixelCircle>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
-                        newColor: new Color(163, 51, 255), Scale: Main.rand.NextFloat(0.8f, 1.2f) * projectile.scale * 0.25f); //3
-
-                    //new Color(172, 71, 255)
-                    //new Color(45, 1, 70)
-                    p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
-                    p.velocity *= 0.85f;
-                    p.rotation = Main.rand.NextFloat(6.28f);
-
-                    GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 1, TimeBeforeFadeOut: 5, VelFadePower: 0.88f, ScaleFadePower: 0.9f, AlphaFadePower: 0.8f, ColorFadePower: 1f);
-                    gpb.earlyVelFadePower = Main.rand.NextFloat(0.92f, 0.95f);
-                    gpb.randomVelRotatePower = 0.1f;
-                    */
-
-                }
-
+                p.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowPixel, 18, 0.5f, 0.5f, true);
             }
 
             float timeForPopInAnim = 30;
@@ -202,6 +104,145 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             return true;
         }
 
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            Vector2 vec2Scale = new Vector2(overallScale * projectile.scale, projectile.scale);
+
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    float myAlpha = projectile.Opacity * Easings.easeInCirc(overallAlpha);
+                    Vector2 offset = (2f * (i * MathHelper.PiOver2).ToRotationVector2());
+
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + offset, null,
+                        new Color(61, 2, 92) with { A = 20 } * 2f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                }
+            });
+
+            Effect myEffect = ModContent.Request<Effect>("Playground/Effects/Filter/Dissolve", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
+
+
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+            myEffect.Parameters["zoom"].SetValue(1f);
+
+            myEffect.Parameters["innerCol"].SetValue(new Color(45, 1, 70).ToVector3());
+            myEffect.Parameters["outerCol"].SetValue(new Color(45, 1, 70).ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+
+            myEffect.Parameters["mainTexWidth"].SetValue(vanillaTex.Width / 2f);
+            myEffect.Parameters["mainTexHeight"].SetValue(vanillaTex.Height / 2f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+
+            return false;
+        }
+    }
+
+
+    public class VilethornTipShotOverride : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.VilethornTip) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle;
+        }
+
+
+        float scale = 0;
+        float alpha = 1f;
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            if (timer == 8)
+            {
+                float pitch = 0.2f + (projectile.ai[1] * 0.12f);
+                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
+                float pitch3 = 0.4f + (projectile.ai[1] * 0.12f);
+
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .015f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
+                SoundEngine.PlaySound(style, projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.15f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
+                SoundEngine.PlaySound(style3, projectile.Center);
+            }
+
+
+            if (timer >= 2 && timer <= 9 && timer % 3 == 0) //7
+            {
+                if (timer >= 2 && timer <= 9 && timer % 3 == 0)
+                {
+                    Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f);
+
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<PulseInOutDust>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: new Color(163, 51, 255) with { A = 20 }, Scale: Main.rand.NextFloat(0.4f, 0.5f) * projectile.scale * 1.25f);
+                    p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
+                    p.velocity *= 0.85f;
+                    p.rotation = MathHelper.PiOver4;
+                    p.noLight = false;
+
+                    p.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowPixel, 18, 0.5f, 0.5f, true);
+                }
+
+                /*
+                for (int i = 0; i < 1; i++) //5 + Main.rand.Next(1, 3)
+                {
+
+                    Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f);
+
+
+                    Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<GlowPixel>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                        newColor: new Color(163, 51, 255), Scale: Main.rand.NextFloat(0.8f, 1.2f) * projectile.scale * 0.75f); //3
+
+                    //new Color(172, 71, 255)
+                    //new Color(45, 1, 70)
+                    p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
+                    p.velocity *= 0.85f;
+                    p.rotation = MathHelper.PiOver4;
+
+                    GlowPixelBehavior gpb = new GlowPixelBehavior(TimeForFadeIn: 1, TimeBeforeFadeOut: 7, VelFadePower: 0.9f, ScaleFadePower: 0.85f, AlphaFadePower: 0.9f, ColorFadePower: 1f);
+                    gpb.earlyVelFadePower = Main.rand.NextFloat(0.92f, 0.95f);
+                    gpb.randomVelRotatePower = 0.1f;
+                    gpb.colorAlpha = 20;
+
+                    p.customData = gpb;
+                }
+                */
+            }
+
+            float timeForPopInAnim = 30;
+            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
+
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2f));
+
+            if (overallScale == 1f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.15f, 0.05f), 0f, 1f);
+
+            timer++;
+            return true;
+        }
+
+        public float overallScale = 0f;
+        public float overallAlpha = 1f;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -252,72 +293,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
             Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
 
-            return false;
-        }
-    }
-
-
-    public class VilethornTipShotOverride : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
-            return lateInstantiation && (entity.type == ProjectileID.VilethornTip) && ModContent.GetInstance<VFXPlusToggles>().MagicToggle.VilethornToggle;
-        }
-
-
-        float scale = 0;
-        float alpha = 1f;
-        int timer = 0;
-        public override bool PreAI(Projectile projectile)
-        {
-            if (timer == 8)
-            {
-                float pitch = 0.2f + (projectile.ai[1] * 0.12f);
-                float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
-
-                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .035f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
-                SoundEngine.PlaySound(style, projectile.Center);
-
-                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                SoundEngine.PlaySound(style2, projectile.Center);
-            }
-
-
-            float timeForPopInAnim = 30;
-            float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
-
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 4f));
-
-            if (scale == 1f)
-                alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
-
-
-            timer++;
-            return base.PreAI(projectile);
-        }
-
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
-
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    float myAlpha = projectile.Opacity * alpha;
-
-                    Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), null,
-                        new Color(61, 2, 92) with { A = 0 } * 0.85f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
-                }
-            });
-
-
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
             return false;
         }
     }
