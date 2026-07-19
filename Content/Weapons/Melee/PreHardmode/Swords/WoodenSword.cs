@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using Mono.Cecil;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -33,51 +34,31 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override void SetDefaults(Item entity)
         {
-            entity.shoot = ProjectileID.WoodenArrowFriendly;
-            entity.shootsEveryUse = true;
             entity.noUseGraphic = true;
             //entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity);
         }
 
-        public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        public override void UseAnimation(Item item, Player player)
         {
             float adjustedItemScale = player.GetAdjustedItemScale(item); // Get the melee scale of the player and item.
-            int trail = Projectile.NewProjectile(source, player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
-
-            //Main.NewText(adjustedItemScale);
-
-            //                new Color(114, 81, 56).ToVector3(),
+            int trail = Projectile.NewProjectile(item.GetSource_FromThis(), player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
 
             Color a = new Color(114, 81, 56);
             Color b = new Color(151, 107, 75);
             Color c = new Color(191, 143, 111);
 
             //Always start with black probably
-            
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
                 Color.Lerp(a, b, 0.75f).ToVector3(),
                 Color.Lerp(b, c, 0.05f).ToVector3(),
 
             };
-            
-
-            /*
-            Vector3[] gradCols = {
-                Color.Black.ToVector3(),
-                Color.Red.ToVector3(),
-                Color.Blue.ToVector3(),
-            };
-            */
-            //Main.NewText(Color.Lerp(Color.SaddleBrown, Color.SandyBrown, 0.66f));
-
-
             SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 10f, 0f, 34f, 4, 2f, 1f, 1f);
             info.flowSpeed = 0f;
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
-
-            return false;
+            base.UseAnimation(item, player);
         }
 
         public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)

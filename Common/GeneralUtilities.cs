@@ -8,6 +8,20 @@ namespace VFXPlus.Common
 {
     internal static class GeneralUtilities
     {
+
+        //Public version of a private vanilla method used to help with dust positioning on melee weapons
+        public static void GetPointOnSwungItemPath(Player player, float spriteWidth, float spriteHeight, float normalizedPointOnPath, float itemScale, out Vector2 location, out Vector2 outwardDirection)
+        {
+            float num = (float)Math.Sqrt(spriteWidth * spriteWidth + spriteHeight * spriteHeight);
+            float num2 = (float)(player.direction == 1).ToInt() * ((float)Math.PI / 2f);
+            if (player.gravDir == -1f)
+            {
+                num2 += (float)Math.PI / 2f * (float)player.direction;
+            }
+            outwardDirection = player.itemRotation.ToRotationVector2().RotatedBy(3.926991f + num2);
+            location = player.RotatedRelativePoint(player.itemLocation + outwardDirection * num * normalizedPointOnPath * itemScale);
+        }
+
         /// <summary>
         /// Simple smooth movement function. Returns a desired velocity vector.
         /// </summary>

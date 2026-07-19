@@ -182,6 +182,13 @@ namespace VFXPlus.Content.Projectiles
 
             SpriteEffects fx = player.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
+
+            //Doesnt look bad for Muramasa
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    Main.spriteBatch.Draw(Sword, swordPos + Main.rand.NextVector2CircularEdge(2f, 2f), null, Color.DodgerBlue with { A = 60 }, Projectile.rotation, swordOrigin, Projectile.scale, fx, 0f);
+            //}
+
             Main.spriteBatch.Draw(Sword, swordPos, null, lightColor, Projectile.rotation, swordOrigin, Projectile.scale, fx, 0f);
 
             #endregion
@@ -224,9 +231,9 @@ namespace VFXPlus.Content.Projectiles
             trailEffect.Parameters["noiseScale"].SetValue(info.noiseScale);
             trailEffect.Parameters["noiseIntensity"].SetValue(info.noiseIntensity);
 
-            trailEffect.Parameters["flowScale"].SetValue(info.flowScale);
-            trailEffect.Parameters["flowSpeed"].SetValue(info.flowSpeed);
-            trailEffect.Parameters["flowYOffset"].SetValue(info.flowYOffset);
+            trailEffect.Parameters["flowScale"].SetValue(info.flowScale * 0.5f);
+            trailEffect.Parameters["flowSpeed"].SetValue(info.flowSpeed * 0.5f);
+            trailEffect.Parameters["flowYOffset"].SetValue(info.flowYOffset * 0.5f);
             trailEffect.Parameters["flowGammaBoost"].SetValue(info.flowGammaBoost);
 
             trailEffect.Parameters["finalColMult"].SetValue(info.finalColMult * 2f);
@@ -350,7 +357,7 @@ namespace VFXPlus.Content.Projectiles
 
             trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/SwordSmear1").Value;
             noiseTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Trail_2").Value;
-            flowTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Test/T_Random_54Stretch").Value;
+            flowTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Noise/Test/T_Random_54StretchLoop").Value;
         }
 
         //Kitchen Sink Constructor

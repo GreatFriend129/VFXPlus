@@ -49,17 +49,32 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             Color middle = new Color(128, 151, 184);
             Color bright = new Color(181, 194, 217);
 
+            //middle = new Color(128, 151, 184);
+            bright = new Color(165, 180, 218);
+
+            
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                new Color(72, 73, 114).ToVector3(),
-                new Color(128, 151, 184).ToVector3(),
-                new Color(181, 194, 217).ToVector3(),
+                Color.Lerp(middle, bright, 0f).ToVector3(),
+                Color.Lerp(middle, bright, 0f).ToVector3(),
+                                Color.Lerp(middle, bright, 0f).ToVector3(),
+                Color.Red.ToVector3()
+                //Color.Lerp(middle, bright, 1f).ToVector3()
             };
+            
 
+            /*
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                Color.Red.ToVector3(),
+                Color.Blue.ToVector3(),
+                Color.Green.ToVector3()
+            };
+            */
             //Red new Color(224, 12, 81).ToVector3(),
 
 
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 8f, 0f, 50f, 4, 3f, 1f, 1f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 8f, 0f, 48f, 4, 4f, 1f, 1f);
             info.flowSpeed = 0f;
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
 

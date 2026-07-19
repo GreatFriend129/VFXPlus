@@ -89,7 +89,12 @@ namespace VFXPlus.Content
             //int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
             //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
 
-            int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<NewBloodRainProj>(), 1, 0, Main.myPlayer);
+            Dust.NewDustPerfect(position, ModContent.DustType<WaterDroplet>(), velocity.SafeNormalize(Vector2.UnitX) * 0f);
+
+            //Gore.NewGorePerfect(null, Main.MouseWorld, Vector2.Zero, GoreID.FartCloud1);
+
+
+            //int windFX3 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 12f, ModContent.ProjectileType<NewBloodRainProj>(), 1, 0, Main.myPlayer);
 
             return false;
 
