@@ -649,7 +649,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             //if (timer == 0)
             //    color = purple;
             
-            float timeForPulse = 30f;
+            float timeForPulse = 20f;
             float myProg = Utils.GetLerpValue(0f, timeForPulse, (float)timer, true);
 
             // Easings.easeOutSine(myProg);
@@ -662,7 +662,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
                 Projectile.active = false;
             }
 
-            Projectile.rotation = Projectile.velocity.ToRotation();
+            //Projectile.rotation = Projectile.velocity.ToRotation();
 
             timer++;
         }
@@ -671,7 +671,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
         public override bool PreDraw(ref Color lightColor)
         {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawEffect(false);
             });
@@ -701,27 +701,34 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
             //Ring values
             myEffect.Parameters["ringRadiusStart"].SetValue(0f);
-            myEffect.Parameters["ringThicknessStart"].SetValue(1.5f * progress);// * Easings.easeOutQuint(progress)); //0.6
+            myEffect.Parameters["ringThicknessStart"].SetValue(0.65f * progress);// * Easings.easeOutQuint(progress)); //0.6
             myEffect.Parameters["ringPower"].SetValue(0.25f);
             myEffect.Parameters["ringMult"].SetValue(2f);
-            myEffect.Parameters["ringWaveSpeed"].SetValue(0.6f);
-            myEffect.Parameters["ringWaveStrength"].SetValue(1f);
+            myEffect.Parameters["ringWaveSpeed"].SetValue(0.3f);
+            myEffect.Parameters["ringWaveStrength"].SetValue(0.25f);
             myEffect.Parameters["ringWaveLength"].SetValue(41f);
 
             //Caustic values
             Vector3[] gradCols2 = {
                 Color.Black.ToVector3(),
                 color.ToVector3(),
-                color.ToVector3(),
+                Color.White.ToVector3(),
             };
+
+            Vector3[] gradCols = {
+                    Color.Black.ToVector3(),
+                    Color.DeepPink.ToVector3(),
+                    Color.HotPink.ToVector3(),
+                    Color.Pink.ToVector3(),
+                };
 
             myEffect.Parameters["gradColors"].SetValue(gradCols2);
             myEffect.Parameters["numberOfColors"].SetValue(gradCols2.Length);
-            myEffect.Parameters["finalColIntensity"].SetValue(1.0f); //3.0
+            myEffect.Parameters["finalColIntensity"].SetValue(1.25f); //3.0
             myEffect.Parameters["posterizationSteps"].SetValue(2.0f);
 
             myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha);
-            myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
+            myEffect.Parameters["fadeStrength"].SetValue(0.35f); //.35
 
 
             myEffect.Parameters["zoom"].SetValue(2f); //7f
@@ -733,7 +740,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
 
             float rot = (float)Main.timeForVisualEffects * 0.1f;
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 150 * new Vector2(0.8f, 0.8f) * overallScale, SpriteEffects.None, 0f); //150 | 0.35 0.8
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 125 * new Vector2(0.35f, 0.8f) * overallScale, SpriteEffects.None, 0f); //150 | 0.35 0.8
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);

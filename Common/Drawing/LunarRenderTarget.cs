@@ -92,10 +92,10 @@ namespace VFXPlus.Common.Drawing
             myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f); //.02
 
             myEffect.Parameters["ScrollTexture1"].SetValue(Mod.Assets.Request<Texture2D>("Assets/StarBG").Value);
-            myEffect.Parameters["ScrollTexture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsMiddle").Value);
-            myEffect.Parameters["ScrollTexture3"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsTop").Value);
-            myEffect.Parameters["zoom1"].SetValue(1.0f);
-            myEffect.Parameters["offset"].SetValue(Main.LocalPlayer.position * 0.11f);
+            myEffect.Parameters["ScrollTexture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Empty").Value);
+            myEffect.Parameters["ScrollTexture3"].SetValue(Mod.Assets.Request<Texture2D>("Assets/BiggerLunarStars").Value);
+            myEffect.Parameters["zoom1"].SetValue(8f);
+            myEffect.Parameters["offset"].SetValue(Main.LocalPlayer.position * 0.11f * 0f);
             myEffect.Parameters["exceptionColor"].SetValue(Color.Red.ToVector4());
             
             /*
@@ -143,7 +143,7 @@ namespace VFXPlus.Common.Drawing
 
             myEffect2.Parameters["outlineColor"].SetValue(outlineCol.ToVector4() * 1f); //DeepPink
             myEffect2.Parameters["outlineThickness"].SetValue(1f * 1f); //2f
-            myEffect2.Parameters["blendBorder"].SetValue(true);
+            myEffect2.Parameters["blendBorder"].SetValue(false);
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect2, Main.GameViewMatrix.EffectMatrix);
 

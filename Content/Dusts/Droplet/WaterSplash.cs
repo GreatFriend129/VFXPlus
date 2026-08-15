@@ -29,8 +29,6 @@ namespace VFXPlus.Content.Dusts
 
         public override bool Update(Gore gore)
         {
-            gore.velocity = Vector2.Zero;
-
             gore.behindTiles = true;
 
             if (gore.frameCounter >= 4)
@@ -44,10 +42,17 @@ namespace VFXPlus.Content.Dusts
                 }
             }
 
-            Vector2 goreToTile = (gore.position / 16f).Floor();
+            gore.velocity.Y += 0.1f;
 
-            //gore.position.Y = goreToTile.Y;
+            Vector2 storedVel = gore.velocity;
+            gore.velocity = Collision.TileCollision(gore.position, gore.velocity, 4, 4);
 
+            if (gore.velocity != storedVel || true)
+            {
+                gore.velocity *= 0f;
+            }
+
+            gore.position += gore.velocity;
             gore.frameCounter++;
 
             return false;

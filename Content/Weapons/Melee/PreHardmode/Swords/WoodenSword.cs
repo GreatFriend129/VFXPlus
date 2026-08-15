@@ -55,7 +55,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                 Color.Lerp(b, c, 0.05f).ToVector3(),
 
             };
-            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 10f, 0f, 34f, 4, 2f, 1f, 1f);
+            SwordProjInfo info = new SwordProjInfo(item.type, gradCols, 10f, 0f, 34f, 3, 2f, 1f, 1f);
             info.flowSpeed = 0f;
             (Main.projectile[trail].ModProjectile as BaseSwordProj).info = info;
             base.UseAnimation(item, player);

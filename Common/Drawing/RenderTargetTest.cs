@@ -130,7 +130,7 @@ namespace VFXPlus.Common.Drawing
             myEffect2.Parameters["outlineThickness"].SetValue(2f * 1f); //2f
             myEffect2.Parameters["blendBorder"].SetValue(false);
 
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect2, Main.GameViewMatrix.EffectMatrix);
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.EffectMatrix);
 
             Main.spriteBatch.Draw(renderTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 0.5f, 0, 0);
 
@@ -145,15 +145,10 @@ namespace VFXPlus.Common.Drawing
             Main.graphics.GraphicsDevice.SetRenderTarget(finalTarget);
             Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/SimpleGalaxy", AssetRequestMode.ImmediateLoad).Value;
-            myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.005f); //.02
-
-            myEffect.Parameters["ScrollTexture1"].SetValue(Mod.Assets.Request<Texture2D>("Assets/StarBG").Value);
-            myEffect.Parameters["ScrollTexture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsMiddle").Value);
-            myEffect.Parameters["ScrollTexture3"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsTop").Value);
-            myEffect.Parameters["zoom1"].SetValue(1.0f);
-            myEffect.Parameters["offset"].SetValue(Main.LocalPlayer.position * 0.11f);
-            myEffect.Parameters["exceptionColor"].SetValue(outlineColB.ToVector4());
+            Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/PleaseBeGoodGalaxy", AssetRequestMode.ImmediateLoad).Value;
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.005f); //.02
+            myEffect.Parameters["zoom"].SetValue(1.0f);
+            myEffect.Parameters["density"].SetValue(1.3f);
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.EffectMatrix);
 

@@ -1,3 +1,6 @@
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
@@ -15,10 +18,15 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
+using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Bows;
+using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
+using static Terraria.GameContent.Animations.IL_Actions.Sprites;
+using static Terraria.ModLoader.PlayerDrawLayer;
 using static tModPorter.ProgressUpdate;
 
 
@@ -133,6 +141,25 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)
         {
+
+            Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
+
+
+            float randRot = Main.rand.NextFloat(6.28f);
+
+            Color newPink = Main.hslToRgb(0.92f, 1f, 0.6f) with { A = 50 };
+
+            int pulse = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 1f;
+
+            int pulse2 = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 1f;
+
+            //Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
+
             /*
             int dustCount = 5 + Main.rand.Next(0, 3);
             for (int i = 220; i < dustCount; i++)
@@ -156,6 +183,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             }
             */
 
+            /*
             float randomRot = Main.rand.NextFloat(6.28f);
 
             int dustCount = 12;
@@ -180,11 +208,365 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                 d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 30, 0.15f, 0.85f, Pixelize: true);
 
             }
-
+            */
         }
 
     }
+
     public class StarfuryShotOverride : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.Starfury);
+        }
+
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            if (timer == 0 && false)
+            {
+                float randRot = (projectile.oldVelocity).ToRotation();
+
+                Color newPink = Main.hslToRgb(0.92f, 0.95f, 0.62f);
+
+                int pulse = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+                //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+                (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+                Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 0.5f;
+
+                int pulse2 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+                (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+                Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 0.5f;
+            }
+            
+            int trailCount = 8;
+            previousRotations.Add(projectile.velocity.ToRotation());
+            previousPositions.Add(projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+
+            if (timer % 2 == 0 && Main.rand.NextBool())
+            {
+                Color dustCol = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+
+                Vector2 dustVel = Main.rand.NextVector2Circular(1f, 1f) + projectile.velocity * 0.02f;
+
+                Dust d = Dust.NewDustPerfect(projectile.Center + Main.rand.NextVector2Circular(10f, 10f), ModContent.DustType<PulseInOutDust>(), dustVel, newColor: dustCol with { A = 200 });
+                d.scale *= Main.rand.NextFloat(1f, 1.5f) * 1f;
+
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 14, 0.15f, 0.85f, Pixelize: true);
+            }
+
+            overallAlpha = 1f;
+            //overallScale = 1f;
+
+            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.05f), 0f, 1f);
+
+            float fadeInTime = Math.Clamp((timer + 6f) / 18f, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
+
+            timer++;
+            return true;
+        }
+
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
+        float overallScale = 1f;
+        float overallAlpha = 0f;
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawPixelatedStuff(projectile, false);
+            });
+            DrawPixelatedStuff(projectile, true);
+
+            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
+            Texture2D StarGlow = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
+
+            //Starfury uses 0.8 scale so x1.25 that is one
+            float drawScale = projectile.scale * 1.25f * overallScale;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
+            Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
+            Color fireBallColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
+            for (int i = 0; i < 4; i++)
+            {
+                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 100 } * 0.25f, fireballRot, FireBall.Size() / 2f, drawScale * 1.05f, SpriteEffects.None);
+            }
+
+            //Star Border
+            for (int i = 220; i < 4; i++)
+            {
+                float dist = 2f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                Vector2 offsetDrawPos = drawPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Main.EntitySpriteDraw(Star, offsetDrawPos, null, Color.HotPink with { A = 150 } * 0.5f, projectile.rotation, Star.Size() / 2f, drawScale * 1.05f, SpriteEffects.None);
+            }
+
+            //Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.White with { A = 200 } * overallAlpha, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(Star, drawPos, null, Color.HotPink * overallAlpha, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.DeepPink with { A = 200 } * overallAlpha, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 50 } * overallAlpha, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None);
+
+
+
+            //Gash
+            Texture2D gash = CommonTextures.Flare.Value;
+
+            Vector2 gashPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 0f;
+            float gashProg = Utils.GetLerpValue(0, 20, timer, true);
+            float gashRot = 0f;// projectile.velocity.ToRotation() + MathHelper.PiOver2;
+            Vector2 gashScale = new Vector2(2f * Easings.easeOutSine(gashProg), 0.5f) * drawScale;
+            //Main.EntitySpriteDraw(gash, gashPos, null, Color.HotPink with { A = 50 } * Easings.easeOutQuad(1f - gashProg) * 0.25f, gashRot, gash.Size() / 2f, gashScale * 2f, SpriteEffects.None);
+            //Main.EntitySpriteDraw(gash, gashPos, null, Color.White with { A = 50 } * Easings.easeOutQuad(1f - gashProg) * 0.25f, gashRot, gash.Size() / 2f, gashScale * 1f, SpriteEffects.None);
+
+            Vector2 newGashScale = new Vector2(1f, 0.5f) * drawScale;
+            Vector2 newGashScale2 = new Vector2(1f + ((float)(Main.timeForVisualEffects * 0.05f) % 1f), 0.5f) * drawScale;
+            //Main.EntitySpriteDraw(gash, gashPos, null, Color.DeepPink with { A = 100 } * 0.5f, gashRot, gash.Size() / 2f, newGashScale * 2f, SpriteEffects.None);
+            //Main.EntitySpriteDraw(gash, gashPos, null, Color.White with { A = 100 } * 0.5f, gashRot, gash.Size() / 2f, newGashScale2 * 1f, SpriteEffects.None);
+
+
+
+            return false;
+
+        }
+
+        public void DrawPixelatedStuff(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/FireBallBlurPMA").Value;
+            Texture2D Trail = CommonTextures.SoulSpikePMA.Value;
+
+            //Starfury uses 0.8 scale so x1.25 that is one
+            float drawScale = projectile.scale * 1.25f * overallScale;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                float colorProg = (progress * 4f) % 1f;
+                Color col = Color.DeepPink;// (i + 1) % 3 == 0 ? Color.Gold : Color.HotPink;// Color.Lerp(Color.LightPink, Color.Gold, colorProg);
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
+
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 100 } * 1f * progress,
+                       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
+
+                //Main.EntitySpriteDraw(FireBall, AfterImagePos, null, Color.HotPink with { A = 20 } * 1f * progress,
+                //       previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(trailScale.Y, trailScale.X), SpriteEffects.None);
+
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 100 } * 0.85f * progress,
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
+            }
+
+            Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
+            for (int i = 220; i < 4; i++)
+            {
+                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, Color.HotPink with { A = 150 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.05f, SpriteEffects.None);
+            }
+
+
+            float sineScale = 0.5f + MathF.Sin((float)Main.timeForVisualEffects * 0.5f) * 0.5f;
+            float fireBallScale = (0.75f + sineScale * 0.25f);
+
+            Vector2 vec2FireballScale = new Vector2(1.25f, 1f) * fireBallScale * drawScale;
+
+            //Main.EntitySpriteDraw(FireBall, fireballPos, null, Color.HotPink with { A = 150 } * 0.5f, projectile.velocity.ToRotation() + MathHelper.PiOver2, FireBall.Size() / 2f, drawScale * fireBallScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(FireBall, fireballPos, null, Color.HotPink with { A = 150 } * 0.5f, projectile.velocity.ToRotation() + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(0.75f, 1.2f) * drawScale * fireBallScale, SpriteEffects.None);
+
+            //Main.EntitySpriteDraw(FireBall, fireballPos, null, Color.DeepPink with { A = 50 } * 0.5f, projectile.velocity.ToRotation() + MathHelper.PiOver2, FireBall.Size() / 2f, vec2FireballScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(FireBall, fireballPos, null, Color.Pink with { A = 50 } * 0.5f, projectile.velocity.ToRotation() + MathHelper.PiOver2, FireBall.Size() / 2f, vec2FireballScale * new Vector2(0.6f, 1f), SpriteEffects.None);
+
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            return true;
+            
+            Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
+
+            
+            float randRot = (-projectile.oldVelocity).ToRotation();
+
+            Color newPink = Main.hslToRgb(0.92f, 1f, 0.6f);
+
+            int pulse = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 0.75f;
+
+            int pulse2 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 0.75f;
+            
+
+            float randomRot = Main.rand.NextFloat(6.28f);
+
+            int dustCount = 12 * 0;
+            for (int i = 0; i < dustCount; i++)
+            {
+                float progress = (float)i / (float)dustCount;
+                float theta = progress * MathHelper.TwoPi;
+
+                float numer = MathF.Cos((2f * MathF.Asin(1) + 3f * MathHelper.Pi) / 10f);
+                float denom = MathF.Cos((2f * MathF.Asin(MathF.Cos(4f * theta)) + 3f * MathHelper.Pi) / 10f);
+
+                float r = numer / denom;
+
+                Color dustCol = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+
+                Vector2 vel = new Vector2(r * 4f, 0f).RotatedBy(randomRot + theta);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center + vel, ModContent.DustType<GlowPixelCross>(), vel, newColor: dustCol with { A = 200 });
+                d.scale *= Main.rand.NextFloat(0.5f, 0.65f) * 0.5f;
+                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(velToBeginShrink: 0.5f, shouldFadeColor: false);
+
+                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
+
+                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.15f, 0.85f, Pixelize: true);
+
+            }
+
+
+            //int b = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
+            //Main.projectile[b].scale *= 0.75f;
+            //Main.projectile[b].rotation = MathHelper.PiOver4;
+
+
+            return false;
+        }
+
+        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
+        {
+            Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
+
+            return base.OnTileCollide(projectile, oldVelocity);
+        }
+
+
+    }
+
+
+    public class StarfuryImpactVFX : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        public override bool? CanDamage() => false;
+        public override bool? CanCutTiles() => false;
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.tileCollide = false;
+
+            Projectile.scale = 1.25f;
+            Projectile.timeLeft = 400;
+        }
+
+        int timer = 0;
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        public override void AI()
+        {
+            int timeForEffect = 14;
+
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+
+            effectProgress = (Utils.GetLerpValue(0, timeForEffect, timer, true));
+
+            if (timer == timeForEffect)
+                Projectile.active = false;
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawEffect(false);
+            });
+            DrawEffect(true);
+
+            return false;
+        }
+
+        float effectProgress = 0f;
+        public void DrawEffect(bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D Star = CommonTextures.RainbowRod.Value;
+            //Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Slash/FadeRingB").Value;
+
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            //OuterStar
+            //float outerStarScale = GeneralUtilities.FadeLinear(effectProgress, 0.5f, 0.5f) * Projectile.scale * overallScale;
+            //Vector2 outerDrawScale = new Vector2(outerStarScale, outerStarScale);
+            //Main.EntitySpriteDraw(Star, drawPos, null, Color.HotPink with { A = 50 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, outerDrawScale * 1.5f, SpriteEffects.None);
+
+            //InnerStar
+            //float innerStarScale = GeneralUtilities.FadeLinear(effectProgress, 0.25f, 0.75f) * Projectile.scale * overallScale;
+            //Vector2 innerDrawScale = new Vector2(innerStarScale, innerStarScale);
+
+            //float innerStarScale = MathF.Pow((float)Math.Sin((TimeInWorld) * (MathHelper.Pi / BurstTime)), 4) * Scale * 0.83f;
+
+            float starScale = MathF.Sin(MathHelper.Pi * effectProgress);
+            //float innerStarScale = MathF.Pow((float)Math.Sin((TimeInWorld) * (MathHelper.Pi / BurstTime)), 4) * overallScale * 0.75f;
+
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.DeepPink with { A = 120 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, starScale * Projectile.scale, SpriteEffects.None);
+
+            float innerStarScale = MathF.Pow(starScale, 4);
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 120 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, innerStarScale * 0.75f * Projectile.scale, SpriteEffects.None); //0.75
+
+
+        }
+    }
+
+    public class StarfuryShotOverrideOld : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
@@ -320,5 +702,4 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
 
     }
-
 }

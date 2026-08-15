@@ -103,9 +103,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<PurpleCasing>());
 
+            float overallVol = 0.75f;
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ONYXBlast") with { Volume = 1f, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, position);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/OnyxBlaster") with { Volume = 1f * overallVol, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, position);
+
+            SoundStyle styleB = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/OnyxA") with { Volume = 0.5f * overallVol, Pitch = 0.15f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styleB, position);
+
+            SoundStyle styleB2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/OnyxB") with { Volume = 0.5f * overallVol, Pitch = -0.1f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styleB2, position);
+
+            SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickShot") with { Volume = 0.5f * overallVol, Pitch = 0.1f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(styleC, position);
+
 
             return true;
         }
@@ -118,6 +129,484 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
             return lateInstantiation && entity.type == ProjectileID.BlackBolt;
+        }
+
+
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            int trailCount = 18;
+            previousRotations.Add(projectile.velocity.ToRotation());
+            previousPositions.Add(projectile.Center);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+
+            float timeForPopInAnim = 30;
+            float animProgress = Math.Clamp((timer + 10) / timeForPopInAnim, 0f, 1f);
+
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 1f)) * 1f;
+            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.5f, 0.09f), 0f, 1f);
+
+
+
+            #region vanillaAI with tweaked Dust
+            if (projectile.alpha <= 0)
+            {
+                for (int num20 = 0; num20 < 2; num20++)
+                {
+                    int num21 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 240);
+                    Main.dust[num21].noGravity = true;
+                    Main.dust[num21].velocity *= 0.3f;
+                    Main.dust[num21].velocity -= projectile.velocity * Main.rand.NextFloat(0.45f, 0.55f);
+                    Main.dust[num21].noLight = true;
+                }
+            }
+            if (projectile.alpha > 0)
+            {
+                projectile.alpha -= 55;
+                projectile.scale = 1.3f;
+                if (projectile.alpha < 0)
+                {
+                    projectile.alpha = 0;
+                    float num22 = 8f; //16 
+                    for (int num24 = 0; (float)num24 < num22; num24++)
+                    {
+                        Vector2 spinningpoint7 = Vector2.UnitX * 0f;
+                        spinningpoint7 += -Vector2.UnitY.RotatedBy((float)num24 * ((float)Math.PI * 2f / num22)) * new Vector2(1f, 4f);
+                        spinningpoint7 = spinningpoint7.RotatedBy(projectile.velocity.ToRotation());
+                        if (num24 % 3 == 0)
+                        {
+                            int num25 = Dust.NewDust(projectile.Center, 0, 0, 240);
+                            Main.dust[num25].scale = 1f;
+                            Main.dust[num25].noLight = true;
+                            Main.dust[num25].noGravity = true;
+                            Main.dust[num25].position = projectile.Center + spinningpoint7;
+                            Main.dust[num25].velocity = Main.dust[num25].velocity * 1f + projectile.velocity * 0.4f;
+                        }
+                        else
+                        {
+                            int dust = Dust.NewDust(projectile.Center, 0, 0, ModContent.DustType<GlowPixelCross>(), newColor: new Color(121, 7, 179) * 1.5f, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.75f);
+                            Main.dust[dust].position = projectile.Center + spinningpoint7 - projectile.velocity.SafeNormalize(Vector2.UnitX) * 30;
+                            Main.dust[dust].velocity = Main.dust[dust].velocity * 1f + projectile.velocity * 0.3f;
+                            Main.dust[dust].noLight = false;
+
+                            Main.dust[dust].customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                                rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 3, postSlowPower: Main.rand.NextFloat(0.87f, 0.92f), velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+                        }
+                    }
+                }
+            }
+
+            projectile.rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+            #endregion
+            timer++;
+            return false;
+        }
+
+        float overallAlpha = 0f;
+        float overallScale = 0f;
+        public List<float> previousRotations = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawPixelatedStuff(projectile, false);
+            });
+            DrawPixelatedStuff(projectile, true);
+
+
+            //Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            //Texture2D glowTex = TextureAssets.Extra[ExtrasID.BlackBolt].Value;
+
+            //Not being texture pack compatible for once
+            //VFXPlus/Content/Weapons/Ranged/Hardmode/Guns/OnyxChunk
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Content/Weapons/Ranged/Hardmode/Guns/OnyxBlasterProj").Value;
+            Texture2D TexGlow = Mod.Assets.Request<Texture2D>("Content/Weapons/Ranged/Hardmode/Guns/OnyxBlasterProjectileGlow").Value;
+
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            float drawScale = overallScale * projectile.scale;
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);
+
+            Color color110 = new Color(120, 40, 222, 120) * overallAlpha;
+
+
+            Main.EntitySpriteDraw(TexGlow, drawPos + new Vector2(0f, 0f), null, purple with { A = 100 } * overallAlpha * 2f, projectile.rotation, TexGlow.Size() / 2f, drawScale * 1f, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(Tex, drawPos, null, lightColor * overallAlpha, projectile.rotation, Tex.Size() / 2f, drawScale, SpriteEffects.None);
+
+            return false;
+
+        }
+
+        public void DrawPixelatedStuff(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            Texture2D Trail = CommonTextures.SoulSpikePMA.Value;
+            Color darkPurple = new Color(42, 2, 82);
+            Color purple3 = new Color(121, 7, 179);
+
+            //Starfury uses 0.8 scale so x1.25 that is one
+            float drawScale = projectile.scale * overallScale;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Color col = Color.Lerp(darkPurple, purple3, 0.5f);
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Vector2 trailScale = new Vector2(1.5f, 0.75f * drawScale * Easings.easeInOutSine(progress));
+
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 100 } * 1f * progress,
+                       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
+
+                //Main.EntitySpriteDraw(FireBall, AfterImagePos, null, Color.HotPink with { A = 20 } * 1f * progress,
+                //       previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(trailScale.Y, trailScale.X), SpriteEffects.None);
+
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.Black with { A = 100 } * 2f * progress,
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.65f), SpriteEffects.None);
+            }
+        }
+
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+
+            //Sound
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/OnyxBlasterShot") with { Volume = 0.5f, Pitch = -.45f, PitchVariance = 0.1f };
+            //SoundEngine.PlaySound(style, projectile.Center);
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);
+            Color purple3 = new Color(121, 7, 179);
+
+
+            #region vanillAI
+            projectile.position = projectile.Center;
+            projectile.width = (projectile.height = 160);
+            projectile.Center = projectile.position;
+            projectile.maxPenetrate = -1;
+            projectile.penetrate = -1;
+            projectile.Damage();
+            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            Vector2 vector20 = projectile.Center + Vector2.One * -20f;
+            int num94 = 40;
+            int num95 = num94;
+            for (int num96 = 0; num96 < 4; num96++)
+            {
+                int num98 = Dust.NewDust(vector20, num94, num95, 240, 0f, 0f, 100, default(Color), 1f);
+                Main.dust[num98].position = projectile.Center + Vector2.UnitY.RotatedByRandom(3.1415927410125732) * (float)Main.rand.NextDouble() * num94 / 2f;
+            }
+            for (int num99 = 220; num99 < 20; num99++)
+            {
+                int num100 = Dust.NewDust(vector20, num94, num95, 62, 0f, 0f, 200, default(Color), 3.7f);
+                Main.dust[num100].position = projectile.Center + Vector2.UnitY.RotatedByRandom(3.1415927410125732) * (float)Main.rand.NextDouble() * num94 / 2f;
+                Main.dust[num100].noGravity = true;
+                Main.dust[num100].noLight = true;
+                Dust dust139 = Main.dust[num100];
+                Dust dust334 = dust139;
+                dust334.velocity *= 3f;
+                dust139 = Main.dust[num100];
+                dust334 = dust139;
+                dust334.velocity += projectile.DirectionTo(Main.dust[num100].position) * (2f + Main.rand.NextFloat() * 4f);
+                num100 = Dust.NewDust(vector20, num94, num95, 62, 0f, 0f, 100, default(Color), 1.5f);
+                Main.dust[num100].position = projectile.Center + Vector2.UnitY.RotatedByRandom(3.1415927410125732) * (float)Main.rand.NextDouble() * num94 / 2f;
+                dust139 = Main.dust[num100];
+                dust334 = dust139;
+                dust334.velocity *= 2f;
+                Main.dust[num100].noGravity = true;
+                Main.dust[num100].fadeIn = 1f;
+                Main.dust[num100].color = Color.Crimson * 0.5f;
+                Main.dust[num100].noLight = true;
+                dust139 = Main.dust[num100];
+                dust334 = dust139;
+                dust334.velocity += projectile.DirectionTo(Main.dust[num100].position) * 8f;
+            }
+            for (int num101 = 220; num101 < 20; num101++)
+            {
+                int num102 = Dust.NewDust(vector20, num94, num95, 62, 0f, 0f, 0, default(Color), 2.7f);
+                Main.dust[num102].position = projectile.Center + Vector2.UnitX.RotatedByRandom(3.1415927410125732).RotatedBy(projectile.velocity.ToRotation()) * num94 / 2f;
+                Main.dust[num102].noGravity = true;
+                Main.dust[num102].noLight = true;
+                Dust dust138 = Main.dust[num102];
+                Dust dust334 = dust138;
+                dust334.velocity *= 3f;
+                dust138 = Main.dust[num102];
+                dust334 = dust138;
+                dust334.velocity += projectile.DirectionTo(Main.dust[num102].position) * 2f;
+            }
+            for (int num103 = 0; num103 < 50; num103++)
+            {
+                int num104 = Dust.NewDust(vector20, num94, num95, 240, 0f, 0f, 0, default(Color), 1.5f);
+                Main.dust[num104].position = projectile.Center + Vector2.UnitX.RotatedByRandom(3.1415927410125732).RotatedBy(projectile.velocity.ToRotation()) * num94 / 2f;
+                Main.dust[num104].noGravity = true;
+                Dust dust137 = Main.dust[num104];
+                Dust dust334 = dust137;
+                dust334.velocity *= 3f;
+                dust137 = Main.dust[num104];
+                dust334 = dust137;
+                dust334.velocity += projectile.DirectionTo(Main.dust[num104].position) * 3f;
+            }
+            #endregion
+
+            Vector2 effectPos = projectile.Center;
+
+            float smokeCount = 19;
+            for (int i = 0; i < smokeCount; i++)
+            {
+                float prog = (float)i / smokeCount;
+
+                float proggg = Main.rand.NextFloat();
+                Color col = Color.Lerp(purple3 * 2f, Color.Black * 1f, proggg);
+
+                Dust d = Dust.NewDustPerfect(effectPos, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.9f, 3f) * 2.75f,
+                    newColor: col * prog, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 1f);
+                d.customData = new MediumSmokeBehavior(Main.rand.Next(15, 25), 0.93f, 0.01f, 0.9f); //12 28
+            }
+
+            for (int i = 220; i < 12 + Main.rand.Next(0, 6); i++)
+            {
+                Color col = Main.rand.NextBool() ? Color.Purple * 2f : Color.Purple * 2f;
+
+
+                float velMult = Main.rand.NextFloat(2f, 6f);
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(velMult, velMult) * 1f;
+                Dust dust = Dust.NewDustPerfect(effectPos + randomStart * 5f, ModContent.DustType<PixelGlowOrb>(), randomStart, Alpha: 0,
+                    newColor: purple3 * 1.5f, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+
+                dust.scale *= 1.75f;
+
+                dust.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.15f, timeBeforeSlow: 4, postSlowPower: 0.89f, fadePower: 0.91f, velToBeginShrink: 3f, colorFadePower: 1f);
+
+                dust.noLight = false;
+            }
+
+            for (int i = 0; i < 4 + Main.rand.Next(0, 5); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2Circular(2f, 2f) * 2f;
+                Dust dust = Dust.NewDustPerfect(effectPos + randomStart * 5f, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: purple3 * 1.5f, Scale: Main.rand.NextFloat(0.65f, 0.75f) * 0.65f);
+
+                //dust.velocity += projectile.velocity * 0.2f;
+
+                dust.noLight = false;
+                dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
+                    rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
+            }
+
+            float randRot = Main.rand.NextFloat(6.28f);
+
+            int pulse = Projectile.NewProjectile(null, effectPos + new Vector2(0f, -0f), Vector2.Zero, ModContent.ProjectileType<OnyxPulse>(), 0, 0, Main.myPlayer);
+            Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 1f;
+            Main.projectile[pulse].ai[0] = 1f;
+
+            int pulse2 = Projectile.NewProjectile(null, effectPos + new Vector2(0f, -0f), Vector2.Zero, ModContent.ProjectileType<OnyxPulse>(), 0, 0, Main.myPlayer);
+            Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 1f;
+            Main.projectile[pulse2].ai[0] = -1f;
+
+
+            for (int i = 220; i < 8 + Main.rand.Next(0, 3); i++)
+            {
+                Vector2 randomStart = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(5f, 10f);
+                Dust dust = Dust.NewDustPerfect(effectPos + new Vector2(0f, -0f), ModContent.DustType<OnyxChunkDust>(), randomStart, Scale: Main.rand.NextFloat(0.75f, 0.85f));
+
+            }
+
+            return false;// base.PreKill(projectile, timeLeft);
+        }
+
+    }
+
+    public class OnyxChunkDust : ModDust
+    {
+        public override string Texture => "VFXPlus/Assets/Pixel";
+
+        public override void OnSpawn(Dust dust)
+        {
+            dust.fadeIn = 1f;
+            dust.noLight = true;
+
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);
+            Color purple3 = new Color(121, 7, 179);
+
+            dust.color = Color.White;
+        }
+
+        public override bool Update(Dust dust)
+        {
+
+            dust.rotation += dust.velocity.Length() * 0.1f * Math.Sign(dust.velocity.X);
+            dust.velocity *= 0.9f;
+
+            if (dust.velocity.Length() < 1.5f)
+                dust.fadeIn *= 0.9f;
+
+            if (dust.velocity.Length() < 0.75f)
+                dust.scale *= 0.98f;
+
+            if (dust.scale <= 0.25f || dust.fadeIn <= 0.05f)
+                dust.active = false;
+
+            dust.position += dust.velocity;
+            return false;
+        }
+
+
+        public override bool PreDraw(Dust dust)
+        {
+            Texture2D Tex = ModContent.Request<Texture2D>("VFXPlus/Content/Weapons/Ranged/Hardmode/Guns/OnyxChunk", AssetRequestMode.ImmediateLoad).Value;
+            Vector2 drawPos = dust.position - Main.screenPosition;
+            Vector2 origin = Tex.Size() / 2f;
+            Main.spriteBatch.Draw(Tex, drawPos, null, dust.color * dust.fadeIn, dust.rotation, origin, dust.scale, SpriteEffects.None, 0f);
+
+            return false;
+        }
+    }
+
+    public class OnyxPulse : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        int timer = 0;
+
+        float progress = 0f;
+        public override void AI()
+        {
+            float timeForPulse = 24f;
+            float myProg = Utils.GetLerpValue(0f, timeForPulse, (float)timer, true);
+
+            progress = myProg;
+
+            if (progress > 0.99f)
+            {
+                progress = 1f;
+                Projectile.active = false;
+            }
+
+            timer++;
+        }
+
+        Effect myEffect = null;
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawEffect(false);
+            });
+
+            DrawEffect(true);
+
+            return false;
+        }
+
+        public Color color;
+        public void DrawEffect(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            float rot = Projectile.rotation;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Radial/RadialPulse", AssetRequestMode.ImmediateLoad).Value;
+
+
+            myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value);
+            myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+            myEffect.Parameters["progress"].SetValue(progress);//0.42f
+
+            //Ring values
+            myEffect.Parameters["ringRadiusStart"].SetValue(0f);
+            myEffect.Parameters["ringThicknessStart"].SetValue(1f * progress);
+            myEffect.Parameters["ringPower"].SetValue(0.25f);
+            myEffect.Parameters["ringMult"].SetValue(2f);
+            myEffect.Parameters["ringWaveSpeed"].SetValue(0.3f);
+            myEffect.Parameters["ringWaveStrength"].SetValue(0.25f);
+            myEffect.Parameters["ringWaveLength"].SetValue(41f);
+
+
+            Color purple = new Color(61, 2, 92);
+            Color darkPurple = new Color(42, 2, 82);  // Color.Purple;//new Color(61, 2, 92);
+            Color purple3 = new Color(121, 7, 179);
+            //Caustic values
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                new Color(42, 2, 82).ToVector3(),
+                purple.ToVector3(),
+            };
+
+
+            myEffect.Parameters["gradColors"].SetValue(gradCols);
+            myEffect.Parameters["numberOfColors"].SetValue(gradCols.Length);
+            myEffect.Parameters["finalColIntensity"].SetValue(1f); //3.0
+            myEffect.Parameters["posterizationSteps"].SetValue(2.0f);
+
+            myEffect.Parameters["totalAlpha"].SetValue(overallAlpha);
+            myEffect.Parameters["fadeStrength"].SetValue(0.35f); //.35
+
+
+            myEffect.Parameters["zoom"].SetValue(2f); //7f
+            myEffect.Parameters["flowSpeed"].SetValue(3f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
+
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, rot, Tex.Size() / 2f, 300 * new Vector2(0.35f, 0.8f) * overallScale, SpriteEffects.None, 0f); //250
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+        }
+    }
+
+
+    public class OnyxBlasterShotOverrideOld : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && entity.type == ProjectileID.BlackBolt && false;
         }
 
 
@@ -411,7 +900,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
             }
 
-            int pulse = Projectile.NewProjectile(null, effectPos + new Vector2(0f, 0f), Vector2.Zero, ModContent.ProjectileType<OnyxPulse>(), 0, 0, Main.myPlayer);
+            int pulse = Projectile.NewProjectile(null, effectPos + new Vector2(0f, 0f), Vector2.Zero, ModContent.ProjectileType<OnyxPulseOld>(), 0, 0, Main.myPlayer);
 
 
             return false;// base.PreKill(projectile, timeLeft);
@@ -419,7 +908,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
     }
 
-    public class OnyxPulse : ModProjectile
+    public class OnyxPulseOld : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
@@ -615,6 +1104,5 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             */
         }
     }
-
 
 }

@@ -220,7 +220,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
             Main.EntitySpriteDraw(Glow, pos, null, orbCol3 with { A = 0 } * overallAlpha * 0.35f, rot, Glow.Size() / 2f, adjustedScale * scale3 * 0.55f, SpriteEffects.None);
 
             //Star
-            Vector2 starScale = new Vector2(0.85f, 1.45f) * (1f - overallScale);
+            Vector2 starScale = new Vector2(0.85f, 1.45f) * (1f - overallScale) * Easings.easeOutCubic(overallAlpha);
             Main.EntitySpriteDraw(CrispStar, pos, null, Color.DodgerBlue with { A = 0 }, rot, CrispStar.Size() / 2f, 1.4f * starScale, SpriteEffects.None);
             Main.EntitySpriteDraw(CrispStar, pos, null, Color.White with { A = 0 }, rot, CrispStar.Size() / 2f, 0.55f * starScale, SpriteEffects.None); //0.6
 

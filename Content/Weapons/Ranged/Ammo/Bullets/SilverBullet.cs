@@ -1,24 +1,25 @@
-using System;
 using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
-using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using Terraria.Graphics.Shaders;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
-using VFXPlus.Common.Drawing;
-using VFXPlus.Common.Interfaces;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.GameContent.Drawing;
 using Terraria.GameContent.UI;
+using Terraria.Graphics.Shaders;
+using Terraria.ID;
+using Terraria.ModLoader;
+using VFXPlus.Common;
+using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Interfaces;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
@@ -52,17 +53,16 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             }
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Extra_196_Black").Value;
+            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value; //Extra_196_Black
             trail1.trailPointLimit = 120 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(7 * totalAlpha); //15
+            trail1.trailWidth = (int)(8 * totalAlpha); //15
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = Color.DarkGray with { A = 75 } * totalAlpha * 0.75f; //255 111 20
-            trail1.timesToDraw = 2;
+            trail1.trailColor = Color.DarkGray with { A = 100 } * totalAlpha * 0.75f; //255 111 20
             trail1.fadeOut = true;
 
-            trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
+            trail1.trailTime = randomTimeOffset + (timer * 0.02f * randomTrailSpeed);
             trail1.trailRot = projectile.velocity.ToRotation();
             trail1.trailPos = projectile.Center + projectile.velocity;
             trail1.TrailLogic();
@@ -115,18 +115,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (timer == 0)
                 return false;
 
-            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            trail1.TrailDrawing(Main.spriteBatch, false);
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
+                trail1.TrailDrawing(Main.spriteBatch, false);
+
+                Color darkest = Color.Gray;
+                Color middle = Color.LightGray;
+                Color brightest = Color.Silver;
+
                 //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
                 if (projectile.active == false)
                     totalAlpha = 0f;
 
-
                 Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
                 Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
-
 
                 Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -10f);
                 drawPos += new Vector2(0f, 0f);
@@ -137,25 +139,21 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 //Vanilla has 1.2 scale for bullets, so normalize this to 1f
                 float adjustedScale = projectile.scale * (5f / 6f);
 
-                Color spikeCol = new Color(75, 75, 75);
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
 
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, spikeCol with { A = 100 } * 0.75f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 200 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
-                Color orbCol = new Color(140, 140, 140);
                 Vector2 orbScale = new Vector2(1f, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, orbCol with { A = 100 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, middle with { A = 150 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
 
                 Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
 
-                Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
-
-                Color col = new Color(125, 125, 125);
+                Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.45f;
 
                 drawPos += new Vector2(0f, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, col with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 125 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 125 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.55f, SpriteEffects.None, 0f);
             });
 
             return false;
@@ -207,6 +205,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             Dust d1 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowStarSharp>(), Vector2.Zero, newColor: starCol, Scale: 1f);
             d1.customData = DustBehaviorUtil.AssignBehavior_GSSBase(fadePower: 0.88f, shouldFadeColor: true, sdci: sdic);
+
+            //Dust dstar = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), Vector2.Zero, newColor: Color.Silver with { A = 100 });
+            //dstar.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 30, 0.15f, 0.85f, Pixelize: true);
+
+            //dstar.scale = 1.5f;
+            //dstar.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 15, 0.25f, 0.75f, Pixelize: true);
+
             return false;
         }
 

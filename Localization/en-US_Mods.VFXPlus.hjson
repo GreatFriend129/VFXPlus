@@ -255,6 +255,9 @@ Projectiles: {
 	LunarBulletTest.DisplayName: Lunar Bullet Test
 	LuminiteBulletTrail.DisplayName: Luminite Bullet Trail
 	NewBloodRainProj.DisplayName: New Blood Rain Proj
+	BloodSlashAnim.DisplayName: Blood Slash Anim
+	StarfuryImpactVFX.DisplayName: Starfury Impact V F X
+	OnyxPulseOld.DisplayName: Onyx Pulse Old
 }
 
 Configs: {
