@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -56,7 +57,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             //Want less dust when the arrow has extra updates (magic quiver)
             int mod = Math.Clamp(2 * EU, 2, 100);
 
-            if (timer % mod == 0 && timer > 10 && Main.rand.NextBool())
+            if (timer % mod == 0 && timer > 10 && Main.rand.NextBool() && false)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.15f;
@@ -76,6 +77,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 Main.dust[num4].velocity.X *= 3f;
                 Main.dust[num4].velocity.Y *= 3f;
                 Main.dust[num4].velocity = (Main.dust[num4].velocity + projectile.velocity) / 2f;
+            }
+
+            //Fire Particles
+            if (timer % mod == 0 && Main.rand.NextBool(2))
+            {
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.25f; //0.5
+
+
+                FireParticle fire = new FireParticle(dustPos + new Vector2(0f, 0f) + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.4f, Color.Lerp(Color.OrangeRed, Color.Red, 0f), colorMult: 1f, bloomAlpha: 1.5f,
+                    AlphaFade: 0.94f, RotPower: 0.01f);
+                fire.renderLayer = RenderLayer.UnderProjectiles;
+
+                ShaderParticleHandler.SpawnParticle(fire);
             }
 
 
@@ -102,7 +117,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawTrail(projectile, false);
             });
@@ -123,7 +138,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 Vector2 offset = Main.rand.NextVector2Circular(2f, 2f);
                 Main.EntitySpriteDraw(vanillaTex, offset + drawPos + projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 2f, null, Color.White with { A = 0 } * 1f, projectile.rotation, TexOrigin,
                     projectile.scale * overallScale, SE);
-
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
@@ -138,7 +152,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/Flare").Value;
+            Texture2D flare = CommonTextures.Flare.Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;

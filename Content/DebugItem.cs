@@ -5,6 +5,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
+using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.FeatheredFoe;
@@ -69,9 +70,15 @@ namespace VFXPlus.Content
             //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
             //dad.rotation = Main.rand.NextFloat(6.28f);
 
-            Dust daa = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<PulseInOutDust>(), Velocity: Main.rand.NextVector2CircularEdge(0f, 0f), newColor: Color.Silver with { A = 120 });
-            daa.scale = 1.5f;
-            daa.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 15, 0.25f, 0.75f, Pixelize: true);
+
+            Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) + velocity * 0.75f; //0.5
+
+            //Color.Lerp(Color.Green, Color.GreenYellow, 0.3f)
+            FireParticle firepp = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(2f, 2f), dustVel, 1f, Color.Lerp(Color.OrangeRed, Color.Red, 0.3f), colorMult: 1.5f, bloomAlpha: 0f,
+                AlphaFade: 0.91f, RotPower: 0.01f);
+            firepp.renderLayer = RenderLayer.UnderProjectiles;
+
+            ShaderParticleHandler.SpawnParticle(firepp);
 
 
             for (int i = 220; i < 24; i++)

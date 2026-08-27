@@ -354,9 +354,13 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
                 p.velocity -= projectile.velocity * 0.2f;
             }
 
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/small fireball projectile death") with { Volume = 0.25f, Pitch = 0.2f, PitchVariance = .15f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, projectile.Center);
+
             #region vanillaKill
             int dustCount = 6; //Vanilla = 20
-            SoundEngine.PlaySound(in SoundID.Item10, projectile.position);
+            ///SoundEngine.PlaySound(in SoundID.Item10, projectile.position);
             for (int num697 = 0; num697 < dustCount; num697++)
             {
                 int num698 = Dust.NewDust(new Vector2(projectile.position.X, projectile.position.Y), projectile.width, projectile.height, 6, (0f - projectile.velocity.X) * 0.2f, (0f - projectile.velocity.Y) * 0.2f, 100, default(Color), 2f);
@@ -372,7 +376,6 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
             #endregion
 
             return false;
-            return base.PreKill(projectile, timeLeft);
         }
 
         bool justTileCollided = false;
@@ -383,6 +386,8 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Misc
 
             bool hitWall = false;
 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Fire/small fireball projectile bounce") with { Volume = 0.3f, Pitch = -0.2f, PitchVariance = .15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, projectile.Center);
             SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.4f, Pitch = -0.15f, PitchVariance = 0.15f, MaxInstances = -1}, projectile.Center);
 
             #region vanillaCode

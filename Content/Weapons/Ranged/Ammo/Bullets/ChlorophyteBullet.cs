@@ -44,18 +44,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
-            trail1.trailPointLimit = 255 + trailRandomLengthOffset;
+            trail1.trailPointLimit = 235 + trailRandomLengthOffset;
             trail1.trailWidth = (int)(12 * totalAlpha);
-            trail1.trailMaxLength = 255 + trailRandomLengthOffset; 
+            trail1.trailMaxLength = 235 + trailRandomLengthOffset; 
 
             trail1.shouldSmooth = false;
             trail1.fadeOut = true;
 
-            Color between = Color.Lerp(Color.ForestGreen, Color.LawnGreen, 0.25f);
+            Color between = Color.Lerp(Color.ForestGreen, Color.LawnGreen, 0.35f);
 
             Color trailCol = Color.Lerp(Color.ForestGreen, Color.LawnGreen, 0.45f);
             Color newTrailCol = Color.Lerp(Color.White, trailCol, 0.85f);
-            trail1.trailColor = between with { A = 70 } * totalAlpha * 0.5f;
+            trail1.trailColor = between with { A = 50 } * totalAlpha * 0.4f;
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);

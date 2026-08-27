@@ -88,8 +88,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
 
+                //FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f) + new Vector2(0f, -100f), dustVel, 0.5f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
 
-                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.5f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
+
+                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f) + new Vector2(0f, 100f), dustVel, 0.5f, Color.Lerp(Color.OrangeRed, Color.Red, 0.35f), colorMult: 1.5f, bloomAlpha: 2f,
                     AlphaFade: 0.91f, RotPower: 0.01f);
                 fire.renderLayer = RenderLayer.UnderProjectiles;
 

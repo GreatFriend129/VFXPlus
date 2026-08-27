@@ -267,14 +267,10 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Staves
 
             myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
 
-            //Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Mask/JackOMask4").Value;
-
             Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
-            //myEffect.Parameters["progress"].SetValue(1f - maskVal);
             myEffect.Parameters["maskTexture"].SetValue(Mask);
             myEffect.Parameters["zoom"].SetValue(1f);
 
-            //myEffect.Parameters["innerCol"].SetValue(new Vector3(1f, 0.5f, 1f));
             myEffect.Parameters["innerCol"].SetValue(new Color(45, 1, 70).ToVector3());
             myEffect.Parameters["outerCol"].SetValue(new Color(45, 1, 70).ToVector3());
             myEffect.Parameters["dissolveColMult"].SetValue(1f);

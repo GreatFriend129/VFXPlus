@@ -32,8 +32,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         }
 
 
-        public float scale = 0f;
-        public float alpha = 1f;
+        public float overallScale = 0f;
+        public float overallAlpha = 1f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -55,10 +55,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2.5f));
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2.5f));
 
-            if (scale == 1f)
-                alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
+            if (overallScale == 1f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.05f), 0f, 1f);
 
             if (timer == 3)
             {
@@ -85,22 +85,51 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
-            Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
+            Vector2 vec2Scale = new Vector2(overallScale * projectile.scale, projectile.scale);
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    float myAlpha = projectile.Opacity * alpha;
+                    float myAlpha = projectile.Opacity * Easings.easeInCirc(overallAlpha);
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3.5f, 3.5f), null,
                         Color.White with { A = 0 } * 0.3f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
+            Effect myEffect = ModContent.Request<Effect>("Playground/Effects/Filter/Dissolve", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
+
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+            myEffect.Parameters["zoom"].SetValue(1f);
+
+            myEffect.Parameters["innerCol"].SetValue(Color.DeepPink.ToVector3());
+            myEffect.Parameters["outerCol"].SetValue(Color.DeepSkyBlue.ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+
+            myEffect.Parameters["mainTexWidth"].SetValue(vanillaTex.Width / 2f);
+            myEffect.Parameters["mainTexHeight"].SetValue(vanillaTex.Height / 2f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
 
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
             return false;            
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+
+            return base.PreKill(projectile, timeLeft);
         }
     }
 

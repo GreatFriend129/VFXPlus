@@ -103,7 +103,16 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<PurpleCasing>());
 
-            float overallVol = 0.75f;
+            float overallVol = 0.9f;
+
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/OnyxBlasterBetter") with { Volume = 1f * overallVol, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
+
+            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/stalactite rock impact 1") with { Volume = 1f * overallVol, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, position);
+
+            /*
 
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/OnyxBlaster") with { Volume = 1f * overallVol, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style, position);
@@ -116,7 +125,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             SoundStyle styleC = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickShot") with { Volume = 0.5f * overallVol, Pitch = 0.1f, PitchVariance = 0.2f, MaxInstances = -1 };
             //SoundEngine.PlaySound(styleC, position);
-
+            */
 
             return true;
         }
@@ -289,8 +298,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         {
 
             //Sound
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/OnyxBlasterShot") with { Volume = 0.5f, Pitch = -.45f, PitchVariance = 0.1f };
-            //SoundEngine.PlaySound(style, projectile.Center);
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/OnyxCrystalShatter") with { Volume = 0.75f, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, projectile.Center);
+
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Onyx/CrumblingRock") with { Volume = 1f, Pitch = -0.08f, PitchVariance = .1f, };
+            SoundEngine.PlaySound(style2, projectile.Center);
+
+            //SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.25f, Pitch = 0f, PitchVariance = 0.1f } , projectile.Center);
+
 
             Color purple = new Color(61, 2, 92);
             Color darkPurple = new Color(42, 2, 82);
@@ -304,7 +319,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             projectile.maxPenetrate = -1;
             projectile.penetrate = -1;
             projectile.Damage();
-            SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
+            //SoundEngine.PlaySound(in SoundID.Item14, projectile.position);
             Vector2 vector20 = projectile.Center + Vector2.One * -20f;
             int num94 = 40;
             int num95 = num94;
