@@ -258,6 +258,7 @@ Projectiles: {
 	BloodSlashAnim.DisplayName: Blood Slash Anim
 	StarfuryImpactVFX.DisplayName: Starfury Impact V F X
 	OnyxPulseOld.DisplayName: Onyx Pulse Old
+	VortexExplosionPulse.DisplayName: Vortex Explosion Pulse
 }
 
 Configs: {

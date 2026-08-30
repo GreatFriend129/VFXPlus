@@ -147,9 +147,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 0 } * overallAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col1 with { A = 40 } * overallAlpha, rot, orb.Size() / 2f, scale1 * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col2 with { A = 40 } * overallAlpha, rot, orb.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, originPoint, null, col3 with { A = 40 } * overallAlpha, rot, orb.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
 
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -251,16 +251,16 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Vector2 innerScale = new Vector2(1f * overallScale, 0.15f * progress) * progress * overallScale;
 
-                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, col with { A = 60 } * 0.85f * progress * overallAlpha * 0.5f,
                     previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, col with { A = 0 } * 0.85f * progress * overallAlpha * 0.5f,
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, col with { A = 60 } * 0.85f * progress * overallAlpha * 0.5f,
                     previousRotations[i], line.Size() / 2f, lineScale * 1.25f, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
+                Main.EntitySpriteDraw(line, AfterImagePos + offset1, null, Color.White with { A = 60 } * 0.26f * progress * overallAlpha * 0.5f,
                     previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 0 } * 0.26f * progress * overallAlpha * 0.5f,
+                Main.EntitySpriteDraw(line, AfterImagePos + offset2, null, Color.White with { A = 60 } * 0.26f * progress * overallAlpha * 0.5f,
                     previousRotations[i], line.Size() / 2f, innerScale, SpriteEffects.None);
 
             }

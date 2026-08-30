@@ -1,22 +1,24 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
+using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
-using VFXPlus.Content.VFXTest;
-using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Gores;
+using VFXPlus.Content.Particles;
+using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.VFXTest;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
@@ -64,7 +66,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
             //Explosion
             int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(54f, -2f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
+            Vector2 muzzlePos = position + new Vector2(52f, -2f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
 
             //Vector2 muzzlePos = position + velocity.SafeNormalize(Vector2.UnitX) * 50f;
             for (int i = 0; i < 6; i++) //16

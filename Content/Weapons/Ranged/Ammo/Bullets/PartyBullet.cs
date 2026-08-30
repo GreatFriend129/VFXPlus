@@ -191,9 +191,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), new Vector2(r, 0f).RotatedBy(randomRot + (theta * MathHelper.TwoPi)), newColor: dustCol with { A = 0 });
                 d.scale *= Main.rand.NextFloat(0.5f, 1f) * 1f;
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
+                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
 
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
+                //Vcool
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
 
             }
 
@@ -210,15 +211,15 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 float r = numer / denom;
 
-                Color dustCol = Main.hslToRgb(Main.rand.NextFloat(), 0.8f, 0.5f);
+                Color dustCol = Main.hslToRgb(Main.rand.NextFloat(), 0.8f, 0.65f);
 
                 //Color dustCol = Main.rand.NextBool() ? Color.HotPink : Color.SkyBlue;
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), new Vector2(r * 5f, 0f).RotatedBy(randomRot + theta), newColor: dustCol with { A = 0 });
-                d.scale *= Main.rand.NextFloat(0.75f, 1f) * 1f;
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), new Vector2(r * 5f, 0f).RotatedBy(randomRot + theta), newColor: dustCol with { A = 50 });
+                d.scale *= Main.rand.NextFloat(0.5f, 1f) * 1f;
+                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 20, 0.05f, 0.95f, Pixelize: true);
 
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 30, 0.15f, 0.85f, Pixelize: true);
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
 
             }
 

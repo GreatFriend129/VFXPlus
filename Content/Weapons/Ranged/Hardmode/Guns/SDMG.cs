@@ -78,7 +78,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 Color col1 = Color.Lerp(Color.Aqua, Color.Green, 0.5f);
 
                 float progress = (float)i / 4;
-                Color col = Color.Lerp(Color.Brown * 0.15f, col1 with { A = 0 } * 0.5f, progress);
+                Color col = Color.Lerp(Color.Brown * 0.15f, col1 with { A = 30 } * 0.5f, progress);
 
                 Dust d = Dust.NewDustPerfect(muzzlePos, ModContent.DustType<MediumSmoke>(), Velocity: Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.85f) * 1f,
                     newColor: col, Scale: Main.rand.NextFloat(0.9f, 1.5f) * 0.35f);

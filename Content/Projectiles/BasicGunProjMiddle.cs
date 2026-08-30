@@ -318,7 +318,7 @@ namespace VFXPlus.Content.Projectiles
             float muzzleFlashScale = Projectile.scale * 2f * Easings.easeOutSine(muzzleFlashPower);
 
 
-            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos + Main.rand.NextVector2Circular(3f, 3f), null, colors[0] with { A = 0 } * easedMuzzleFlashAlpha * 0.75f, Projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, mySE, 0f);
+            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos + Main.rand.NextVector2Circular(3f, 3f), null, colors[0] with { A = 40 } * easedMuzzleFlashAlpha * 0.75f, Projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, mySE, 0f);
 
             Main.spriteBatch.Draw(MuzzleFlash, muzzleFlashPos, null, colors[3] * easedMuzzleFlashAlpha * 1f, Projectile.rotation, muzzleFlashOrigin, muzzleFlashScale, mySE, 0f);
 
@@ -326,7 +326,7 @@ namespace VFXPlus.Content.Projectiles
 
             if (isShotgun)
                 overglowAlpha = Easings.easeInQuad(overglowAlpha);
-            Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos, null, colors[0] with { A = 0 } * overglowAlpha, Projectile.rotation, muzzleFlashOrigin, 3f * (1f - bonusPower), mySE, 0f);
+            //Main.spriteBatch.Draw(MuzzleFlashGlow, muzzleFlashPos, null, colors[0] with { A = 40 } * overglowAlpha, Projectile.rotation, muzzleFlashOrigin, 3f * (1f - bonusPower), mySE, 0f);
 
 
 
@@ -339,9 +339,9 @@ namespace VFXPlus.Content.Projectiles
 
             float starAlpha = 0.65f * Easings.easeInSine(bonusPower);
 
-            Main.spriteBatch.Draw(Flash, starPos, null, colors[1] with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.4f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.3f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 0 } * starAlpha, starRot, Flash.Size() / 2, 0.2f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, colors[1] with { A = 40 } * starAlpha, starRot, Flash.Size() / 2, 0.4f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 40 } * starAlpha, starRot, Flash.Size() / 2, 0.3f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 40 } * starAlpha, starRot, Flash.Size() / 2, 0.2f, SpriteEffects.None, 0f);
 
 
             //Glowmask for OnyxBlaster

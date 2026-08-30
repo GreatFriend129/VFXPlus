@@ -38,7 +38,6 @@ namespace VFXPlus.Content.Dusts
                 dust.velocity *= 0.9f;
             }
 
-
             dust.position += dust.velocity;
 
             behavoir.timer++;

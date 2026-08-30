@@ -51,7 +51,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 SoundEngine.PlaySound(style, projectile.Center);
             }
 
-
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
@@ -59,6 +58,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             if (overallScale == 1f)
                 overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.05f), 0f, 1f);
+
+            //float adjustedAI1 = Math.Max(projectile.ai[1] - 1, 0f);
+
+            //if (overallScale == 1f && timer > 40 + (2 * adjustedAI1))
+            //    overallAlpha = Math.Clamp(overallAlpha - 0.12f, 0f, 1f);
+            //overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.01f), 0f, 1f);
 
             if (timer == 3)
             {
@@ -91,10 +96,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    float myAlpha = projectile.Opacity * Easings.easeInCirc(overallAlpha);
+                    float myAlpha = projectile.Opacity * overallAlpha;
 
                     Main.spriteBatch.Draw(vanillaTex, drawPos + Main.rand.NextVector2Circular(3.5f, 3.5f), null,
-                        Color.White with { A = 0 } * 0.3f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
+                        Color.White with { A = 20 } * 0.3f * myAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
@@ -102,26 +107,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
             myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
 
-            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Mask/JackOMask2").Value; ;// Mod.Assets.Request<Texture2D>("Assets/Noise/Swirl").Value;
             myEffect.Parameters["maskTexture"].SetValue(Mask);
             myEffect.Parameters["zoom"].SetValue(1f);
 
-            myEffect.Parameters["innerCol"].SetValue(Color.DeepPink.ToVector3());
-            myEffect.Parameters["outerCol"].SetValue(Color.DeepSkyBlue.ToVector3());
-            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+            myEffect.Parameters["innerCol"].SetValue(Color.White.ToVector3());
+            myEffect.Parameters["outerCol"].SetValue(Color.White.ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(0.25f);
 
-            myEffect.Parameters["mainTexWidth"].SetValue(vanillaTex.Width / 2f);
+            myEffect.Parameters["mainTexWidth"].SetValue((vanillaTex.Width / 2f) - 2); //Vile shard texture is fucked up
             myEffect.Parameters["mainTexHeight"].SetValue(vanillaTex.Height / 2f);
 
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
             Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
 
             return false;            
         }

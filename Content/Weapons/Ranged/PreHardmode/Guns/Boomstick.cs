@@ -38,8 +38,11 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 1f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 0.2f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, position);
+
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/deagle_01") with { Volume = 0.2f, Pitch = -.1f, PitchVariance = .1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style2, position);
 
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
@@ -101,7 +104,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             }
 
             //Bullet Casing
-            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<ShotgunShell>());
 
             return true;
         }

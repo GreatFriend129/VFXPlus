@@ -2316,13 +2316,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         {
             int trailCount = 14;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             float fadeInTime = Math.Clamp((timer + 12f) / 25f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
@@ -2334,7 +2334,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         float overallAlpha = 1f;
         float overallScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -2354,7 +2354,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
 
                 float size = (0.5f + (0.5f * progress)) * projectile.scale;
 
-                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.3f,
                     previousRotations[i], TexOrigin, size * overallScale, SpriteEffects.None);

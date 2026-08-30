@@ -39,7 +39,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 vector14.Y *= -1f;
             }
 
+            //Vanilla
             //float num144 = (float)player.itemAnimation / (float)player.itemAnimationMax * 0.66f + player.miscCounterNormalized;
+
+            //We are using a different value than vanilla but that's fine because this only affects the color
             float num144 = (float)player.itemAnimation / (float)player.itemAnimationMax * 0.1f + player.miscCounterNormalized;
             
             Vector2 pointPoisition = player.MountedCenter + new Vector2(player.direction * 15, player.gravDir * 3f);
@@ -53,12 +56,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             #endregion
             Main.projectile[a].spriteDirection = velocity.X > 0 ? 1 : -1;
 
+            //Spawn the pulse vfx on first use
             if (player.itemAnimation == item.useAnimation)
             {
                 int vfx = Projectile.NewProjectile(source, pointPoisition, Vector2.Zero, ModContent.ProjectileType<NightglowPulseVFX2>(), 0, 0, player.whoAmI);
                 Main.projectile[vfx].spriteDirection = velocity.X > 0 ? 1 : -1;
             }
 
+            //Dust
             for (int i = 0; i < Main.rand.Next(1, 3); i++)
             {
                 Vector2 dustVel = Main.rand.NextVector2Circular(4f, 4f);
@@ -92,21 +97,21 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             previousPositions.Add(projectile.Center);
             previousRotations.Add(projectile.velocity.ToRotation());
 
-            int trailCount = 40;
+            int trailCount = 20;
             if (previousPositions.Count > trailCount)
             {
                 previousPositions.RemoveAt(0);
                 previousRotations.RemoveAt(0);
             }
 
-            previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
-            previousRotations.Add(projectile.velocity.ToRotation());
+            //previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
+            //previousRotations.Add(projectile.velocity.ToRotation());
 
-            if (previousPositions.Count > trailCount)
-            {
-                previousPositions.RemoveAt(0);
-                previousRotations.RemoveAt(0);
-            }
+            //if (previousPositions.Count > trailCount)
+            //{
+            //    previousPositions.RemoveAt(0);
+            //    previousRotations.RemoveAt(0);
+            //}
 
             if (timer % 3 == 0 && Main.rand.NextBool(5))
             {
@@ -150,7 +155,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
         public void DrawPixelTrail(Projectile projectile)
         {
-            Texture2D AfterImage = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D AfterImage = CommonTextures.SoulSpikePMA.Value;
 
             float xScale = 0.15f + (0.45f * Utils.GetLerpValue(2f, 5f, projectile.velocity.Length(), true));
 
@@ -162,13 +167,33 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Vector2 vec2Scale = new Vector2(xScale, 0.8f * progress) * projectile.scale * 0.75f;
-                Vector2 vec2Scale2 = new Vector2(xScale, 0.4f * progress) * projectile.scale * 0.75f;
+                Vector2 vec2Scale = new Vector2(xScale * 1.5f, 1f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
+                Vector2 vec2Scale2 = new Vector2(xScale * 1.5f, 0.66f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, color with { A = 0 },
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, color with { A = 150 },
                        previousRotations[i], AfterImage.Size() / 2f, vec2Scale, SpriteEffects.None);
 
-                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 1f * progress,
+                //Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 100 } * 1f * progress,
+                //       previousRotations[i], AfterImage.Size() / 2f, vec2Scale2, SpriteEffects.None);
+
+            }
+
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Color color = Main.hslToRgb((timer * 0.01f + projectile.ai[1] + (progress * 0.05f)) % 1f, 1f, 0.4f, 0);
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Vector2 vec2Scale = new Vector2(xScale * 1.5f, 1f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
+                Vector2 vec2Scale2 = new Vector2(xScale * 1.5f, 0.5f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
+
+                //Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, color with { A = 200 },
+                //       previousRotations[i], AfterImage.Size() / 2f, vec2Scale, SpriteEffects.None);
+
+                Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 150 } * 1f * progress,
                        previousRotations[i], AfterImage.Size() / 2f, vec2Scale2, SpriteEffects.None);
 
             }
@@ -180,7 +205,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             float rainbowAlpha = 1f - Utils.GetLerpValue(2f, 5f, projectile.velocity.Length(), true);
 
-            if (rainbowAlpha == 0f)
+            if (rainbowAlpha <= 0.1f)
                 return;
 
             float starRot = (float)Main.timeForVisualEffects * (projectile.velocity.X > 0 ? -1f : 1f);
@@ -196,13 +221,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
             float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * rainbowAlpha, starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 0 } * 1f, starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 0 } * 0.75f, starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            byte AVal = (byte)(150 * rainbowAlpha);
 
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 1f, starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 0.75f, starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 1f, MathHelper.PiOver2 + starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 0.75f, MathHelper.PiOver2 + starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+
+            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * rainbowAlpha, starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
             Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * rainbowAlpha, MathHelper.PiOver2 + starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 0 } * 1f, MathHelper.PiOver2 + starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 0 } * 0.75f, MathHelper.PiOver2 + starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

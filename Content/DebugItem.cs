@@ -70,15 +70,25 @@ namespace VFXPlus.Content
             //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
             //dad.rotation = Main.rand.NextFloat(6.28f);
 
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) + velocity * 0.75f; //0.5
 
-            Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) + velocity * 0.75f; //0.5
+                float prog = (float)(i / 3f);
 
-            //Color.Lerp(Color.Green, Color.GreenYellow, 0.3f)
-            FireParticle firepp = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(2f, 2f), dustVel, 1f, Color.Lerp(Color.OrangeRed, Color.Red, 0.3f), colorMult: 1.5f, bloomAlpha: 0f,
-                AlphaFade: 0.91f, RotPower: 0.01f);
-            firepp.renderLayer = RenderLayer.UnderProjectiles;
+                Vector2 fireParticleVel = Main.rand.NextVector2Unit() * Main.rand.NextFloat(0.35f, 0.85f) * 2f;
+                fireParticleVel += velocity.SafeNormalize(Vector2.UnitX) * 5f;
 
-            ShaderParticleHandler.SpawnParticle(firepp);
+                Color colr2 = Color.Lerp(Color.OrangeRed, Color.Red, 0.3f);
+
+                //Color.Lerp(Color.Green, Color.GreenYellow, 0.3f)
+                FireParticle firepp = new FireParticle(Main.MouseWorld + Main.rand.NextVector2Circular(3f, 3f), fireParticleVel, 0.85f, colr2, colorMult: 1.5f, bloomAlpha: 1.15f,
+                    AlphaFade: 0.88f, RotPower: 0.01f);
+                firepp.renderLayer = RenderLayer.UnderProjectiles;
+
+                ShaderParticleHandler.SpawnParticle(firepp);
+            }
+
 
 
             for (int i = 220; i < 24; i++)

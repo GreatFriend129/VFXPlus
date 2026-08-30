@@ -112,12 +112,22 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 projectile.soundDelay = num45 - num56 * num34;
                 if (projectile.ai[0] != 1f)
                 {
-                    //SoundStyle style = new SoundStyle("Terraria/Sounds/Research_3") with { Volume = 0.3f, Pitch = .65f, PitchVariance = .2f };
-                    //SoundEngine.PlaySound(style, projectile.Center);
-                    //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_158") with { Volume = 1f, Pitch = .45f, PitchVariance = 0.1f };
-                    //SoundEngine.PlaySound(style2, projectile.Center);
+                    //SoundEngine.PlaySound(SoundID.Item91 with { Volume = 0.5f }, projectile.Center);
 
-                    SoundEngine.PlaySound(SoundID.Item91 with { Volume = 0.5f }, projectile.Center);
+                    float soundProg = Utils.GetLerpValue(0, 120, projectile.ai[0], true);
+
+                    float volume = 0.6f - (soundProg * 0.25f);
+                    float pitch = -0.85f + (Easings.easeOutQuad(soundProg) * 0.95f);
+
+                    SoundStyle style23 = new SoundStyle("Terraria/Sounds/Custom/dd2_sky_dragons_fury_shot_0") with { Volume = 0.3f * volume, Pitch = .10f + pitch, PitchVariance = 0.4f };
+                    SoundEngine.PlaySound(style23, projectile.Center);
+
+                    SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.2f * volume, Pitch = 0f + pitch, MaxInstances = -1, PitchVariance = 0.15f };
+                    SoundEngine.PlaySound(style32, projectile.Center);
+
+                    SoundStyle style3 = new SoundStyle("Terraria/Sounds/Research_3") with { Volume = .28f * volume, Pitch = .6f + pitch, PitchVariance = 0.2f };
+                    SoundEngine.PlaySound(style3, projectile.Center);
+                    
                 }
             }
             if (projectile.ai[1] == 1f && projectile.ai[0] != 1f)
@@ -283,15 +293,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
             if (projectile.ai[1] == 0) //If we haven't tileCollided
             {
-                int trailCount = 30;
-                previousRotations.Add(projectile.rotation);
-                previousPositions.Add(projectile.Center);
+                int trailCount = 15; //30
 
-                if (previousRotations.Count > trailCount)
-                    previousRotations.RemoveAt(0);
+                if (timer % 2 == 0)
+                {
+                    previousRotations.Add(projectile.rotation);
+                    previousPositions.Add(projectile.Center);
 
-                if (previousPositions.Count > trailCount)
-                    previousPositions.RemoveAt(0);
+                    if (previousRotations.Count > trailCount)
+                        previousRotations.RemoveAt(0);
+
+                    if (previousPositions.Count > trailCount)
+                        previousPositions.RemoveAt(0);
+                }
 
 
                 bool addInBetween = false;
@@ -353,7 +367,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
             Vector2 posOffset = new Vector2(-15f, 0f).RotatedBy(projectile.velocity.ToRotation());
 
             //After-Image
-            for (int i = 0; i < previousRotations.Count; i++)
+            for (int i = 220; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
@@ -378,6 +392,37 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
                 Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.4f * progress * progress,
                     projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
             }
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
+
+                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.7f);
+
+                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.55f);
+
+                //Main
+                Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 150 } * 0.7f * progress * progress * 2.0f,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
+            }
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
+
+                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.6f);
+
+                Vector2 lineScale2 = new Vector2(1.85f, 0.15f + 0.2f * progress * 1f * 0.6f); //1.25
+
+                //White
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 150 } * 0.5f * progress * progress * 2.0f,
+                    projectile.velocity.ToRotation(), line.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
+            }
+
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

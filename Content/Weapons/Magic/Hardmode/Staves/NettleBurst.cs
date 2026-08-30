@@ -1,19 +1,20 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
 using Terraria;
+using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using Terraria.GameContent;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Dusts;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 {
-    //Literally just so that the proj alternate color
+    //Literally just so that the proj can alternate color
     public class NettleBurstPlayer : ModPlayer
     {
         public bool makeRed = false;
@@ -30,8 +31,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         bool isRed = false;
 
-        public float scale = 0f;
-        public float alpha = 1f;
+        public float overallScale = 0f;
+        public float overallAlpha = 1f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -62,14 +63,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             float timeForPopInAnim = 25;
             float animProgress = Math.Clamp((timer + 7) / timeForPopInAnim, 0f, 1f); //15 60
 
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2f));
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2f));
 
-            if (scale == 1f)
-                alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
+            if (overallScale == 1f && timer > 42)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.25f, 0.04f), 0f, 1f);
 
             if (timer >= 4 && timer <= 11 && timer % 2 == 0) //7
             {
-                for (int i = 0; i < 1; i++) //5 + Main.rand.Next(1, 3)
+                for (int i = 220; i < 1; i++) //5 + Main.rand.Next(1, 3)
                 {
                     Color col = isRed ? Color.Red : Color.ForestGreen;
 
@@ -85,6 +86,23 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     //int d = Dust.NewDust(projectile.position, projectile.width, projectile.height, ModContent.DustType<GlowPixelCross>(), newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.45f) * projectile.scale);
                 }
 
+            }
+
+            if (timer >= 2 && timer <= 9 && timer % 3 == 0)
+            {
+                Color col = isRed ? Color.Red : Color.ForestGreen;
+
+                Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<PulseInOutDust>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                    newColor: col with { A = 20 }, Scale: Main.rand.NextFloat(0.4f, 0.5f) * projectile.scale * 2f);
+                p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
+                p.velocity *= 0.85f;
+                p.rotation = MathHelper.PiOver4;
+                p.noLight = false;
+
+                p.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 18, 0.5f, 0.5f, true);
             }
 
             if (timer == 7)
@@ -212,7 +230,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 if (projectile.type >= 150 && projectile.type <= 152)
                 {
-                    for (int num832 = 0; num832 < 8; num832++)
+                    for (int num832 = 220; num832 < 8; num832++)
                     {
                         int num843 = Dust.NewDust(projectile.position, projectile.width, projectile.height, 7, projectile.velocity.X * 0.025f, projectile.velocity.Y * 0.025f, 200, default(Color), 1.3f);
                         Main.dust[num843].noGravity = true;
@@ -223,7 +241,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 }
                 else if (projectile.type == 493 || projectile.type == 494)
                 {
-                    for (int num855 = 0; num855 < 8; num855++)
+                    for (int num855 = 220; num855 < 8; num855++)
                     {
                         int num866 = Dust.NewDust(projectile.position, projectile.width, projectile.height, Main.rand.Next(68, 71), projectile.velocity.X * 0.025f, projectile.velocity.Y * 0.025f, 200, default(Color), 1.3f);
                         Main.dust[num866].noGravity = true;
@@ -234,7 +252,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 }
                 else
                 {
-                    for (int num877 = 0; num877 < 3; num877++)
+                    for (int num877 = 220; num877 < 3; num877++)
                     {
                         Dust.NewDust(projectile.position, projectile.width, projectile.height, 18, projectile.velocity.X * 0.025f, projectile.velocity.Y * 0.025f, 170, default(Color), 1.2f);
                     }
@@ -266,39 +284,60 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         {            
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
-            Vector2 drawPos = projectile.Center - Main.screenPosition;// + new Vector2(3f, 2f).RotatedBy(projectile.rotation);
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
 
-            Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
+            Vector2 vec2Scale = new Vector2(overallScale * projectile.scale, projectile.scale);
+
+            Color col = isRed ? Color.Red : new Color(0, 170, 0);
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                for (int num163 = 0; num163 < 4; num163++)
+                for (int i = 0; i < 4; i++)
                 {
-                    Vector2 offset = projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 4f;
-                    offset += offset.RotatedBy(Main.timeForVisualEffects * 0.2f * projectile.direction) * 0.25f;
+                    float borderAlpha = projectile.Opacity * Easings.easeInCirc(overallAlpha);
+                    Vector2 offset = (2f * (i * MathHelper.PiOver2).ToRotationVector2());
 
-                    Color col = isRed ? Color.Red : Color.Green;
-
-                    Main.EntitySpriteDraw(vanillaTex, drawPos + offset, null,
-                        col with { A = 0 } * projectile.Opacity * alpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, 0f);
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + offset, null,
+                        col with { A = 50 } * borderAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, SpriteEffects.None);
+            Effect myEffect = ModContent.Request<Effect>("Playground/Effects/Filter/Dissolve", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
+
+
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+            myEffect.Parameters["zoom"].SetValue(1f);
+
+            //new Color(20, 14, 14)
+            Color dissolveCol = isRed ? new Color(30, 0, 0) : new Color(0, 30, 0);
+            myEffect.Parameters["innerCol"].SetValue(dissolveCol.ToVector3());
+            myEffect.Parameters["outerCol"].SetValue(dissolveCol.ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+
+            myEffect.Parameters["mainTexWidth"].SetValue(vanillaTex.Width / 2f);
+            myEffect.Parameters["mainTexHeight"].SetValue(vanillaTex.Height / 2f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             return false;            
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
+            return false;
             return base.PreKill(projectile, timeLeft);
         }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
-        }
-
     }
 
     public class NettleBurstTipShotOverride : GlobalProjectile
@@ -312,8 +351,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
         bool isRed = false;
 
-        float scale = 0;
-        float alpha = 1f;
+        float overallScale = 0;
+        float overallAlpha = 1f;
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
@@ -329,22 +368,26 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             {
                 float pitch = 0.2f + (projectile.ai[1] * 0.12f);
                 float pitch2 = -0.4f + (projectile.ai[1] * 0.12f);
+                float pitch3 = 0f + (projectile.ai[1] * 0.11f); //14
 
-                //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .035f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
-                //SoundEngine.PlaySound(style, projectile.Center);
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Metallic/joker_stab2") with { Volume = .025f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, };
+                SoundEngine.PlaySound(style, projectile.Center);
 
-                //SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.1f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
-                //SoundEngine.PlaySound(style2, projectile.Center);
+                SoundStyle style2 = new SoundStyle("Terraria/Sounds/Item_153") with { Volume = 0.07f, Pitch = pitch2, PitchVariance = .05f, MaxInstances = -1, }; //153\156
+                SoundEngine.PlaySound(style2, projectile.Center);
+
+                SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Earth/PlantGrowth") with { Volume = 0.15f, Pitch = pitch3, PitchVariance = 0.05f, MaxInstances = -1 };
+                SoundEngine.PlaySound(style3, projectile.Center);
             }
 
 
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 6) / timeForPopInAnim, 0f, 1f); //15 60
 
-            scale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2f));
+            overallScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, in_tensity: 0f, out_tensity: 2f));
 
-            if (scale == 1f)
-                alpha = Math.Clamp(MathHelper.Lerp(alpha, -0.5f, 0.05f), 0f, 1f);
+            if (overallScale == 1f)
+                overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, -0.5f, 0.05f), 0f, 1f);
 
             if (timer >= 4 && timer <= 11 && timer % 2 == 0) //7
             {
@@ -360,8 +403,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                         newColor: col * 1f, Scale: Main.rand.NextFloat(0.2f, 0.25f) * projectile.scale * 1.5f); //3
 
                     p.velocity += (projectile.rotation + MathHelper.PiOver2).ToRotationVector2() * -1f;
-
-                    //int d = Dust.NewDust(projectile.position, projectile.width, projectile.height, ModContent.DustType<GlowPixelCross>(), newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.45f) * projectile.scale);
                 }
             }
 
@@ -374,37 +415,55 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
-            Vector2 vec2Scale = new Vector2(scale * projectile.scale, projectile.scale);
 
+            Vector2 vec2Scale = new Vector2(overallScale * projectile.scale, projectile.scale);
+
+            Color col = isRed ? Color.Red : Color.Green;
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                for (int num163 = 0; num163 < 4; num163++)
+                for (int i = 0; i < 4; i++)
                 {
-                    Vector2 offset = projectile.rotation.ToRotationVector2().RotatedBy((float)Math.PI / 2f * (float)num163) * 4f;
-                    offset += offset.RotatedBy(Main.timeForVisualEffects * 0.2f * projectile.direction) * 0.25f;
+                    float borderAlpha = projectile.Opacity * Easings.easeInCirc(overallAlpha);
+                    Vector2 offset = (2f * (i * MathHelper.PiOver2).ToRotationVector2());
 
-                    Color col = isRed ? Color.Red : Color.Green;
-
-                    Main.EntitySpriteDraw(vanillaTex, drawPos + offset, null,
-                        col with { A = 0 } * projectile.Opacity * alpha, projectile.rotation, vanillaTex.Size() / 2f, vec2Scale, 0f);
+                    Main.spriteBatch.Draw(vanillaTex, drawPos + offset, null,
+                        col with { A = 50 } * borderAlpha, projectile.rotation, vanillaTex.Size() / 2, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
                 }
             });
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * projectile.Opacity, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+            Effect myEffect = ModContent.Request<Effect>("Playground/Effects/Filter/Dissolve", AssetRequestMode.ImmediateLoad).Value;
+
+            myEffect.Parameters["progress"].SetValue(1f - overallAlpha);
+
+
+            Texture2D Mask = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+            myEffect.Parameters["maskTexture"].SetValue(Mask);
+            myEffect.Parameters["zoom"].SetValue(1f);
+
+            myEffect.Parameters["innerCol"].SetValue(col.ToVector3());
+            myEffect.Parameters["outerCol"].SetValue(col.ToVector3());
+            myEffect.Parameters["dissolveColMult"].SetValue(1f);
+
+            myEffect.Parameters["mainTexWidth"].SetValue(vanillaTex.Width / 2f);
+            myEffect.Parameters["mainTexHeight"].SetValue(vanillaTex.Height / 2f);
+
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor, projectile.rotation, vanillaTex.Size() / 2, vec2Scale, SpriteEffects.None);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.pixelShader.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
             return false;
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
-
-            //return false;
             return base.PreKill(projectile, timeLeft);
-        }
-
-        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            base.OnHitNPC(projectile, target, hit, damageDone);
         }
     }
 }

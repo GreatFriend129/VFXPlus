@@ -41,9 +41,6 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 0.4f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, position);
 
-            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ShotgunWithReload") with { Volume = 1f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(style, position);
-
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
             
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
@@ -104,8 +101,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             }
 
             //Bullet Casing
-            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
-            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<ShotgunShell>());
+            Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<ShotgunShell>());
 
             return true;
         }
