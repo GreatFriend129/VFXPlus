@@ -37,13 +37,218 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
         }
     }
 
-    public class BloodRainBowShotOverride : GlobalProjectile
+    public class BloodRainBowShotOverrideNew : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
             return lateInstantiation && (entity.type == ProjectileID.BloodArrow);
+        }
+
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            if (timer == 0)
+            {
+                Vector2 portalVel = projectile.velocity.SafeNormalize(Vector2.UnitX) * 3f;
+                int portal = Projectile.NewProjectile(null, projectile.Center, portalVel, ModContent.ProjectileType<BloodRainBowVFX>(), 0, 0, Main.myPlayer);
+                Main.projectile[portal].rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+            }
+
+
+            //VERY IMPORTANT
+            projectile.hide = false;
+
+            int trailCount = 16; //14
+            previousRotations.Add(projectile.velocity.ToRotation());
+            previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
+
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            if (timer % 3 == 0 && false)
+            {
+                Vector2 vel = Main.rand.NextVector2Circular(3f, 3f).RotatedBy(projectile.velocity.ToRotation());
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowFlare>(), vel, newColor: Color.DarkRed, Scale: Main.rand.NextFloat(0.55f, 0.8f) * 0.8f);
+                d.velocity += projectile.velocity * 0.5f;
+
+                d.customData = new GlowFlareBehavior(GlowThreshold: 0.6f, GlowPower: 2.5f, TotalBoost: 1f);
+            }
+
+            if (timer % 2 == 0 && Main.rand.NextBool(2))
+            {
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SnowDustCopyQuickFade>(), Main.rand.NextVector2Circular(1f, 2f), newColor: Color.Red, Scale: 1f);
+                d.velocity -= projectile.velocity * 0.25f;
+                d.noGravity = true;
+            }
+
+            float fadeInTime = Math.Clamp((timer + 12f) / 55f, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.25f);
+
+            timer++;
+
+            if (timer % 1 == 0 && false)
+            {
+                Vector2 dustPos = projectile.Center;
+                Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
+                Dust d = Dust.NewDustPerfect(dustPos, DustID.Blood, dustVel, Scale: 1f);
+                d.velocity += projectile.velocity * 0.1f;
+
+                if (Main.rand.NextBool())
+                {
+                    Vector2 dustVel2 = Main.rand.NextVector2Circular(0.75f, 0.75f);
+                    Dust d2 = Dust.NewDustPerfect(dustPos, DustID.Blood, dustVel, Scale: 0.75f);
+                    d2.velocity += projectile.velocity * 0.1f;
+                }
+            }
+
+            #region vanillaAI
+            projectile.ai[0] += 1f;
+
+            if (projectile.ai[0] >= 15f)
+            {
+                projectile.ai[0] = 15f;
+
+                projectile.velocity.Y += 0.1f;
+            }
+
+            projectile.rotation = (float)Math.Atan2(projectile.velocity.Y, projectile.velocity.X) + 1.57f;
+            if (projectile.velocity.Y > 16f)
+            {
+                projectile.velocity.Y = 16f;
+            }
+
+            Lighting.AddLight(projectile.Center, 0.3f, 0.05f, 0.05f);
+            #endregion
+
+            return false;
+        }
+
+        float overallAlpha = 1f;
+        float overallScale = 0f;
+        List<float> previousRotations = new List<float>();
+        List<Vector2> previousPositions = new List<Vector2>();
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            Color lightColorCopy = lightColor;
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawVertexTrail(projectile, false, lightColorCopy);
+            });
+            DrawVertexTrail(projectile, true, lightColorCopy);
+            return false;
+        }
+
+        Effect myEffect = null;
+        public void DrawVertexTrail(Projectile projectile, bool giveUp, Color lightColor)
+        {
+            if (giveUp)
+                return;
+
+            Effect chainEffect = ModContent.Request<Effect>("Playground/Effects/TrailShaders/ChainShader", AssetRequestMode.ImmediateLoad).Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousRotations.ToArray();
+
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            //float widthSubtract = Math.Clamp(projectile.velocity.Length() * 0.07f, 0f, 1f);
+
+            Color lighterCol = new Color(235, 0, 0);// Main.hslToRgb(projectile.ai[1], 1f, 0.5f);
+            Color darkerCol = new Color(100, 0, 0);// Main.hslToRgb(projectile.ai[1] - 0.03f, 1f, 0.25f);
+
+            float StripWidth(float progress)
+            {
+                float toReturn = 0f;
+                if (progress < 0.85f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
+                    toReturn = Easings.easeInCubic(LV);
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
+                    toReturn = Easings.easeOutQuad(1f - LV);
+                }
+
+                if (toReturn < 0.13f)
+                    toReturn = 0f;
+
+                return toReturn * overallScale * 3f; //2.25
+
+            }
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+
+            chainEffect.Parameters["progress"].SetValue(0f);
+            chainEffect.Parameters["reps"].SetValue(1f);
+
+            Color col = darkerCol;
+            for (int i = 0; i < 5; i++)
+            {
+                if (i == 4)
+                {
+                    //trailTexture = Mod.Assets.Request<Texture2D>("Assets/Noise/noise").Value;
+                    col = lighterCol;
+                }
+
+
+                Color StripColor(float progress) => col.MultiplyRGBA(lightColor);
+                Vector2 offset = (2f * (i * MathHelper.PiOver2).ToRotationVector2());
+
+                if (i == 4)
+                    offset = Vector2.Zero;
+
+                vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+                Matrix transform = Matrix.CreateTranslation(new Vector3(offset, 0f));
+                Matrix view = Matrix.Identity;
+                Matrix projectionMatrix = Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0f, -1f, 1f);
+
+                chainEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+                chainEffect.Parameters["WorldViewProjection"].SetValue(transform * view * projectionMatrix);
+                chainEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+
+                vertexStrip.DrawTrail();
+            }
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            for (int i = 220; i < 9 + Main.rand.Next(0, 5); i++)
+            {
+
+                Vector2 vel = Main.rand.NextVector2Circular(5f, 5f).RotatedBy(projectile.velocity.ToRotation());
+                Dust d = Dust.NewDustPerfect(projectile.Center + new Vector2(0f, projectile.height / 2f), ModContent.DustType<GlowFlare>(), vel, newColor: Color.Red, Scale: Main.rand.NextFloat(0.45f, 0.8f) * 0.8f);
+                d.velocity += new Vector2(0f, -1f);
+
+                d.customData = new GlowFlareBehavior(GlowThreshold: 0.6f, GlowPower: 2.5f, TotalBoost: 1f);
+            }
+
+            Dust.NewDustPerfect(projectile.Center + projectile.velocity * 1f, ModContent.DustType<PaintSplotch>(), newColor: Color.Lerp(Color.Red, Color.DarkRed, 0.5f), Scale: 1f);
+
+            return true;
+        }
+    }
+
+
+    public class BloodRainBowShotOverride : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.BloodArrow) && false;
         }
 
         int timer = 0;
@@ -136,7 +341,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             float drawScale = projectile.scale * overallScale;
             Color darkerRed = new Color(103, 0, 0);
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
 
                 //After-Image
@@ -458,9 +663,9 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
             Vector2 v2Scale = new Vector2(1f * easedScale, 0.25f + (easedScale * 0.75f)) * Projectile.scale * 1.25f;
 
 
-            Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.DarkRed with { A = 60 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.25f, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, portalPos, null, Color.Red with { A = 60 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 60 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.5f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos + Main.rand.NextVector2Circular(3f, 3f), null, Color.DarkRed with { A = 160 } * 0.5f, rot, portal.Size() / 2f, v2Scale * 1.25f, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.Red with { A = 160 } * 1f, rot, portal.Size() / 2f, v2Scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(portal, portalPos, null, Color.White with { A = 160 } * 1f, rot, portal.Size() / 2f, v2Scale * 0.5f, SpriteEffects.None);
 
         }
     }

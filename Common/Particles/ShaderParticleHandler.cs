@@ -118,6 +118,7 @@ namespace VFXPlus.Common
 
 
         //TODO optimize
+        //TODO make this not hot garbage
         //private static List<ShaderParticle> underprojLayerParticles;
         //private static List<ShaderParticle> dustsLayerParticles;
         public static void DrawAllParticles(SpriteBatch sb)
@@ -142,7 +143,7 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.Dusts)
+                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType != ParticleType.FireParticleAlpha)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 
@@ -159,7 +160,42 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.UnderProjectiles)
+                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType != ParticleType.FireParticleAlpha)
+                        particle.DrawWithShader(sb, particle.myShader);
+                }
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
+            });
+
+            ///AlphaVersion
+            //Draw shader layer
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, VFXPlus.SmokeColShaderAlpha, Main.GameViewMatrix.EffectMatrix);
+
+                foreach (ShaderParticle particle in particles)
+                {
+                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType == ParticleType.FireParticleAlpha)
+                        particle.DrawWithShader(sb, particle.myShader);
+                }
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
+
+            });
+
+            //UnderProjLayer
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, VFXPlus.SmokeColShaderAlpha, Main.GameViewMatrix.EffectMatrix);
+
+                foreach (ShaderParticle particle in particles)
+                {
+                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType == ParticleType.FireParticleAlpha)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 

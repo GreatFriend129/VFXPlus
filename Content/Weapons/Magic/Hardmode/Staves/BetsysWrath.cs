@@ -95,8 +95,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 Color colToUse = Main.rand.NextFloat() < 0.33f ? colB : colA;
 
                 Vector2 vel = -projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
-                FireParticle fire = new FireParticle(projectile.Center, vel, 0.75f, colToUse, colorMult: 1f, bloomAlpha: 1.65f, AlphaFade: 0.9f);
+                FireParticleAlpha fire = new FireParticleAlpha(projectile.Center + new Vector2(0f, 0f), vel, 1f, colToUse, colorMult: 1f, bloomAlpha: 0.65f, AlphaFade: 0.9f);
                 fire.scaleFadePower = 1.09f;
+                fire.renderLayer = RenderLayer.UnderProjectiles;
+
                 ShaderParticleHandler.SpawnParticle(fire);
             }
 
@@ -256,7 +258,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Color colToUse = Main.rand.NextFloat() < 0.33f ? colB : colA;
 
-                FireParticle fire = new FireParticle(projectile.Center, veloF, fireScale, colToUse, colorMult: 1.15f, bloomAlpha: 1.5f, AlphaFade: alphaFade, VelFade: 0.9f);
+                FireParticleAlpha fire = new FireParticleAlpha(projectile.Center, veloF, fireScale, colToUse, colorMult: 1.15f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f);
                 fire.scaleFadePower = 1.01f; //1.05
                 ShaderParticleHandler.SpawnParticle(fire);
             }

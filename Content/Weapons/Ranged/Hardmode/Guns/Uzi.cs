@@ -99,12 +99,23 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //Sound
             float volumeMult = 0.65f;
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.35f * volumeMult, Pitch = 0.15f + 0.25f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi2") with { Volume = 0.5f * volumeMult, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, player.Center);
 
-            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = 0.5f * volumeMult, Pitch = -0.2f + 0.25f, PitchVariance = 0.25f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style2, player.Center);
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi1") with { Volume = 0.25f * volumeMult, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, player.Center);
 
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.35f * volumeMult, Pitch = 0.15f + 0.25f, PitchVariance = 0.15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
+
+            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = 0.5f * volumeMult, Pitch = -0.2f + 0.25f, PitchVariance = 0.25f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style2, player.Center);
+
+            SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/elites_03") with { Volume = .35f * volumeMult, Pitch = -.45f, PitchVariance = .15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style3, player.Center);
+
+            SoundStyle style4 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/QuickComponent") with { Volume = 0.5f * volumeMult, Pitch = -.05f, PitchVariance = .15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style4, player.Center);
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

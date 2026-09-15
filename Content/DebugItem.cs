@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -9,6 +10,7 @@ using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.FeatheredFoe;
+using VFXPlus.Content.Gores;
 using VFXPlus.Content.Particles;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest;
@@ -70,7 +72,34 @@ namespace VFXPlus.Content
             //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
             //dad.rotation = Main.rand.NextFloat(6.28f);
 
-            for (int i = 0; i < 4; i++)
+            //int windFX23 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ProjectileID.PainterPaintball, 1, 0, Main.myPlayer);
+            //Main.projectile[windFX23].scale = 10;
+
+            for (int i = 0; i < 6; i++)
+            {
+                float prog = (float)i / 5f;
+
+                //Vector2 vel =  velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.35f) * Main.rand.NextFloat(2f, 35f);
+                //float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                //FireParticle fire = new FireParticle(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.92f);
+                //fire.scaleFadePower = 1.1f;
+                //ShaderParticleHandler.SpawnParticle(fire);
+
+                Vector2 vel = velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.5f) * Main.rand.NextFloat(2f, 28f); //30
+                float myScale = Main.rand.NextFloat(1.25f, 1.5f);
+                FireParticleAlpha fire = new FireParticleAlpha(Main.MouseWorld, vel * 1.5f, myScale, Color.OrangeRed, colorMult: 1f, bloomAlpha: 2f, AlphaFade: 0.95f, VelFade: 0.8f, 
+                    EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
+                fire.scaleFadePower = 1.1f;
+
+                ShaderParticleHandler.SpawnParticle(fire);
+
+
+                //FireParticle fire = new FireParticle(Main.MouseWorld, Main.projectile[smoke].velocity, 1.5f, Color.DeepSkyBlue, colorMult: 1f, bloomAlpha: 1f);
+                //ShaderParticleHandler.SpawnParticle(fire);
+            }
+
+
+            for (int i = 220; i < 4; i++)
             {
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) + velocity * 0.75f; //0.5
 

@@ -15,6 +15,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
@@ -566,7 +567,8 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         }
     }
 
-    public class StarfuryShotOverrideOld : GlobalProjectile
+    
+    public class StarfuryShotOverrideAlt : GlobalProjectile
     {
         public override bool InstancePerEntity => true;
 
@@ -575,15 +577,14 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             return lateInstantiation && (entity.type == ProjectileID.Starfury) && false;
         }
 
-        public List<Vector2> previousPositions = new List<Vector2>();
-        public List<float> previousVelRots = new List<float>();
-
         int timer = 0;
-        public override void AI(Projectile projectile)
+        public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 18; //34
+
+            //Trail
+            int trailCount = 12; //12
             previousVelRots.Add(projectile.velocity.ToRotation());
-            previousPositions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center + projectile.velocity);
 
             if (previousVelRots.Count > trailCount)
                 previousVelRots.RemoveAt(0);
@@ -591,99 +592,149 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
-            bool addInBetween = true;
-            if (addInBetween)
-            {
-                previousVelRots.Add(projectile.velocity.ToRotation());
-                previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
-
-                if (previousVelRots.Count > trailCount)
-                    previousVelRots.RemoveAt(0);
-
-                if (previousPositions.Count > trailCount)
-                    previousPositions.RemoveAt(0);
-            }
-
             timer++;
-
-            base.AI(projectile);
+            return base.PreAI(projectile);
         }
 
-        float alpha = 1f;
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+        public List<Vector2> previousPositions = new List<Vector2>();
+        public List<float> previousVelRots = new List<float>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            return true;
-            
-            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
-            Texture2D StarBlack = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
-            Texture2D Line = Mod.Assets.Request<Texture2D>("Assets/Pixel/Nightglow").Value;
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawShit(false, projectile);
+            });
+            DrawShit(true, projectile);
+
+
             Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
-
-            Texture2D Glorb = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
-
-            //Starfury uses 0.8 scale so x1.25 that is one
-            float scale = projectile.scale * 1.25f;
-
-            //Nightglow
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
-
-            if (previousVelRots != null && previousPositions != null)
+            Vector2 fireballPos = projectile.Center - Main.screenPosition + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
+            Color fireBallColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
+            for (int i = 220; i < 4; i++)
             {
-                for (int i = 0; i < previousVelRots.Count; i++)
-                {
-                    float progress = (float)i / previousVelRots.Count;
-                    float size = (1f - (progress * 0.5f)) * scale;
-
-                    float colVal = progress * alpha;
-
-                    Color col = Color.Lerp(Color.LightGoldenrodYellow * 0.75f, Color.HotPink, progress) * progress * 0.5f;
-
-                    float size2 = (1f - (progress * 0.15f)) * scale;
-                    Vector2 vec2Scale = new Vector2(2f, 3f) * size;
-
-                    //Black
-                    Main.EntitySpriteDraw(Line, previousPositions[i] - Main.screenPosition, null, Color.Black * 0.15f * (colVal * colVal),
-                            previousVelRots[i] + MathHelper.PiOver2, Line.Size() / 2f, vec2Scale * size2, SpriteEffects.None);
-
-                    Main.EntitySpriteDraw(StarBlack, previousPositions[i] - Main.screenPosition, null, col with { A = 0 } * 0.85f * colVal,
-                            previousVelRots[i], StarBlack.Size() / 2f, size2, SpriteEffects.None);
-
-                    Main.EntitySpriteDraw(Line, previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(5f, 5f), null, col with { A = 0 } * 2f * colVal,
-                            previousVelRots[i] + MathHelper.PiOver2, Line.Size() / 2f, vec2Scale * size2, SpriteEffects.None);
-
-                }
-
-            }
-            float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
-
-            Main.EntitySpriteDraw(Glorb, drawPos, null, Color.HotPink with { A = 0 } * alpha * 0.2f, projectile.rotation, Glorb.Size() / 2f, scale * 1.5f + sineScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(Glorb, drawPos, null, Color.LightPink with { A = 0 } * alpha * 0.3f, projectile.rotation, Glorb.Size() / 2f, scale * 1f + sineScale, SpriteEffects.None);
-
-
-            for (int i = 0; i < 6; i++)
-            {
-                Color col = Color.DeepPink;
-                Main.EntitySpriteDraw(Star, drawPos + Main.rand.NextVector2Circular(1.5f, 1.5f), null, col with { A = 0 } * 0.8f * alpha, projectile.rotation, Star.Size() / 2f, scale * 1.1f, SpriteEffects.None);
-            }
-
-            Main.EntitySpriteDraw(Star, drawPos, null, Color.HotPink * alpha, projectile.rotation, Star.Size() / 2f, scale * 1f, SpriteEffects.None);
-            Main.EntitySpriteDraw(StarBlack, drawPos, null, Color.White with { A = 0 } * 0.35f * alpha, projectile.rotation, StarBlack.Size() / 2f, scale * 1.1f, SpriteEffects.None);
-
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -15f;
                 float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
-                float dist = 5f;
+                float dist = 4f;
 
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, Color.HotPink with { A = 0 } * 0.35f, fireballRot, FireBall.Size() / 2f, projectile.scale * 1.05f * alpha, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 200 } * 0.25f, fireballRot, FireBall.Size() / 2f, 1f * 1.05f, SpriteEffects.None);
             }
 
+            Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
+            Texture2D tex2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
+            
+            Main.spriteBatch.Draw(tex2, projectile.Center - Main.screenPosition, null, Color.DeepPink, projectile.rotation, tex2.Size() / 2f, 1f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(tex, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, projectile.rotation, tex.Size() / 2f, 1f, SpriteEffects.None, 0f);
 
             return false;
+
+        }
+
+        Effect myEffect = null;
+        public void DrawShit(bool giveUp, Projectile projectile)
+        {
+            if (giveUp)
+                return;
+
+            #region orb
+
+            //Glorb
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+
+            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
+            Color[] cols = { Color.HotPink * 0.75f, Color.DeepPink * 0.525f, Color.DeepPink * 0.375f };
+            float[] scales = { 1.15f, 1.6f, 2.5f };
+
+            float orbRot = projectile.velocity.ToRotation();
+            float orbAlpha = 0.6f * overallAlpha;
+            Vector2 orbScale = new Vector2(0.85f, 0.85f) * 0.45f * projectile.scale * overallScale;
+            Vector2 orbOrigin = orb.Size() / 2f;
+
+            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
+            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
+
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
+
+            #endregion
+
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
+            Vector2 fireballPos = projectile.Center - Main.screenPosition + projectile.velocity.SafeNormalize(Vector2.UnitX) * -35f;
+            Color fireBallColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
+            for (int i = 0; i < 4; i++)
+            {
+                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Vector2 fireballScale = new Vector2(1.05f, 1.25f);
+
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 0 } * 0.25f, fireballRot, FireBall.Size() / 2f, fireballScale, SpriteEffects.None);
+            }
+
+            #region SolidTrail(good) use for fibber 
+            //Trail
+            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+
+            if (myEffect == null)
+                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousVelRots.ToArray();
+
+            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f) * 0.15f;
+
+            Color StripColor(float progress) => Color.White * (progress * progress);
+            float StripWidthUnder(float progress) => 20f * Easings.easeInCubic(progress) * overallScale * sineWidthMult * 0.6f;
+            float StripWidthOver(float progress) => 8f * Easings.easeInCubic(progress) * overallScale * sineWidthMult * 0.6f;
+
+            VertexStrip vertexStripUnder = new VertexStrip();
+            vertexStripUnder.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthUnder, -Main.screenPosition, includeBacksides: true);
+
+            VertexStrip vertexStripOver = new VertexStrip();
+            vertexStripOver.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthOver, -Main.screenPosition, includeBacksides: true);
+
+
+
+            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            myEffect.Parameters["progress"].SetValue(timer * 0.05f * 0f);
+            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
+            myEffect.Parameters["reps"].SetValue(1f);
+
+            //UnderLayer
+            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.HotPink, Color.DeepPink, 0.5f).ToVector3() * 1f);
+            myEffect.Parameters["glowThreshold"].SetValue(1f);
+            myEffect.Parameters["glowIntensity"].SetValue(1f);
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStripUnder.DrawTrail();
+
+
+            //Over layer
+            myEffect.Parameters["ColorOne"].SetValue(Color.Pink.ToVector3() * 1f);
+            myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
+            myEffect.Parameters["glowIntensity"].SetValue(2f); //2.25
+            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
+            vertexStripOver.DrawTrail();
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+            #endregion
+
+
+            //Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
+            //Texture2D tex2 = Mod.Assets.Request<Texture2D>("Content/Items/Weapons/Misc/Ranged/Guns/Fibber/VanillaStarBorder").Value;
+            //Color col = colorOptions[colorIndex];
+
+            //Main.spriteBatch.Draw(tex2, Projectile.Center - Main.screenPosition, null, Color.Blue, Projectile.rotation, tex2.Size() / 2f, 1f, SpriteEffects.None, 0f);
+            //Main.spriteBatch.Draw(tex, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, Projectile.rotation, tex.Size() / 2f, 1f, SpriteEffects.None, 0f);
 
         }
 
@@ -692,14 +743,5 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
             return base.PreKill(projectile, timeLeft);
         }
-
-        public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
-        {
-            Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
-
-            return base.OnTileCollide(projectile, oldVelocity);
-        }
-
-
     }
 }

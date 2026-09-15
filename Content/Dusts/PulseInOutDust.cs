@@ -35,8 +35,10 @@ namespace VFXPlus.Content.Dusts
             if (behavoir.drawType == PulseInOutDustBehavior.DrawOptions.ShakyStar)
             {
                 dust.rotation += dust.velocity.X * 0.03f;
-                dust.velocity *= 0.9f;
+                //dust.velocity *= 0.9f;
             }
+
+            dust.velocity *= behavoir.velFadeAmount;
 
             dust.position += dust.velocity;
 
@@ -96,6 +98,19 @@ namespace VFXPlus.Content.Dusts
 
                 Main.spriteBatch.Draw(Tex, drawPos, null, dust.color with { A = 70 } * 1f, dust.rotation, origin, dust.scale * behavoir.drawScale * adjustedScale * 1.5f, SpriteEffects.None, 0f);
             }
+            else if (behavoir.drawType == PulseInOutDustBehavior.DrawOptions.VanillaStar)
+            {
+                Vector2 flareScale = new Vector2(1.25f, 0.35f) * behavoir.drawScale * dust.scale; //0.75
+                Vector2 flareScale2 = new Vector2(1.25f, 0.35f) * behavoir.drawScale * dust.scale;
+
+                Main.spriteBatch.Draw(Tex, drawPos, null, dust.color, dust.rotation, origin, flareScale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, drawPos, null, dust.color, dust.rotation + MathHelper.PiOver2, origin, flareScale2, SpriteEffects.None, 0f);
+
+                Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = dust.color.A }, dust.rotation + MathHelper.PiOver2, origin, flareScale2 * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Tex, drawPos, null, Color.White with { A = dust.color.A }, dust.rotation, origin, flareScale * 0.5f, SpriteEffects.None, 0f);
+
+
+            }
         }
     }
 
@@ -110,6 +125,7 @@ namespace VFXPlus.Content.Dusts
             GlowPixel = 1,
             GlowStarSharp = 2,
             ShakyStar = 3,
+            VanillaStar = 4,
         }
 
         public int totalTime;
@@ -123,6 +139,7 @@ namespace VFXPlus.Content.Dusts
 
         public bool pixelize = false;
 
+        public float velFadeAmount = 1f;
         public PulseInOutDustBehavior(DrawOptions DrawType, int TotalTime, float InAmount, float OutAmount, bool Pixelize = false)
         {
             totalTime = TotalTime;
@@ -137,9 +154,33 @@ namespace VFXPlus.Content.Dusts
                 texture = CommonTextures.CrispStarPMA.Value;
             else if (drawType == DrawOptions.ShakyStar)
                 texture = ModContent.Request<Texture2D>("VFXPlus/Assets/PartyStar", AssetRequestMode.ImmediateLoad).Value;
+            else if (drawType == DrawOptions.VanillaStar)
+                texture = CommonTextures.Flare.Value;
             else
                 texture = CommonTextures.CrispStarPMA.Value;
 
+        }
+
+        public PulseInOutDustBehavior(DrawOptions DrawType, int TotalTime, float InAmount, float OutAmount, bool Pixelize = false, float VelFadeAmount = 1f)
+        {
+            totalTime = TotalTime;
+            inAmount = InAmount;
+            outAmount = OutAmount;
+            pixelize = Pixelize;
+
+            drawType = DrawType;
+            if (drawType == DrawOptions.GlowPixel)
+                texture = ModContent.Request<Texture2D>("VFXPlus/Content/Dusts/Textures/PixelGlow", AssetRequestMode.ImmediateLoad).Value;
+            else if (drawType == DrawOptions.GlowStarSharp)
+                texture = CommonTextures.CrispStarPMA.Value;
+            else if (drawType == DrawOptions.ShakyStar)
+                texture = ModContent.Request<Texture2D>("VFXPlus/Assets/PartyStar", AssetRequestMode.ImmediateLoad).Value;
+            else if (drawType == DrawOptions.VanillaStar)
+                texture = CommonTextures.Flare.Value;
+            else
+                texture = CommonTextures.CrispStarPMA.Value;
+
+            velFadeAmount = VelFadeAmount;
         }
     }
 

@@ -47,8 +47,8 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.Revolver,
                     AnimTime: 18,
-                    NormalXOffset: 20f,
-                    DestXOffset: 12f,
+                    NormalXOffset: 18f,
+                    DestXOffset: 10f,
                     YRecoilAmount: 0.2f,
                     HoldOffset: new Vector2(0f, 2f),
                     TipPos: new Vector2(30f, -4f),
@@ -110,6 +110,11 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             SoundEngine.PlaySound(style, position);
             */
 
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/QuickComponent") with { Volume = 0.4f, Pitch = -0.2f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/MusketShot") with { Volume = 0.4f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 }; ;
+            SoundEngine.PlaySound(style2, position);
+            /*
             SoundStyle style = new SoundStyle("Terraria/Sounds/Custom/dd2_defense_tower_spawn") with { Volume = 0.1f, Pitch = .8f, PitchVariance = 0.2f, MaxInstances = -1 };
             SoundEngine.PlaySound(style, position);
             SoundStyle style2 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Volume = 0.35f, Pitch = .85f, PitchVariance = .25f, MaxInstances = -1 };
@@ -117,6 +122,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
             SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .25f, Pitch = 1f, PitchVariance = 0.1f };
             SoundEngine.PlaySound(style4, position);
+            */
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());

@@ -69,10 +69,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Orb
             Texture2D orb = CommonTextures.feather_circle128PMA.Value;
             float orbRot = projectile.rotation + MathHelper.PiOver2;
-            Vector2 orbScale = new Vector2(0.2f, 0.1f) * overallScale * 2f;
+            Vector2 orbScale = new Vector2(0.2f, 0.1f) * overallScale * 1.75f;
             float sineScale = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
 
-            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Gold with { A = 0 } * 0.2f, orbRot, orb.Size() / 2f, orbScale * sineScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, Color.Gold with { A = 50 } * 0.15f, orbRot, orb.Size() / 2f, orbScale * sineScale, SpriteEffects.None);
 
 
 
@@ -86,13 +86,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 float progress = (float)i / previousRotations.Count;
 
-                Color col = Color.LightGoldenrodYellow * progress * projectile.Opacity;
+                Color col = Color.LightGoldenrodYellow;
 
                 float size2 = (1f + (progress * 0.25f)) * projectile.scale;
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * 0.5f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 50 } * 0.5f * progress * projectile.Opacity,
                         previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None); //0.5f
 
             }
@@ -102,7 +102,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             {
                 float opacitySquared = projectile.Opacity * projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2f, 2f), sourceRectangle, 
-                    Color.Gold with { A = 0 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SpriteEffects.None);
+                    Color.Gold with { A = 50 } * 0.75f * opacitySquared, projectile.rotation, TexOrigin, projectile.scale * 1.05f * overallScale, SpriteEffects.None);
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * projectile.Opacity, projectile.rotation, TexOrigin, projectile.scale * overallScale, SpriteEffects.None);

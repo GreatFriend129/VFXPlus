@@ -173,9 +173,6 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, color with { A = 150 },
                        previousRotations[i], AfterImage.Size() / 2f, vec2Scale, SpriteEffects.None);
 
-                //Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 100 } * 1f * progress,
-                //       previousRotations[i], AfterImage.Size() / 2f, vec2Scale2, SpriteEffects.None);
-
             }
 
 
@@ -187,11 +184,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Vector2 vec2Scale = new Vector2(xScale * 1.5f, 1f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
                 Vector2 vec2Scale2 = new Vector2(xScale * 1.5f, 0.5f * Easings.easeInSine(progress)) * projectile.scale * 0.75f;
-
-                //Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, color with { A = 200 },
-                //       previousRotations[i], AfterImage.Size() / 2f, vec2Scale, SpriteEffects.None);
 
                 Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 150 } * 1f * progress,
                        previousRotations[i], AfterImage.Size() / 2f, vec2Scale2, SpriteEffects.None);
@@ -210,7 +203,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             float starRot = (float)Main.timeForVisualEffects * (projectile.velocity.X > 0 ? -1f : 1f);
 
-            Color rainbow = Main.hslToRgb((timer * 0.01f + projectile.ai[1]) % 1f, 1f, 0.65f, 0) * overallAlpha * rainbowAlpha;
+            Color rainbow = Main.hslToRgb((timer * 0.01f + projectile.ai[1]) % 1f, 1f, 0.65f, 0);
 
             float scale1 = 1f;
             float scale2 = 1.6f;
@@ -223,14 +216,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             byte AVal = (byte)(150 * rainbowAlpha);
 
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 1f, starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 0.75f, starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 150 } * 1f * overallAlpha * rainbowAlpha, starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 150 } * 0.75f * overallAlpha * rainbowAlpha, starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 1f, MathHelper.PiOver2 + starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = AVal } * 0.75f, MathHelper.PiOver2 + starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 150 } * 1f * overallAlpha * rainbowAlpha, MathHelper.PiOver2 + starRot * 0.18f, spike.Size() / 2f, scale2 * scale * sineScale1, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, rainbow with { A = 150 } * 0.75f * overallAlpha * rainbowAlpha, MathHelper.PiOver2 + starRot * -0.09f, spike.Size() / 2f, scale3 * scale * sineScale2, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * rainbowAlpha, starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 0 } * rainbowAlpha, MathHelper.PiOver2 + starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 150 } * rainbowAlpha, starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
+            Main.EntitySpriteDraw(spike, drawPos, null, Color.White with { A = 150 } * rainbowAlpha, MathHelper.PiOver2 + starRot * 0.45f, spike.Size() / 2f, scale1 * scale, SpriteEffects.None);
 
         }
 

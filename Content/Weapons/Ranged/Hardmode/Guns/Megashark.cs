@@ -106,6 +106,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
+            //Dust casing2 = Dust.NewDustPerfect(position + velocity, ModContent.DustType<BulletCasingDust>(), new Vector2(velocity.X * -0.25f, -0.75f), newColor: Color.White);
 
             return true;
         }

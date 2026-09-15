@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,6 +10,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Content.Dusts;
 
 
 namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
@@ -43,7 +45,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.Trimarang) && false;
+            return lateInstantiation && (entity.type == ProjectileID.Trimarang);
         }
 
         public List<Vector2> previousPositions = new List<Vector2>();
@@ -69,6 +71,35 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
             //visualRotation = projectile.rotation;
             visualRotation += 0.45f * projectile.direction * overallScale;
+
+            if (timer % 6 == 0)
+            {
+                Vector2 dustVel = Main.rand.NextVector2Circular(1f, 1f);
+
+                Color dustCol = Main.rand.NextBool(40) ? Color.Red : Color.Lerp(Color.DodgerBlue, Color.Blue, 0.5f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center + Main.rand.NextVector2Circular(5f, 5f), ModContent.DustType<PulseInOutDust>(), dustVel, 0, dustCol with { A = 100 }, Main.rand.NextFloat(0.7f, 0.9f));
+                d.velocity += projectile.velocity * 0.2f;
+                d.scale *= 0.7f;
+
+                int pulseTime = Main.rand.Next(18, 22);
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.VanillaStar, pulseTime, 0.5f, 0.5f, Pixelize: false);
+            }
+
+            if (timer % 6 == 0 && false)
+            {
+                Vector2 dustVel = Main.rand.NextVector2Circular(1f, 1f);
+
+                Color dustCol = Main.rand.NextBool() ? Color.Red : Color.Lerp(Color.DodgerBlue, Color.Blue, 0.5f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center + Main.rand.NextVector2Circular(5f, 5f) + new Vector2(0f, 0f), ModContent.DustType<PulseInOutDust>(), dustVel, 0, dustCol with { A = 100 }, Main.rand.NextFloat(0.7f, 0.9f));
+                d.velocity += projectile.velocity * 0.2f;
+                d.scale *= 0.75f;
+
+                int pulseTime = Main.rand.Next(18, 22);
+                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.VanillaStar, pulseTime, 0.5f, 0.5f, Pixelize: true);
+            }
+
 
             timer++;
             return true;
@@ -112,7 +143,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
                 float progress = (float)i / previousRotations.Count;
 
                 Vector2 spikeScale = new Vector2(1f, 0.75f * progress) * progress;
-                Color spikeCol = Color.Red * 0.15f * overallAlpha * Easings.easeInQuad(progress);
+                Color spikeCol = Color.Red * 0.15f * overallAlpha * Easings.easeInQuad(progress) * 0f;
 
                 Main.EntitySpriteDraw(trailTex, previousPositions[i] - Main.screenPosition, null, spikeCol with { A = 0 } * overallAlpha * progress,
                         previousRotations[i], trailTex.Size() / 2f, projectile.scale * overallScale * spikeScale, SpriteEffects.None);
@@ -136,12 +167,19 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
             float ringRot = (float)Main.timeForVisualEffects * 0.6f * projectile.direction;
 
-            float ringScale = 0.135f * projectile.scale * overallScale; //125
+            float ringScale = 0.125f * projectile.scale * overallScale; //125
             float ringAlpha = overallAlpha * 1f;
 
-            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.DodgerBlue with { A = 0 } * ringAlpha, ringRot, RingTex.Size() / 2f, ringScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Blue with { A = 0 } * ringAlpha, ringRot + MathHelper.PiOver4, RingTex.Size() / 2f, ringScale * 1.1f, SpriteEffects.None);
-            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Red with { A = 0 } * ringAlpha, ringRot + MathHelper.PiOver2, RingTex.Size() / 2f, ringScale * 0.5f, SpriteEffects.None);
+            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.DodgerBlue with { A = 50 } * ringAlpha, ringRot, RingTex.Size() / 2f, ringScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Blue with { A = 50 } * ringAlpha, ringRot + MathHelper.PiOver4, RingTex.Size() / 2f, ringScale * 1.1f, SpriteEffects.None);
+            Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Red with { A = 50 } * ringAlpha, ringRot + MathHelper.PiOver2, RingTex.Size() / 2f, ringScale * 0.5f, SpriteEffects.None);
+
+            //ringScale = 0.135f;
+            //drawPos += new Vector2(0f, -100f);
+            //Main.EntitySpriteDraw(RingTex, drawPos, null, Color.DodgerBlue with { A = 0 } * ringAlpha, ringRot, RingTex.Size() / 2f, ringScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Blue with { A = 0 } * ringAlpha, ringRot + MathHelper.PiOver4, RingTex.Size() / 2f, ringScale * 1.1f, SpriteEffects.None);
+            //Main.EntitySpriteDraw(RingTex, drawPos, null, Color.Red with { A = 0 } * ringAlpha, ringRot + MathHelper.PiOver2, RingTex.Size() / 2f, ringScale * 0.5f, SpriteEffects.None);
+
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)

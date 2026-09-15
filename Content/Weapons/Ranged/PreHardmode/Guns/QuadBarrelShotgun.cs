@@ -38,8 +38,11 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 0.4f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 0.6f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, position);
+
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ShotgunBadIThink3") with { Volume = 0.75f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style, position);
 
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
             

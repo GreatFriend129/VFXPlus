@@ -17,6 +17,7 @@ namespace VFXPlus.Common.IL
         public override void OnModLoad()
         {
             IL_Player.ItemCheck_EmitUseVisuals += RemoveStarfurySwingDust;
+            IL_Player.ItemCheck_EmitUseVisuals += RemoveVolcanoSwingDust;
         }
 
         private void RemoveStarfurySwingDust(ILContext il)
@@ -24,6 +25,21 @@ namespace VFXPlus.Common.IL
             ILCursor c = new ILCursor(il);
 
             if (!c.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(65)))
+            {
+                VFXPlus.Instance.Logger.Warn("RemoveStarfurySwingDust Edit failed.");
+                return;
+            }
+
+            //Effectively appends '&& false' to the if statement, making it never run 
+            c.Emit(OpCodes.Ldc_I4_0);
+            c.Emit(OpCodes.And);
+        }
+
+        private void RemoveVolcanoSwingDust(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            if (!c.TryGotoNext(MoveType.Before, i => i.MatchLdcI4(121)))
             {
                 VFXPlus.Instance.Logger.Warn("RemoveStarfurySwingDust Edit failed.");
                 return;

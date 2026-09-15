@@ -20,11 +20,14 @@ namespace VFXPlus.Content.Gores
         public override string Texture => "VFXPlus/Content/Gores/ShotgunShell";
         public override bool Update(Gore gore)
         {
+            gore.drawOffset = new Vector2(0f, -gore.AABBRectangle.Height / 2f);
 
             if (gore.frameCounter == 0)
             {
                 gore.rotation = Main.rand.NextFloat(6.28f);
                 gore.alpha = 255;
+
+                gore.position += new Vector2(0f, 5f);
             }
 
             float sizeProg = Utils.GetLerpValue(0, 255, gore.alpha, true);
@@ -41,7 +44,7 @@ namespace VFXPlus.Content.Gores
             {
                 gore.alpha += 10;
 
-                gore.scale = 0.625f * Easings.easeInOutQuad(1f - sizeProg);
+                //gore.scale = 0.625f * Easings.easeInOutQuad(1f - sizeProg);
 
                 if (gore.alpha >= 250)
                     gore.active = false;

@@ -58,7 +58,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailMaxLength = 120 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = new Color(255, 95, 18) with { A = 35 } * Easings.easeInQuad(totalAlpha) * 0.45f;
+            trail1.trailColor = new Color(255, 106, 10) with { A = 55 } * Easings.easeInQuad(totalAlpha) * 0.4f; //255r
             trail1.fadeOut = true;
 
             trail1.trailTime = randomTimeOffset + (timer * 0.02f * randomTrailSpeed); //0.05
@@ -126,9 +126,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 trail1.TrailDrawing(Main.spriteBatch, false);
 
-                Color darkest = new Color(255, 74, 5);
-                Color middle = new Color(255, 90, 10);
-                Color brightest = new Color(255, 111, 20);
+                //Color darkest = new Color(255, 74, 5); //74 5 | 90 10 | 111 20
+                //Color middle = new Color(255, 90, 10);
+                //Color brightest = new Color(255, 111, 20);
+
+                //Color darkest = new Color(255, 90, 10); //74 5 | 90 10 | 111 20
+                //Color middle = new Color(255, 111, 20);
+                //Color brightest = new Color(255, 122, 26);
+
+                Color darkest = new Color(255, 87, 9); //74 5 | 90 10 | 111 20
+                Color middle = new Color(255, 108, 18);
+                Color brightest = new Color(255, 120, 24);
 
                 //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
                 if (projectile.active == false)
@@ -148,10 +156,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
 
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 75 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 90 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
                 Vector2 orbScale = new Vector2(1f, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, middle with { A = 75 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, middle with { A = 90 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
 
                 Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
@@ -159,8 +167,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.45f;
 
                 drawPos += new Vector2(0f, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.55f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 90 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 90 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.55f, SpriteEffects.None, 0f);
             });
 
             return false;

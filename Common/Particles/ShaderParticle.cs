@@ -10,13 +10,14 @@ namespace VFXPlus.Common
     public enum ParticleType : int
     {
         FireParticle = 1,
+        FireParticleAlpha = 2,
     }
 
     //Use this instead of dust when we want to apply a shader to a particle
     public class ShaderParticle : Entity
     {
         public int particleID;
-        public int particleType;
+        public ParticleType particleType;
 
         public Vector2 Center;
         public Vector2 Velocity;

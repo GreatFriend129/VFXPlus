@@ -124,13 +124,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 smoke.alpha = 2;
             }
 
-            if (timer % 1 == 0 && true)// Main.rand.NextBool())
+            if (timer % 1 == 0 && false)// Main.rand.NextBool())
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
 
 
-                FireParticle fire = new FireParticle(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.75f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), colorMult: 0.75f, bloomAlpha: 1f,
+                FireParticleAlpha fire = new FireParticleAlpha(dustPos + projectile.velocity + Main.rand.NextVector2Circular(2f, 2f) + new Vector2(0f, -50f), dustVel, 1f, Color.Lerp(Color.Green, Color.GreenYellow, 0.3f), 
+                    colorMult: 0.75f, bloomAlpha: 0.5f,
                     AlphaFade: 0.91f, RotPower: 0.01f);
                 fire.renderLayer = RenderLayer.UnderProjectiles;
 
@@ -138,11 +139,13 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             }
 
             //fuck this looks good but I dont want to have to change it again
-            if (timer % 1 == 0 && timer > 3 && false)
+            if (timer % 1 == 0 && timer > 3)
             {
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
-                FireParticle fire = new FireParticle(projectile.Center, -vel, 1f, Color.Lerp(Color.Green, Color.GreenYellow, 0.25f), colorMult: 0.75f, bloomAlpha: 1f, AlphaFade: 0.9f);
+                FireParticleAlpha fire = new FireParticleAlpha(projectile.Center + new Vector2(0f, 0f), -vel, 1.25f, Color.Lerp(Color.Green, Color.GreenYellow, 0.25f), colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.95f,
+                    EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
                 fire.scaleFadePower = 1.08f;
+                fire.renderLayer = RenderLayer.UnderProjectiles;
                 ShaderParticleHandler.SpawnParticle(fire);
             }
 
@@ -327,7 +330,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
             });
 
             //Border
-            for (int i = 0; i < 6; i++)
+            for (int i = 220; i < 6; i++)
             {
                 float dist = 1.5f;
 
@@ -338,8 +341,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     Color.White with { A = 0 } * true_alpha * 0.8f, projectile.rotation, TexOrigin, finalDrawScale * 1.05f, se);
             }
 
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 1f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
-            Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 } * 0.1f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * 1f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, Color.White with { A = 0 } * 0.1f * true_alpha, projectile.rotation, TexOrigin, finalDrawScale, se);
 
             return false;
         }

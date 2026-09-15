@@ -116,7 +116,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                     float soundProg = Utils.GetLerpValue(0, 120, projectile.ai[0], true);
 
-                    float volume = 0.6f - (soundProg * 0.25f);
+                    float volume = 0.8f - (soundProg * 0.35f);
                     float pitch = -0.85f + (Easings.easeOutQuad(soundProg) * 0.95f);
 
                     SoundStyle style23 = new SoundStyle("Terraria/Sounds/Custom/dd2_sky_dragons_fury_shot_0") with { Volume = 0.3f * volume, Pitch = .10f + pitch, PitchVariance = 0.4f };
@@ -399,12 +399,12 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.MagicGuns
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + posOffset;
 
-                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.7f);
+                Color newCol = new Color(0, 113, 255);// Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.7f);
 
-                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.55f);
+                Vector2 lineScale = new Vector2(1.85f, 0.3f + 0.4f * progress * 1.75f * 0.5f);
 
                 //Main
-                Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 150 } * 0.7f * progress * progress * 2.0f,
+                Main.EntitySpriteDraw(line, AfterImagePos, null, newCol with { A = 150 } * 1f * progress * progress * 2.0f,
                     projectile.velocity.ToRotation(), line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
             }
 

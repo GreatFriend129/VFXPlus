@@ -55,7 +55,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             int EU = 1 + projectile.extraUpdates;
 
             //Want less dust when the arrow has extra updates (magic quiver)
-            int mod = Math.Clamp(2 * EU, 2, 100);
+            int mod = Math.Clamp(1 * EU, 1, 100); //2
 
             if (timer % mod == 0 && timer > 10 && Main.rand.NextBool() && false)
             {
@@ -80,17 +80,56 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             }
 
             //Fire Particles
-            if (timer % mod == 0 && Main.rand.NextBool(2))
+            if (timer % 1 == 0 && Main.rand.NextBool(1))
             {
-                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 2f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) - projectile.velocity * 0.25f; //0.5
+
+                Color fireRed = Color.Lerp(Color.OrangeRed, Color.Red, 0.05f);//0.15
+
+                for (int i = 0; i < 2; i++)
+                {
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.4f, fireRed, colorMult: 1.5f, bloomAlpha: 3f, AlphaFade: 0.96f);
+                    fire.bloomColor = fireRed with { A = 150 };
+                    fire.scaleFadePower = 1.08f;
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
+
+            if (timer % mod == 0 && Main.rand.NextBool(2) && false)
+            {
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.25f; //0.5
 
+                Color fireRed = Color.Lerp(Color.OrangeRed, Color.Red, 0.05f);//0.15
 
-                FireParticle fire = new FireParticle(dustPos + new Vector2(0f, 0f) + Main.rand.NextVector2Circular(2f, 2f), dustVel, 0.4f, Color.Lerp(Color.OrangeRed, Color.Red, 0f), colorMult: 1f, bloomAlpha: 1.5f,
-                    AlphaFade: 0.94f, RotPower: 0.01f);
-                fire.renderLayer = RenderLayer.UnderProjectiles;
+                for (int i = 0; i < 2; i++)
+                {
+                    Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, -100f), dustVel, 0.5f, fireRed, colorMult: 1.5f, bloomAlpha: 3f, AlphaFade: 0.96f);
+                    fire.bloomColor = fireRed with { A = 150 };
+                    //fire.scaleFadePower = 1.08f;
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
 
-                ShaderParticleHandler.SpawnParticle(fire);
+            if (timer % mod == 0 && Main.rand.NextBool(1) && false)
+            {
+                Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 2f;
+                Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) - projectile.velocity * 0.25f; //0.5
+
+                Color fireRed = Color.Lerp(Color.OrangeRed, Color.Red, 0.05f);//0.15
+
+                for (int i = 0; i < 2; i++)
+                {
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.5f, fireRed, colorMult: 1.5f, bloomAlpha: 3f, AlphaFade: 0.96f);
+                    fire.bloomColor = fireRed with { A = 150 };
+                    //fire.scaleFadePower = 1.08f;
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
 
 
@@ -162,6 +201,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Color betweenOrange2 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.85f) * overallAlpha;
             Color betweenOrange3 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.4f) * overallAlpha;
 
+            Color betweenOrange4 = Color.Lerp(Color.Orange, Color.OrangeRed, 0.1f) * overallAlpha;
+
+
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
@@ -184,8 +226,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     float middleProg = (float)(i - 1) / previousPostions.Count;
 
                     float size3 = (0.5f + (0.5f * progress));
-                    Vector2 vec2Scale = new Vector2(3f, 1f * size3 * yScaleMult) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, col2 with { A = 0 } * 0.35f * middleProg,
+                    Vector2 vec2Scale = new Vector2(3f, 1f * size3 * yScaleMult) * overallScale * projectile.scale * 0.35f;
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenOrange4 with { A = 160 } * 0.5f * middleProg,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }

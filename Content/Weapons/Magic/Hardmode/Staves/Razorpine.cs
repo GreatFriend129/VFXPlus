@@ -69,6 +69,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             myVFX.rotation = projectile.rotation;
             myVFX.scale = projectile.scale;
             myVFX.alpha = projectile.alpha;
+            myVFX.ai[2] = projectile.velocity.Length();
 
             if (myVFX.ModProjectile is RazorpineVFX rvfx)
             {
@@ -207,7 +208,11 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Vector2 originOffset = new Vector2(vanillaTex.Height / 2f, 0f).RotatedBy(Projectile.rotation - MathHelper.PiOver2);
             drawPos += originOffset;
 
-            Vector2 vec2Scale = new Vector2(0.25f + (fadeInScale * 0.75f * overallAlpha), 1f) * Projectile.scale * overallScale * justHitPower;
+            //Utils.DrawBorderString(Main.spriteBatch, "" + fadeInScale, Projectile.Center - Main.screenPosition, Color.Red);
+
+            float yScaleBonus = Easings.easeOutQuad(1f - fadeInScale) * (stuckInNPC || !isAttached ? 0f : 1f);
+
+            Vector2 vec2Scale = new Vector2(0.25f + (fadeInScale * 0.75f * overallAlpha), 1f + yScaleBonus) * Projectile.scale * overallScale * justHitPower;
 
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
@@ -220,20 +225,28 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw with { A = 0 } * 0.75f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, null, colw with { A = 50 } * 0.5f,
                         previousRotations[i], TexOrigin, vec2Scale2 * overallScale, SpriteEffects.None);
             }
 
             float rotBonus = MathF.Sin(stuckInPower * MathHelper.TwoPi * 2f) * 0.5f * Easings.easeInCirc(stuckInPower); //0.4
 
             int layers = isAttached ? 6 : 5;
-            for (int i = 0; i < layers; i++)
+            for (int i = 220; i < layers; i++)
             {
                 Color toUse = Color.Lerp(Color.Green, Color.Green, stuckInPower);
 
                 float opacitySquared = Projectile.Opacity * Projectile.Opacity;
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), null,
                     toUse with { A = 0 } * 1f * opacitySquared * overallAlpha, Projectile.rotation + rotBonus, TexOrigin, vec2Scale * 1.1f, SpriteEffects.None);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                float opacitySquared = Projectile.Opacity * Projectile.Opacity; 
+                Vector2 offset = (2f * (i * MathHelper.PiOver2).ToRotationVector2());
+
+                Main.spriteBatch.Draw(vanillaTex, drawPos + offset, null, Color.Green with { A = 50 } * opacitySquared * overallAlpha, Projectile.rotation + rotBonus, TexOrigin, vec2Scale * 1.1f, SpriteEffects.None, 0f); //1.1f
             }
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * Projectile.Opacity * overallAlpha * 1f, Projectile.rotation + rotBonus, TexOrigin, vec2Scale, SpriteEffects.None);

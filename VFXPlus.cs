@@ -29,6 +29,7 @@ namespace VFXPlus
         }
 
         public static Effect SmokeColShader;
+        public static Effect SmokeColShaderAlpha;
 
         public static Effect GlowingTrailShader;
 
@@ -64,6 +65,7 @@ namespace VFXPlus
                 BasicTrailShader = Instance.Assets.Request<Effect>("Effects/TrailShaders/BasicTrailShader", AssetRequestMode.ImmediateLoad).Value;
                 TrailShaderGradient = Instance.Assets.Request<Effect>("Effects/TrailShaders/TrailShaderGradient", AssetRequestMode.ImmediateLoad).Value;
                 SmokeColShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokeColShader", AssetRequestMode.ImmediateLoad).Value;
+                SmokeColShaderAlpha = Instance.Assets.Request<Effect>("Effects/Air/SmokeColShaderAlpha", AssetRequestMode.ImmediateLoad).Value;
                 SmokeNoiseShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokyNoise", AssetRequestMode.ImmediateLoad).Value;
             }
 

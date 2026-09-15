@@ -252,6 +252,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
         public override bool PreAI(Projectile projectile)
         {
             int trailCount = 15; //20
+
             previousRotations.Add(projectile.velocity.ToRotation());
             previousPositions.Add(projectile.Center + projectile.velocity);
 
@@ -319,7 +320,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                 DrawPixelTrail(projectile);
             });
 
-            Texture2D Tex = CommonTextures.SoulSpike.Value;
+            Texture2D Tex = CommonTextures.SoulSpikePMA.Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             Vector2 TexOrigin = Tex.Size() / 2f;
@@ -332,19 +333,19 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
             Color col1 = Color.DeepPink;
             Color col2 = Color.HotPink;
 
-            Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, col2 with { A = 0 }, drawRot, TexOrigin, scale * 0.8f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.7f, 0.7f), null, col1 with { A = 0 }, drawRot, TexOrigin, scale * 0.55f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.35f, 0.35f), null, Color.White with { A = 0 }, drawRot, TexOrigin, scale * 0.3f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + posOffset, null, col2 with { A = 60 }, drawRot, TexOrigin, scale * 0.8f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.7f, 0.7f), null, col1 with { A = 60 }, drawRot, TexOrigin, scale * 0.55f, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(Tex, drawPos + Main.rand.NextVector2Circular(0.35f, 0.35f), null, Color.White with { A = 60 }, drawRot, TexOrigin, scale * 0.3f, SpriteEffects.None, 0f);
 
             return false;
         }
 
         public void DrawPixelTrail(Projectile projectile)
         {
-            Texture2D AfterImage = CommonTextures.SoulSpike.Value;
+            Texture2D AfterImage = CommonTextures.SoulSpikePMA.Value;
 
             //After-Image
-            for (int i = 0; i < previousRotations.Count - 1; i++)
+            for (int i = 6; i < previousRotations.Count - 1; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
@@ -359,10 +360,10 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
                     Vector2 newVec2 = new Vector2(0.5f, 0.5f) * size2;
                     Vector2 newVec22 = new Vector2(0.5f, 0.2f) * size2;
 
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 0 } * 1f * progress,
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, col with { A = 60 } * 1f * progress,
                            previousRotations[i], AfterImage.Size() / 2f, newVec2 * 1f, SpriteEffects.None);
 
-                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 0 } * 0.75f * progress,
+                    Main.EntitySpriteDraw(AfterImage, AfterImagePos, null, Color.White with { A = 60 } * 0.75f * progress,
                            previousRotations[i], AfterImage.Size() / 2f, newVec22 * 1f, SpriteEffects.None);
                 }
 

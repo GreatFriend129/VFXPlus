@@ -704,7 +704,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Color[] cols = { Color.White, Color.Aquamarine, Color.Aqua };
 
             int h3 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, Main.myPlayer);
-            Main.projectile[h3].scale = 1f;
+            Main.projectile[h3].scale = 0.75f;
             Main.projectile[h3].rotation = projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
             (Main.projectile[h3].ModProjectile as H3Impact).cols = cols;
@@ -712,13 +712,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             (Main.projectile[h3].ModProjectile as H3Impact).xScaleMult = 0.5f; //.5
             (Main.projectile[h3].ModProjectile as H3Impact).yScaleMult = 0.85f; //.5
 
-            int h32 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, Main.myPlayer);
-            Main.projectile[h32].scale = 1f;
-            Main.projectile[h32].rotation = projectile.velocity.ToRotation();
+            //int h32 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, Main.myPlayer);
+            //Main.projectile[h32].scale = 0.75f;
+            //Main.projectile[h32].rotation = projectile.velocity.ToRotation();
 
-            (Main.projectile[h32].ModProjectile as H3Impact).cols = cols;
-            (Main.projectile[h32].ModProjectile as H3Impact).pixelize = true;
-            (Main.projectile[h32].ModProjectile as H3Impact).xScaleMult = 0.5f; //.5
+            //(Main.projectile[h32].ModProjectile as H3Impact).cols = cols;
+            //(Main.projectile[h32].ModProjectile as H3Impact).pixelize = true;
+            //(Main.projectile[h32].ModProjectile as H3Impact).xScaleMult = 0.5f; //.5
 
             float distanceToPlayer = (projectile.Center - Main.player[projectile.owner].Center).Length();
 
@@ -860,7 +860,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, myEffect, Main.GameViewMatrix.EffectMatrix);
 
-            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 130 * new Vector2(1f, 1f), SpriteEffects.None, 0f); 
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.rotation, Tex.Size() / 2f, 120 * new Vector2(1f, 1f), SpriteEffects.None, 0f); //130
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);

@@ -21,7 +21,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
-            return lateInstantiation && (entity.type == ProjectileID.WoodenBoomerang) && false;
+            return lateInstantiation && (entity.type == ProjectileID.WoodenBoomerang);
         }
 
         public List<Vector2> previousPositions = new List<Vector2>();
@@ -39,13 +39,9 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            float fadeInTime = Math.Clamp((timer + 4f) / 12f, 0f, 1f); //4 |12
+            float fadeInTime = Math.Clamp((timer + 4f) / 12f, 0f, 1f);
             overallScale = Easings.easeInOutHarsh(fadeInTime);
 
-            //float fadeInAlphaTime = Math.Clamp((timer + 4f) / 12f, 0f, 1f); //4 |12
-            //overallAlpha = Easings.easeInOutHarsh(fadeInTime);
-
-            //visualRotation = projectile.rotation;
             visualRotation += 0.45f * projectile.direction * overallScale;
 
             timer++;
@@ -71,7 +67,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
             {
                 float progress = (float)i / previousRotations.Count;
 
-                Main.EntitySpriteDraw(vanillaTex, previousPositions[i] - Main.screenPosition, null, lightColor * 0.35f * overallAlpha * Easings.easeOutQuad(progress),
+                Main.EntitySpriteDraw(vanillaTex, previousPositions[i] - Main.screenPosition, null, lightColor * 0.15f * overallAlpha * Easings.easeOutQuad(progress),
                         previousRotations[i], vanillaTex.Size() / 2f, projectile.scale * overallScale * Easings.easeInSine(progress), SpriteEffects.None);
             }
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * overallAlpha, visualRotation, vanillaTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
@@ -87,14 +83,14 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
-            Texture2D trailTex = CommonTextures.SoulSpike.Value;
+            Texture2D trailTex = CommonTextures.SoulSpikePMA.Value;
             for (int i = 0; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
                 Vector2 spikeScale = new Vector2(1f, 1f) * progress;
 
-                Main.EntitySpriteDraw(trailTex, previousPositions[i] - Main.screenPosition, null, Color.SaddleBrown with { A = 0 } * 0.07f * overallAlpha * progress,
+                Main.EntitySpriteDraw(trailTex, previousPositions[i] - Main.screenPosition, null, new Color(99, 61, 34) with { A = 100 } * 0.1f * overallAlpha * progress,
                         previousRotations[i], trailTex.Size() / 2f, projectile.scale * overallScale * spikeScale, SpriteEffects.None);
             }
 

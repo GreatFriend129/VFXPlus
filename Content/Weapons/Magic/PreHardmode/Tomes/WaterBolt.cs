@@ -98,46 +98,44 @@ namespace VFXPlus.Content.Weapons.Magic.PreHardmode.Tomes
         {
             Texture2D line = CommonTextures.Flare.Value;
 
+            float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
+
             //After-Image
             for (int i = 0; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
-                float sineScale = MathF.Sin((float)Main.timeForVisualEffects * 0.25f) * 0.1f;
-
-
-                float offsetIntensity = (1.5f * (1f - progress)) + 3f; //+4.5
-
+                float offsetIntensity = (1.5f * (1f - progress)) + 3f;
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(offsetIntensity, offsetIntensity);
 
-                float startScale = 1f + sineScale;
-
                 Color col = Color.Lerp(Color.DodgerBlue, Color.Blue, 1f - progress);
+                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress);
 
-                float easedFadeValue = progress * progress;
-
-
-                Vector2 lineScale = new Vector2(1.25f, 0.3f + 0.4f * progress); //
-                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); //0.1f 0.2f
-
-                //Black
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.Black * 0.2f * easedFadeValue,
-                    previousRotations[i], line.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
-
-                //Main
-                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 0 } * 1f * easedFadeValue,
-                    previousRotations[i], line.Size() / 2f, lineScale * startScale, SpriteEffects.None);
-
-                //White
-                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 0 } * 0.5f * easedFadeValue,
-                    previousRotations[i], line.Size() / 2f, lineScale2 * startScale, SpriteEffects.None);
-
+                //Blue
+                Main.EntitySpriteDraw(line, AfterImagePos, null, col with { A = 90 } * progress * progress,
+                    previousRotations[i], line.Size() / 2f, lineScale * (1f + sineScale), SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.DodgerBlue with { A = 0 } * 1f,
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                float offsetIntensity = (1.5f * (1f - progress)) + 3f; 
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + Main.rand.NextVector2Circular(offsetIntensity, offsetIntensity);
+
+                Color col = Color.Lerp(Color.DodgerBlue, Color.Blue, 1f - progress);
+                Vector2 lineScale2 = new Vector2(1.25f, 0.05f + 0.05f * progress); 
+
+                //White
+                Main.EntitySpriteDraw(line, AfterImagePos, null, Color.White with { A = 90 } * 0.5f * progress * progress,
+                    previousRotations[i], line.Size() / 2f, lineScale2 * (1f + sineScale), SpriteEffects.None);
+            }
+
+            //Body
+            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.DodgerBlue with { A = 90 } * 1f,
                 projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(1.2f, 0.7f) * 0.75f, SpriteEffects.None);
 
-            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 } * 0.85f,
+            Main.EntitySpriteDraw(line, projectile.Center - Main.screenPosition, null, Color.White with { A = 90 } * 0.85f,
                 projectile.velocity.ToRotation(), line.Size() / 2f, new Vector2(1.25f, 0.7f) * 0.5f, SpriteEffects.None);
 
             return;
