@@ -18,6 +18,7 @@ using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest;
+using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
@@ -90,67 +91,108 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0)
+            if (timer == 0 && false)
             {
                 Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<SuperStarShooterConstellationTest>(), 0, 0, projectile.owner, projectile.whoAmI);
+            }
+
+            if (timer == 0 && false)
+            {
+                Vector2 pulsePos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * 30f;
+
+                int pulse = Projectile.NewProjectile(null, pulsePos, projectile.velocity.SafeNormalize(Vector2.UnitX) * 1f, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+                (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+                Main.projectile[pulse].rotation = projectile.velocity.ToRotation();
             }
 
             currentRot = projectile.velocity.ToRotation();
 
             int trailCount = 10; 
-            previousVelRots.Add(currentRot);
-            previousPositions.Add(projectile.Center + projectile.velocity + currentRot.ToRotationVector2() * 0f); //40
+            previousRotations.Add(currentRot);
+            previousPositions.Add(projectile.Center); //40
 
-            if (previousVelRots.Count > trailCount)
-                previousVelRots.RemoveAt(0);
+            if (previousRotations.Count > trailCount)
+                previousRotations.RemoveAt(0);
 
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
 
-            if (timer % 3 == 0 && false)
-            {
-                Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ConstellationTest>(), 0, 0, projectile.owner);
-            }
 
-
-            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.06f), 0f, 1f);
+            overallAlpha = 1f;// Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.06f), 0f, 1f);
 
             float fadeInTime = Math.Clamp((timer + 3f) / 20f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
             projectile.soundDelay = 10;
 
+            if (timer % 4 == 0)
+            {
+                fireballFrame = (fireballFrame + 1) % 4;
+            }
 
             timer++;
 
             return true;
         }
 
+        int fireballFrame = 0;
+
         float overallScale = 0f;
         float overallAlpha = 0f;
         float currentRot = 0f;
-        public List<float> previousVelRots = new List<float>();
+        public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
 
-        Effect trailEffect = null;
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                DrawTrail(projectile, false);
             });
-            DrawTrail(true);
+            DrawTrail(projectile, true);
 
-            //Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
-            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarSolidWhite").Value;
+            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
             Texture2D StarGlow = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             float drawScale = projectile.scale * overallScale;
 
             Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
-            Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
+            Texture2D FireBall2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/BigFireballWhite").Value;
+
             Color fireBallColor = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
+
+            Vector2 fireball2Pos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 24f;
+            Rectangle fireball2sourceRectangle = new Rectangle(0, (FireBall2.Height / 4) * fireballFrame, FireBall2.Width, (FireBall2.Height / 4));
+            Vector2 fireball2origin = fireball2sourceRectangle.Size() / 2f;
+            Vector2 fireball2Scale = new Vector2(0.55f, 1.25f) * drawScale * 1.05f;
+
+            //Main.EntitySpriteDraw(FireBall2, fireball2Pos, fireball2sourceRectangle, Color.Orange with { A = 50 } * 0.5f, projectile.velocity.ToRotation() - MathHelper.PiOver2, fireball2origin, fireball2Scale, SpriteEffects.None);
+
+            float time = (float)Main.timeForVisualEffects / 60f;
+            for (float i = 220f; i < 1f; i += 0.5f)
+            {
+                float drawS = time % 0.5f / 0.5f;
+                drawS = (drawS + i) % 1f;
+
+                float drawA = drawS * 2f;
+                if (drawA > 1f)
+                    drawA = 2f - drawA;
+
+                float fireballRot = projectile.velocity.ToRotation() - MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                //Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                //Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Vector2 scalea = new Vector2(fireball2Scale.X, fireball2Scale.Y * (0.6f + drawS * 1f));
+
+                Main.EntitySpriteDraw(FireBall2, fireball2Pos + new Vector2(0f, 0f), fireball2sourceRectangle, fireBallColor with { A = 100 } * drawA, fireballRot, new Vector2(FireBall2.Width / 2f, 100f), scalea, SpriteEffects.None);
+            }
+
+
+            Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
             for (int i = 0; i < 4; i++)
             {
                 float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
@@ -160,11 +202,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 150 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.1f, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 175 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.05f, SpriteEffects.None);
             }
 
             Vector2 fireballPos2 = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 0f;
-            float time = (float)Main.timeForVisualEffects / 60f;
+            //float time = (float)Main.timeForVisualEffects / 60f;
             for (float i = 0f; i < 1f; i += 0.5f)
             {
                 float drawS = time % 0.5f / 0.5f;
@@ -178,143 +220,65 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
 
                 float dist = 4f;
 
-                //Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                //Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
-
-                Main.EntitySpriteDraw(FireBall, fireballPos2 + new Vector2(0f, 0f), null, Color.White with { A = 100 } * drawA, fireballRot, new Vector2((float)FireBall.Width / 2f, 10f), 0.4f + drawS * 0.5f, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, fireballPos2 + new Vector2(0f, 0f), null, Color.White with { A = 100 } * drawA, fireballRot, new Vector2((float)FireBall.Width / 2f, 10f), 0.3f + drawS * 0.5f, SpriteEffects.None);
             }
 
-            //Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Black with { A = 235 }, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Orange with { A = 200 } * overallAlpha, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 50 } * overallAlpha, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None);
 
-            //Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Gold with { A = 235 }, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 100 }, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None); //100
-
-            drawPos += new Vector2(0f, 0f);
-            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.White with { A = 150 } * 1f, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
-            Main.EntitySpriteDraw(Star, drawPos, null, Color.Gold with { A = 250 }, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None); //100
 
             return false;
         }
 
-        public void DrawTrail(bool giveUp = false)
+        public void DrawTrail(Projectile projectile, bool giveUp = false)
         {
             if (giveUp)
                 return;
 
-            if (trailEffect == null)
-                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/BasicGlowTrail", AssetRequestMode.ImmediateLoad).Value;
+            Texture2D Trail = CommonTextures.Flare.Value;
 
+            float drawScale = projectile.scale * 1f * overallScale;
 
-            Texture2D trailTexture1 = Mod.Assets.Request<Texture2D>("Assets/Trails/FlameTrail").Value; //
-            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/OuterLavaTrail").Value; //OuterLavaTrail with 10f mult |Extra_196_Black
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
 
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousVelRots.ToArray();
-
-
-            //Blue DodgerBlue
-            Color StripColor(float progress) => Color.Lerp(Color.Orange, Color.DarkGoldenrod, progress) with { A = 150 } * 1f;
-
-            float StripWidth(float progress)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                float sineWidthMult = 1f + (float)Math.Cos((Main.timeForVisualEffects * 0.24f) + (progress * 12f)) * 0.2f;
-                float toReturn = 0f;
+                float progress = (float)i / previousRotations.Count;
 
-                
-                if (progress < 0.75f) //back half
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.75f, progress, true);
-                    toReturn = Easings.easeInSine(LV);
-                }
-                else //Front half
-                {
-                    float LV = Utils.GetLerpValue(0.75f, 1f, progress, true);
-                    toReturn = 1f;
-                }
-                
+                float colorProg = (progress * 4f) % 1f;
+                Color col = Color.Lerp(Color.Orange, Color.Gold, 0.35f);
 
-                /*
-                if (progress < 0.75f) //back half
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.75f, progress, true);
-                    toReturn = Easings.easeInCubic(LV);
-                }
-                else //Front half
-                {
-                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
-                    toReturn = 1f - LV;
-                }
-                */
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + new Vector2(0f, 0f);// + Main.rand.NextVector2Circular(0f, 10f).RotatedBy(previousRotations[i]);
 
+                Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
 
-                /*
-                if (progress < 0.4f) //back half
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.4f, progress, true);
-                    toReturn = Easings.easeInSine(LV) * 0f;
-                }
-                else if (progress >= 0.4 && progress < 0.8f)
-                {
-                    toReturn = 0f;
-                }
-                else //Front half
-                {
-                    float LV = Utils.GetLerpValue(0.8f, 1f, progress, true);
-                    toReturn = Easings.easeInCubic(1f - LV);
-                }
-                */
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 200 } * 1f * progress,
+                       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
 
-                return 25f * toReturn * sineWidthMult; //18
-
-
-                /*
-                float toReturn = 0f;
-                if (progress < 0.85f) //back half
-                {
-                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
-                    toReturn = Easings.easeInSine(LV);
-                }
-                else //Front half
-                {
-                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
-                    toReturn = Easings.easeInSine(1f - LV);
-                }
-
-                return 50f * toReturn * sineWidthMult;
-                */
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 150 } * 0.85f * progress,
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
             }
 
+            for (int i = 220; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
 
+                float colorProg = (progress * 4f) % 1f;
+                Color col = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
 
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + new Vector2(0f, -100f);
 
-            VertexStripFixed vertexStrip = new VertexStripFixed();
-            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+                Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
 
-            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.05f);
+                //Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 150 } * 1f * progress,
+                //       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
 
-            trailEffect.Parameters["bodyIntensity"].SetValue(1f);
-            trailEffect.Parameters["bodyPower"].SetValue(1f);
-            trailEffect.Parameters["posterizationSteps"].SetValue(0f);
+                //Main.EntitySpriteDraw(FireBall, AfterImagePos, null, Color.HotPink with { A = 20 } * 1f * progress,
+                //       previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(trailScale.Y, trailScale.X), SpriteEffects.None);
 
-            trailEffect.Parameters["whiteGlowSize"].SetValue(0.45f);
-            trailEffect.Parameters["whiteGlowPower"].SetValue(2f);
-
-
-            trailEffect.Parameters["TrailTexture1"].SetValue(trailTexture1);
-            trailEffect.Parameters["tex1reps"].SetValue(2f);
-            trailEffect.Parameters["tex1Intensity"].SetValue(1f); //2f
-
-            trailEffect.Parameters["TrailTexture2"].SetValue(trailTexture2);
-            trailEffect.Parameters["tex2reps"].SetValue(2f);
-            trailEffect.Parameters["tex2Intensity"].SetValue(1f);
-
-            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
-            vertexStrip.DrawTrail();
-
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 100 } * 0.85f * progress,
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
+            }
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
@@ -399,10 +363,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             {
                 //alpha *= 0.9f;
 
-                float fadeInTime = Math.Clamp((timer + 3f) / 20f, 0f, 1f);
+                float fadeInTime = Math.Clamp((timer + 3f) / 25f, 0f, 1f); //3 20
                 scale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
-                if (timer > 5)
+                if (timer > 6)
                     alpha -= 0.06f;
 
                 velocity *= 0.95f; //92

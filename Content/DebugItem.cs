@@ -68,7 +68,10 @@ namespace VFXPlus.Content
 
             //int Const = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ConstellationTest>(), 1, 0, Main.myPlayer);
 
-            int glowTrail = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
+            //int glowTrail = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
+            int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Color.Lerp(Color.Gold, Color.Orange, 0.75f);// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
 
 
             for (int i = 220; i < 6; i++)
