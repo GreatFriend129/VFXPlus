@@ -15,6 +15,7 @@ using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.Projectiles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
@@ -125,6 +126,17 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                 if (projectile.ai[0] == 0f && Main.myPlayer == projectile.owner)
                 {
                     Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<LunarExplosionAnim>(), 0, 0f);
+
+                    Color[] cols = { Color.White, Color.Aquamarine, Color.Aqua };
+
+                    int h3 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<H3Impact>(), 0, 0, Main.myPlayer);
+                    Main.projectile[h3].scale = 0.85f;
+                    Main.projectile[h3].rotation = 0f;// projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                    (Main.projectile[h3].ModProjectile as H3Impact).cols = cols;
+                    (Main.projectile[h3].ModProjectile as H3Impact).pixelize = true;
+                    (Main.projectile[h3].ModProjectile as H3Impact).xScaleMult = 0.5f; //.5
+                    (Main.projectile[h3].ModProjectile as H3Impact).yScaleMult = 0.85f; //.5
                 }
 
                 projectile.ai[0] += 1f;

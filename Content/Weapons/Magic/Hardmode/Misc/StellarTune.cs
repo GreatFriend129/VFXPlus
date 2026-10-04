@@ -138,9 +138,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                CerobaStyleDraw(projectile, false);
+                CerobaStyleDraw(projectile, true);
             });
-            CerobaStyleDraw(projectile, true);
+            CerobaStyleDraw(projectile, false);
 
             float scale = MathHelper.Lerp(1f, 1.25f, pulseIntensity) * alpha;
             float easedStarScale = Easings.easeInCubic(alpha);
@@ -304,7 +304,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             Vector2 vector5 = projectile.Center + vector;
             Texture2D value = TextureAssets.Projectile[projectile.type].Value;
             _ = new Rectangle(0, 0, value.Width, value.Height).Size() / 2f;
-            Texture2D value2 = CommonTextures.FireBallBlur.Value;// 
+            Texture2D value2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value; //FireBallBlur
             Rectangle value3 = value2.Frame();
             Vector2 origin2 = new Vector2((float)value3.Width / 2f, 10f);
             _ = Color.Cyan * 0.5f * num2;

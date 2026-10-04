@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using rail;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using rail;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.VFXTest;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
@@ -84,6 +85,472 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         {
             return lateInstantiation && (entity.type == ProjectileID.SuperStar);
+        }
+
+        int timer = 0;
+        public override bool PreAI(Projectile projectile)
+        {
+            if (timer == 0)
+            {
+                Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<SuperStarShooterConstellationTest>(), 0, 0, projectile.owner, projectile.whoAmI);
+            }
+
+            currentRot = projectile.velocity.ToRotation();
+
+            int trailCount = 10; 
+            previousVelRots.Add(currentRot);
+            previousPositions.Add(projectile.Center + projectile.velocity + currentRot.ToRotationVector2() * 0f); //40
+
+            if (previousVelRots.Count > trailCount)
+                previousVelRots.RemoveAt(0);
+
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
+
+            if (timer % 3 == 0 && false)
+            {
+                Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<ConstellationTest>(), 0, 0, projectile.owner);
+            }
+
+
+            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.06f), 0f, 1f);
+
+            float fadeInTime = Math.Clamp((timer + 3f) / 20f, 0f, 1f);
+            overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
+
+            projectile.soundDelay = 10;
+
+
+            timer++;
+
+            return true;
+        }
+
+        float overallScale = 0f;
+        float overallAlpha = 0f;
+        float currentRot = 0f;
+        public List<float> previousVelRots = new List<float>();
+        public List<Vector2> previousPositions = new List<Vector2>();
+
+        Effect trailEffect = null;
+        public override bool PreDraw(Projectile projectile, ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(false);
+            });
+            DrawTrail(true);
+
+            //Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
+            Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarSolidWhite").Value;
+            Texture2D StarGlow = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            float drawScale = projectile.scale * overallScale;
+
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
+            Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
+            Color fireBallColor = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
+            for (int i = 0; i < 4; i++)
+            {
+                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 150 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.1f, SpriteEffects.None);
+            }
+
+            Vector2 fireballPos2 = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 0f;
+            float time = (float)Main.timeForVisualEffects / 60f;
+            for (float i = 0f; i < 1f; i += 0.5f)
+            {
+                float drawS = time % 0.5f / 0.5f;
+                drawS = (drawS + i) % 1f;
+
+                float drawA = drawS * 2f;
+                if (drawA > 1f)
+                    drawA = 2f - drawA;
+
+                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+
+                float dist = 4f;
+
+                //Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
+                //Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+
+                Main.EntitySpriteDraw(FireBall, fireballPos2 + new Vector2(0f, 0f), null, Color.White with { A = 100 } * drawA, fireballRot, new Vector2((float)FireBall.Width / 2f, 10f), 0.4f + drawS * 0.5f, SpriteEffects.None);
+            }
+
+            //Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Black with { A = 235 }, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+
+            //Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Gold with { A = 235 }, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            //Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 100 }, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None); //100
+
+            drawPos += new Vector2(0f, 0f);
+            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.White with { A = 150 } * 1f, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.Gold with { A = 250 }, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None); //100
+
+            return false;
+        }
+
+        public void DrawTrail(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/BasicGlowTrail", AssetRequestMode.ImmediateLoad).Value;
+
+
+            Texture2D trailTexture1 = Mod.Assets.Request<Texture2D>("Assets/Trails/FlameTrail").Value; //
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/OuterLavaTrail").Value; //OuterLavaTrail with 10f mult |Extra_196_Black
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = previousPositions.ToArray();
+            float[] rot_arr = previousVelRots.ToArray();
+
+
+            //Blue DodgerBlue
+            Color StripColor(float progress) => Color.Lerp(Color.Orange, Color.DarkGoldenrod, progress) with { A = 150 } * 1f;
+
+            float StripWidth(float progress)
+            {
+                float sineWidthMult = 1f + (float)Math.Cos((Main.timeForVisualEffects * 0.24f) + (progress * 12f)) * 0.2f;
+                float toReturn = 0f;
+
+                
+                if (progress < 0.75f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.75f, progress, true);
+                    toReturn = Easings.easeInSine(LV);
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.75f, 1f, progress, true);
+                    toReturn = 1f;
+                }
+                
+
+                /*
+                if (progress < 0.75f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.75f, progress, true);
+                    toReturn = Easings.easeInCubic(LV);
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
+                    toReturn = 1f - LV;
+                }
+                */
+
+
+                /*
+                if (progress < 0.4f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.4f, progress, true);
+                    toReturn = Easings.easeInSine(LV) * 0f;
+                }
+                else if (progress >= 0.4 && progress < 0.8f)
+                {
+                    toReturn = 0f;
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.8f, 1f, progress, true);
+                    toReturn = Easings.easeInCubic(1f - LV);
+                }
+                */
+
+                return 25f * toReturn * sineWidthMult; //18
+
+
+                /*
+                float toReturn = 0f;
+                if (progress < 0.85f) //back half
+                {
+                    float LV = Utils.GetLerpValue(0f, 0.85f, progress, true);
+                    toReturn = Easings.easeInSine(LV);
+                }
+                else //Front half
+                {
+                    float LV = Utils.GetLerpValue(0.85f, 1f, progress, true);
+                    toReturn = Easings.easeInSine(1f - LV);
+                }
+
+                return 50f * toReturn * sineWidthMult;
+                */
+            }
+
+
+
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.05f);
+
+            trailEffect.Parameters["bodyIntensity"].SetValue(1f);
+            trailEffect.Parameters["bodyPower"].SetValue(1f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(0f);
+
+            trailEffect.Parameters["whiteGlowSize"].SetValue(0.45f);
+            trailEffect.Parameters["whiteGlowPower"].SetValue(2f);
+
+
+            trailEffect.Parameters["TrailTexture1"].SetValue(trailTexture1);
+            trailEffect.Parameters["tex1reps"].SetValue(2f);
+            trailEffect.Parameters["tex1Intensity"].SetValue(1f); //2f
+
+            trailEffect.Parameters["TrailTexture2"].SetValue(trailTexture2);
+            trailEffect.Parameters["tex2reps"].SetValue(2f);
+            trailEffect.Parameters["tex2Intensity"].SetValue(1f);
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+            vertexStrip.DrawTrail();
+
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+        }
+
+        public override bool PreKill(Projectile projectile, int timeLeft)
+        {
+            SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.75f, Pitch = 0.15f, PitchVariance = 0.05f, MaxInstances = -1 }, projectile.position);
+
+            Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Gold, Scale: 0.25f);
+
+            da.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 20,
+                overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+
+            for (int i = 0; i < 9 + Main.rand.Next(3); i++)
+            {
+                Color col = Color.Gold;
+
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(3f, 7f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+            }
+
+            Color newColor7 = Color.CornflowerBlue;
+            if (Main.tenthAnniversaryWorld && (projectile.type == 12 || projectile.type == 955))
+            {
+                newColor7 = Color.HotPink;
+                newColor7.A /= 2;
+            }
+            for (int num635 = 0; num635 < 7; num635++)
+            {
+                ////Dust.NewDust(projectile.position, projectile.width, projectile.height, 58, projectile.velocity.X * 0.1f, projectile.velocity.Y * 0.1f, 150, default(Color), 0.8f);
+            }
+            for (float num636 = 0f; num636 < 1f; num636 += 0.225f)  //0.125
+            {
+                Dust.NewDustPerfect(projectile.Center, 278, Vector2.UnitY.RotatedBy(num636 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (4f + Main.rand.NextFloat() * 4f), 150, newColor7).noGravity = true;
+            }
+            for (float num637 = 0f; num637 < 1f; num637 += 0.35f) //0.25f
+            {
+                Dust.NewDustPerfect(projectile.Center, 278, Vector2.UnitY.RotatedBy(num637 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (2f + Main.rand.NextFloat() * 3f), 150, Color.Gold).noGravity = true;
+            }
+            Vector2 vector54 = new Vector2(Main.screenWidth, Main.screenHeight);
+            if (projectile.Hitbox.Intersects(Utils.CenteredRectangle(Main.screenPosition + vector54 / 2f, vector54 + new Vector2(400f))))
+            {
+                for (int num638 = 0; num638 < 4; num638++)
+                {
+                    Gore.NewGore(projectile.GetSource_FromThis(), projectile.position, Main.rand.NextVector2CircularEdge(0.5f, 0.5f) * projectile.velocity.Length(), Utils.SelectRandom<int>(Main.rand, 16, 17, 17, 17, 17, 17, 17, 17));
+                }
+            }
+
+            return false;
+        }
+
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            for (int i = 0; i < 5 + Main.rand.Next(3); i++)
+            {
+                Color col = Color.Gold;
+
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 3f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.35f, 0.55f));
+            }
+        }
+    }
+
+
+    public class SuperStarShooterConstellationTest : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
+
+        private class Constellation
+        {
+            public Vector2 position;
+            public Vector2 velocity;
+            public Color color;
+            public float alpha = 1f;
+            public float scale = 1f;
+
+            public List<int> connectingIndices = new List<int>();
+
+            public int lifeTime = 0;
+            public int timer = 0;
+            public void Update()
+            {
+                //alpha *= 0.9f;
+
+                float fadeInTime = Math.Clamp((timer + 3f) / 20f, 0f, 1f);
+                scale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
+
+                if (timer > 5)
+                    alpha -= 0.06f;
+
+                velocity *= 0.95f; //92
+                position += velocity;
+
+                timer++;
+            }
+
+            public Constellation(Vector2 position, Vector2 velocity, Color color)
+            {
+                this.position = position;
+                this.velocity = velocity;
+                this.color = color;
+            }
+        }
+
+        public override void SetStaticDefaults()
+        {
+            ProjectileID.Sets.DrawScreenCheckFluff[Projectile.type] = 1500;
+        }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = Projectile.height = 16;
+            Projectile.ignoreWater = true;
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.hide = true;
+
+            Projectile.tileCollide = false;
+            Projectile.timeLeft = 250; //180
+        }
+
+        public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs, List<int> behindProjectiles, List<int> overPlayers, List<int> overWiresUI)
+        {
+            behindProjectiles.Add(index);
+            base.DrawBehind(index, behindNPCsAndTiles, behindNPCs, behindProjectiles, overPlayers, overWiresUI);
+        }
+
+        public Color col = Color.DodgerBlue;
+
+
+        int timer = 0;
+        float overallAlpha = 1f;
+        float overallScale = 1f;
+
+        List<Constellation> constellations = new List<Constellation>();
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.ai[1] = Main.rand.NextBool() ? 1f : -1f;
+
+            Projectile parent = Main.projectile[(int)Projectile.ai[0]];
+
+            if (parent.active == false)
+            {
+                Projectile.timeLeft--;
+                //Projectile.timeLeft = 100;
+                Projectile.active = false;
+                return;
+            }
+
+            Projectile.Center = parent.Center;
+
+            if (timer % 4 == 0 && parent.active)
+            {
+                Vector2 dir = parent.velocity.RotatedBy(MathHelper.PiOver2).RotatedByRandom(1f).SafeNormalize(Vector2.UnitX);
+
+                Vector2 randomDir = dir * Main.rand.NextFloat(4f, 8f) * Projectile.ai[1];
+                constellations.Add(new Constellation(Projectile.Center + randomDir * Main.rand.NextFloat(1f, 3f), (parent.velocity * 0.1f) + (randomDir * 0.1f), Color.Gold)); //* Main.rand.NextFloat(1f, 3f)
+
+                Projectile.ai[1] *= -1;
+            }
+
+            foreach (Constellation c in constellations)
+            {
+                c.Update();
+                if (c.alpha <= 0.1f)
+                {
+                    //constellations.Remove(c);
+                }
+            }
+
+
+            timer++;
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            Projectile parent = Main.projectile[(int)Projectile.ai[0]];
+
+            Texture2D Pixel = CommonTextures.CrispStarPMA.Value;// Mod.Assets.Request<Texture2D>("Assets/Pixel/ConstellationPixel").Value;
+            Texture2D Line = CommonTextures.SoulSpikePMA.Value; //Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/BasicGlowSliver").Value; //CommonTextures.SoulSpikePMA.Value;
+
+            Color betweenBlue = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0f); //bp/white
+            Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f); //bp/white
+            Color golden = Color.Lerp(Color.Gold, Color.Orange, 0.75f); //bp/white
+
+            //Draw connections
+            for (int i = 1; i < constellations.Count; i++)
+            {
+                Constellation currentConst = constellations[i];
+                Constellation previousConst = constellations[i - 1];
+
+                if (previousConst.alpha > 0.1f)
+                {
+                    Vector2 between = (currentConst.position - previousConst.position);
+                    Vector2 scale = new Vector2(between.Length() / Line.Width, 0.65f * currentConst.scale);
+
+                    Main.spriteBatch.Draw(Line, previousConst.position - Main.screenPosition, null, golden with { A = 175 } * previousConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), scale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(Line, previousConst.position - Main.screenPosition, null, Color.White with { A = 175 } * previousConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), new Vector2(scale.X, scale.Y * 0.25f), SpriteEffects.None, 0f);
+                }
+            }
+
+            //Draw connect from last point to parent
+            Constellation finalConst = constellations.Last();
+            if (finalConst.alpha > 0.1f)
+            {
+                Vector2 between = (parent.Center - finalConst.position);
+                Vector2 scale = new Vector2(between.Length() / Line.Width, 0.65f * finalConst.scale);
+
+                Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, golden with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, Color.White with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), new Vector2(scale.X, scale.Y * 0.25f), SpriteEffects.None, 0f);
+            }
+
+            //Draw stars
+            for (int i = 0; i < constellations.Count; i++)
+            {
+                Constellation currentConst = constellations[i];
+
+                float starAlpha = Easings.easeOutQuad(currentConst.alpha);
+
+                Main.spriteBatch.Draw(Pixel, currentConst.position - Main.screenPosition, null, golden with { A = 160 } * starAlpha, 0f, Pixel.Size() / 2f, 0.5f * currentConst.scale, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(Pixel, currentConst.position - Main.screenPosition, null, Color.White with { A = 160 } * starAlpha, 0f, Pixel.Size() / 2f, 0.25f * currentConst.scale, SpriteEffects.None, 0f);
+            }
+
+            return false;
+        }
+
+    }
+
+    public class SuperStarShotOverrideOld : GlobalProjectile
+    {
+        public override bool InstancePerEntity => true;
+
+        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
+        {
+            return lateInstantiation && (entity.type == ProjectileID.SuperStar) && false;
         }
 
         int timer = 0;

@@ -36,20 +36,20 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         {            
             int trailCount = 11 + trailOffsetAmount;
             previousRotations.Add(projectile.rotation);
-            previousPostions.Add(projectile.Center);
+            previousPositions.Add(projectile.Center);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
 
-            if (previousPostions.Count > trailCount)
-                previousPostions.RemoveAt(0);
+            if (previousPositions.Count > trailCount)
+                previousPositions.RemoveAt(0);
 
             int EU = 1 + projectile.extraUpdates;
 
             //Want less dust when the arrow has extra updates (magic quiver)
             int mod = Math.Clamp(3 * EU, 3, 100);
 
-            if (timer % mod == 0 && Main.rand.NextBool(2) && timer > 5)
+            if (timer % mod == 0 && Main.rand.NextBool(2) && timer > 5 && false)
             {
                 float rot = projectile.velocity.ToRotation();
 
@@ -62,6 +62,27 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 dp.customData = new MuraLineBehavior(new Vector2(0.6f, 1f), WhiteIntensity: 0f);
             }
 
+            if (timer % mod == 0 && Main.rand.NextBool(2) && timer > 5)
+            {
+                float rot = projectile.velocity.ToRotation();
+
+                Vector2 pos = projectile.Center + new Vector2(0f, Main.rand.NextFloat(-5f, 5f)).RotatedBy(rot);
+                Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX) * Main.rand.NextFloat(2f, 7f);
+
+                Color col = new Color(120, 120, 90);// Main.rand.NextBool(2) ? new Color(114, 81, 56) : new Color(151, 107, 75); //new Color(120, 120, 90);
+
+                Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<WindLine>(), vel * 1f, newColor: col * 1.5f, Scale: Main.rand.NextFloat(1f, 1.3f));
+
+                float velFadePower = Main.rand.NextFloat(0.9f, 0.93f);
+                int shrinkTime = Main.rand.Next(2, 5);
+
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.85f, XScale: 0.5f, YScale: 0.5f, Pixelize: true);
+                wlb.colorAlpha = 255;
+                wlb.whiteCoreIntensity = 0f;
+
+                dp.customData = wlb;
+            }
+
             float fadeInTime = Math.Clamp((float)(timer + 5f) / 12f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
@@ -71,7 +92,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
         float overallScale = 0f;
         public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
+        public List<Vector2> previousPositions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -93,7 +114,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             for (int i = 0; i < 4; i++)
             {
                 Main.EntitySpriteDraw(vanillaTex, drawPos + Main.rand.NextVector2Circular(2.5f, 2.5f), sourceRectangle,
-                    new Color(120, 120, 90) with { A = 0 } * 0.45f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SpriteEffects.None);
+                    new Color(120, 120, 90) with { A = 50 } * 0.45f, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SpriteEffects.None);
             }
 
             //MainTex
@@ -108,7 +129,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D Flare = CommonTextures.SoulSpikePMA.Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
@@ -125,19 +146,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
 
                 float size = (0.5f + (0.5f * progress)) * projectile.scale;
 
-                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.25f,
-                    previousRotations[i], TexOrigin, size * overallScale, SpriteEffects.None);
+                //Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 70 } * progress * 0.25f,
+                //    previousRotations[i], TexOrigin, size * overallScale, SpriteEffects.None);
 
                 if (i > 1)
                 {
-                    float middleProg = (float)(i - 1) / previousPostions.Count;
+                    float middleProg = (float)(i - 1) / previousPositions.Count;
 
                     float size2 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(3f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, thisGray with { A = 0 } * 0.15f * middleProg,
-                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
+                    Main.EntitySpriteDraw(Flare, AfterImagePos, null, thisGray with { A = 170 } * 0.5f * middleProg,
+                        previousRotations[i] + MathHelper.PiOver2, Flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }
         }
@@ -170,7 +191,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         {
             if (projectile.penetrate != 1)
             {
-                for (int i = 0; i < 5; i++)
+                for (int i = 220; i < 5; i++)
                 {
                     float arrowVel = 7f;
                     Vector2 randomStart = Main.rand.NextVector2Circular(3f, 3f) * 1f;
@@ -180,6 +201,29 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
                         rotPower: 0.15f, preSlowPower: 0.97f, timeBeforeSlow: 6, postSlowPower: 0.92f, velToBeginShrink: 3.5f, fadePower: 0.85f, shouldFadeColor: false);
                 }
+
+                int dustCount = 3 + Main.rand.Next(0, 3);
+                for (int i = 0; i < dustCount; i++)
+                {
+                    float prog = (float)(i + 1f) / dustCount;
+                    Color col = new Color(120, 120, 90) * 1.35f;// Main.rand.NextBool(2) ? new Color(114, 81, 56) : new Color(151, 107, 75);
+
+
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1.5f, 3.5f);
+
+                    Dust p = Dust.NewDustPerfect(target.Center + vel, ModContent.DustType<WindLine>(), vel, newColor: col * 1f, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 2f);
+                    p.velocity += projectile.velocity.SafeNormalize(Vector2.UnitX) * 4f;
+
+                    float velFadePower = Main.rand.NextFloat(0.9f, 0.93f);
+                    int shrinkTime = Main.rand.Next(2, 5);
+
+                    WindLineBehavior wlb = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.85f, XScale: 0.5f, YScale: 0.5f, Pixelize: true);
+                    wlb.colorAlpha = 255;
+                    wlb.whiteCoreIntensity = 0f;
+
+                    p.customData = wlb;
+                }
+
             }
 
             base.OnHitNPC(projectile, target, hit, damageDone);

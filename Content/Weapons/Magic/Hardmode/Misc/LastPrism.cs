@@ -258,7 +258,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             laserEffect.Parameters["onTex"].SetValue(ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/Clear/GlowTrailClear").Value); //ThinLineGlowClear
             laserEffect.Parameters["gradientTex"].SetValue(ModContent.Request<Texture2D>(GradLocation + lpci.textureLocation).Value);
             laserEffect.Parameters["baseColor"].SetValue(Color.White.ToVector3() * 1f);
-            laserEffect.Parameters["satPower"].SetValue(0.8f - (combinedLaserStartBoostPower * 0.8f)); //0.9f
+            laserEffect.Parameters["satPower"].SetValue(0.9f - (combinedLaserStartBoostPower * 0.9f));
+
 
             laserEffect.Parameters["sampleTexture1"].SetValue(CommonTextures.ThinGlowLine.Value);
             laserEffect.Parameters["sampleTexture2"].SetValue(CommonTextures.spark_06.Value);

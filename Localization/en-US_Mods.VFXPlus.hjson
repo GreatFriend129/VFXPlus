@@ -259,6 +259,10 @@ Projectiles: {
 	StarfuryImpactVFX.DisplayName: Starfury Impact V F X
 	OnyxPulseOld.DisplayName: Onyx Pulse Old
 	VortexExplosionPulse.DisplayName: Vortex Explosion Pulse
+	ConstellationTest.DisplayName: Constellation Test
+	BasicGlowTrailTest.DisplayName: Basic Glow Trail Test
+	StarTrailTest.DisplayName: Star Trail Test
+	SuperStarShooterConstellationTest.DisplayName: Super Star Shooter Constellation Test
 }
 
 Configs: {

@@ -1,18 +1,20 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
+using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Particles;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
@@ -52,7 +54,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             //Want less dust when the arrow has extra updates (magic quiver)
             int mod = Math.Clamp(2 * EU, 2, 100);
 
-            if (timer % mod == 0 && timer > 10)
+            if (timer % mod == 0 && timer > 10 && false)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -2f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.15f;
@@ -64,14 +66,29 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                 smoke.alpha = 2;
             }
 
-            if ((timer + dustRandomOffsetTime) % mod == 0 && Main.rand.NextBool(2) && timer > 5)
+            //Fire Particles
+            if (timer % 1 == 0 && Main.rand.NextBool(1))
             {
-                int d = Dust.NewDust(projectile.position, 7, 7, ModContent.DustType<GlowFlare>(), newColor: CursedGreen, Scale: Main.rand.NextFloat(0.35f, 0.4f) * 1.25f);
-                Main.dust[d].velocity -= projectile.velocity * 0.25f;
-                Main.dust[d].velocity *= 0.45f;
-                Main.dust[d].customData = new GlowFlareBehavior(0.4f, 2f);
-            }
 
+                Color cursedGreen = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+                Color cursedGreen2 = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+
+                for (int i = 0; i < 1; i++)
+                {
+                    Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) + projectile.velocity * 0.2f; //0.5
+
+                    float posOffset = -4f + (10f * i);
+
+                    Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * posOffset;
+
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.5f, cursedGreen, colorMult: 1f, bloomAlpha: 1f, AlphaFade: 0.97f, //col * 0.5f
+                        EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
+                    fire.bloomColor = cursedGreen with { A = 150 };
+                    fire.scaleFadePower = 1.01f; //1.05
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
 
             float fadeInTime = Math.Clamp((timer + 5f * EU) / 15f * EU, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1.5f);
@@ -89,6 +106,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
         public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
+            {
+                DrawTrail(projectile, false);
+            });
+            DrawTrail(projectile, true);
+
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Texture2D orb = CommonTextures.feather_circle128PMA.Value;
 
@@ -97,8 +120,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects SE = projectile.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            DrawTrail(projectile, false);
-
             //Border
             for (int i = 0; i < 4; i++)
             {
@@ -106,10 +127,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
                     Color.White with { A = 0 } * 0.2f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * 1.1f * overallScale, SE);
             }
 
-            Main.EntitySpriteDraw(orb, drawPos, null, Color.GreenYellow with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
+            //Main.EntitySpriteDraw(orb, drawPos, null, Color.GreenYellow with { A = 0 } * 0.1f * overallAlpha, projectile.rotation, orb.Size() / 2, new Vector2(0.35f, 0.65f) * overallScale, SE);
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, sourceRectangle, lightColor * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
-            Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.GreenYellow with { A = 0 } * 0.35f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
+            //Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.GreenYellow with { A = 0 } * 0.35f * overallAlpha, projectile.rotation, TexOrigin, projectile.scale * overallScale, SE);
 
             return false;
         }
@@ -128,37 +149,28 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Arrows
             Color betweenGreen = Color.Lerp(CursedGreen, Color.GreenYellow, 0.1f);
 
             //After-Image
-            if (previousRotations != null && previousPostions != null)
+            for (int i = 0; i < previousRotations.Count; i++)
             {
-                for (int i = 0; i < previousRotations.Count; i++)
+                float progress = (float)i / previousRotations.Count;
+
+                //Start End
+                Color col = Color.Lerp(CursedGreen, CursedGreen, 1f - Easings.easeInCubic(progress)) * progress;
+
+                float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
+
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 100 } * progress * 0.35f * overallAlpha,
+                    previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
+
+                if (i > 1)
                 {
-                    float progress = (float)i / previousRotations.Count;
+                    float middleProg = (float)(i - 1) / previousPostions.Count;
 
-                    //Start End
-                    Color col = Color.Lerp(CursedGreen, CursedGreen, 1f - Easings.easeInCubic(progress)) * progress;
-
-                    float size2 = (0.5f + (0.5f * progress)) * projectile.scale;
-
-                    Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
-
-                    Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.2f * overallAlpha,
-                        previousRotations[i], TexOrigin, size2 * overallScale, SpriteEffects.None);
-
-                    if (i > 1)
-                    {
-                        float middleProg = (float)(i - 1) / previousPostions.Count;
-
-                        float size3 = (0.5f + (0.5f * progress));
-                        Vector2 vec2Scale = new Vector2(3f, 0.75f * size3) * overallScale * projectile.scale * 0.5f;
-                        Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGreen with { A = 0 } * 0.2f * middleProg * overallAlpha,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-
-
-                        Vector2 randPos = Main.rand.NextVector2Circular(10f, 10f);
-
-                        Main.EntitySpriteDraw(flare, AfterImagePos + randPos, null, betweenGreen with { A = 0 } * 0.15f * middleProg * overallAlpha,
-                            previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
-                    }
+                    float size3 = (0.5f + (0.5f * progress));
+                    Vector2 vec2Scale = new Vector2(3f, 1f * size3) * overallScale * projectile.scale * 0.5f;
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, betweenGreen with { A = 150 } * 0.35f * middleProg * overallAlpha,
+                        previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SpriteEffects.None);
                 }
             }
         }

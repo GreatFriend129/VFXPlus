@@ -138,12 +138,12 @@ namespace VFXPlus.Common
                 drawPos.Y += drawInfo.drawPlayer.gfxOffY;
 
                 //Arrow Texture
-                Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+                Texture2D flare = CommonTextures.SoulSpikePMA.Value;
 
                 Color col = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0.35f);
 
-                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, col with { A = 0 } * alpha * 0.85f, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0));
-                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.White with { A = 0 } * alpha, rot, flare.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0)); 
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, col with { A = 80 } * alpha * 0.85f, rot, flare.Size() / 2f, scale, SpriteEffects.None, 0));
+                drawInfo.DrawDataCache.Add(new DrawData(flare, drawPos + off, null, Color.White with { A = 80 } * alpha, rot, flare.Size() / 2f, scale * 0.5f, SpriteEffects.None, 0)); 
             }
 
         }

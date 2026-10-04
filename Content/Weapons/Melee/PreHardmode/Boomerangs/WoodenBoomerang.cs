@@ -32,7 +32,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
         {
             int trailCount = 14;
             previousPositions.Add(projectile.Center);
-            previousRotations.Add(projectile.velocity.ToRotation());
+            previousRotations.Add(visualRotation);
 
             if (previousPositions.Count > trailCount)
                 previousPositions.RemoveAt(0);
@@ -70,6 +70,28 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
                 Main.EntitySpriteDraw(vanillaTex, previousPositions[i] - Main.screenPosition, null, lightColor * 0.15f * overallAlpha * Easings.easeOutQuad(progress),
                         previousRotations[i], vanillaTex.Size() / 2f, projectile.scale * overallScale * Easings.easeInSine(progress), SpriteEffects.None);
             }
+
+            for (int i = 220; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+
+                Main.EntitySpriteDraw(vanillaTex, previousPositions[i] - Main.screenPosition, null, lightColor * progress * overallAlpha * 0.15f,
+                        previousRotations[i], vanillaTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
+            }
+
+            for (int i = 221; i < 6; i++)
+            {
+                float progress = (float)i / 6;
+                float inverseProg = 1f - progress;
+
+                Color col = Color.Lerp(Color.Red, Color.Blue, progress);
+
+                float rot = visualRotation + (MathHelper.Pi * 0.75f * progress);
+                Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White * inverseProg * overallAlpha * 0.5f, 
+                    rot, vanillaTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
+            }
+
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, lightColor * overallAlpha, visualRotation, vanillaTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
 
             return false;
@@ -84,7 +106,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
             Vector2 drawPos = projectile.Center - Main.screenPosition;
 
             Texture2D trailTex = CommonTextures.SoulSpikePMA.Value;
-            for (int i = 0; i < previousRotations.Count; i++)
+            for (int i = 220; i < previousRotations.Count; i++)
             {
                 float progress = (float)i / previousRotations.Count;
 
@@ -93,7 +115,18 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
                 Main.EntitySpriteDraw(trailTex, previousPositions[i] - Main.screenPosition, null, new Color(99, 61, 34) with { A = 100 } * 0.1f * overallAlpha * progress,
                         previousRotations[i], trailTex.Size() / 2f, projectile.scale * overallScale * spikeScale, SpriteEffects.None);
             }
+            Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
+            for (int i = 1; i < 6; i++)
+            {
+                float progress = (float)i / 6;
+                float inverseProg = 1f - progress;
 
+                Color col = Color.Lerp(Color.Red, Color.Blue, progress);
+
+                float rot = visualRotation + (MathHelper.Pi * 0.75f * progress);
+                Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White * inverseProg * overallAlpha * 0.25f,
+                    rot, vanillaTex.Size() / 2f, projectile.scale * overallScale, SpriteEffects.None);
+            }
 
             //Texture2D Orb = CommonTextures.feather_circle128PMA.Value;
             //Main.EntitySpriteDraw(Orb, drawPos, null, Color.Brown * 0.2f, 0f, Orb.Size() / 2f, 1f * projectile.scale * overallScale, SpriteEffects.None);

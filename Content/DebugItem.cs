@@ -66,16 +66,12 @@ namespace VFXPlus.Content
                 //return false;
             }
 
-            //Vector2 thisVel = new Vector2(0f, -4f).RotateRandom(0.25f);
-            //Dust dad = Dust.NewDustPerfect(Main.MouseWorld, ModContent.DustType<MediumSmoke>(), Velocity: thisVel,
-            //    newColor: Color.Tan with { A = 0 }, Scale: Main.rand.NextFloat(0.9f, 1.5f));
-            //dad.customData = new MediumSmokeBehavior(Main.rand.Next(6, 21), 0.93f, 0.1f, 0.1f); //12 28
-            //dad.rotation = Main.rand.NextFloat(6.28f);
+            //int Const = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ConstellationTest>(), 1, 0, Main.myPlayer);
 
-            //int windFX23 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ProjectileID.PainterPaintball, 1, 0, Main.myPlayer);
-            //Main.projectile[windFX23].scale = 10;
+            int glowTrail = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
 
-            for (int i = 0; i < 6; i++)
+
+            for (int i = 220; i < 6; i++)
             {
                 float prog = (float)i / 5f;
 

@@ -49,14 +49,25 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Boomerangs
                 for (int i = 0; i < 2; i++)
                 {
                     Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedByRandom(0.2f) * -Main.rand.NextFloat(2.5f, 7f);
-                    FireParticleAlpha fire = new FireParticleAlpha(projectile.Center + projectile.velocity, vel, 1f, fireRed, colorMult: 1.5f, bloomAlpha: 3f, AlphaFade: 0.9f);
+                    FireParticleAlpha fire = new FireParticleAlpha(projectile.Center + projectile.velocity, vel, 1f, fireRed, colorMult: 1.5f, bloomAlpha: 2f, AlphaFade: 0.92f);
                     fire.bloomColor = fireRed with { A = 150 };
-                    fire.scaleFadePower = 1.08f;
+                    //fire.scaleFadePower = 1.08f;
                     fire.renderLayer = RenderLayer.UnderProjectiles;
                     ShaderParticleHandler.SpawnParticle(fire);
                 }
 
             }
+
+            if (timer % 2 == 0 && Main.rand.NextBool(3))
+            {
+                int num4 = Dust.NewDust(projectile.position + new Vector2(0f, 0f), projectile.width, projectile.height, DustID.Torch, projectile.velocity.X * -0.55f, projectile.velocity.Y * -0.55f, 150,
+                    default(Color), 1.3f);
+                Main.dust[num4].noGravity = true;
+                Main.dust[num4].velocity.X *= 3f;
+                Main.dust[num4].velocity.Y *= 3f;
+                Main.dust[num4].velocity = (Main.dust[num4].velocity + projectile.velocity) / 2f;
+            }
+
 
             if (timer % 1 == 0 && timer > 3 && false)
             {

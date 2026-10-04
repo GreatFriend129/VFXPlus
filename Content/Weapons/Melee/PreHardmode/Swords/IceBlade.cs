@@ -162,7 +162,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                 fireCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0f);
 
 
-                Color bloomCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
+                Color bloomCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f); //75
                 //fireCol = Color.DeepSkyBlue;
 
                 for (int i = 0; i < 2; i++)

@@ -258,7 +258,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Staves
 
                 Color colToUse = Main.rand.NextFloat() < 0.33f ? colB : colA;
 
-                FireParticleAlpha fire = new FireParticleAlpha(projectile.Center, veloF, fireScale, colToUse, colorMult: 1.15f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f);
+                FireParticleAlpha fire = new FireParticleAlpha(projectile.Center, veloF, fireScale, colToUse, colorMult: 1.15f, bloomAlpha: 2f, AlphaFade: alphaFade, VelFade: 0.9f); //1fbloom
                 fire.scaleFadePower = 1.01f; //1.05
                 ShaderParticleHandler.SpawnParticle(fire);
             }

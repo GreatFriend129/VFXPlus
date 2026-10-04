@@ -1,20 +1,21 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using static tModPorter.ProgressUpdate;
 using VFXPlus.Common.Drawing;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
+using static tModPorter.ProgressUpdate;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
@@ -29,7 +30,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
         public override void SetDefaults(Item entity)
         {
-            //entity.UseSound = SoundID.Item1 with { Volume = 0f };
+            entity.UseSound = SoundID.Item1 with { Volume = 0f };
             base.SetDefaults(entity); 
         }
 
@@ -46,11 +47,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
             float circlePulseSize = 0.13f;
 
-            Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity.SafeNormalize(Vector2.UnitX) * 3f, newColor: Color.DodgerBlue);
+            Dust d2 = Dust.NewDustPerfect(position, ModContent.DustType<CirclePulse>(), velocity.SafeNormalize(Vector2.UnitX) * 2f, newColor: Color.DodgerBlue);
             CirclePulseBehavior b2 = new CirclePulseBehavior(circlePulseSize, true, 6, 0.2f, 0.4f);
             b2.drawLayer = "Dusts";
             d2.customData = b2;
             d2.scale = circlePulseSize * 0.05f;
+
+            //Sound
+            SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.15f * 0.75f, Pitch = -0.2f, PitchVariance = 0.1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style32, position);
+
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/TechBlip") with { Volume = 0.25f * 0.75f, Pitch = .30f, PitchVariance = 0.1f, };
+            SoundEngine.PlaySound(style2, position);
 
             return true;
         }
@@ -71,7 +79,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            int trailCount = 32; //18
+            int trailCount = 18;//32; //18
 
             previousPositions.Add(projectile.Center);
             previousRotations.Add(projectile.velocity.ToRotation());
@@ -82,14 +90,53 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
                 previousRotations.RemoveAt(0);
             }
 
-            previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
-            previousRotations.Add(projectile.velocity.ToRotation());
+            //previousPositions.Add(projectile.Center + projectile.velocity * 0.5f);
+            //previousRotations.Add(projectile.velocity.ToRotation());
 
-            if (previousPositions.Count > trailCount)
+            //if (previousPositions.Count > trailCount)
+            //{
+            //    previousPositions.RemoveAt(0);
+            //    previousRotations.RemoveAt(0);
+           // }
+
+            if (timer > 5 && timer % 3 == 0 && Main.rand.NextBool(2) && false)
             {
-                previousPositions.RemoveAt(0);
-                previousRotations.RemoveAt(0);
+                Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixel>(), vel, newColor: Color.DodgerBlue, Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.5f);
+                d.alpha = 2;
+                d.velocity += projectile.velocity.RotatedByRandom(0.1f) * 0.5f;
+                d.velocity *= 0.25f;
             }
+
+            if (timer % 2 == 0 && Main.rand.NextBool(8))
+            {
+                Vector2 dustVel = Main.rand.NextVector2Circular(2f, 2f);
+                dustVel += projectile.velocity * 0.55f;
+
+                Color dustCol = Color.DodgerBlue;
+                float dustScale = Main.rand.NextFloat(0.6f, 0.7f);
+
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: dustCol, Scale: dustScale);
+                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(timeBeforeSlow: 0, postSlowPower: 0.89f, velToBeginShrink: 10f, fadePower: 0.89f, shouldFadeColor: false);
+            }
+
+            if (timer >= 5 && timer % 3 == 0 && false)
+            {
+                Vector2 posOffset = Main.rand.NextVector2Circular(7f, 7f) + new Vector2(0f, 0f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(0.75f, 0.75f);
+
+                Dust p = Dust.NewDustPerfect(projectile.Center + posOffset, ModContent.DustType<PulseInOutDust>(), vel * Main.rand.NextFloat(0.8f, 1.05f),
+                    newColor: Color.DodgerBlue with { A = 20 }, Scale: Main.rand.NextFloat(0.4f, 0.5f) * projectile.scale * 0.75f);
+                p.velocity += projectile.velocity.SafeNormalize(Vector2.UnitX) * 0.5f;
+                p.velocity *= 0.85f;
+                p.rotation = MathHelper.PiOver4;
+                p.noLight = false;
+
+                p.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowPixel, 14, 0.25f, 0.75f, true);
+            }
+
+
 
             float fadeInTime = Math.Clamp((timer + 18f) / 35f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
@@ -106,17 +153,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
         public List<float> previousRotations = new List<float>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
 
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
                 DrawTrail(projectile, false);
             });
             DrawTrail(projectile, true);
 
-
             return false;
-
         }
 
         float starPower = 0f;
@@ -126,14 +170,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
             if (giveUp)
                 return;
 
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D flare = CommonTextures.SoulSpikePMA.Value;
 
             Color color = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.75f);
 
             float overallWidth = 1f + ((float)Math.Sin(Main.timeForVisualEffects * 0.06f) * 0.15f);
 
             //Trail
-            for (int i = 0; i < previousPositions.Count; i++)
+            for (int i = 220; i < previousPositions.Count; i++)
             {
                 float progress = (float)i / previousPositions.Count;
 
@@ -154,6 +198,38 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
                 //Main.EntitySpriteDraw(flare, trailPos, null, Color.White with { A = 0 }, previousRotations[i], 
                     //flare.Size() / 2f, trailScaleThin, 0);
+            }
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+                float AfterImageRot = previousRotations[i];
+
+                Color newCol = new Color(0, 113, 255);// Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.7f);
+
+                Vector2 lineScale = new Vector2(0.75f, (0.2f + 0.5f * progress) * 0.65f);
+
+                //Main
+                Main.EntitySpriteDraw(flare, AfterImagePos, null, newCol with { A = 150 } * 1f * progress * 2.0f,
+                    AfterImageRot, flare.Size() / 2f, lineScale * projectile.scale, SpriteEffects.None);
+            }
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+                float AfterImageRot = previousRotations[i];
+
+                Color newCol = Color.Lerp(Color.Blue, Color.DeepSkyBlue, 0.6f);
+
+                Vector2 lineScale2 = new Vector2(0.75f, (0.1f + 0.25f * progress) * 0.65f); //1.25
+
+                //White
+                Main.EntitySpriteDraw(flare, AfterImagePos, null, Color.White with { A = 150 } * progress,
+                    AfterImageRot, flare.Size() / 2f, lineScale2 * projectile.scale, SpriteEffects.None);
             }
         }
 

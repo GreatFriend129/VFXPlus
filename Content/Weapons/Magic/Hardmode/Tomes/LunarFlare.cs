@@ -15,6 +15,7 @@ using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Particles;
+using VFXPlus.Content.Projectiles;
 
 
 namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
@@ -344,7 +345,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                         a.velocity.Y *= -1;
                 }
 
-                for (int i = 0; i < 12; i++) //16
+                for (int i = 220; i < 12; i++) //16
                 {
                     Color col1 = Color.Lerp(Color.Aquamarine, Color.Aqua, 0.85f);
 
@@ -369,7 +370,32 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
 
 
                 }
+
+                for (int i = 0; i < 16; i++)
+                {
+                    float prog = (float)i / 16;
+
+                    Vector2 veloF = Main.rand.NextVector2CircularEdge(10f, 10f) * Easings.easeOutSine(prog) * 1f; //12
+
+                    float alphaFade = Main.rand.NextFloat(0.94f, 0.95f);
+                    float fireScale = Main.rand.NextFloat(1.75f, 2.25f) * 0.5f;
+
+                    //Color.Lerp(Color.OrangeRed, Color.Red, 0.5f)
+                    Color colA = Color.Lerp(Color.OrangeRed, Color.Orange, 0.65f); //65
+                    Color colB = Color.Lerp(Color.Purple, Color.Red, 0.15f);
+
+                    Color colToUse = Color.Lerp(Color.DodgerBlue, Color.Aqua, 0.85f);// Main.rand.NextFloat() < 0.33f ? colB : colA;
+
+                    FireParticleAlpha fire = new FireParticleAlpha(Projectile.Center, veloF, fireScale, colToUse, colorMult: 1f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f,
+                        EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f
+                         ); //1fbloom
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    fire.scaleFadePower = 1.15f; //1.05
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
+
+
 
             overallScale = Math.Clamp(MathHelper.Lerp(overallScale, 2.25f, 0.1f), 0f, 2.25f);
             pulseVal *= 0.8f;
