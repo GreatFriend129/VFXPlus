@@ -93,5 +93,19 @@ namespace VFXPlus.Common
         {
             return min + random.NextFloat() * (max - min);
         }
+
+
+        /// <summary>
+        /// Oscillates between two numbers via a sinewave.
+        /// </summary>
+        /// <param name="a">Minumum Value.</param>
+        /// <param name="b">Maximum Value.</param>
+        /// <param name="speed">Speed of the sinewave.</param>
+        /// <param name="offset">Horizontal offset of the sinewave.</param>
+        public static float OscSine(float a, float b, float speed, float offset)
+        {
+            float middle = (b - a) / 2f;
+            return a + middle + (middle * MathF.Sin((float)Main.timeForVisualEffects * 0.05f * speed + offset));
+        }
     }
 }

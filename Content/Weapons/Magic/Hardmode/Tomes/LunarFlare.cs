@@ -384,7 +384,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Tomes
                     Color colA = Color.Lerp(Color.OrangeRed, Color.Orange, 0.65f); //65
                     Color colB = Color.Lerp(Color.Purple, Color.Red, 0.15f);
 
-                    Color colToUse = Color.Lerp(Color.DodgerBlue, Color.Aqua, 0.85f);// Main.rand.NextFloat() < 0.33f ? colB : colA;
+                    Color colToUse = Color.Lerp(Color.DodgerBlue, Color.Aqua, 0.5f); //.85
 
                     FireParticleAlpha fire = new FireParticleAlpha(Projectile.Center, veloF, fireScale, colToUse, colorMult: 1f, bloomAlpha: 1f, AlphaFade: alphaFade, VelFade: 0.9f,
                         EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f

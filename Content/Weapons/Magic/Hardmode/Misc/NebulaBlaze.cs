@@ -73,8 +73,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 b2A.drawLayer = "OverPlayers";
                 d2A.customData = b2A;
 
-                //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/Ding") with { Volume = 0.2f, Pitch = -0.9f, PitchVariance = 0.15f };
-                //SoundEngine.PlaySound(style);
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/Ding") with { Volume = 0.2f, Pitch = -0.9f, PitchVariance = 0.15f };
+                SoundEngine.PlaySound(style);
             }
 
             int trailCount = 22; //16
@@ -571,8 +571,8 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
                 b2A.drawLayer = "OverPlayers";
                 d2A.customData = b2A;
 
-                //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = .45f, Pitch = -.45f, PitchVariance = 0.1f };
-                //SoundEngine.PlaySound(style);
+                SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = .45f, Pitch = -.45f, PitchVariance = 0.1f };
+                SoundEngine.PlaySound(style);
             }
 
             int trailCount = 22;
@@ -612,14 +612,14 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/EvenThinnerGlowLine").Value; //07Black
             trail1.trailPointLimit = 85;
-            trail1.trailWidth = trueTrailWidth;
+            trail1.trailWidth = (int)(trueTrailWidth * 1.5);
             trail1.trailMaxLength = 250;
-            trail1.timesToDraw = 2;
+            trail1.timesToDraw = 1;
             trail1.shouldSmooth = false;
             trail1.pinchHead = true;
             trail1.useEffectMatrix = true;
 
-            trail1.trailColor = thisBlue;
+            trail1.trailColor = thisBlue with { A = 150 };
 
             float OffsetAmount = 25f * MathF.Sin((float)timer / 35 * projectile.extraUpdates);
             Vector2 offsetPosition = new Vector2(0, OffsetAmount).RotatedBy(projectile.velocity.ToRotation());
@@ -632,9 +632,9 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             //Trail2 Info Dump
             trail2.trailTexture = trail1.trailTexture;
             trail2.trailPointLimit = 85;
-            trail2.trailWidth = trueTrailWidth;
+            trail2.trailWidth = (int)(trueTrailWidth * 1.5);
             trail2.trailMaxLength = 250;
-            trail2.timesToDraw = 2;
+            trail2.timesToDraw = 1;
             trail2.shouldSmooth = false;
             trail2.pinchHead = true;
             trail2.useEffectMatrix = true;
@@ -642,7 +642,7 @@ namespace VFXPlus.Content.Weapons.Magic.Hardmode.Misc
             float OffsetAmount2 = 25f * MathF.Sin((float)timer / 35 * projectile.extraUpdates);
             Vector2 offsetPosition2 = new Vector2(0, -OffsetAmount2).RotatedBy(projectile.velocity.ToRotation());
 
-            trail2.trailColor = thisBlue;
+            trail2.trailColor = thisBlue with { A = 150 };
 
             trail2.trailRot = projectile.velocity.ToRotation();
             trail2.trailPos = offsetPosition2 + projectile.Center + projectile.velocity;//Projectile.Center + Projectile.velocity + Main.rand.NextVector2Circular(5,5);

@@ -65,60 +65,42 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
         public override void MeleeEffects(Item item, Player player, Rectangle hitbox)
         {
-            if (Main.rand.Next(5) == 0)
-            {
-                //Color col = Main.rand.NextBool(2) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-                //int d = Dust.NewDust(new Vector2(hitbox.X, hitbox.Y), hitbox.Width, hitbox.Height, ModContent.DustType<PulseInOutDust>(), 0f, 0f, 0, col, Main.rand.NextFloat(0.35f, 0.55f) * 2f);
-                //Main.dust[d].velocity *= 0.25f;
-                //Main.dust[d].customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
-            }
-
             //Using itemAnimation instead of itemTime is very important here
             //Sometimes itemTime will stay at zero even when using the weapon for some reason
-            if (player.itemAnimation % 4 == 0 && false)
-            {
-                Color col = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
 
-                GeneralUtilities.GetPointOnSwungItemPath(player, 40f, 40f, 0.35f + 0.65f * Main.rand.NextFloat(), player.GetAdjustedItemScale(item), out var location2, out var outwardDirection2);
+            if (player.itemAnimation % 4 == 0)
+            {
+                Color col = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f);// Main.rand.NextBool(1) ? Color.Lerp(Color.DeepSkyBlue,) : Color.SkyBlue;
+
+                GeneralUtilities.GetPointOnSwungItemPath(player, 35f, 35f, 0.35f + 0.65f * Main.rand.NextFloat(), player.GetAdjustedItemScale(item), out var location2, out var outwardDirection2);
 
                 Vector2 vector2 = outwardDirection2.RotatedBy((float)Math.PI / 2f * (float)player.direction * player.gravDir);
-
-                Dust d = Dust.NewDustPerfect(location2, ModContent.DustType<PulseInOutDust>(), vector2 * 1.5f, 0, col with { A = 200 }, Main.rand.NextFloat(0.7f, 0.9f));
-
-                int pulseTime = Main.rand.Next(18, 22);
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, pulseTime, 0.5f, 0.5f, Pixelize: true);
-            }
-
-            if (player.itemAnimation % 4 == 0 && false)
-            {
-                Color col = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-
-                GeneralUtilities.GetPointOnSwungItemPath(player, 40f, 40f, 0.35f + 0.65f * Main.rand.NextFloat(), player.GetAdjustedItemScale(item), out var location2, out var outwardDirection2);
-
-                Vector2 vector2 = outwardDirection2.RotatedBy((float)Math.PI / 2f * (float)player.direction * player.gravDir);
-
-                //Dust d = Dust.NewDustDirect(new Vector2(hitbox.X, hitbox.Y), hitbox.Width, hitbox.Height, ModContent.DustType<GlowPixelCross>(), 0f, 0f, 0, col, Main.rand.NextFloat(0.15f, 0.3f));
-                //d.velocity *= 0.25f;
-                //d.velocity += vector2 * 0.5f;
 
                 Dust d = Dust.NewDustPerfect(location2, ModContent.DustType<GlowPixelCross>(), vector2 * 1.5f, 0, col with { A = 200 }, Main.rand.NextFloat(0.15f, 0.3f));
                 d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.1f, timeBeforeSlow: 3, preSlowPower: 0.99f, postSlowPower: 0.92f,
                     velToBeginShrink: 0.75f, fadePower: 0.95f, shouldFadeColor: false);
             }
 
-            //Lighting.AddLight(player.itemLocation, Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f).ToVector3() * 0.25f);
+            if (player.itemAnimation % 5 == 0)
+            {
+                Color bloomCol = Color.Lerp(Color.DeepSkyBlue, Color.SkyBlue, 0.5f); //75
+                for (int i = 0; i < 2; i++)
+                {
+                    GeneralUtilities.GetPointOnSwungItemPath(player, 35f, 35f, 0.35f + 0.65f * Main.rand.NextFloat(), player.GetAdjustedItemScale(item), out var location2, out var outwardDirection2);
 
-            //Vanilla
-            /*
-            if (Main.rand.Next(5) == 0)
-            {
-                Dust.NewDust(new Vector2(hitbox.X, hitbox.Y), hitbox.Width, hitbox.Height, 58, 0f, 0f, 150, default(Color), 1.2f);
+                    Vector2 vector2 = outwardDirection2.RotatedBy((float)Math.PI / 2f * (float)player.direction * player.gravDir);
+
+                    FireParticleAlpha fire = new FireParticleAlpha(location2 + new Vector2(0f, 0f), vector2 * 3f, 0.5f, Color.DeepSkyBlue, colorMult: 0.5f, bloomAlpha: 2f, AlphaFade: 0.98f,
+                        EndAlpha: 1f, BlackRemoveThreshold: 1f);
+                    fire.bloomColor = bloomCol with { A = 200 };
+
+                    fire.scaleFadePower = 1.05f;
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
-            if (Main.rand.Next(10) == 0)
-            {
-                Gore.NewGore(null, new Vector2(hitbox.X, hitbox.Y), default(Vector2), Main.rand.Next(16, 18));
-            }
-            */
+
+            //Lighting.AddLight(player.itemLocation, Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f).ToVector3() * 0.25f);
 
             base.MeleeEffects(item, player, hitbox);
         }

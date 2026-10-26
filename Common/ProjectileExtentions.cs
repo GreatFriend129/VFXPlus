@@ -12,6 +12,7 @@ using Terraria.ModLoader;
 using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
+using VFXPlus.Content.Weapons.Ranged.Hardmode.Guns;
 using VFXPLus.Common;
 
 #endregion
@@ -214,7 +215,7 @@ namespace VFXPlus.Common
             //d2.customData = cpb2;
             //d2.velocity = new Vector2(0.01f, 0f).RotatedBy(0f);
 
-            Projectile.NewProjectile(null, pos, Vector2.Zero, ModContent.ProjectileType<ExplosionPulse>(), 0, 0, Main.myPlayer);
+            Projectile.NewProjectile(null, pos, Vector2.Zero, ModContent.ProjectileType<RocketExplosionPulse>(), 0, 0, Main.myPlayer);
 
             float distanceToPlayer = (pos - Main.player[projectile.owner].Center).Length();
 
@@ -824,7 +825,7 @@ namespace VFXPlus.Common
             myEffect.Parameters["finalColIntensity"].SetValue(2.0f); //3.0
             myEffect.Parameters["posterizationSteps"].SetValue(0.0f);
 
-            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 0.75f);
+            myEffect.Parameters["totalAlpha"].SetValue(Easings.easeOutQuint(1f - progress) * overallAlpha * 1f);
             myEffect.Parameters["fadeStrength"].SetValue(0f); //.35
 
 

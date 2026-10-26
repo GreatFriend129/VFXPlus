@@ -156,7 +156,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         {
             int trailCount = 18; //18
             previousRotations.Add(projectile.velocity.ToRotation());
-            previousPositions.Add(projectile.Center + projectile.velocity + projectile.velocity.SafeNormalize(Vector2.UnitX) * 26f);
+            previousPositions.Add(projectile.Center + projectile.velocity + projectile.velocity.SafeNormalize(Vector2.UnitX) * 20f);
 
             if (previousRotations.Count > trailCount)
                 previousRotations.RemoveAt(0);
@@ -248,7 +248,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             //new Color(255, 45, 0), new Color(255, 100, 15) | Color.Blue, Color.DodgerBlue
 
             //Blue DodgerBlue
-            Color StripColor(float progress) => Color.Lerp(Color.Blue, Color.DodgerBlue, progress) with { A = 175 } * 1f;
+            Color StripColor(float progress) => Color.Lerp(new Color(0, 0, 255), new Color(20, 114, 255), progress) with { A = 175 } * 1f;
 
             float StripWidth(float progress)
             {

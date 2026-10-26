@@ -18,6 +18,7 @@ using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest;
+using VFXPlus.Content.Weapons.Magic.Hardmode.Staves;
 using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
 
 
@@ -46,8 +47,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 held.SetProjInfo(
                     GunID: ItemID.SuperStarCannon,
                     AnimTime: 20,
-                    NormalXOffset: 16f,
-                    DestXOffset: 0f,
+                    NormalXOffset: 22f,
+                    DestXOffset: 6f,
                     YRecoilAmount: 0.21f,
                     HoldOffset: new Vector2(0f, 1f)
                     );
@@ -88,12 +89,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             return lateInstantiation && (entity.type == ProjectileID.SuperStar);
         }
 
-        int timer = 0;
+        public int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0 && false)
+            Color golden = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+
+            if (timer == 0 && Main.myPlayer == projectile.owner)
             {
-                Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<SuperStarShooterConstellationTest>(), 0, 0, projectile.owner, projectile.whoAmI);
+                ConstellationTrail ConTrail = (ConstellationTrail)Projectile.NewProjectileDirect(null, projectile.Center, projectile.velocity, ModContent.ProjectileType<ConstellationTrail>(), 0, 0, projectile.owner, projectile.whoAmI).ModProjectile;
+                ConTrail.starCol = golden with { A = 160 };
+                ConTrail.lineCol = golden with { A = 175 };
+                ConTrail.parentType = ProjectileID.SuperStar;
             }
 
             if (timer == 0 && false)
@@ -105,10 +111,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 Main.projectile[pulse].rotation = projectile.velocity.ToRotation();
             }
 
-            currentRot = projectile.velocity.ToRotation();
-
             int trailCount = 10; 
-            previousRotations.Add(currentRot);
+            previousRotations.Add(projectile.velocity.ToRotation());
             previousPositions.Add(projectile.Center); //40
 
             if (previousRotations.Count > trailCount)
@@ -118,31 +122,31 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 previousPositions.RemoveAt(0);
 
 
-            overallAlpha = 1f;// Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.06f), 0f, 1f);
+            overallAlpha = Math.Clamp(MathHelper.Lerp(overallAlpha, 1.25f, 0.06f), 0f, 1f);
 
             float fadeInTime = Math.Clamp((timer + 3f) / 20f, 0f, 1f);
             overallScale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
             projectile.soundDelay = 10;
 
-            if (timer % 4 == 0)
+            timer++;
+
+            if (timer % 40 == 0)
             {
-                fireballFrame = (fireballFrame + 1) % 4;
+                SoundStyle starPulse = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = 0.3f, Pitch = -.85f, PitchVariance = .2f, MaxInstances = -1 };
+                SoundEngine.PlaySound(starPulse, projectile.Center);
             }
 
-            timer++;
+            //So the constellation proj can look back to check if we are synced
+            projectile.ai[2] = timer;
 
             return true;
         }
 
-        int fireballFrame = 0;
-
         float overallScale = 0f;
         float overallAlpha = 0f;
-        float currentRot = 0f;
         public List<float> previousRotations = new List<float>();
         public List<Vector2> previousPositions = new List<Vector2>();
-
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
@@ -157,41 +161,28 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             Vector2 drawPos = projectile.Center - Main.screenPosition;
             float drawScale = projectile.scale * overallScale;
 
-            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
-            Texture2D FireBall2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/BigFireballWhite").Value;
+            //Glorb
+            Texture2D Glorb = CommonTextures.feather_circle128PMA.Value;
+            Vector2 glorbPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -8f;
+            Vector2 glorbScale = new Vector2(1f, 0.75f) * drawScale;
+            Main.EntitySpriteDraw(Glorb, glorbPos + new Vector2(0f, 0f), null, Color.Lerp(Color.Orange, Color.Gold, 0.5f) with { A = 200 } * 0.35f, projectile.velocity.ToRotation(), Glorb.Size() / 2f, glorbScale * 1.15f, SpriteEffects.None);
 
-            Color fireBallColor = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
 
-            Vector2 fireball2Pos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 24f;
-            Rectangle fireball2sourceRectangle = new Rectangle(0, (FireBall2.Height / 4) * fireballFrame, FireBall2.Width, (FireBall2.Height / 4));
-            Vector2 fireball2origin = fireball2sourceRectangle.Size() / 2f;
-            Vector2 fireball2Scale = new Vector2(0.55f, 1.25f) * drawScale * 1.05f;
-
-            //Main.EntitySpriteDraw(FireBall2, fireball2Pos, fireball2sourceRectangle, Color.Orange with { A = 50 } * 0.5f, projectile.velocity.ToRotation() - MathHelper.PiOver2, fireball2origin, fireball2Scale, SpriteEffects.None);
-
-            float time = (float)Main.timeForVisualEffects / 60f;
-            for (float i = 220f; i < 1f; i += 0.5f)
+            //Intial Star
+            if (overallScale < 1f)
             {
-                float drawS = time % 0.5f / 0.5f;
-                drawS = (drawS + i) % 1f;
+                Texture2D CrispStar = CommonTextures.CrispStarPMA.Value;
 
-                float drawA = drawS * 2f;
-                if (drawA > 1f)
-                    drawA = 2f - drawA;
-
-                float fireballRot = projectile.velocity.ToRotation() - MathHelper.PiOver2;
-
-                float dist = 4f;
-
-                //Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                //Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
-
-                Vector2 scalea = new Vector2(fireball2Scale.X, fireball2Scale.Y * (0.6f + drawS * 1f));
-
-                Main.EntitySpriteDraw(FireBall2, fireball2Pos + new Vector2(0f, 0f), fireball2sourceRectangle, fireBallColor with { A = 100 } * drawA, fireballRot, new Vector2(FireBall2.Width / 2f, 100f), scalea, SpriteEffects.None);
+                Vector2 crispStarScale = new Vector2(1.5f, 1f) * projectile.scale * (1f - overallScale);
+                Main.EntitySpriteDraw(CrispStar, drawPos + new Vector2(0f, 0f), null, Color.Orange with { A = 175 } * 1f, projectile.velocity.ToRotation(), CrispStar.Size() / 2f, crispStarScale * 1f, SpriteEffects.None);
+                Main.EntitySpriteDraw(CrispStar, drawPos + new Vector2(0f, 0f), null, Color.White with { A = 175 } * 1f, projectile.velocity.ToRotation(), CrispStar.Size() / 2f, crispStarScale * 0.5f, SpriteEffects.None);
             }
 
 
+            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
+            Color fireBallColor = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
+
+            //Outer gold fireball
             Vector2 fireballPos = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
             for (int i = 0; i < 4; i++)
             {
@@ -202,11 +193,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
                 Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
 
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 175 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.05f, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 150 } * 0.35f, fireballRot, FireBall.Size() / 2f, drawScale * 1.05f, SpriteEffects.None); //175A
             }
 
-            Vector2 fireballPos2 = drawPos + projectile.velocity.SafeNormalize(Vector2.UnitX) * 0f;
-            //float time = (float)Main.timeForVisualEffects / 60f;
+            //Inner white fireball
+            float time = (float)Main.timeForVisualEffects / 60f;
             for (float i = 0f; i < 1f; i += 0.5f)
             {
                 float drawS = time % 0.5f / 0.5f;
@@ -218,12 +209,12 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
 
                 float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
-                float dist = 4f;
-
-                Main.EntitySpriteDraw(FireBall, fireballPos2 + new Vector2(0f, 0f), null, Color.White with { A = 100 } * drawA, fireballRot, new Vector2((float)FireBall.Width / 2f, 10f), 0.3f + drawS * 0.5f, SpriteEffects.None);
+                Main.EntitySpriteDraw(FireBall, drawPos, null, Color.White with { A = 100 } * drawA, fireballRot, new Vector2((float)FireBall.Width / 2f, 10f), drawScale * (0.3f + drawS * 0.5f), SpriteEffects.None);
             }
 
-            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Orange with { A = 200 } * overallAlpha, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
+
+            //Main star
+            Main.EntitySpriteDraw(StarGlow, drawPos, null, Color.Orange with { A = 250 } * overallAlpha, projectile.rotation, StarGlow.Size() / 2f, drawScale, SpriteEffects.None);
             Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 50 } * overallAlpha, projectile.rotation, Star.Size() / 2f, drawScale, SpriteEffects.None);
 
 
@@ -248,7 +239,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 float colorProg = (progress * 4f) % 1f;
                 Color col = Color.Lerp(Color.Orange, Color.Gold, 0.35f);
 
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + new Vector2(0f, 0f);// + Main.rand.NextVector2Circular(0f, 10f).RotatedBy(previousRotations[i]);
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + new Vector2(0f, 0f);
 
                 Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
 
@@ -256,27 +247,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                        previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
 
                 Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 150 } * 0.85f * progress,
-                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
-            }
-
-            for (int i = 220; i < previousRotations.Count; i++)
-            {
-                float progress = (float)i / previousRotations.Count;
-
-                float colorProg = (progress * 4f) % 1f;
-                Color col = Color.Lerp(Color.Orange, Color.Gold, 0.75f);
-
-                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition + new Vector2(0f, -100f);
-
-                Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
-
-                //Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 150 } * 1f * progress,
-                //       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
-
-                //Main.EntitySpriteDraw(FireBall, AfterImagePos, null, Color.HotPink with { A = 20 } * 1f * progress,
-                //       previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(trailScale.Y, trailScale.X), SpriteEffects.None);
-
-                Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 100 } * 0.85f * progress,
                     previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
             }
         }
@@ -366,10 +336,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
                 float fadeInTime = Math.Clamp((timer + 3f) / 25f, 0f, 1f); //3 20
                 scale = Easings.easeInOutBack(fadeInTime, 0f, 1f);
 
-                if (timer > 6)
+                if (timer > 9)
                     alpha -= 0.06f;
 
-                velocity *= 0.95f; //92
+                velocity *= 0.95f; //95
                 position += velocity;
 
                 timer++;
@@ -407,59 +377,76 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
         }
 
         public Color col = Color.DodgerBlue;
-
+        public bool deactivated = false;
 
         int timer = 0;
-        float overallAlpha = 1f;
-        float overallScale = 1f;
 
         List<Constellation> constellations = new List<Constellation>();
         public override void AI()
         {
-            if (timer == 0)
-                Projectile.ai[1] = Main.rand.NextBool() ? 1f : -1f;
-
             Projectile parent = Main.projectile[(int)Projectile.ai[0]];
 
-            if (parent.active == false)
+            if (parent.active && parent.type == ProjectileID.SuperStar && parent.ai[2] == timer + 1)
             {
-                Projectile.timeLeft--;
-                //Projectile.timeLeft = 100;
-                Projectile.active = false;
-                return;
+                Projectile.Center = parent.Center;
+                Projectile.velocity = parent.velocity;
+            }
+            else
+            {
+                deactivated = true;
             }
 
-            Projectile.Center = parent.Center;
-
-            if (timer % 4 == 0 && parent.active)
+            if (timer == 0)
             {
-                Vector2 dir = parent.velocity.RotatedBy(MathHelper.PiOver2).RotatedByRandom(1f).SafeNormalize(Vector2.UnitX);
+                //Which side should the constellation start on
+                Projectile.ai[1] = Main.rand.NextBool() ? 1f : -1f;
+
+                //Delay before first constellation
+                Projectile.ai[2] = Main.rand.Next(0, 4);
+            }
+
+            if ((timer + (int)Projectile.ai[2]) % 4 == 0 && !deactivated)
+            {
+                Vector2 dir = Projectile.velocity.RotatedBy(MathHelper.PiOver2).RotatedByRandom(1f).SafeNormalize(Vector2.UnitX);
 
                 Vector2 randomDir = dir * Main.rand.NextFloat(4f, 8f) * Projectile.ai[1];
-                constellations.Add(new Constellation(Projectile.Center + randomDir * Main.rand.NextFloat(1f, 3f), (parent.velocity * 0.1f) + (randomDir * 0.1f), Color.Gold)); //* Main.rand.NextFloat(1f, 3f)
+                constellations.Add(new Constellation(Projectile.Center + randomDir * Main.rand.NextFloat(1f, 3f), (Projectile.velocity * 0.1f) + (randomDir * 0.1f), Color.Gold)); //* Main.rand.NextFloat(1f, 3f)
+
+                if (constellations.Count > 10)
+                    constellations.RemoveAt(0);
 
                 Projectile.ai[1] *= -1;
             }
 
-            foreach (Constellation c in constellations)
+            for (int i = 0; i < constellations.Count; i++)
             {
-                c.Update();
-                if (c.alpha <= 0.1f)
-                {
-                    //constellations.Remove(c);
-                }
+                constellations[i].Update();
             }
 
+            //Delete projectile if deactivated and all constellations are under alpha
+            if (deactivated)
+            {
+                bool shouldKill = true;
+                for (int i = 0; i < constellations.Count; i++)
+                {
+                    if (constellations[i].alpha > 0.1f)
+                        shouldKill = false;
+                }
+
+                if (shouldKill)
+                    Projectile.Kill();
+            }
 
             timer++;
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
-            Projectile parent = Main.projectile[(int)Projectile.ai[0]];
+            if (timer <= Projectile.ai[2])
+                return false;
 
             Texture2D Pixel = CommonTextures.CrispStarPMA.Value;// Mod.Assets.Request<Texture2D>("Assets/Pixel/ConstellationPixel").Value;
-            Texture2D Line = CommonTextures.SoulSpikePMA.Value; //Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/BasicGlowSliver").Value; //CommonTextures.SoulSpikePMA.Value;
+            Texture2D Line = CommonTextures.SoulSpikePMA.Value; //Mod.Assets.Request<Texture2D>("Assets/Trails/Clear/BasicGlowSliver").Value;
 
             Color betweenBlue = Color.Lerp(Color.DodgerBlue, Color.DeepSkyBlue, 0f); //bp/white
             Color betweenPink = Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f); //bp/white
@@ -482,15 +469,19 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Misc
             }
 
             //Draw connect from last point to parent
-            Constellation finalConst = constellations.Last();
-            if (finalConst.alpha > 0.1f)
+            if (!deactivated && constellations.Count > 0)
             {
-                Vector2 between = (parent.Center - finalConst.position);
-                Vector2 scale = new Vector2(between.Length() / Line.Width, 0.65f * finalConst.scale);
+                Constellation finalConst = constellations.Last();
+                if (finalConst.alpha > 0.1f)
+                {
+                    Vector2 between = (Projectile.Center - finalConst.position);
+                    Vector2 scale = new Vector2(between.Length() / Line.Width, 0.65f * finalConst.scale);
 
-                Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, golden with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), scale, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, Color.White with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), new Vector2(scale.X, scale.Y * 0.25f), SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, golden with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), scale, SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(Line, finalConst.position - Main.screenPosition, null, Color.White with { A = 175 } * finalConst.alpha, between.ToRotation(), new Vector2(0f, Line.Height / 2f), new Vector2(scale.X, scale.Y * 0.25f), SpriteEffects.None, 0f);
+                }
             }
+
 
             //Draw stars
             for (int i = 0; i < constellations.Count; i++)

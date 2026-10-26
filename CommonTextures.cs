@@ -18,6 +18,8 @@ namespace VFXPlus
 {
     class CommonTextures
     {
+        public static readonly Asset<Texture2D> Pixel = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel", AssetRequestMode.ImmediateLoad);
+
         #region OrbsFolder
         public static readonly string OrbLoc = "VFXPlus/Assets/Orbs/";
 

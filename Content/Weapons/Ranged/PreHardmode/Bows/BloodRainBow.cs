@@ -79,9 +79,9 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                 d.customData = new GlowFlareBehavior(GlowThreshold: 0.6f, GlowPower: 2.5f, TotalBoost: 1f);
             }
 
-            if (timer % 2 == 0 && Main.rand.NextBool(2))
+            if (timer % 1 == 0 && Main.rand.NextBool(2))
             {
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SnowDustCopyQuickFade>(), Main.rand.NextVector2Circular(1f, 2f), newColor: Color.Red, Scale: 1f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SnowDustCopyQuickFade>(), Main.rand.NextVector2Circular(1f, 2f), newColor: new Color (200, 0, 0), Scale: 1f);
                 d.velocity -= projectile.velocity * 0.25f;
                 d.noGravity = true;
             }
@@ -161,7 +161,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
 
             //float widthSubtract = Math.Clamp(projectile.velocity.Length() * 0.07f, 0f, 1f);
 
-            Color lighterCol = new Color(235, 0, 0);// Main.hslToRgb(projectile.ai[1], 1f, 0.5f);
+            Color lighterCol = new Color(225, 0, 0);// Main.hslToRgb(projectile.ai[1], 1f, 0.5f);
             Color darkerCol = new Color(100, 0, 0);// Main.hslToRgb(projectile.ai[1] - 0.03f, 1f, 0.25f);
 
             float StripWidth(float progress)
@@ -181,7 +181,7 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows
                 if (toReturn < 0.13f)
                     toReturn = 0f;
 
-                return toReturn * overallScale * 3f; //2.25
+                return toReturn * overallScale * 3.5f; //3
 
             }
 

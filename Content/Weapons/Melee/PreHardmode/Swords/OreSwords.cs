@@ -45,20 +45,21 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             float adjustedItemScale = player.GetAdjustedItemScale(item); // Get the melee scale of the player and item.
             int trail = Projectile.NewProjectile(player.GetSource_FromThis(), player.MountedCenter, new Vector2(player.direction, 0f), ModContent.ProjectileType<BaseSwordProj>(), 0, 0f, player.whoAmI, player.direction * player.gravDir, player.itemAnimationMax, adjustedItemScale);
 
-            Color darkest = new Color(72, 73, 114);
-            Color middle = new Color(128, 151, 184);
-            Color bright = new Color(181, 194, 217);
+            Color darkest = new Color(72, 73, 134);
+            Color middle = new Color(128, 151, 204);
+            Color bright = new Color(181, 194, 237);
 
             //middle = new Color(128, 151, 184);
-            bright = new Color(165, 180, 218);
+            //bright = new Color(165, 180, 218);
 
             
             Vector3[] gradCols = {
                 Color.Black.ToVector3(),
-                Color.Lerp(middle, bright, 0f).ToVector3(),
-                Color.Lerp(middle, bright, 0f).ToVector3(),
-                                Color.Lerp(middle, bright, 0f).ToVector3(),
-                Color.Red.ToVector3()
+                Color.Lerp(darkest, middle, 0.5f).ToVector3(),
+                Color.Lerp(darkest, middle, 1f).ToVector3(),
+                Color.Lerp(middle, bright, 0.5f).ToVector3(),
+                Color.Lerp(middle, bright, 1f).ToVector3(),
+                //new Color(255, 5, 20).ToVector3()
                 //Color.Lerp(middle, bright, 1f).ToVector3()
             };
             

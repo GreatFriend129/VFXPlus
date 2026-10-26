@@ -126,13 +126,22 @@ namespace VFXPlus.Common
             if (Main.dedServ || particles.Count == 0)
                 return;
 
+            int drawRange = 2000;
+            Vector2 cameraPos = Main.screenPosition + new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
+
+            if (Main.rand.NextFloat() > 0.9f)
+            {
+                Dust.NewDustPerfect(cameraPos + new Vector2(1000f, 0f), DustID.Adamantite);
+            }
+
             foreach (ShaderParticle particle in particles)
             {
                 if (particle == null)
                     continue;
 
                 //Draw normal layer
-                particle.Draw(sb);
+                if (particle.Center.Distance(cameraPos) < drawRange)
+                    particle.Draw(sb);
             }
 
             //Draw shader layer
@@ -143,7 +152,7 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType != ParticleType.FireParticleAlpha)
+                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType != ParticleType.FireParticleAlpha && particle.Center.Distance(cameraPos) < drawRange)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 
@@ -160,7 +169,7 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType != ParticleType.FireParticleAlpha)
+                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType != ParticleType.FireParticleAlpha && particle.Center.Distance(cameraPos) < drawRange)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 
@@ -178,7 +187,7 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType == ParticleType.FireParticleAlpha)
+                    if (particle.renderLayer == RenderLayer.Dusts && particle.particleType == ParticleType.FireParticleAlpha && particle.Center.Distance(cameraPos) < drawRange)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 
@@ -195,7 +204,7 @@ namespace VFXPlus.Common
 
                 foreach (ShaderParticle particle in particles)
                 {
-                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType == ParticleType.FireParticleAlpha)
+                    if (particle.renderLayer == RenderLayer.UnderProjectiles && particle.particleType == ParticleType.FireParticleAlpha && particle.Center.Distance(cameraPos) < drawRange)
                         particle.DrawWithShader(sb, particle.myShader);
                 }
 

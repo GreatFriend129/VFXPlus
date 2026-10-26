@@ -17,6 +17,7 @@ using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
 using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
+using VFXPlus.Content.Weapons.Ranged.Hardmode.Guns;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
 using VFXPlus.Content.Weapons.Ranged.PreHardmode.Bows;
 using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
@@ -47,8 +48,7 @@ namespace VFXPlus.Content
             Item.autoReuse = true;
         }
         public override bool AltFunctionUse(Player player) => true;
-        
-        
+                
         bool tick = false;
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
@@ -69,9 +69,12 @@ namespace VFXPlus.Content
             //int Const = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ConstellationTest>(), 1, 0, Main.myPlayer);
 
             //int glowTrail = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
-            int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<VortexExplosionPulse>(), 0, 0, Main.myPlayer);
+            int pulse2 = Projectile.NewProjectile(null, Main.MouseWorld + new Vector2(150f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ExplosionPulse>(), 0, 0, Main.myPlayer);
+            int pulse3 = Projectile.NewProjectile(null, Main.MouseWorld + new Vector2(300f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<RocketExplosionPulse>(), 0, 0, Main.myPlayer);
+
             //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Color.Lerp(Color.Gold, Color.Orange, 0.75f);// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Color.Lerp(Color.Gold, Color.Orange, 0.75f);// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
 
 
             for (int i = 220; i < 6; i++)

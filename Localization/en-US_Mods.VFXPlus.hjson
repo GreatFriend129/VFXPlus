@@ -83,6 +83,11 @@ Items: {
 		DisplayName: Booyah Bomb
 		Tooltip: ""
 	}
+
+	DevPetItem: {
+		DisplayName: Dev Pet Item
+		Tooltip: ""
+	}
 }
 
 Projectiles: {
@@ -263,6 +268,10 @@ Projectiles: {
 	BasicGlowTrailTest.DisplayName: Basic Glow Trail Test
 	StarTrailTest.DisplayName: Star Trail Test
 	SuperStarShooterConstellationTest.DisplayName: Super Star Shooter Constellation Test
+	ConstellationTrail.DisplayName: Constellation Trail
+	DevPetProjectile.DisplayName: Dev Pet Projectile
+	RocketExplosionPulse.DisplayName: Rocket Explosion Pulse
+	KarmaPanelTest.DisplayName: Karma Panel Test
 }
 
 Configs: {
@@ -742,4 +751,11 @@ NPCs: {
 	AsgoreBee.DisplayName: Asgore Bee
 	OphanaimBee.DisplayName: Ophanaim Bee
 	WalledDashBee.DisplayName: Walled Dash Bee
+}
+
+Buffs: {
+	DevPetBuff: {
+		DisplayName: Dev Pet Buff
+		Description: Mods.VFXPlus.Buffs.DevPetBuff.Description
+	}
 }

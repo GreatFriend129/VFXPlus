@@ -55,13 +55,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             //Trail1 Info Dump
             trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 130 + trailRandomLengthOffset;
-            trail1.trailWidth = (int)(9 * totalAlpha); //17
+            trail1.trailWidth = (int)(11 * totalAlpha); //17
             trail1.trailMaxLength = 130 + trailRandomLengthOffset; 
 
             trail1.shouldSmooth = false;
             trail1.fadeOut = true;
 
-            Color trailCol = CursedGreen with { A = 100 } * 1f;
+            Color trailCol = CursedGreen with { A = 100 } * 0.4f;
             trail1.trailColor = trailCol * totalAlpha * 1f;
             trail1.timesToDraw = 1;
 
@@ -83,7 +83,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             }
 
-            if (timer % 1 == 0 && Main.rand.NextBool())
+            if (timer % 1 == 0 && Main.rand.NextBool() && false)
             {
                 Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -6f;
                 Vector2 dustVel = Main.rand.NextVector2CircularEdge(1f, 1f) - projectile.velocity * 0.35f; //0.5
@@ -97,6 +97,56 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 ShaderParticleHandler.SpawnParticle(fire);
             }
+
+            if (timer % 1 == 0 && false)// && Main.rand.NextBool(1))
+            {
+
+                Color cursedGreen = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+                Color cursedGreen2 = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+
+                for (int i = 0; i < 2; i++)
+                {
+                    Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) + projectile.velocity * 0.5f; //0.5
+
+                    float posOffset = -30f + (10f * i);
+
+                    Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * posOffset;
+
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.55f, cursedGreen, colorMult: 1f, bloomAlpha: 1.5f, AlphaFade: 0.89f + (i * 0.03f), //col * 0.5f
+                        EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
+                    fire.bloomColor = cursedGreen with { A = 150 };
+                    fire.scaleFadePower = 1.07f; //1.05
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
+
+            if (timer % 1 == 0 && Main.rand.NextBool(1))
+            {
+
+                Color cursedGreen = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+                Color cursedGreen2 = Color.Lerp(Color.Green, Color.GreenYellow, 0.25f);
+
+                for (int i = 0; i < 1; i++)
+                {
+                    Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) + projectile.velocity * 0.5f; //0.5
+
+                    float posOffset = -30f + (10f * i);
+
+                    Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * posOffset;
+
+                    float alphaFade = Main.rand.NextFloat(0.96f, 0.975f);
+                    float scaleFade = Main.rand.NextFloat(1.065f, 1.1f);
+
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.5f, cursedGreen, colorMult: 1f, bloomAlpha: 1.35f, AlphaFade: alphaFade, //col * 0.5f
+                        EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
+                    fire.bloomColor = cursedGreen with { A = 150 };
+                    fire.scaleFadePower = scaleFade; //1.05
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
+            }
+
 
             //Quickly fade in
             totalAlpha = Math.Clamp(MathHelper.Lerp(totalAlpha, 1.25f, 0.08f), 0f, 1f); //1.15
@@ -147,10 +197,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale) * 0.5f;
 
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 75 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 100 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
 
                 Vector2 orbScale = new Vector2(1f, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
-                Main.EntitySpriteDraw(orb, drawPos, null, middle with { A = 75 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+                Main.EntitySpriteDraw(orb, drawPos, null, middle with { A = 100 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
 
 
                 Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
@@ -158,8 +208,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale) * 0.5f;
 
                 drawPos += new Vector2(0f, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 75 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
             });
             return false;
         }
