@@ -183,3 +183,4 @@ C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Deb
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\refint\VFXPlus.dll
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.pdb
 C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\ref\VFXPlus.dll
+C:\Users\Colin\Documents\My Games\Terraria\tModLoader\ModSources\VFXPlus\obj\Debug\net8.0\VFXPlus.csproj.Up2Date

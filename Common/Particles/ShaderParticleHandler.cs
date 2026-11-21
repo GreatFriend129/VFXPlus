@@ -212,6 +212,9 @@ namespace VFXPlus.Common
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer, null, Main.Transform);
 
             });
+
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            //
         }
 
         //Todo make a version of this that actually works

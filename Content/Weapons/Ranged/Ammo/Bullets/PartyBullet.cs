@@ -63,7 +63,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.trailMaxLength = 135 + trailRandomLengthOffset; //120
 
             trail1.shouldSmooth = false;
-            trail1.trailColor = Main.hslToRgb(projectile.ai[2], 0.7f, 0.5f) with { A = 70 } * totalAlpha * 0.5f;
+            trail1.trailColor = Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f) with { A = 70 } * totalAlpha * 0.5f;
 
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
@@ -88,7 +88,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Main.hslToRgb(projectile.ai[2], 0.7f, 0.5f), Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.5f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f), Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.5f);
                 d.alpha = 2;
                 d.velocity += projectile.velocity.RotatedByRandom(0.1f) * 0.55f;
                 d.velocity *= 0.35f;
@@ -101,7 +101,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             float animProgress = Math.Clamp((timer + 4) / timeForPopInAnim, 0f, 1f);
             totalScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
 
-            Lighting.AddLight(projectile.Center, Main.hslToRgb(projectile.ai[2], 0.7f, 0.5f).ToVector3() * 0.7f);
+            Lighting.AddLight(projectile.Center, Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f).ToVector3() * 0.7f);
 
             timer++;
             return base.PreAI(projectile);
@@ -122,11 +122,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 trail1.TrailDrawing(Main.spriteBatch, false);
 
-                Color col = Main.hslToRgb(projectile.ai[2], 0.7f, 0.5f);
+                Color col = Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f);
 
-                Color darkest = Main.hslToRgb(projectile.ai[2], 0.7f, 0.5f);
-                Color middle = Main.hslToRgb(projectile.ai[2], 0.7f, 0.58f);
-                Color brightest = Main.hslToRgb(projectile.ai[2], 0.7f, 0.65f);
+                Color darkest = Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f);
+                Color middle = Main.hslToRgb(projectile.ai[2], 0.9f, 0.58f);
+                Color brightest = Main.hslToRgb(projectile.ai[2], 0.9f, 0.65f);
 
                 //Color darkest = new Color(69, 130, 0);
                 //Color middle = new Color(87, 153, 0);
@@ -177,94 +177,58 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
         {            
             SoundStyle style = new SoundStyle("Terraria/Sounds/Item_40") with { Volume = 0.5f, Pitch = -.7f, PitchVariance = .3f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, projectile.Center);
-            
-            Color col = Main.rand.NextBool() ? Color.HotPink : Color.SkyBlue;
+
+            Color col = Main.hslToRgb(projectile.ai[2], 0.9f, 0.5f); ;// Main.rand.NextBool() ? Color.HotPink : Color.SkyBlue;
 
             float randomRot = Main.rand.NextFloat(6.28f);
 
             int dustCount = 20; //40
 
-            int crossCount = 10;
-            for (int i = 0; i < crossCount; i++)
+            int crossCountA = 5; //10
+            for (int i = 0; i < crossCountA; i++)
             {
-                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
+                float dir = (MathHelper.TwoPi / (float)crossCountA) * i;
 
-                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3f, 7f) * 1f;
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3f, 6.5f) * 1f;
                 dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
 
                 Color dustCol = Main.hslToRgb(projectile.ai[2] /*Main.rand.NextFloat()*/, 1f, 0.5f);
 
-                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), dustVel, newColor: dustCol, Scale: Main.rand.NextFloat(0.25f, 0.55f) * 2f);
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), dustVel, newColor: dustCol, Scale: Main.rand.NextFloat(0.25f, 0.55f) * 1.5f);
+                gd.velocity -= projectile.oldVelocity * 0.4f;
+
                 gd.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.2f, timeBeforeSlow: 5,
                     preSlowPower: 0.97f, postSlowPower: 0.88f, velToBeginShrink: 3f, fadePower: 0.95f);
 
             }
 
-            for (int i = 220; i < dustCount; i++)
+            int crossCount = 4;
+            for (int i = 0; i < crossCount; i++)
             {
-                float theta = (float)i / (float)dustCount;
-                //Main.NewText(MathF.Cos(3f * theta * MathHelper.TwoPi));
+                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
 
-                float r = 5f * (MathF.Cos(3f * theta * MathHelper.TwoPi) + 0.5f);
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 6.5f);
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
 
-                float scaleMult = Easings.easeOutQuad(r / 5f);
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f) * 0.85f);
+                gd.velocity -= projectile.oldVelocity * 0.4f;
 
-                Color dustCol = Color.SkyBlue;// Main.rand.NextBool() ? Color.HotPink : Color.SkyBlue;
-
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), new Vector2(r, 0f).RotatedBy(randomRot + (theta * MathHelper.TwoPi)), newColor: dustCol with { A = 0 });
-                d.scale *= Main.rand.NextFloat(0.5f, 1f) * 1f;
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
-
-                //Vcool
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
-
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: 5,
+                    preSlowPower: 0.94f, postSlowPower: 0.9f, velToBeginShrink: 1.5f, fadePower: 0.92f, shouldFadeColor: false);
             }
 
-            //Good
-            for (int i = 220; i < dustCount; i++)
+            int pgoCount = 7;
+            for (int i = 220; i < pgoCount; i++)
             {
-                float progress = (float)i / (float)dustCount;
-                float theta = progress * MathHelper.TwoPi;
-                
-                //Main.NewText(MathF.Cos(3f * theta * MathHelper.TwoPi));
+                float dir = (MathHelper.TwoPi / (float)pgoCount) * i;
 
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), newColor: col, Scale: Main.rand.NextFloat(0.55f, 0.8f));
+                d.velocity = dir.ToRotationVector2() * Main.rand.NextFloat(0.5f, 6f);
+                d.velocity = d.velocity.RotatedBy(Main.rand.NextFloat(-0.2f, 0.2f));
 
-                float numer = MathF.Cos((2f * MathF.Asin(1) + 3f * MathHelper.Pi) / 10f);
-                float denom = MathF.Cos((2f * MathF.Asin(MathF.Cos(4f * theta)) + 3f * MathHelper.Pi) / 10f);
-
-                float r = numer / denom;
-
-                Color dustCol = Main.hslToRgb(Main.rand.NextFloat(), 0.8f, 0.65f);
-
-                //Color dustCol = Main.rand.NextBool() ? Color.HotPink : Color.SkyBlue;
-
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), new Vector2(r * 5f, 0f).RotatedBy(randomRot + theta), newColor: dustCol with { A = 50 });
-                d.scale *= Main.rand.NextFloat(0.5f, 1f) * 1f;
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 20, 0.05f, 0.95f, Pixelize: true);
-
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.5f, 0.5f, Pixelize: true);
-
+                d.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.04f, timeBeforeSlow: 4, postSlowPower: 0.89f, velToBeginShrink: 1f, fadePower: 0.8f, colorFadePower: 1f, glowIntensity: 0.4f);
             }
 
-            for (int i = 220; i < 14; i++)
-            {
-
-
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), Velocity: Main.rand.NextVector2CircularEdge(6f, 6f), newColor: col with { A = 0 });
-                d.scale *= Main.rand.NextFloat(0.9f, 1.05f) * 1f;
-                d.velocity *= Main.rand.NextFloat(0.8f, 1.05f);
-                d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 60, 0.05f, 0.95f, Pixelize: true);
-                //d.rotation = Main.rand.NextFloat(6.28f);
-            }
-
-            for (int i = 220; i < 3 + Main.rand.Next(0, 3); i++)
-            {
-                Vector2 dustVel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.Pi + Main.rand.NextFloat(-1f, 1f)) * Main.rand.NextFloat(1f, 3f);
-                Dust p = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.3f, 0.5f) * 1.5f);
-
-                p.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
-                        rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 8, postSlowPower: 0.92f, velToBeginShrink: 4f, fadePower: 0.88f, shouldFadeColor: false);
-            }
 
             //Particles on trail
             int count = trail1.trailPositions.Count;

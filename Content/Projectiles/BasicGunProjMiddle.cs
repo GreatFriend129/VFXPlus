@@ -343,6 +343,13 @@ namespace VFXPlus.Content.Projectiles
             Main.spriteBatch.Draw(Flash, starPos, null, colors[2] with { A = 40 } * starAlpha, starRot, Flash.Size() / 2, 0.3f, SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(Flash, starPos, null, Color.White with { A = 40 } * starAlpha, starRot, Flash.Size() / 2, 0.2f, SpriteEffects.None, 0f);
 
+            ///Glowmasks
+            
+            if (gunID == ItemID.Xenopopper)
+            {
+                Texture2D Glowmask = TextureAssets.GlowMask[GlowMaskID.Xenopopper].Value;
+                Main.spriteBatch.Draw(Glowmask, drawPos, null, Color.White, Projectile.rotation, Texture.Size() / 2, Projectile.scale, mySE, 0f);
+            }
 
             //Glowmask for OnyxBlaster
             if (gunID == ItemID.OnyxBlaster)

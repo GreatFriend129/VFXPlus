@@ -221,5 +221,20 @@ namespace VFXPlus.Common
             toReturn = progress * progress / (2f * (progress * progress - progress) + 1f);
             return toReturn;
         }
+
+
+        public static float easeInPow(float progress, float power)
+        {
+            float toReturn = 0f;
+            toReturn = MathF.Pow(progress, power);
+            return toReturn;
+        }
+
+        public static float easeOutPow(float progress, float power)
+        {
+            float toReturn = 0f;
+            toReturn = 1f - MathF.Pow(1f - progress, power);
+            return toReturn;
+        }
     }
 }

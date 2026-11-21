@@ -38,6 +38,20 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            int variant = Main.rand.Next(1, 4);
+            SoundStyle gunshot = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RedRyder/RedRyderB" + variant) with { Volume = 1f, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(gunshot, player.Center);
+
+            //SoundStyle gunshot2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RedRyder/RedRyder" + variant) with { Volume = 0.15f, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(gunshot2, player.Center);
+
+            SoundStyle style33 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi1") with { Volume = 0.75f, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style33, position);
+
+            //int variant2 = Main.rand.Next(1, 5);
+            //SoundStyle gunshot2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RedRyder/Revolver02b_Shot01") with { Volume = 0.35f, Pitch = 0.15f, PitchVariance = .1f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(gunshot2, position);
+
             //Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<MusketTest2>(), 0, 0, player.whoAmI);
 
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjLong>(), 0, 0, player.whoAmI);
@@ -99,6 +113,15 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
 
             //Sound
+            /*
+            int variant = Main.rand.Next(1, 4);
+            SoundStyle gunshot = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RedRyder/RedRyder" + variant) with { Volume = 0f, Pitch = -0.25f, PitchVariance = .1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(gunshot, player.Center);
+            int variant2 = Main.rand.Next(1, 5);
+            SoundStyle gunshot2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/RedRyder/Revolver02b_Shot01") with { Volume = 0.5f, Pitch = 0f, PitchVariance = .1f, MaxInstances = -1 };
+            SoundEngine.PlaySound(gunshot2, position);
+            */
+
             //SoundStyle style1 = new SoundStyle("Terraria/Sounds/Custom/dd2_ballista_tower_shot_0") with { Pitch = .9f, PitchVariance = .25f, MaxInstances = -1, Volume = 0.25f };
             //SoundEngine.PlaySound(style1, position);
 

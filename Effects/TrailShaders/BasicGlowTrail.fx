@@ -5,6 +5,8 @@ float progress;
 //How many times the texture repeats
 float tex1reps = 1.0;
 float tex2reps = 1.0;
+float tex1YStretch = 1.0;
+float tex2YStretch = 1.0;
 
 float bodyPower = 4.0;
 float bodyIntensity = 1.0;
@@ -13,6 +15,7 @@ float tex2Intensity = 1.0;
 
 float whiteGlowSize = 1.0;
 float whiteGlowPower = 2.0;
+float whiteGlowIntensity = 1.0;
 
 float posterizationSteps = 0.0;
 
@@ -38,7 +41,7 @@ sampler trailTex1 = sampler_state
     minfilter = POINT;
     mipfilter = POINT;
     AddressU = wrap;
-    AddressV = wrap;
+    //AddressV = wrap;
 };
 
 texture TrailTexture2;
@@ -49,7 +52,7 @@ sampler trailTex2 = sampler_state
     minfilter = POINT;
     mipfilter = POINT;
     AddressU = wrap;
-    AddressV = wrap;
+    //AddressV = wrap;
 };
 
 
@@ -110,21 +113,25 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
     //Fix trail appearing jaggy if the width changes with trail progress
     baseCoords.y = (baseCoords.y - 0.5) / input.TextureCoordinates.z + 0.5;
     
-    float4 finalCol = float4(0.0, 0.0, 0.0, 0.0);
+    
+    float3 beamCol = input.Color.rgb;
     
     //0 if on center line, 0.5 if as far away as possible
     float verticalDistFromCenter = abs(baseCoords.y - 0.5);
     
     //The closer to the center, the more white it is
-    float whiteIntensity = pow((0.05 * whiteGlowSize) / (verticalDistFromCenter * 1.5), whiteGlowPower);
+    float whiteIntensity = pow((0.05 * whiteGlowSize) / (verticalDistFromCenter * 1.5), whiteGlowPower) * whiteGlowIntensity;
 
-    float3 beamCol = input.Color.rgb;
-    beamCol += whiteIntensity * length(beamCol);
+    beamCol += 1.0 * whiteIntensity;
     
     beamCol *= pow(smoothstep(0.5, 0.0, verticalDistFromCenter), bodyPower); //4
     
-    float3 trail1 = tex2D(trailTex1, float2((baseCoords.x * tex1reps) - progress, baseCoords.y)).rgb * beamCol;
-    float3 trail2 = tex2D(trailTex2, float2((baseCoords.x * tex2reps) - progress, baseCoords.y)).rgb * beamCol;
+    float centeredY = baseCoords.y - 0.5;
+    float stretchedY1 = (centeredY * tex1YStretch) + 0.5;
+    float stretchedY2 = (centeredY * tex2YStretch) + 0.5;
+    
+    float3 trail1 = tex2D(trailTex1, float2((baseCoords.x * tex1reps) - progress, stretchedY1)).rgb * beamCol;
+    float3 trail2 = tex2D(trailTex2, float2((baseCoords.x * tex2reps) - progress, stretchedY2)).rgb * beamCol;
     
     float3 combinedTrail = (trail1 * tex1Intensity) + (trail2 * tex2Intensity);
 
@@ -135,44 +142,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
     float brightness = dot(toPosterize.rgb, float3(0.2126, 0.7152, 0.0722));
     brightness = smoothstep(0.0, 1.0, brightness);
     
-    float4 toReturn = float4(toPosterize, input.Color.a) * brightness;
+    float4 toReturn = float4(toPosterize, input.Color.a) * brightness;    
     return toReturn;
-    
-    /*
-    float2 baseCoords = input.TextureCoordinates.xy;
-    
-    //Fix trail appearing jaggy if the width changes with trail progress
-    baseCoords.y = (baseCoords.y - 0.5) / input.TextureCoordinates.z + 0.5;
-    
-    //0 if on center line, 0.5 if as far away as possible
-    float verticalDistFromCenter = abs(baseCoords.y - 0.5);
-    
-    //The closer to the center, the more white it is
-    float whiteIntensity = pow((0.05 * whiteGlowSize) / (verticalDistFromCenter * 1.5), whiteGlowPower);
-
-    float4 beamCol = input.Color;
-    beamCol += whiteIntensity * length(beamCol);
-    
-    beamCol *= pow(smoothstep(0.5, 0.0, verticalDistFromCenter), bodyPower); //4
-    
-    float4 trail1 = tex2D(trailTex1, float2((baseCoords.x * tex1reps) - progress, baseCoords.y)) * beamCol;
-    float4 trail2 = tex2D(trailTex2, float2((baseCoords.x * tex2reps) - progress, baseCoords.y)) * beamCol;
-    
-    float4 combinedTrail = (trail1 * tex1Intensity) + (trail2 * tex2Intensity);
-
-    float3 toPosterize = (beamCol.rgb * bodyIntensity) + combinedTrail.rgb;
-    toPosterize = Posterize(toPosterize);
-    
-    
-    //Remove black from result
-    float finalColAVG = length(toPosterize) / 3.0;
-    
-    //if (finalColAVG < 0.75)
-    //    finalColAVG = 0.0;
-    
-    float4 toReturn = float4(toPosterize, input.Color.a) * finalColAVG;
-    return toReturn;
-    */
 }
 
 technique BasicColorDrawing

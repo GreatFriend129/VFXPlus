@@ -38,11 +38,26 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ShotgunBadIThink3") with { Volume = 0.75f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
+            int soundNum = 1;
+            float pitch = 0.05f;
+            if (velocity.X > 0)
+            {
+                pitch = 0.05f;
+                soundNum = 2;
+            }
+
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Shotgun/Shotgun1") with { Volume = 0.66f, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = 1 };
             SoundEngine.PlaySound(style, position);
 
-            //SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/deagle_01") with { Volume = 0.5f, Pitch = -.1f, PitchVariance = .1f * 0f, MaxInstances = -1 };
-            //SoundEngine.PlaySound(style2, position);
+            /////SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BasicShotgun") with { Volume = 1f, Pitch = 0f, PitchVariance = 0.1f, MaxInstances = -1 };
+            /////SoundEngine.PlaySound(style, position);
+
+            ///SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/ShotgunBadIThink3") with { Volume = 0.75f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = 1 };
+            ///SoundEngine.PlaySound(style, position);
+
+            /////SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/deagle_01") with { Volume = 0.5f, Pitch = -.1f, PitchVariance = .1f * 0f, MaxInstances = -1 };
+            /////SoundEngine.PlaySound(style2, position);
 
             //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/BoomstickWithClick") with { Volume = 0.65f, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style, position);

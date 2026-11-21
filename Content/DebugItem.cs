@@ -16,6 +16,7 @@ using VFXPlus.Content.Projectiles;
 using VFXPlus.Content.VFXTest;
 using VFXPlus.Content.VFXTest.Aero;
 using VFXPlus.Content.Weapons.Magic.Hardmode.Tomes;
+using VFXPlus.Content.Weapons.Melee.PreHardmode.Swords;
 using VFXPlus.Content.Weapons.Ranged.Ammo.Bullets;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Guns;
 using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
@@ -66,12 +67,16 @@ namespace VFXPlus.Content
                 //return false;
             }
 
-            //int Const = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ConstellationTest>(), 1, 0, Main.myPlayer);
+            int karma = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<KarmaPanelTest>(), 1, 0, Main.myPlayer);
+
+            //int Const = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
+
+            //int b1 = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 14f, ProjectileID.Bullet, 1, 0, Main.myPlayer);
+            ///int b2 = Projectile.NewProjectile(null, position + new Vector2(0f, -100f), velocity.SafeNormalize(Vector2.UnitX) * 14f, ProjectileID.MeteorShot, 1, 0, Main.myPlayer);
+
 
             //int glowTrail = Projectile.NewProjectile(null, position, velocity.SafeNormalize(Vector2.UnitX) * 20f, ProjectileID.Starfury, 1, 0, Main.myPlayer);
-            int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<VortexExplosionPulse>(), 0, 0, Main.myPlayer);
-            int pulse2 = Projectile.NewProjectile(null, Main.MouseWorld + new Vector2(150f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<ExplosionPulse>(), 0, 0, Main.myPlayer);
-            int pulse3 = Projectile.NewProjectile(null, Main.MouseWorld + new Vector2(300f, 0f), velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<RocketExplosionPulse>(), 0, 0, Main.myPlayer);
+            //int pulse = Projectile.NewProjectile(null, Main.MouseWorld, velocity.SafeNormalize(Vector2.UnitX) * 0f, ModContent.ProjectileType<VortexExplosionPulse>(), 0, 0, Main.myPlayer);
 
             //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
             //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Color.Lerp(Color.Gold, Color.Orange, 0.75f);// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);

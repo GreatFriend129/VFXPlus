@@ -38,6 +38,9 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Phoenix/PhoenixNew2") with { Volume = 0.25f, Pitch = 0f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
+
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
@@ -101,11 +104,12 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasing>());
 
-            SoundStyle styleTrue = new SoundStyle("VFXPlus/Sounds/Effects/Gun/PhoenixBlaster") with { Volume = 0.35f, Pitch = -0.35f, PitchVariance = 0.15f, MaxInstances = -1 };
-            SoundEngine.PlaySound(styleTrue, position);
+            ////SoundStyle styleTrue = new SoundStyle("VFXPlus/Sounds/Effects/Gun/PhoenixBlaster") with { Volume = 0.35f, Pitch = -0.35f, PitchVariance = 0.15f, MaxInstances = -1 };
+            ////SoundEngine.PlaySound(styleTrue, position);
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/elites_03") with { Volume = .35f, Pitch = -.45f, PitchVariance = .15f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, position);
+            ////SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/elites_03") with { Volume = .35f, Pitch = -.45f, PitchVariance = .15f, MaxInstances = -1 };
+            ////SoundEngine.PlaySound(style, position);
+
 
             //SoundStyle style44 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/PhoenixShot") with { Volume = 0.25f, Pitch = 0f, PitchVariance = .25f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style44, position);

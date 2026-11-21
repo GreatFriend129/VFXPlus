@@ -167,9 +167,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawTrail(projectile, false);
+                DrawTrail(projectile, true);
             });
-            DrawTrail(projectile, true);
+            DrawTrail(projectile, false);
 
             //Border
             for (int i = 0; i < 4; i++)
@@ -189,7 +189,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D flare = CommonTextures.SoulSpikePMA.Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
             Vector2 TexOrigin = new Vector2(vanillaTex.Width * 0.5f, vanillaTex.Height * 0.25f);
@@ -207,8 +207,21 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
                 Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.45f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 50 } * progress * 0.45f,
                     previousRotations[i], TexOrigin, size1 * overallScale, SE);
+            }
+
+            //After-Image
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
+                //Start End
+                Color col = Color.Lerp(Color.Yellow, Color.DarkGoldenrod, 1f - Easings.easeInCubic(progress)) * progress;
+
+                float size1 = (0.5f + (0.5f * progress)) * projectile.scale;
+
+                Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
                 if (i > 1)
                 {
@@ -216,7 +229,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
                     float size2 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(1.5f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 255, 100) with { A = 0 } * 0.1f * middleProg,
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 255, 100) with { A = 50 } * 0.1f * middleProg,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
                 }
             }

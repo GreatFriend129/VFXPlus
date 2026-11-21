@@ -38,6 +38,9 @@ namespace VFXPlus
 
         public static Effect SmokeNoiseShader;
 
+        public static Effect RadialPulse2Shader;
+
+
         public override void Load()
         {
             // Literally ripped from SLR
@@ -67,6 +70,8 @@ namespace VFXPlus
                 SmokeColShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokeColShader", AssetRequestMode.ImmediateLoad).Value;
                 SmokeColShaderAlpha = Instance.Assets.Request<Effect>("Effects/Air/SmokeColShaderAlpha", AssetRequestMode.ImmediateLoad).Value;
                 SmokeNoiseShader = Instance.Assets.Request<Effect>("Effects/Compiler/SmokyNoise", AssetRequestMode.ImmediateLoad).Value;
+
+                RadialPulse2Shader = Instance.Assets.Request<Effect>("Effects/Radial/RadialPulse2", AssetRequestMode.ImmediateLoad).Value;
             }
 
             var screenRef = new Ref<Effect>(VFXPlus.Instance.Assets.Request<Effect>("Effects/GlowDustShader", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value);
@@ -107,7 +112,9 @@ namespace VFXPlus
                 BasicTrailShader = null;
                 TrailShaderGradient = null;
                 SmokeColShader = null;
+                SmokeColShaderAlpha = null;
                 SmokeNoiseShader = null;
+                RadialPulse2Shader = null;
                 Instance ??= null;
             }
 

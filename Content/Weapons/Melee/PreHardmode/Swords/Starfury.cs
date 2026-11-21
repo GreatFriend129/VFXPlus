@@ -1,21 +1,10 @@
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Tasks;
-using Microsoft.CodeAnalysis;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Graphics.PackedVector;
-using Mono.Cecil;
-using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Threading;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
-using Terraria.GameContent;
-using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using VFXPlus.Common;
@@ -23,9 +12,7 @@ using VFXPlus.Common.Drawing;
 using VFXPlus.Common.Utilities;
 using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
-using VFXPlus.Content.Weapons.Ranged.Hardmode.Misc;
-using VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc;
-using static Terraria.ModLoader.PlayerDrawLayer;
+using static tModPorter.ProgressUpdate;
 
 
 namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
@@ -139,24 +126,77 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)
         {
 
-            Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
+            int a = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<StarImpactVFX>(), 0, 0f, player.whoAmI);
+            (Main.projectile[a].ModProjectile as StarImpactVFX).impactType = StarImpactVFX.StarImpactType.StarfuryMelee;
+
+            int pgoCount = 3; //10
+            for (int i = 0; i < pgoCount; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)pgoCount) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(2f, 5f) * 1f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool(4) ? Color.Orange : Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
+
+                Dust gd = Dust.NewDustPerfect(target.Center, ModContent.DustType<PixelGlowOrb>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.5f, 0.9f));
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.86f, 0.91f);
+                float fadePower = Main.rand.NextFloat(0.92f, 0.96f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.95f, postSlowPower: postSlowPower, velToBeginShrink: 3f, fadePower: fadePower);
+
+            }
+
+            int crossCount = 4;
+            for (int i = 0; i < crossCount; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(2.5f, 5f) * 1f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool(4) ? Color.Orange : Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
+
+
+                Dust gd = Dust.NewDustPerfect(target.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.88f, 0.92f);
+                float fadePower = Main.rand.NextFloat(0.89f, 0.93f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.92f, postSlowPower: postSlowPower, velToBeginShrink: 1.5f, fadePower: fadePower, shouldFadeColor: false);
+            }
 
 
             float randRot = Main.rand.NextFloat(6.28f);
-
-            Color newPink = Main.hslToRgb(0.92f, 1f, 0.6f) with { A = 50 };
-
-            int pulse = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            /*
+            int pulse = Projectile.NewProjectile(null, target.Center, (randRot - MathHelper.PiOver4).ToRotationVector2() * 0.1f, ModContent.ProjectileType<StarfuryRadialPulse>(), 0, 0, Main.myPlayer);
+            Main.projectile[pulse].scale = 0.75f;
             Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 1f;
 
-            int pulse2 = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-            (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            int pulse2 = Projectile.NewProjectile(null, target.Center, (randRot + MathHelper.PiOver4).ToRotationVector2() * 0.1f, ModContent.ProjectileType<StarfuryRadialPulse>(), 0, 0, Main.myPlayer);
+            Main.projectile[pulse2].scale = 0.75f;
             Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 1f;
+            */
+            Color newPink = Main.hslToRgb(0.92f, 1f, 0.6f) with { A = 50 };
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = 0.35f, Pitch = -.25f, PitchVariance = .2f, MaxInstances = 1 };
-            SoundEngine.PlaySound(style, player.Center);
+            //int pulse = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            //Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 1f;
+
+            //int pulse2 = Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
+            //(Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
+            //Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 1f;
+
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Magic/QuickShine") with { Volume = 0.35f, Pitch = -.25f, PitchVariance = .2f, MaxInstances = 1 };
+            //SoundEngine.PlaySound(style, player.Center);
 
             //Projectile.NewProjectile(null, target.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
 
@@ -225,20 +265,10 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-            if (timer == 0 && false)
+            if (timer == 0)
             {
-                float randRot = (projectile.oldVelocity).ToRotation();
-
-                Color newPink = Main.hslToRgb(0.92f, 0.95f, 0.62f);
-
-                int pulse = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-                //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-                (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-                Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 0.5f;
-
-                int pulse2 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-                (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-                Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 0.5f;
+                Vector2 pulseVel = projectile.velocity.SafeNormalize(Vector2.UnitX);
+                Projectile.NewProjectile(null, projectile.Center, pulseVel * 0.25f, ModContent.ProjectileType<StarfuryRadialPulse>(), 0, 0f, projectile.owner);
             }
 
             if (timer == 0 && Main.myPlayer == projectile.owner)
@@ -316,9 +346,9 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawPixelatedStuff(projectile, false);
+                DrawPixelatedStuff(projectile, true);
             });
-            DrawPixelatedStuff(projectile, true);
+            DrawPixelatedStuff(projectile, false);
 
             Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStar").Value;
             Texture2D StarGlow = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
@@ -381,7 +411,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             if (giveUp)
                 return;
 
-            Texture2D Trail = CommonTextures.SoulSpikePMA.Value;
+            Texture2D Trail = CommonTextures.SoulSpikePMA.Value; //SoulSpike
 
             //Starfury uses 0.8 scale so x1.25 that is one
             float drawScale = projectile.scale * 1.25f * overallScale;
@@ -412,119 +442,137 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                 Vector2 trailScale = new Vector2(1.5f, 0.7f * drawScale * Easings.easeInOutSine(progress));
 
                 Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.White with { A = 150 } * 0.85f * progress,
-                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.5f), SpriteEffects.None);
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.35f), SpriteEffects.None);
             }
 
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-            //return true;
-            
+        {            
             SoundStyle starPulse = new SoundStyle("VFXPlus/Sounds/Effects/Magic/Ding") with { Volume = 0.35f, Pitch = -.85f, PitchVariance = .2f, MaxInstances = -1 };
             SoundEngine.PlaySound(starPulse, projectile.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/star_impact_01") with { Volume = 0.25f, Pitch = 0.35f, PitchVariance = 0.15f, MaxInstances = -1 };
             SoundEngine.PlaySound(style2, projectile.Center);
 
-            for (int i = 0; i < 9 + Main.rand.Next(2); i++)
+
+            int a = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarImpactVFX>(), 0, 0f, projectile.owner);
+            (Main.projectile[a].ModProjectile as StarImpactVFX).impactType = StarImpactVFX.StarImpactType.Starfury;
+
+            Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.DeepPink, Scale: 0.25f);
+
+            da.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 20,
+                overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+
+            //Impact
+            /*
+            for (int i = 0; i < 12; i++)
             {
-                Color col = Main.rand.NextBool(3) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 7f);
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticle>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.8f, 1.25f));
-                d.velocity -= projectile.velocity * 0.45f;
-
-                d.velocity *= 0.7f;
-
-
-                d.fadeIn = Main.rand.Next(0, 4);
-                d.alpha = Main.rand.Next(0, 2);
-                d.noLight = false;
-
-            }
-
-
-            for (int i = 0; i < 7 + Main.rand.Next(0, 5); i++)
-            {
-                Color col = Main.rand.NextBool(3) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-                Vector2 randomStart = Main.rand.NextVector2Circular(4f, 4f) * 1f;
-                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: col, Scale: Main.rand.NextFloat(0.65f, 0.75f));
-
-                dust.velocity -= projectile.velocity * 0.1f;
+                Vector2 randomStart = Main.rand.NextVector2Circular(3.5f, 3.5f) * 1f;
+                Dust dust = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), randomStart, newColor: Color.DeepPink, Scale: Main.rand.NextFloat(0.35f, 0.65f));
+                //dust.velocity += Projectile.velocity * 0.25f;
 
                 dust.noLight = false;
                 dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(
                     rotPower: 0.15f, preSlowPower: 0.99f, timeBeforeSlow: 12, postSlowPower: 0.92f, velToBeginShrink: 3f, fadePower: 0.91f, shouldFadeColor: false);
             }
 
-            return false;
-
-            for (int i = 0; i < 9 + Main.rand.Next(3); i++)
+            for (int i = 0; i < 15; i++)
             {
+                Color col = Main.rand.NextBool(3) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 9f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<RoaParticleAlpha>(), vel, newColor: col with { A = 100 }, Scale: Main.rand.NextFloat(0.75f, 1.5f));
+                d.fadeIn = Main.rand.Next(0, 4);
+                d.alpha = Main.rand.Next(0, 2);
+                d.noLight = false;
+
+            }
+            */
+
+            for (float num636 = 220f; num636 < 1f; num636 += 0.25f)  //0.125
+            {
+                Dust.NewDustPerfect(projectile.Center, DustID.FireworksRGB, Vector2.UnitY.RotatedBy(num636 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (4f + Main.rand.NextFloat() * 8f), 150, Color.HotPink).noGravity = true;
+            }
+            for (float num637 = 220f; num637 < 1f; num637 += 0.35f) //0.25f
+            {
+                Dust.NewDustPerfect(projectile.Center, DustID.FireworksRGB, Vector2.UnitY.RotatedBy(num637 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (2f + Main.rand.NextFloat() * 6f), 150, Color.Gold, 0.85f).noGravity = true;
+            }
+
+            int crossCountA = 5; //10
+            for (int i = 0; i < crossCountA; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)crossCountA) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3f, 7f) * 1.5f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool(4) ? Color.Orange : Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
+
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f) * 2f);
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.86f, 0.91f);
+                float fadePower = Main.rand.NextFloat(0.92f, 0.96f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.95f, postSlowPower: postSlowPower, velToBeginShrink: 3f, fadePower: fadePower);
+
+            }
+
+            int crossCount = 7;
+            for (int i = 0; i < crossCount; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 7f) * 1.5f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool(4) ? Color.Orange : Color.Lerp(Color.DeepPink, Color.HotPink, 0.25f);
+
+
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.88f, 0.92f);
+                float fadePower = Main.rand.NextFloat(0.89f, 0.93f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.92f, postSlowPower: postSlowPower, velToBeginShrink: 1.5f, fadePower: fadePower, shouldFadeColor: false);
+            }
+
+            //farCross
+            int farCrossCount = 3 + Main.rand.Next(3);
+            for (int i = 0; i < farCrossCount; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)farCrossCount) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3f, 7f) * 2f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
                 Color col = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
 
-                Vector2 vel = Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(1f, 5f);
+                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PulseInOutDust>(), dustVel, 0, col with { A = 200 }, Main.rand.NextFloat(0.75f, 1f) * 0.65f);
+                //d.rotation = MathHelper.PiOver4;
 
-                Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.45f));
+                int pulseTime = Main.rand.Next(35, 41);
+                float velFadeAmount = Main.rand.NextFloat(0.93f, 0.95f);
+
+                PulseInOutDustBehavior poudb = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, pulseTime, 0.15f, 0.35f, Pixelize: true);
+                poudb.velFadeAmount = velFadeAmount;
+
+                d.customData = poudb;
             }
-
-            return false;
-            
-            Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
-
-            
-            float randRot = (-projectile.oldVelocity).ToRotation();
-
-            Color newPink = Main.hslToRgb(0.92f, 1f, 0.6f);
-
-            int pulse = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-            //(Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-            (Main.projectile[pulse].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-            Main.projectile[pulse].rotation = randRot - MathHelper.PiOver4 * 0.75f;
-
-            int pulse2 = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<PaintballGunPulseBIG>(), 0, 0, Main.myPlayer);
-            (Main.projectile[pulse2].ModProjectile as PaintballGunPulseBIG).color = newPink;// Main.hslToRgb(Main.rand.NextFloat(), 1f, 0.5f);
-            Main.projectile[pulse2].rotation = randRot + MathHelper.PiOver4 * 0.75f;
-            
-
-            float randomRot = Main.rand.NextFloat(6.28f);
-
-            int dustCount = 12 * 0;
-            for (int i = 0; i < dustCount; i++)
-            {
-                float progress = (float)i / (float)dustCount;
-                float theta = progress * MathHelper.TwoPi;
-
-                float numer = MathF.Cos((2f * MathF.Asin(1) + 3f * MathHelper.Pi) / 10f);
-                float denom = MathF.Cos((2f * MathF.Asin(MathF.Cos(4f * theta)) + 3f * MathHelper.Pi) / 10f);
-
-                float r = numer / denom;
-
-                Color dustCol = Main.rand.NextBool(4) ? Color.Gold : Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f);
-
-                Vector2 vel = new Vector2(r * 4f, 0f).RotatedBy(randomRot + theta);
-
-                Dust d = Dust.NewDustPerfect(projectile.Center + vel, ModContent.DustType<GlowPixelCross>(), vel, newColor: dustCol with { A = 200 });
-                d.scale *= Main.rand.NextFloat(0.5f, 0.65f) * 0.5f;
-                d.customData = DustBehaviorUtil.AssignBehavior_GPCBase(velToBeginShrink: 0.5f, shouldFadeColor: false);
-
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.ShakyStar, 40, 0.05f, 0.95f, Pixelize: true);
-
-                //d.customData = new PulseInOutDustBehavior(PulseInOutDustBehavior.DrawOptions.GlowStarSharp, 20, 0.15f, 0.85f, Pixelize: true);
-
-            }
-
-
-            //int b = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarfuryImpactVFX>(), 0, 0, Main.myPlayer);
-            //Main.projectile[b].scale *= 0.75f;
-            //Main.projectile[b].rotation = MathHelper.PiOver4;
-
 
             return false;
         }
 
         public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
         {
+            previousPositions.Clear();
+            previousRotations.Clear();
+            
             Collision.HitTiles(projectile.position + projectile.velocity, projectile.velocity, projectile.width, projectile.height);
 
             return base.OnTileCollide(projectile, oldVelocity);
@@ -533,8 +581,135 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
     }
 
+    public class StarfuryRadialPulse : ModProjectile
+    {
+        public override string Texture => "Terraria/Images/Projectile_0";
 
-    public class StarfuryImpactVFX : ModProjectile
+
+        public override void SetDefaults()
+        {
+            Projectile.hostile = false;
+            Projectile.friendly = false;
+            Projectile.ignoreWater = true;
+            Projectile.tileCollide = false;
+
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = 22900;
+
+        }
+
+
+        int timer = 0;
+
+        float progress = 0f;
+        public override void AI()
+        {
+            if (timer == 0)
+                Projectile.rotation = Main.rand.NextFloat(6.28f);
+
+            float timeForPulse = 22f; //18
+            float myProg = Utils.GetLerpValue(0f, timeForPulse, (float)timer, true);
+
+            progress = myProg;
+
+            if (progress > 0.99f)
+            {
+                progress = 1f;
+                Projectile.active = false;
+            }
+
+            timer++;
+        }
+
+        Effect myEffect = null;
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
+            {
+                DrawEffect(false);
+            });
+
+            DrawEffect(true);
+
+            return false;
+        }
+
+        public void DrawEffect(bool giveUp = false)
+        {
+            if (giveUp)
+                return;
+
+            bool isSpecial = Projectile.ai[0] == 1;
+            bool isGold = Projectile.ai[1] == 1;
+
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+            Texture2D Tex2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/CrispStarPMA").Value;
+
+            Vector3[] gradCols = {
+                Color.Black.ToVector3(),
+                Color.DeepPink.ToVector3() * 0.6f,
+                Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f).ToVector3() * 1f,
+                Color.HotPink.ToVector3(),
+                Color.White.ToVector3()
+            };
+
+            Vector3[] gradColsGold = {
+                Color.Black.ToVector3(),
+                Color.Orange.ToVector3() * 0.6f,
+                Color.Lerp(Color.Orange, Color.Gold, 0.35f).ToVector3() * 1f,
+                Color.Gold.ToVector3(),
+                Color.White.ToVector3()
+            };
+
+            float thickness = 2f * Easings.easeOutQuad(progress);
+
+            if (isSpecial || isGold)
+                thickness = 2f * Easings.easeOutSine(progress);
+
+            Effect thisEffect = ShaderHelper.SetRadialPulse2Params(
+                causticTexture: Mod.Assets.Request<Texture2D>("Assets/Noise/Test/T_Random_54").Value, 
+                causticTexture2: Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value, 
+                uTime: (float)Main.timeForVisualEffects * 0.02f, 
+                progress: Easings.easeOutSine(progress), 
+                tex1Alpha: 0.8f, //0.8
+                tex2Alpha: 0.55f, //0.55f
+                rotation: Projectile.rotation + (float)Main.timeForVisualEffects * 0.1f,
+                flowSpeed: 3f,
+                zoom: 1f, 
+
+                colors: isGold ? gradColsGold : gradCols, 
+                finalColIntensity: 4f,
+                posterizationSteps: 0f,
+                totalAlpha: Easings.easeOutCubic(1f - progress),
+                zFadeStrength: 1.1f,
+
+                ringRadiusStart: 0f,
+                ringThicknessStart: 2f * Easings.easeOutQuad(progress) * (isSpecial ? 0.85f : 1f),
+                ringPower: 0.2f,
+                ringMult: 2f,
+                ringWaveSpeed: 0f,
+                ringWaveStrength: 0f,
+                ringWaveLength: 0f
+                );
+            
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, thisEffect, Main.GameViewMatrix.EffectMatrix);
+
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.velocity.ToRotation(), Tex.Size() / 2f, 155 * new Vector2(0.4f, 1f) * Projectile.scale, SpriteEffects.None, 0f); //160
+            //Main.spriteBatch.Draw(Tex2, drawPos, null, Color.White, 0f, Tex2.Size() / 2f, 2f * new Vector2(1f, 1f), SpriteEffects.None, 0f); //160
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+        }
+    }
+
+    public class StarImpactVFX : ModProjectile
     {
         public override string Texture => "Terraria/Images/Projectile_0";
 
@@ -557,16 +732,35 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         float overallAlpha = 1f;
         float overallScale = 1f;
 
+        public enum StarImpactType
+        {
+            Starfury,
+            StarfuryMelee,
+            StarCannon, 
+            SuperStarShooter
+        }
+
+        public StarImpactType impactType = StarImpactType.Starfury;
         public override void AI()
         {
-            int timeForEffect = 14;
-
             if (timer == 0)
-                Projectile.rotation = Main.rand.NextFloat(6.28f);
+            {
+                //Star rotaion
+                Projectile.ai[0] = Main.rand.NextFloat(6.28f);
 
-            effectProgress = (Utils.GetLerpValue(0, timeForEffect, timer, true));
+                //Ring rotation
+                Projectile.ai[1] = Main.rand.NextFloat(6.28f);
 
-            if (timer == timeForEffect)
+            }
+
+
+            int timeForStarEffect = 14;
+            starProgress = Utils.GetLerpValue(0, timeForStarEffect, timer, true);
+
+            int timeForRingEffect = 22;
+            ringProgress = Utils.GetLerpValue(0f, timeForRingEffect, timer, true);
+
+            if (timer == timeForStarEffect && ringProgress > 0.99f)
                 Projectile.active = false;
 
             timer++;
@@ -576,224 +770,165 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
-                DrawEffect(false);
+                //TODO: Fix zoom being fucked up if rings are being drawn
+                if (impactType != StarImpactType.StarfuryMelee)
+                    DrawRings(true);
+                DrawStar(true);
             });
-            DrawEffect(true);
+            if (impactType != StarImpactType.StarfuryMelee)
+                DrawRings(false);
+
+            DrawStar(false);
 
             return false;
         }
 
-        float effectProgress = 0f;
-        public void DrawEffect(bool giveUp)
+        float starProgress = 0f;
+        public void DrawStar(bool giveUp)
         {
             if (giveUp)
                 return;
+
+            Color starColor = Color.DeepPink with { A = 120 };
+            float totalStarScale = 1f;
+
+            if (impactType == StarImpactType.Starfury)
+            {
+                starColor = Color.DeepPink with { A = 120 };
+                totalStarScale = 2f;
+            }
+            else if (impactType == StarImpactType.StarfuryMelee)
+            {
+                starColor = Color.DeepPink with { A = 120 };
+            }
+            else if (impactType == StarImpactType.StarCannon)
+            {
+                Color deepBlue = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.85f);
+                Color golden = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+                float yellowValue = GeneralUtilities.OscSine(0f, 0.85f, 2f, 0f);
+                starColor = Color.Lerp(deepBlue with { A = 160 }, golden with { A = 160 }, yellowValue);
+                totalStarScale = 2f;
+            }
+            else if (impactType == StarImpactType.SuperStarShooter)
+            {
+                starColor = Color.Lerp(Color.Gold, Color.Orange, 0.45f);
+                totalStarScale = 2f;
+            }
 
             Texture2D Star = CommonTextures.CrispStarPMA.Value;
-            //Texture2D Star = Mod.Assets.Request<Texture2D>("Assets/Slash/FadeRingB").Value;
-
-
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
-
-            //OuterStar
-            //float outerStarScale = GeneralUtilities.FadeLinear(effectProgress, 0.5f, 0.5f) * Projectile.scale * overallScale;
-            //Vector2 outerDrawScale = new Vector2(outerStarScale, outerStarScale);
-            //Main.EntitySpriteDraw(Star, drawPos, null, Color.HotPink with { A = 50 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, outerDrawScale * 1.5f, SpriteEffects.None);
-
-            //InnerStar
-            //float innerStarScale = GeneralUtilities.FadeLinear(effectProgress, 0.25f, 0.75f) * Projectile.scale * overallScale;
-            //Vector2 innerDrawScale = new Vector2(innerStarScale, innerStarScale);
-
-            float starScale = MathF.Sin(MathHelper.Pi * effectProgress);
-
-            //Texture2D glorb = CommonTextures.feather_circle128PMA.Value;
-            //Main.EntitySpriteDraw(glorb, drawPos, null, Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f) with { A = 120 } * overallAlpha * 0.35f, Projectile.rotation, glorb.Size() / 2f, starScale * Projectile.scale * 0.75f, SpriteEffects.None);
-
-
-            Main.EntitySpriteDraw(Star, drawPos, null, Color.DeepPink with { A = 120 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, starScale * Projectile.scale, SpriteEffects.None);
+            
+            float starScale = MathF.Sin(MathHelper.Pi * starProgress);
+            Main.EntitySpriteDraw(Star, drawPos, null, starColor * overallAlpha, Projectile.ai[0], Star.Size() / 2f, starScale * Projectile.scale * totalStarScale, SpriteEffects.None);
 
             float innerStarScale = MathF.Pow(starScale, 4);
-            Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 120 } * overallAlpha, Projectile.rotation, Star.Size() / 2f, innerStarScale * 0.65f * Projectile.scale, SpriteEffects.None); //0.75
-
-
-        }
-    }
-
-    
-    public class StarfuryShotOverrideAlt : GlobalProjectile
-    {
-        public override bool InstancePerEntity => true;
-
-        public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-        {
-            return lateInstantiation && (entity.type == ProjectileID.Starfury) && false;
+            Main.EntitySpriteDraw(Star, drawPos, null, Color.White with { A = 120 } * overallAlpha, Projectile.ai[0], Star.Size() / 2f, innerStarScale * 0.65f * Projectile.scale * totalStarScale, SpriteEffects.None); //0.75
         }
 
-        int timer = 0;
-        public override bool PreAI(Projectile projectile)
-        {
-
-            //Trail
-            int trailCount = 12; //12
-            previousVelRots.Add(projectile.velocity.ToRotation());
-            previousPositions.Add(projectile.Center + projectile.velocity);
-
-            if (previousVelRots.Count > trailCount)
-                previousVelRots.RemoveAt(0);
-
-            if (previousPositions.Count > trailCount)
-                previousPositions.RemoveAt(0);
-
-            timer++;
-            return base.PreAI(projectile);
-        }
-
-        float overallAlpha = 1f;
-        float overallScale = 1f;
-        public List<Vector2> previousPositions = new List<Vector2>();
-        public List<float> previousVelRots = new List<float>();
-        public override bool PreDraw(Projectile projectile, ref Color lightColor)
-        {
-            ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
-            {
-                DrawShit(false, projectile);
-            });
-            DrawShit(true, projectile);
-
-
-            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
-            Vector2 fireballPos = projectile.Center - Main.screenPosition + projectile.velocity.SafeNormalize(Vector2.UnitX) * -25f;
-            Color fireBallColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
-            for (int i = 220; i < 4; i++)
-            {
-                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
-
-                float dist = 4f;
-
-                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
-
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 200 } * 0.25f, fireballRot, FireBall.Size() / 2f, 1f * 1.05f, SpriteEffects.None);
-            }
-
-            Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
-            Texture2D tex2 = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarGlow").Value;
-            
-            Main.spriteBatch.Draw(tex2, projectile.Center - Main.screenPosition, null, Color.DeepPink, projectile.rotation, tex2.Size() / 2f, 1f, SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(tex, projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, projectile.rotation, tex.Size() / 2f, 1f, SpriteEffects.None, 0f);
-
-            return false;
-
-        }
-
-        Effect myEffect = null;
-        public void DrawShit(bool giveUp, Projectile projectile)
+        float ringProgress = 0f;
+        public void DrawRings(bool giveUp)
         {
             if (giveUp)
                 return;
 
-            #region orb
+            Vector3[] gradColsBlue = {
+                Color.Black.ToVector3(),
+                Color.Lerp(Color.Blue, Color.DodgerBlue, 0f).ToVector3() * 1.5f,
+                Color.Lerp(Color.Blue, Color.DodgerBlue, 0.5f).ToVector3() * 1.25f,
+                Color.Lerp(Color.Blue, Color.DodgerBlue, 0.85f).ToVector3() * 1f,
+                Color.White.ToVector3()
+            };
+            
+            Vector3[] gradColsGold = {
+                Color.Black.ToVector3(),
+                new Color(255, 140, 0).ToVector3() * 0.5f,
+                Color.Lerp(Color.Orange, Color.Gold, 0.25f).ToVector3() * 0.75f,
+                Color.Lerp(Color.Orange, Color.Gold, 0.75f).ToVector3(),
+                Color.White.ToVector3()
+            };
 
-            //Glorb
-            Vector2 drawPos = projectile.Center - Main.screenPosition;
+            Vector3[] gradCols = { Color.White.ToVector3() };
+            float thickness = 1f;
+            float texScale = 1f;
 
-            Texture2D orb = CommonTextures.feather_circle128PMA.Value;
-            Color[] cols = { Color.HotPink * 0.75f, Color.DeepPink * 0.525f, Color.DeepPink * 0.375f };
-            float[] scales = { 1.15f, 1.6f, 2.5f };
-
-            float orbRot = projectile.velocity.ToRotation();
-            float orbAlpha = 0.6f * overallAlpha;
-            Vector2 orbScale = new Vector2(0.85f, 0.85f) * 0.45f * projectile.scale * overallScale;
-            Vector2 orbOrigin = orb.Size() / 2f;
-
-            float sineScale1 = 1f + (float)Math.Sin(Main.timeForVisualEffects * 0.07f) * 0.15f;
-            float sineScale2 = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.13f) * 0.1f;
-
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[0] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[0], SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[1] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[1] * sineScale1, SpriteEffects.None);
-            Main.EntitySpriteDraw(orb, drawPos, null, cols[2] with { A = 0 } * orbAlpha, orbRot, orbOrigin, orbScale * scales[2] * sineScale2, SpriteEffects.None);
-
-            #endregion
-
-            Texture2D FireBall = Mod.Assets.Request<Texture2D>("Assets/Pixel/Extra_91").Value;
-            Vector2 fireballPos = projectile.Center - Main.screenPosition + projectile.velocity.SafeNormalize(Vector2.UnitX) * -35f;
-            Color fireBallColor = Color.Lerp(Color.DeepPink, Color.HotPink, 0.75f);
-            for (int i = 0; i < 4; i++)
+            if (impactType == StarImpactType.Starfury)
             {
-                float fireballRot = projectile.velocity.ToRotation() + MathHelper.PiOver2;
+                gradCols = new Vector3[] { 
+                    Color.Black.ToVector3(),
+                    Color.DeepPink.ToVector3() * 0.6f,
+                    Color.Lerp(Color.DeepPink, Color.HotPink, 0.5f).ToVector3() * 1f,
+                    Color.HotPink.ToVector3(),                
+                    Color.White.ToVector3()            
+                };
 
-                float dist = 4f;
+                texScale = 0.85f;
+                thickness = 0.85f;
+            }
+            else if (impactType == StarImpactType.StarCannon)
+            {
+                Color deepBlue = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.85f);
+                Color golden = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+                float yellowValue = 1f * GeneralUtilities.OscSine(0f, 1f, 2f, 0f);
+                //starColor = Color.Lerp(deepBlue with { A = 160 }, golden with { A = 160 }, yellowValue);
 
-                Vector2 offset = new Vector2(dist, 0f).RotatedBy(MathHelper.PiOver2 * i);
-                Vector2 offsetDrawPos = fireballPos + offset.RotatedBy(Main.timeForVisualEffects * 0.05f * projectile.direction);
+                gradCols = new Vector3[] {
+                    Vector3.Lerp(gradColsBlue[0], gradColsGold[0], yellowValue),
+                    Vector3.Lerp(gradColsBlue[1], gradColsGold[1], yellowValue),
+                    Vector3.Lerp(gradColsBlue[2], gradColsGold[2], yellowValue),
+                    Vector3.Lerp(gradColsBlue[3], gradColsGold[3], yellowValue),
+                    Vector3.Lerp(gradColsBlue[4], gradColsGold[4], yellowValue),
+                };
 
-                Vector2 fireballScale = new Vector2(1.05f, 1.25f);
-
-                Main.EntitySpriteDraw(FireBall, offsetDrawPos, null, fireBallColor with { A = 0 } * 0.25f, fireballRot, FireBall.Size() / 2f, fireballScale, SpriteEffects.None);
+                thickness = 0.85f;
+            }
+            else if (impactType == StarImpactType.SuperStarShooter)
+            {
+                gradCols = gradColsGold;
+                thickness = 0.85f;
+                texScale = 1f;
             }
 
-            #region SolidTrail(good) use for fibber 
-            //Trail
-            Texture2D trailTexture = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+            Effect thisEffect = ShaderHelper.SetRadialPulse2Params(
+                causticTexture: Mod.Assets.Request<Texture2D>("Assets/Noise/Test/T_Random_54").Value,
+                causticTexture2: Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value,
+                uTime: (float)Main.timeForVisualEffects * 0.02f,
+                progress: Easings.easeOutSine(ringProgress),
+                tex1Alpha: 0.8f, //0.8
+                tex2Alpha: 0.55f, //0.55f
+                rotation: Projectile.rotation + (float)Main.timeForVisualEffects * 0.1f,
+                flowSpeed: 3f,
+                zoom: 1f,
 
-            if (myEffect == null)
-                myEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/TendrilShader", AssetRequestMode.ImmediateLoad).Value;
+                colors: gradCols,
+                finalColIntensity: 4f,
+                posterizationSteps: 0f,
+                totalAlpha: Easings.easeOutCubic(1f - ringProgress),
+                zFadeStrength: 1.1f,
 
-            //Convert lists to arrays for use in vertex strip
-            Vector2[] pos_arr = previousPositions.ToArray();
-            float[] rot_arr = previousVelRots.ToArray();
+                ringRadiusStart: 0f,
+                ringThicknessStart: 2f * Easings.easeOutQuad(ringProgress) * thickness,
+                ringPower: 0.2f,
+                ringMult: 2f,
+                ringWaveSpeed: 0f,
+                ringWaveStrength: 0f,
+                ringWaveLength: 0f
+                );
 
-            float sineWidthMult = 1f + (float)Math.Cos(Main.timeForVisualEffects * 0.09f) * 0.15f;
+            Texture2D Tex = Mod.Assets.Request<Texture2D>("Assets/Pixel").Value;
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            Color StripColor(float progress) => Color.White * (progress * progress);
-            float StripWidthUnder(float progress) => 20f * Easings.easeInCubic(progress) * overallScale * sineWidthMult * 0.6f;
-            float StripWidthOver(float progress) => 8f * Easings.easeInCubic(progress) * overallScale * sineWidthMult * 0.6f;
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, thisEffect, Main.GameViewMatrix.EffectMatrix);
 
-            VertexStrip vertexStripUnder = new VertexStrip();
-            vertexStripUnder.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthUnder, -Main.screenPosition, includeBacksides: true);
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.ai[1] + MathHelper.PiOver4, Tex.Size() / 2f, 155 * new Vector2(0.4f, 1f) * Projectile.scale * texScale, SpriteEffects.None, 0f); //160
+            Main.spriteBatch.Draw(Tex, drawPos, null, Color.White, Projectile.ai[1] - MathHelper.PiOver4, Tex.Size() / 2f, 155 * new Vector2(0.4f, 1f) * Projectile.scale * texScale, SpriteEffects.None, 0f); //160
 
-            VertexStrip vertexStripOver = new VertexStrip();
-            vertexStripOver.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidthOver, -Main.screenPosition, includeBacksides: true);
-
-
-
-            myEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
-            myEffect.Parameters["progress"].SetValue(timer * 0.05f * 0f);
-            myEffect.Parameters["TrailTexture"].SetValue(trailTexture);
-            myEffect.Parameters["reps"].SetValue(1f);
-
-            //UnderLayer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Lerp(Color.HotPink, Color.DeepPink, 0.5f).ToVector3() * 1f);
-            myEffect.Parameters["glowThreshold"].SetValue(1f);
-            myEffect.Parameters["glowIntensity"].SetValue(1f);
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStripUnder.DrawTrail();
-
-
-            //Over layer
-            myEffect.Parameters["ColorOne"].SetValue(Color.Pink.ToVector3() * 1f);
-            myEffect.Parameters["glowThreshold"].SetValue(0.7f); //0.6
-            myEffect.Parameters["glowIntensity"].SetValue(2f); //2.25
-            myEffect.CurrentTechnique.Passes["MainPS"].Apply();
-            vertexStripOver.DrawTrail();
-
-            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            #endregion
-
-
-            //Texture2D tex = Mod.Assets.Request<Texture2D>("Assets/Pixel/VanillaStarBlackBG").Value;
-            //Texture2D tex2 = Mod.Assets.Request<Texture2D>("Content/Items/Weapons/Misc/Ranged/Guns/Fibber/VanillaStarBorder").Value;
-            //Color col = colorOptions[colorIndex];
-
-            //Main.spriteBatch.Draw(tex2, Projectile.Center - Main.screenPosition, null, Color.Blue, Projectile.rotation, tex2.Size() / 2f, 1f, SpriteEffects.None, 0f);
-            //Main.spriteBatch.Draw(tex, Projectile.Center - Main.screenPosition, null, Color.White with { A = 0 }, Projectile.rotation, tex.Size() / 2f, 1f, SpriteEffects.None, 0f);
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
         }
 
-        public override bool PreKill(Projectile projectile, int timeLeft)
-        {
-
-            return base.PreKill(projectile, timeLeft);
-        }
     }
 }

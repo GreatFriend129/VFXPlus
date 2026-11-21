@@ -225,9 +225,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawPixelatedStuff(projectile, false);
+                DrawPixelatedStuff(projectile, true);
             });
-            DrawPixelatedStuff(projectile, true);
+            DrawPixelatedStuff(projectile, false);
 
 
             //Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
@@ -276,20 +276,28 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             {
                 float progress = (float)i / previousRotations.Count;
 
+                Color col = Color.Lerp(darkPurple, purple3, 0.75f);
+
+                Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
+
+                Vector2 trailScale = new Vector2(1.5f, 0.75f * drawScale * Easings.easeInOutSine(progress));
+
+                Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 150 } * 1f * progress,
+                       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
+            }
+
+            for (int i = 0; i < previousRotations.Count; i++)
+            {
+                float progress = (float)i / previousRotations.Count;
+
                 Color col = Color.Lerp(darkPurple, purple3, 0.5f);
 
                 Vector2 AfterImagePos = previousPositions[i] - Main.screenPosition;
 
                 Vector2 trailScale = new Vector2(1.5f, 0.75f * drawScale * Easings.easeInOutSine(progress));
 
-                Main.EntitySpriteDraw(Trail, AfterImagePos, null, col with { A = 100 } * 1f * progress,
-                       previousRotations[i], Trail.Size() / 2f, trailScale, SpriteEffects.None);
-
-                //Main.EntitySpriteDraw(FireBall, AfterImagePos, null, Color.HotPink with { A = 20 } * 1f * progress,
-                //       previousRotations[i] + MathHelper.PiOver2, FireBall.Size() / 2f, new Vector2(trailScale.Y, trailScale.X), SpriteEffects.None);
-
                 Main.EntitySpriteDraw(Trail, AfterImagePos, null, Color.Black with { A = 100 } * 2f * progress,
-                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.65f), SpriteEffects.None);
+                    previousRotations[i], Trail.Size() / 2f, new Vector2(trailScale.X, trailScale.Y * 0.35f), SpriteEffects.None);
             }
         }
 

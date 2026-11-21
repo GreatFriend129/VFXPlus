@@ -47,9 +47,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                     GunID: ItemID.Xenopopper,
                     AnimTime: 18,
                     NormalXOffset: 15f,
-                    DestXOffset: -3f, //-4
+                    DestXOffset: 0f, //-4
                     YRecoilAmount: 0.25f,
-                    HoldOffset: new Vector2(0f, 2f),
+                    HoldOffset: new Vector2(0f, -2f),
                     TipPos: new Vector2(28f, -3f),
                     StarPos: new Vector2(22f, -3f)
                     );
@@ -57,9 +57,10 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 held.timeToStartFade = 0;
                 held.isShotgun = true;
             }
+            Main.projectile[gun].scale = 1f;
 
             int dir = velocity.X > 0 ? 1 : -1;
-            Vector2 muzzlePos = position + new Vector2(34f, -2f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
+            Vector2 muzzlePos = position + new Vector2(34f, -6f * dir).RotatedBy(velocity.ToRotation()) + new Vector2(0f, 1f);
 
             //Vector2 muzzlePos = position + velocity.SafeNormalize(Vector2.UnitX) * 50f;
             for (int i = 0; i < 11; i++) //16
@@ -117,7 +118,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         int timer = 0;
         public override bool PreAI(Projectile projectile)
         {
-
             totalAlpha = 0.2f + Math.Clamp(MathHelper.Lerp(totalAlpha, 1.5f, 0.12f), 0f, 1f) * 0.8f;
 
             float progress = Math.Clamp((timer + 5f) / 30f, 0f, 1f); //timer / 50
@@ -130,10 +130,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         float totalAlpha = 0f;
         float totalScale = 0f;
-        public List<float> previousRotations = new List<float>();
-        public List<Vector2> previousPostions = new List<Vector2>();
         public override bool PreDraw(Projectile projectile, ref Color lightColor)
         {
+            float beforePopIntensity = Utils.GetLerpValue(25f, 0f, projectile.timeLeft, true);
+            float beforePopIntensityScale = Utils.GetLerpValue(35f, 0f, projectile.timeLeft, true);
+
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
 
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -141,8 +142,22 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Vector2 TexOrigin = sourceRectangle.Size() / 2f;
             SpriteEffects se = projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            //Bloomball
-            Texture2D Ball = Mod.Assets.Request<Texture2D>("Assets/Orbs/feather_circle128PMA").Value;
+            drawPos += Main.rand.NextVector2CircularEdge(2f, 2f) * beforePopIntensity;
+
+            #region Flare
+            Texture2D Flare = CommonTextures.SoulSpikePMA.Value;
+            Vector2 flareScaleHoriz = new Vector2(1.75f * Easings.easeInSine(beforePopIntensityScale), 0.5f) * projectile.scale * totalScale * 1f;
+            Vector2 flareScaleVerti = new Vector2(0.875f * Easings.easeInSine(beforePopIntensityScale), 0.5f) * projectile.scale * totalScale * 1f;
+
+            Color outerFlareCol = Color.Lerp(Color.Purple, Color.MediumPurple, 0.1f) with { A = 50 } * 0.5f;
+            Color innerFlareCol = Color.White with { A = 20 } * 0.25f;
+
+            Main.EntitySpriteDraw(Flare, drawPos + new Vector2(0f, 0f), null, outerFlareCol, 0f, Flare.Size() / 2f, flareScaleHoriz, 0);
+            Main.EntitySpriteDraw(Flare, drawPos + new Vector2(0f, 0f), null, outerFlareCol, MathHelper.PiOver2, Flare.Size() / 2f, flareScaleVerti, 0);
+
+            Main.EntitySpriteDraw(Flare, drawPos + new Vector2(0f, 0f), null, innerFlareCol, 0f, Flare.Size() / 2f, flareScaleHoriz * 0.6f, 0);
+            Main.EntitySpriteDraw(Flare, drawPos + new Vector2(0f, 0f), null, innerFlareCol, MathHelper.PiOver2, Flare.Size() / 2f, flareScaleVerti * 0.6f, 0);
+            #endregion
 
 
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White * 0.75f * totalAlpha, projectile.rotation, TexOrigin, projectile.scale * totalScale, 0);
@@ -150,8 +165,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             float glowscale = (float)(Math.Sin(Main.GlobalTimeWrappedHourly * 6f) / 5f + 1f) * 1.15f;
             Main.EntitySpriteDraw(vanillaTex, drawPos, null, Color.White with { A = 0 } * 0.25f * totalAlpha, projectile.rotation, TexOrigin, projectile.scale * glowscale * totalScale, 0);
 
+
+            //Bloomball
+            Texture2D Ball = CommonTextures.feather_circle128PMA.Value;
             Main.EntitySpriteDraw(Ball, drawPos + new Vector2(0f, 0f), null, Color.Purple with { A = 0 } * 0.5f * totalAlpha, projectile.rotation, Ball.Size() / 2f, projectile.scale * 0.3f * totalScale, 0);
 
+
+            //Utils.DrawBorderString(Main.spriteBatch, "" + projectile.timeLeft, drawPos + new Vector2(0f, -20f), Color.White);
 
             return false;
         }
@@ -184,7 +204,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             d1.scale = 0.04f;
             d2.scale = 0.04f;
 
-            #region vanillaAI
+            #region vanillaAI (less sound volume)
             SoundEngine.PlaySound(SoundID.Item96 with { Volume = 0.35f }, projectile.position);
             int num305 = Main.rand.Next(5, 9) - 4;
             for (int num306 = 0; num306 < num305; num306++)

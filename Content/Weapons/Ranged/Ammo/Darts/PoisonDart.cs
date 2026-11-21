@@ -90,9 +90,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction("UnderProjectiles", () =>
             {
-                DrawTrail(projectile, false);
+                DrawTrail(projectile, true);
             });
-            DrawTrail(projectile, true);
+            DrawTrail(projectile, false);
 
             //Border
             for (int i = 0; i < 4; i++)
@@ -112,7 +112,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
                 return;
 
             Texture2D vanillaTex = TextureAssets.Projectile[projectile.type].Value;
-            Texture2D flare = Mod.Assets.Request<Texture2D>("Assets/Pixel/SoulSpike").Value;
+            Texture2D flare = CommonTextures.SoulSpikePMA.Value;
             //Texture2D flare = CommonTextures.Flare.Value;
 
             Rectangle sourceRectangle = vanillaTex.Frame(1, Main.projFrames[projectile.type], frameY: projectile.frame);
@@ -131,7 +131,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
                 Vector2 AfterImagePos = previousPostions[i] - Main.screenPosition;
 
-                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 0 } * progress * 0.45f,
+                Main.EntitySpriteDraw(vanillaTex, AfterImagePos, sourceRectangle, col with { A = 50 } * progress * 0.35f,
                     previousRotations[i], TexOrigin, size1 * overallScale, SE);
 
                 if (i > 1)
@@ -140,7 +140,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Darts
 
                     float size2 = (0.5f + (0.5f * progress));
                     Vector2 vec2Scale = new Vector2(1.5f, 0.75f * size2) * overallScale * projectile.scale * 0.5f;
-                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 150, 150) with { A = 0 } * 0.17f * middleProg,
+                    Main.EntitySpriteDraw(flare, AfterImagePos, null, new Color(255, 150, 150) with { A = 50 } * 0.2f * middleProg,
                         previousRotations[i] + MathHelper.PiOver2, flare.Size() / 2f, vec2Scale, SE);
                 }
             }

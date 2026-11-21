@@ -50,23 +50,17 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             }
 
             //Trail1 Info Dump
-            trail1.trailTexture = ModContent.Request<Texture2D>("VFXPlus/Assets/Trails/spark_07_Black").Value;
             trail1.trailPointLimit = 150 + trailRandomLengthOffset; 
-            trail1.trailWidth = (int)(10 * totalAlpha * totalScale); //15
-            trail1.trailMaxLength = 300 + trailRandomLengthOffset; 
+            trail1.trailMaxLength = 500 + trailRandomLengthOffset; //300
 
             trail1.shouldSmooth = false;
 
             Color trailCol = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
-            trail1.trailColor = trailCol with { A = 75 } * totalAlpha * 0.7f * 1f;
-            trail1.timesToDraw = 1;
-            trail1.useEffectMatrix = true;
-            trail1.pinchHead = true;
 
             trail1.trailTime = randomTimeOffset + (timer * 0.05f * randomTrailSpeed);
             trail1.trailRot = projectile.velocity.ToRotation();
-            trail1.trailPos = projectile.Center + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -50f) + new Vector2(0f, 0f);
-            
+            trail1.trailPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * -5f;
+
             if (timer > 5) 
                 trail1.TrailLogic();
 
@@ -75,6 +69,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
+                Color dustCol = Color.Lerp(Color.Yellow, Color.DarkGoldenrod, 1f);
+
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelAlts>(), vel, newColor: Color.Yellow, Scale: Main.rand.NextFloat(0.45f, 0.5f) * 0.55f);
                 d.alpha = 2;
                 d.velocity += projectile.velocity.RotatedByRandom(0.1f) * 0.75f;
@@ -82,7 +78,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
             }
 
-            if ((timer + (int)randomTimeOffset) % 6 == 0 && Main.rand.NextBool(2) && timer > 5)
+            //Just more messy than anything tbh
+            if (false && (timer + (int)randomTimeOffset) % 6 == 0 && Main.rand.NextBool(2) && timer > 5)
             {
                 float rot = projectile.velocity.ToRotation();
 
@@ -91,8 +88,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
 
                 Dust dp = Dust.NewDustPerfect(pos, ModContent.DustType<WindLine>(), vel, newColor: Color.DarkGoldenrod, Scale: Main.rand.NextFloat(0.75f, 1f));
 
-                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.9f, TimeToStartShrink: 5, ShrinkYScalePower: 0.75f, XScale: 2f, YScale: Main.rand.NextFloat(0.75f, 1f), true, KillEarlyTime: 10);
-                wlb.colorAlpha = 50;
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: 0.9f, TimeToStartShrink: 5, ShrinkYScalePower: 0.75f, XScale: 2f, YScale: Main.rand.NextFloat(0.75f, 1f), false, KillEarlyTime: 10);
+                wlb.colorAlpha = 100;
                 wlb.whiteCoreIntensity = 0.5f;
                 dp.customData = wlb;
             }
@@ -103,7 +100,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             float timeForPopInAnim = 20;
             float animProgress = Math.Clamp((timer + 4) / timeForPopInAnim, 0f, 1f);
 
-            totalScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 4f)) * 1f;
+            totalScale = 0f + MathHelper.Lerp(0f, 1f, Easings.easeInOutBack(animProgress, 0f, 2f)) * 1f;
 
             Lighting.AddLight(projectile.Center, Color.Yellow.ToVector3() * 0.5f);
 
@@ -119,53 +116,125 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             if (timer == 0)
                 return false;
 
+            DrawTrail(projectile, false);
+
+
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.Dusts, () =>
             {
-                trail1.TrailDrawing(Main.spriteBatch, false);
-
-                Color darkest = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
-                Color middle = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
-                Color brightest = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
-
-                //Need to not draw if projectile is false because otherwise it will draw wrong on the frame it is killed (due to pixelation system)
-                if (projectile.active == false)
-                    totalAlpha = 0f;
-
-                Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
-                Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
-
-                Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -50f);
-                drawPos += new Vector2(0f, 0f);
-
-                float drawRot = projectile.velocity.ToRotation();
-                Vector2 drawOrigin = spike.Size() / 2f;
-
-                //Vanilla has 1.2 scale for bullets, so normalize this to 1f
-                float adjustedScale = projectile.scale * (5f / 6f);
-
-                Vector2 outSpikeScale = new Vector2(adjustedScale * 7.53f, adjustedScale * 1.5f * totalScale) * 0.5f;
-
-                Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 100 } * 0.4f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
-
-                Vector2 orbScale = new Vector2(3.5f, 0.25f * totalScale) * 0.7f * adjustedScale; //0.3
-                Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, middle with { A = 100 } * 0.2f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
-
-
-                Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
-
-                Vector2 drawScale2 = new Vector2(adjustedScale * 5f, adjustedScale * totalScale) * 0.5f;
-
-                drawPos += new Vector2(0f, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
-                Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 100 } * totalAlpha, drawRot, drawOrigin, drawScale2 * 0.5f, SpriteEffects.None, 0f);
+                DrawBody(projectile, true);
             });
-
-
-
-
+            DrawBody(projectile, false);
 
             return false;
         }
+
+        public void DrawBody(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+
+            Color darkest = Color.Lerp(Color.Gold, Color.Orange, 1f);
+            Color middle = Color.Lerp(Color.Gold, Color.Orange, 0.75f);
+            Color brightest = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
+
+
+            Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
+            Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
+
+            Vector2 drawPos = projectile.Center - Main.screenPosition + (projectile.velocity.SafeNormalize(Vector2.UnitX) * -30f);
+            drawPos += new Vector2(0f, 0f);
+
+            float drawRot = projectile.velocity.ToRotation();
+            Vector2 drawOrigin = spike.Size() / 2f;
+
+            //Vanilla has 1.2 scale for bullets, so normalize this to 1f
+            float adjustedScale = projectile.scale * (5f / 6f);
+
+            Vector2 outSpikeScale = new Vector2(adjustedScale * 2.15f, adjustedScale * 1.5f * totalScale * 1f) * 0.5f;
+            outSpikeScale.X *= 3f;
+
+            Main.EntitySpriteDraw(spike, drawPos + new Vector2(0f, 0f), null, darkest with { A = 140 } * 0.5f * totalAlpha, drawRot, drawOrigin, outSpikeScale, SpriteEffects.None);
+
+            Vector2 orbScale = new Vector2(1f, 0.25f * totalScale * 1f) * 0.7f * adjustedScale; //0.3
+            orbScale.X *= 3f;
+            Main.EntitySpriteDraw(orb, drawPos + new Vector2(0f, 0f), null, middle with { A = 140 } * 0.3f * totalAlpha, drawRot, orb.Size() / 2f, orbScale, SpriteEffects.None);
+
+
+            Texture2D spike2 = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/StarlightLessGlow").Value;
+
+            Vector2 drawScale2 = new Vector2(adjustedScale * 2f, adjustedScale * totalScale * 1f) * 0.45f;
+            drawScale2.X *= 3f;
+
+            drawPos += new Vector2(0f, 0f);
+            Main.spriteBatch.Draw(spike2, drawPos, null, brightest with { A = 90 } * totalAlpha, drawRot, drawOrigin, drawScale2, SpriteEffects.None, 0f);
+            Main.spriteBatch.Draw(spike2, drawPos, null, Color.White with { A = 90 } * totalAlpha * 0.75f, drawRot, drawOrigin, drawScale2 * 0.6f, SpriteEffects.None, 0f);
+        }
+
+        Effect trailEffect = null;
+        public void DrawTrail(Projectile projectile, bool giveUp)
+        {
+            if (giveUp)
+                return;
+
+            //isBlue = true;
+
+            if (trailEffect == null)
+                trailEffect = ModContent.Request<Effect>("VFXPlus/Effects/TrailShaders/BasicGlowTrail", AssetRequestMode.ImmediateLoad).Value;
+
+
+            Texture2D trailTexture1 = Mod.Assets.Request<Texture2D>("Assets/Trails/FlameTrail").Value;
+            Texture2D trailTexture2 = Mod.Assets.Request<Texture2D>("Assets/Trails/ThinGlowLine3").Value;
+
+            //Convert lists to arrays for use in vertex strip
+            Vector2[] pos_arr = trail1.trailPositions.ToArray();
+            float[] rot_arr = trail1.trailRotations.ToArray();
+
+            Color trailDark = Color.Lerp(Color.Gold, Color.Orange, 1f);
+            Color trailLight = Color.Lerp(Color.Gold, Color.Orange, 0.55f);
+            Color StripColor(float progress) => Color.Lerp(trailDark, trailLight, progress) with { A = 215 } * Easings.easeOutQuad(progress) * 0.4f;
+
+            float StripWidth(float progress)
+            {
+                float sineWidthMult = 1f + (float)Math.Cos((Main.timeForVisualEffects * 0.24f) + (progress * 12f)) * 0.18f;
+
+                float toReturn = Easings.easeOutSine(progress);
+
+                return 15f * totalScale;// * toReturn * totalScale; 
+            }
+
+            VertexStripFixed vertexStrip = new VertexStripFixed();
+            vertexStrip.PrepareStrip(pos_arr, rot_arr, StripColor, StripWidth, -Main.screenPosition, includeBacksides: true);
+
+            trailEffect.Parameters["WorldViewProjection"].SetValue(Main.GameViewMatrix.NormalizedTransformationmatrix);
+            trailEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * -0.05f);
+
+            trailEffect.Parameters["bodyIntensity"].SetValue(1.25f);
+            trailEffect.Parameters["bodyPower"].SetValue(1f);
+            trailEffect.Parameters["posterizationSteps"].SetValue(0f);
+
+            trailEffect.Parameters["whiteGlowSize"].SetValue(0.5f);
+            trailEffect.Parameters["whiteGlowPower"].SetValue(2f);
+            trailEffect.Parameters["whiteGlowIntensity"].SetValue(0f);
+
+
+            trailEffect.Parameters["TrailTexture1"].SetValue(trailTexture1);
+            trailEffect.Parameters["tex1reps"].SetValue(3f);
+            trailEffect.Parameters["tex1Intensity"].SetValue(1f); //2f
+            trailEffect.Parameters["tex1YStretch"].SetValue(1.25f); //2f
+
+            trailEffect.Parameters["TrailTexture2"].SetValue(trailTexture2);
+            trailEffect.Parameters["tex2reps"].SetValue(2f);
+            trailEffect.Parameters["tex2Intensity"].SetValue(2.5f);
+            trailEffect.Parameters["tex2YStretch"].SetValue(0.75f); //2f
+
+            trailEffect.CurrentTechnique.Passes["DefaultPass"].Apply();
+            vertexStrip.DrawTrail();
+
+
+            Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+        }
+
 
         public override bool PreKill(Projectile projectile, int timeLeft)
         {
@@ -237,7 +306,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             {
                 float prog = (float)(i + 1f) / dustCount;
 
-                float rotAmount = ((i % 2 == 0 ? 0.5f : -0.5f) * prog) + Main.rand.NextFloat(-0.1f, 0.1f);
+                float rotAmount = ((i % 2 == 0 ? 0.35f : -0.35f) * prog) + Main.rand.NextFloat(-0.1f, 0.1f);
 
                 Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(rotAmount) * (7f + (13f * prog));
 
@@ -245,13 +314,15 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 //Vector2 vel = projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(rotDir) * Main.rand.NextFloat(10f, 15);
 
 
-                Dust p = Dust.NewDustPerfect(projectile.Center + vel, ModContent.DustType<WindLine>(), -vel, newColor: Color.DarkGoldenrod, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 1.5f);
+                Dust p = Dust.NewDustPerfect(projectile.Center + vel, ModContent.DustType<WindLine>(), -vel, newColor: Color.DarkGoldenrod, Scale: Main.rand.NextFloat(0.5f, 0.65f) * 2f);
+                //I like this x-scale but it starts behind the center if we don't do this
+                p.position += p.velocity;
 
                 float velFadePower = Main.rand.NextFloat(0.9f, 0.93f);
                 int shrinkTime = Main.rand.Next(4, 8);
 
-                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: true);
-                wlb.colorAlpha = 50;
+                WindLineBehavior wlb = new WindLineBehavior(VelFadePower: velFadePower, TimeToStartShrink: shrinkTime, ShrinkYScalePower: 0.5f, XScale: 1f, YScale: 0.5f, Pixelize: false);
+                wlb.colorAlpha = 100;
                 wlb.whiteCoreIntensity = 0.5f;
 
                 p.customData = wlb;

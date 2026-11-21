@@ -47,14 +47,15 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.Revolver,
                     AnimTime: 18,
-                    NormalXOffset: 18f,
-                    DestXOffset: 10f,
-                    YRecoilAmount: 0.2f,
-                    HoldOffset: new Vector2(0f, 2f),
-                    TipPos: new Vector2(30f, -4f),
-                    StarPos: new Vector2(27f, -4f)
+                    NormalXOffset: 20f,
+                    DestXOffset: 12f, //10
+                    YRecoilAmount: 0.2f, //0.2
+                    HoldOffset: new Vector2(0f, 0f),
+                    TipPos: new Vector2(27f, -4f),
+                    StarPos: new Vector2(24f, -4f)
                     ); 
             }
+            Main.projectile[gun].scale = 0.9f;
 
             //Explosion
             int dir = velocity.X > 0 ? 1 : -1;

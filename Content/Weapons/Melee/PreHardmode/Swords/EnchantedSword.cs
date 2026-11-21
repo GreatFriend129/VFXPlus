@@ -202,9 +202,9 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
         {
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(false);
+                DrawTrail(true);
             });
-            DrawTrail(true);
+            DrawTrail(false);
 
             Texture2D VanillaTex = TextureAssets.Projectile[projectile.type].Value;
             Vector2 drawPos = projectile.Center - Main.screenPosition;
@@ -248,7 +248,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
             //new Color(255, 45, 0), new Color(255, 100, 15) | Color.Blue, Color.DodgerBlue
 
             //Blue DodgerBlue
-            Color StripColor(float progress) => Color.Lerp(new Color(0, 0, 255), new Color(20, 114, 255), progress) with { A = 175 } * 1f;
+            Color StripColor(float progress) => Color.Lerp(new Color(0, 0, 255), new Color(20, 114, 255), progress) with { A = 125 } * 1f;
 
             float StripWidth(float progress)
             {
@@ -281,7 +281,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
                     toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return 25f * toReturn * sineWidthMult * overallScale;
+                return 30f * toReturn * sineWidthMult * overallScale; //25
             }
 
             VertexStripFixed vertexStrip = new VertexStripFixed();
@@ -296,6 +296,7 @@ namespace VFXPlus.Content.Weapons.Melee.PreHardmode.Swords
 
             trailEffect.Parameters["whiteGlowSize"].SetValue(0.5f);
             trailEffect.Parameters["whiteGlowPower"].SetValue(2f);
+            trailEffect.Parameters["whiteGlowIntensity"].SetValue(1f);
 
 
             trailEffect.Parameters["TrailTexture1"].SetValue(trailTexture1);

@@ -53,12 +53,18 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
             d2.customData = b2;
             d2.scale = circlePulseSize * 0.05f;
 
+
+            int soundVariant = Main.rand.Next(1, 4);
+            //soundVariant = 1;
+            SoundStyle pulseBowSound = new SoundStyle("VFXPlus/Sounds/Effects/Bow/PulseBow/PulseBow" + soundVariant) with { Volume = 0.85f, Pitch = 0f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundEngine.PlaySound(pulseBowSound, position);
+
             //Sound
             SoundStyle style32 = new SoundStyle("AerovelenceMod/Sounds/Effects/laser_fire") with { Volume = 0.15f * 0.75f, Pitch = -0.2f, PitchVariance = 0.1f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style32, position);
+            //SoundEngine.PlaySound(style32, position);
 
-            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/TechBlip") with { Volume = 0.25f * 0.75f, Pitch = .30f, PitchVariance = 0.1f, };
-            SoundEngine.PlaySound(style2, position);
+            SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Tech/TechBlip") with { Volume = 1f, Pitch = -.30f, PitchVariance = 0.1f, };
+            //SoundEngine.PlaySound(style2, position);
 
             return true;
         }
@@ -156,9 +162,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
             ModContent.GetInstance<PixelationSystem>().QueueRenderAction(RenderLayer.UnderProjectiles, () =>
             {
-                DrawTrail(projectile, false);
+                DrawTrail(projectile, true);
             });
-            DrawTrail(projectile, true);
+            DrawTrail(projectile, false);
 
             return false;
         }

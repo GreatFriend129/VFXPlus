@@ -44,10 +44,13 @@ float finalColIntensity = 1.0;
 //Total alpha of the effect
 float totalAlpha = 1.0;
 
-
 float posterizationSteps = 0.0;
 
 float customRotation = 0.0;
+
+float texture1Alpha = 1.0;
+
+float texture2Alpha = 0.0;
 
 texture causticTexture;
 sampler2D causticTex = sampler_state
@@ -60,6 +63,16 @@ sampler2D causticTex = sampler_state
     //AddressV = wrap;
 };
 
+texture causticTexture2;
+sampler2D causticTex2 = sampler_state
+{
+    texture = <causticTexture2>;
+    magfilter = LINEAR;
+    minfilter = LINEAR;
+    mipfilter = LINEAR;
+    //AddressU = wrap;
+    //AddressV = wrap;
+};
 
 const float TwoPi = 6.283185;
 
@@ -127,6 +140,8 @@ float3 Posterize(float3 inputCol)
 float4 RadialScrollGradient(float4 screenspace : TEXCOORD0) : COLOR0
 {   
     float2 baseUV = screenspace.xy;
+    float4 baseCol = tex2D(uImage0, baseUV);
+
     
     float fade = EaseOutQuadratic(progress);
     
@@ -167,7 +182,12 @@ float4 RadialScrollGradient(float4 screenspace : TEXCOORD0) : COLOR0
     
 
     //Sample caustic texture at the polar coords    
-    float3 causCol = tex2D(causticTex, polarCoords);
+    float3 causCol = tex2D(causticTex, polarCoords) * texture1Alpha;
+    
+    polarCoords.x -= flowSpeed * uTime * 0.05;
+    float3 causCol2 = tex2D(causticTex2, polarCoords) * texture2Alpha;
+
+    causCol += causCol2;
     
     //Limit effect to only be on ring
     causCol *= ring;
@@ -188,7 +208,7 @@ float4 RadialScrollGradient(float4 screenspace : TEXCOORD0) : COLOR0
     //brightness = 1.0;
     
     float4 toReturn = float4(gradCol * finalColIntensity, totalAlpha) * zFade;
-    return toReturn * brightness;
+    return toReturn * baseCol * brightness;
 }
 
 technique Technique1

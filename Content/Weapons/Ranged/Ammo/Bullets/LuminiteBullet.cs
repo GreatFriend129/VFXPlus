@@ -616,7 +616,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                     toReturn = Easings.easeOutSine(1f - LV);
                 }
 
-                return toReturn * sineWidthMult * overallScale * 8; //7
+                return toReturn * sineWidthMult * overallScale * 7; //7
             }
 
 

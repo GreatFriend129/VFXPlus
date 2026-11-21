@@ -840,10 +840,13 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             float rot = Projectile.rotation + (float)Main.timeForVisualEffects * 0.1f;
 
             myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Test/T_Random_54").Value); //Trail_2 0.45 totalAlpha | LavaNoise 1f zoom
+            myEffect.Parameters["causticTexture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value); //Trail_2 0.45 totalAlpha | LavaNoise 1f zoom
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
             myEffect.Parameters["progress"].SetValue(Easings.easeOutSine(progress));//0.42f
             myEffect.Parameters["customRotation"].SetValue(rot);
 
+            myEffect.Parameters["texture1Alpha"].SetValue(0.5f);
+            myEffect.Parameters["texture2Alpha"].SetValue(0.5f);
             //thickness++ ringpower++
 
             //Ring values
@@ -910,7 +913,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
         }
     }
-
 
     public class RocketExplosionPulse : ModProjectile
     {
@@ -981,10 +983,14 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             float rot = Projectile.rotation + (float)Main.timeForVisualEffects * 0.1f;
 
             myEffect.Parameters["causticTexture"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Test/T_Random_54").Value); //Trail_2 0.45 totalAlpha
+            myEffect.Parameters["causticTexture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Noise/Trail_2").Value); //Trail_2 0.45 totalAlpha
+
             myEffect.Parameters["uTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
             myEffect.Parameters["progress"].SetValue(progress);//0.42f
             myEffect.Parameters["customRotation"].SetValue(rot);
 
+            myEffect.Parameters["texture1Alpha"].SetValue(1.0f);
+            myEffect.Parameters["texture2Alpha"].SetValue(0.1f);
 
 
             //thickness++ ringpower++

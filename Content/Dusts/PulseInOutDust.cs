@@ -32,7 +32,7 @@ namespace VFXPlus.Content.Dusts
             if (!dust.noLight || true)
                 Lighting.AddLight(dust.position, dust.color.ToVector3() * 0.4f * dust.scale * behavoir.drawScale);
 
-            if (behavoir.drawType == PulseInOutDustBehavior.DrawOptions.ShakyStar)
+            if (behavoir.drawType == PulseInOutDustBehavior.DrawOptions.ShakyStar || behavoir.drawType == PulseInOutDustBehavior.DrawOptions.VenomBubble)
             {
                 dust.rotation += dust.velocity.X * 0.03f;
                 //dust.velocity *= 0.9f;
@@ -111,6 +111,10 @@ namespace VFXPlus.Content.Dusts
 
 
             }
+            else if (behavoir.drawType == PulseInOutDustBehavior.DrawOptions.VenomBubble)
+            {
+                Main.spriteBatch.Draw(Tex, drawPos, null, dust.color, dust.rotation, origin, dust.scale * behavoir.drawScale, SpriteEffects.None, 0f);
+            }
         }
     }
 
@@ -126,6 +130,7 @@ namespace VFXPlus.Content.Dusts
             GlowStarSharp = 2,
             ShakyStar = 3,
             VanillaStar = 4,
+            VenomBubble = 5,
         }
 
         public int totalTime;
@@ -156,6 +161,8 @@ namespace VFXPlus.Content.Dusts
                 texture = ModContent.Request<Texture2D>("VFXPlus/Assets/PartyStar", AssetRequestMode.ImmediateLoad).Value;
             else if (drawType == DrawOptions.VanillaStar)
                 texture = CommonTextures.Flare.Value;
+            else if (drawType == DrawOptions.VenomBubble)
+                texture = ModContent.Request<Texture2D>("VFXPlus/Content/Dusts/Textures/VenomBubble", AssetRequestMode.ImmediateLoad).Value;
             else
                 texture = CommonTextures.CrispStarPMA.Value;
 
@@ -177,6 +184,8 @@ namespace VFXPlus.Content.Dusts
                 texture = ModContent.Request<Texture2D>("VFXPlus/Assets/PartyStar", AssetRequestMode.ImmediateLoad).Value;
             else if (drawType == DrawOptions.VanillaStar)
                 texture = CommonTextures.Flare.Value;
+            else if (drawType == DrawOptions.VenomBubble)
+                texture = ModContent.Request<Texture2D>("VFXPlus/Content/Dusts/Textures/VenomBubble", AssetRequestMode.ImmediateLoad).Value;
             else
                 texture = CommonTextures.CrispStarPMA.Value;
 

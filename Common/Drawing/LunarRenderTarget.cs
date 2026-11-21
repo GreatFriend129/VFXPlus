@@ -101,15 +101,15 @@ namespace VFXPlus.Common.Drawing
             /*
             Effect myEffect = ModContent.Request<Effect>("VFXPlus/Effects/Air/SimpleGalaxy2", AssetRequestMode.ImmediateLoad).Value;
 
-            myEffect.Parameters["Texture1"].SetValue(Mod.Assets.Request<Texture2D>("Assets/SpaceDustDark").Value);
-            myEffect.Parameters["Texture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/SpaceDustDark").Value);
+            myEffect.Parameters["Texture1"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Empty").Value);
+            myEffect.Parameters["Texture2"].SetValue(Mod.Assets.Request<Texture2D>("Assets/Empty").Value);
             myEffect.Parameters["Texture3"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsLayer").Value);
             myEffect.Parameters["Texture4"].SetValue(Mod.Assets.Request<Texture2D>("Assets/LunarStarsLayer").Value);
 
             myEffect.Parameters["progress"].SetValue((float)Main.timeForVisualEffects * 0.01f); //.02
-            myEffect.Parameters["zoom1"].SetValue(1f);
-            myEffect.Parameters["zoom2"].SetValue(1f);
-            myEffect.Parameters["zoom3"].SetValue(1f);
+            myEffect.Parameters["zoom1"].SetValue(0.5f);
+            myEffect.Parameters["zoom2"].SetValue(0.5f);
+            myEffect.Parameters["zoom3"].SetValue(0.5f);
             myEffect.Parameters["colorIntensity1"].SetValue(1f);
             myEffect.Parameters["colorIntensity2"].SetValue(1f);
             myEffect.Parameters["colorIntensity3"].SetValue(1f);
@@ -121,7 +121,7 @@ namespace VFXPlus.Common.Drawing
             */
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect, Main.GameViewMatrix.EffectMatrix);
 
-            Main.spriteBatch.Draw(renderTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 0.5f, 0, 0); //0.5f
+            Main.spriteBatch.Draw(renderTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1f, 0, 0); //0.5f
 
             Main.spriteBatch.End();
 
@@ -142,8 +142,8 @@ namespace VFXPlus.Common.Drawing
             Color outlineColB = new Color(35, 255, 220);
 
             myEffect2.Parameters["outlineColor"].SetValue(outlineCol.ToVector4() * 1f); //DeepPink
-            myEffect2.Parameters["outlineThickness"].SetValue(1f * 1f); //2f
-            myEffect2.Parameters["blendBorder"].SetValue(false);
+            myEffect2.Parameters["outlineThickness"].SetValue(1f * 3f); //2f
+            myEffect2.Parameters["blendBorder"].SetValue(true);
 
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, myEffect2, Main.GameViewMatrix.EffectMatrix);
 
@@ -164,7 +164,7 @@ namespace VFXPlus.Common.Drawing
             
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            Main.spriteBatch.Draw(finalTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 2f, 0, 0); //2f
+            Main.spriteBatch.Draw(finalTarget, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1f, 0, 0); //2f
 
             Main.spriteBatch.End();
         }

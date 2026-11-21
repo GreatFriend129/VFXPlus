@@ -73,8 +73,6 @@ namespace VFXPlus.Common.Drawing
                         {
                             
                             case ProjectileID.Bullet:
-                                if (p.TryGetGlobalProjectile(out MusketBallProjOverride globalMB))
-                                    globalMB.DrawAdditive(Main.spriteBatch);
                                 if (p.TryGetGlobalProjectile(out MusketBallProjOverrideOld globalMBO))
                                     globalMBO.DrawAdditive(Main.spriteBatch);
                                 break;
@@ -99,10 +97,6 @@ namespace VFXPlus.Common.Drawing
                                 if (p.TryGetGlobalProjectile(out ExplodingBulletProjOverride globalEB))
                                     globalEB.DrawAdditive(Main.spriteBatch);
                                 break;
-                            case ProjectileID.CrystalBullet:
-                                if (p.TryGetGlobalProjectile(out CrystalBulletProjOverride globalCB))
-                                    globalCB.DrawAdditive(Main.spriteBatch);
-                                break;
                             case ProjectileID.CursedBullet:
                                 if (p.TryGetGlobalProjectile(out CursedBulletProjOverride globalCurB))
                                     globalCurB.DrawAdditive(Main.spriteBatch);
@@ -110,10 +104,6 @@ namespace VFXPlus.Common.Drawing
                             case ProjectileID.ChlorophyteBullet:
                                 if (p.TryGetGlobalProjectile(out ChlorophyteBullet globalChB))
                                     globalChB.DrawAdditive(Main.spriteBatch);
-                                break;
-                            case ProjectileID.NanoBullet:
-                                if (p.TryGetGlobalProjectile(out NanoBulletProjOverride globalNB))
-                                    globalNB.DrawAdditive(Main.spriteBatch);
                                 break;
                             case ProjectileID.VenomBullet:
                                 if (p.TryGetGlobalProjectile(out VenomBulletProjOverride globalVB))

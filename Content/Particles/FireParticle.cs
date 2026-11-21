@@ -300,4 +300,5 @@ namespace VFXPlus.Content.Particles
             spriteBatch.Draw(Smoke, drawPos, null, myColor, Rotation, TexOrigin, Scale * 0.075f, SE, 0f);
         }
     }
+
 }

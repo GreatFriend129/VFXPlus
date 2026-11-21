@@ -1,22 +1,23 @@
-using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using rail;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Audio;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using Terraria.DataStructures;
-using System.Linq;
 using VFXPlus.Common;
-using VFXPlus.Content.Dusts;
-using ReLogic.Content;
-using VFXPlus.Common.Utilities;
-using Terraria.GameContent;
-using System.Threading;
 using VFXPlus.Common.Drawing;
-using rail;
+using VFXPlus.Common.Utilities;
+using VFXPlus.Content.Dusts;
 using VFXPlus.Content.Projectiles;
+using VFXPlus.Content.Weapons.Melee.PreHardmode.Swords;
 
 
 namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
@@ -280,9 +281,77 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Misc
         {
             SoundEngine.PlaySound(SoundID.Item10 with { Volume = 0.75f, Pitch = 0.15f, PitchVariance = 0.05f, MaxInstances = -1 }, projectile.position);
 
-            Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Gold, Scale: 0.2f);
 
-            da.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 20,
+            int a = Projectile.NewProjectile(null, projectile.Center, Vector2.Zero, ModContent.ProjectileType<StarImpactVFX>(), 0, 0f, projectile.owner);
+            (Main.projectile[a].ModProjectile as StarImpactVFX).impactType = StarImpactVFX.StarImpactType.StarCannon;
+
+            /*
+            //Dust da = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Gold, Scale: 0.25f);
+
+            //da.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 20,
+            //    overallAlpha: 0.2f, DrawWhiteCore: true, 1f, 1f);
+
+            Color betweenBlue = Color.Lerp(Color.DodgerBlue, Color.Blue, 0.35f);
+
+            for (float num636 = 0f; num636 < 1f; num636 += 0.25f)  //0.125
+            {
+                Dust.NewDustPerfect(projectile.Center, DustID.FireworksRGB, Vector2.UnitY.RotatedBy(num636 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (4f + Main.rand.NextFloat() * 4f), 150, Color.Gold).noGravity = true;
+            }
+            for (float num637 = 0f; num637 < 1f; num637 += 0.35f) //0.25f
+            {
+                Dust.NewDustPerfect(projectile.Center, DustID.FireworksRGB, Vector2.UnitY.RotatedBy(num637 * ((float)Math.PI * 2f) + Main.rand.NextFloat() * 0.5f) * (2f + Main.rand.NextFloat() * 3f), 150, betweenBlue, 0.85f).noGravity = true;
+            }
+
+            int crossCountA = 5; //10
+            for (int i = 0; i < crossCountA; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)crossCountA) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3f, 7f) * 1.15f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool() ? Color.Orange : betweenBlue;
+
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<PixelGlowOrb>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f) * 2f);
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.86f, 0.91f);
+                float fadePower = Main.rand.NextFloat(0.92f, 0.96f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_PGOBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.95f, postSlowPower: postSlowPower, velToBeginShrink: 3f, fadePower: fadePower);
+
+            }
+
+            int crossCount = 7;
+            for (int i = 0; i < crossCount; i++)
+            {
+                float dir = (MathHelper.TwoPi / (float)crossCount) * i;
+
+                Vector2 dustVel = dir.ToRotationVector2() * Main.rand.NextFloat(3.5f, 7f) * 1.15f;
+                dustVel = dustVel.RotatedBy(Main.rand.NextFloat(-0.15f, 0.15f));
+
+                Color col = Main.rand.NextBool() ? Color.Orange : betweenBlue;
+
+
+                Dust gd = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), dustVel, newColor: col, Scale: Main.rand.NextFloat(0.25f, 0.55f));
+                //gd.velocity -= projectile.oldVelocity * 0.2f;
+
+                int timeBeforeSlow = Main.rand.Next(3, 7);
+                float postSlowPower = Main.rand.NextFloat(0.88f, 0.92f);
+                float fadePower = Main.rand.NextFloat(0.89f, 0.93f);
+
+                gd.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, timeBeforeSlow: timeBeforeSlow,
+                    preSlowPower: 0.92f, postSlowPower: postSlowPower, velToBeginShrink: 1.5f, fadePower: fadePower, shouldFadeColor: false);
+            }
+
+            return false;
+            */
+
+            Dust da2 = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<SoftGlowDust>(), Vector2.Zero, newColor: Color.Gold, Scale: 0.2f);
+
+            da2.customData = DustBehaviorUtil.AssignBehavior_SGDBase(timeToStartFade: 3, timeToChangeScale: 0, fadeSpeed: 0.9f, sizeChangeSpeed: 0.95f, timeToKill: 20,
                 overallAlpha: 0.15f, DrawWhiteCore: true, 1f, 1f);
 
             for (int i = 0; i < 7 + Main.rand.Next(3); i++)

@@ -38,6 +38,9 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Phoenix/PhoenixNew2") with { Volume = 0.2f, Pitch = 0.2f, PitchVariance = 0.35f, MaxInstances = -1 };
+            SoundEngine.PlaySound(style, position);
+
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjLong>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjLong held)
@@ -99,8 +102,8 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //Sound
             float volumeMult = 0.65f;
 
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi2") with { Volume = 0.5f * volumeMult, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
+            /////SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi2") with { Volume = 0.5f * volumeMult, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //////SoundEngine.PlaySound(style, player.Center);
 
             SoundStyle style2 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Uzi1") with { Volume = 0.25f * volumeMult, Pitch = 0f, PitchVariance = 0.2f, MaxInstances = -1 };
             //SoundEngine.PlaySound(style2, player.Center);

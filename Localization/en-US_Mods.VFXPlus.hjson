@@ -272,6 +272,9 @@ Projectiles: {
 	DevPetProjectile.DisplayName: Dev Pet Projectile
 	RocketExplosionPulse.DisplayName: Rocket Explosion Pulse
 	KarmaPanelTest.DisplayName: Karma Panel Test
+	StarfuryRadialPulse.DisplayName: Starfury Radial Pulse
+	StarImpactVFX.DisplayName: Star Impact V F X
+	KarmaEyeTest.DisplayName: Karma Eye Test
 }
 
 Configs: {
