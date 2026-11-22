@@ -64,7 +64,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             trail1.TrailLogic();
 
 
-            if (timer > 5 && timer % 3 == 0 && Main.rand.NextBool(3))
+            if (timer > 5 && timer % 3 == 0 && Main.rand.NextBool(3) && false)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(3f, 3f);
 
@@ -73,6 +73,29 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 d.velocity += -projectile.velocity.RotatedByRandom(0.1f) * 0.55f;
                 d.velocity *= 0.35f;
 
+            }
+
+            if (timer % 1 == 0 && Main.rand.NextBool(1))
+            {
+
+                Color fireRed = Color.Lerp(Color.OrangeRed, Color.Red, 0.05f);//0.15
+                Color fireRed2 = Color.Lerp(Color.OrangeRed, Color.Orange, 0.25f);//0.15
+
+                for (int i = 0; i < 1; i++)
+                {
+                    Vector2 dustVel = Main.rand.NextVector2CircularEdge(0.5f, 0.5f) + projectile.velocity * 0.2f; //0.5
+
+                    float posOffset = -4f + (10f * i);
+
+                    Vector2 dustPos = projectile.Center + projectile.velocity.SafeNormalize(Vector2.UnitX) * posOffset;
+
+                    FireParticleAlpha fire = new FireParticleAlpha(dustPos + new Vector2(0f, 0f), dustVel, 0.5f, fireRed * 0.5f, colorMult: 1.5f, bloomAlpha: 2f, AlphaFade: 0.97f, //col * 0.5f
+                        EndAlpha: 0.5f, BlackRemoveThreshold: 0.5f);
+                    fire.bloomColor = fireRed with { A = 150 };
+                    fire.scaleFadePower = 1.01f; //1.05
+                    fire.renderLayer = RenderLayer.UnderProjectiles;
+                    ShaderParticleHandler.SpawnParticle(fire);
+                }
             }
 
             if (timer % 1 == 0 && Main.rand.NextBool() && false)
@@ -117,7 +140,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
                 }
             }
 
-            if (timer % 3 == 0 && Main.rand.NextBool(4))
+            if (timer % 3 == 0 && Main.rand.NextBool(4) && false)
             {
                 Vector2 vel = Main.rand.NextVector2Circular(2f, 2f);
                 Dust d = Dust.NewDustPerfect(projectile.Center, ModContent.DustType<GlowPixelCross>(), vel, newColor: new Color(87, 153, 0), Scale: Main.rand.NextFloat(0.15f, 0.35f));
@@ -199,6 +222,11 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             middle = new Color(69, 130, 0);
             brightest = new Color(87, 153, 0);
 
+
+            darkest = Color.OrangeRed;
+            middle = Color.OrangeRed;
+            brightest = Color.Orange;
+
             Texture2D spike = ModContent.Request<Texture2D>("VFXPlus/Assets/Pixel/Starlight").Value;
             Texture2D orb = ModContent.Request<Texture2D>("VFXPlus/Assets/Orbs/feather_circle128PMA").Value;
 
@@ -247,7 +275,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Ammo.Bullets
             Vector2[] pos_arr = trail1.trailPositions.ToArray();
             float[] rot_arr = trail1.trailRotations.ToArray();
 
-            Color StripColor(float progress) => Color.Lerp(new Color(50, 112, 0), new Color(69, 130, 0), progress) with { A = 215 } * Easings.easeOutQuad(progress) * 0.5f;
+            Color StripColor(float progress) => Color.Lerp(Color.OrangeRed, Color.Orange, progress) with { A = 215 } * Easings.easeOutQuad(progress) * 0.25f;
 
             float StripWidth(float progress)
             {

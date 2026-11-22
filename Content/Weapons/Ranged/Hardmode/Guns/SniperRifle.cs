@@ -39,7 +39,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
         {
             float overallVol = 0.75f;
 
-            SoundStyle styleBiggie = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Phoenix/PhoenixBlasterV1") with { Volume = .0f, Pitch = -.15f, PitchVariance = 0.2f, MaxInstances = 1 };
+            SoundStyle styleBiggie = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Phoenix/PhoenixBlasterV1") with { Volume = .15f, Pitch = -.15f, PitchVariance = 0.2f, MaxInstances = 1 };
             SoundEngine.PlaySound(styleBiggie, position);
 
             SoundStyle style33 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperFinal2") { Volume = 1f * overallVol, Pitch = 0.0f, PitchVariance = 0.1f, MaxInstances = -1 };
