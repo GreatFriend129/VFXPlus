@@ -56,7 +56,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Bows
 
             int soundVariant = Main.rand.Next(1, 4);
             //soundVariant = 1;
-            SoundStyle pulseBowSound = new SoundStyle("VFXPlus/Sounds/Effects/Bow/PulseBow/PulseBow" + soundVariant) with { Volume = 0.35f, Pitch = 0f, PitchVariance = 0.25f, MaxInstances = -1 };
+            SoundStyle pulseBowSound = new SoundStyle("VFXPlus/Sounds/Effects/Bow/PulseBow/PulseBow" + soundVariant) with { Volume = 0.35f, Pitch = 0.05f, PitchVariance = 0.25f, MaxInstances = -1 };
             SoundEngine.PlaySound(pulseBowSound, position);
 
             //Sound

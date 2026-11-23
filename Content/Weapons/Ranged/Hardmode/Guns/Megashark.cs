@@ -81,7 +81,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
                 d.rotation = Main.rand.NextFloat(6.28f);
 
-                d.velocity += velocity.SafeNormalize(Vector2.UnitX) * 0.5f;
+                d.velocity += velocity.SafeNormalize(Vector2.UnitX) * 0.5f * 4f;
             }
 
             //Light Dust
@@ -101,7 +101,7 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
                 dust.customData = DustBehaviorUtil.AssignBehavior_GPCBase(rotPower: 0.2f, preSlowPower: 0.99f, timeBeforeSlow: 0, postSlowPower: 0.89f,
                     velToBeginShrink: 10f, fadePower: 0.9f, shouldFadeColor: false);
 
-                dust.velocity += velocity.SafeNormalize(Vector2.UnitX) * 2f;
+                dust.velocity += velocity.SafeNormalize(Vector2.UnitX) * 2f * 4f;
             }
 
             //Bullet Casing

@@ -38,6 +38,26 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle styleVM = new SoundStyle("VFXPlus/Sounds/Effects/Gun/VenusMagnum") with { Volume = 1f, Pitch = -0.3f, PitchVariance = 0.3f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styleVM, position);
+
+            float volumeMult = 0.6f; //.5
+
+            SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/TF2/smg_shoot") with { Volume = 0.1f, Pitch = -0.2f, PitchVariance = 0.15f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(styleA, position);
+
+            SoundStyle styleAB = new SoundStyle("VFXPlus/Sounds/Effects/Gun/Phoenix/PhoenixNew2") with { Volume = 0.2f, Pitch = 0f, PitchVariance = 0.35f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(styleAB, position);
+
+            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .15f * volumeMult, Pitch = 0.5f, PitchVariance = 0.15f }; //1f P
+            //SoundEngine.PlaySound(style4, position);
+
+            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 1f * volumeMult, Pitch = 0.2f, PitchVariance = 0.2f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style, player.Center);
+
+            SoundStyle style5 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = 1f * volumeMult, Pitch = -0.25f, PitchVariance = 0.1f, MaxInstances = -1 };
+            //SoundEngine.PlaySound(style5, position);
+
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjMiddle>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjMiddle held)
@@ -99,20 +119,6 @@ namespace VFXPlus.Content.Weapons.Ranged.Hardmode.Guns
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<GreenCasing>());
 
-            //Sound
-            
-            //GGator
-            
-            float volumeMult = 0.6f; //.5
-
-            SoundStyle style4 = new SoundStyle("Terraria/Sounds/Item_38") with { Volume = .15f * volumeMult, Pitch = 0.5f, PitchVariance = 0.15f }; //1f P
-            SoundEngine.PlaySound(style4, position);
-
-            SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/Gun/GunShotC") with { Volume = 0.15f * volumeMult, Pitch = 0.2f, PitchVariance = 0.2f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style, player.Center);
-
-            SoundStyle style5 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = .45f * volumeMult, Pitch = -0.25f, PitchVariance = 0.1f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style5, position);
 
             return true;
         }

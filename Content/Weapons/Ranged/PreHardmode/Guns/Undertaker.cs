@@ -38,6 +38,12 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
 
         public override bool Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
         {
+            SoundStyle styleA = new SoundStyle("VFXPlus/Sounds/Effects/TF2/smg_shoot") with { Volume = .35f, Pitch = -0.15f, PitchVariance = 0.15f, MaxInstances = -1 };
+            SoundEngine.PlaySound(styleA, position);
+
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/TF2/ambassador_shoot") with { Volume = .34f, Pitch = .02f, };
+            //SoundStyle style = new SoundStyle("VFXPlus/Sounds/Effects/TF2/letranger_shoot") with { Volume = .34f, Pitch = .02f, };
+            
             int gun = Projectile.NewProjectile(null, position, Vector2.Zero, ModContent.ProjectileType<BasicGunProjLong>(), 0, 0, player.whoAmI);
 
             if (Main.projectile[gun].ModProjectile is BasicGunProjLong held)
@@ -45,12 +51,12 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
                 held.SetProjInfo(
                     GunID: ItemID.TheUndertaker,
                     AnimTime: 25,
-                    NormalXOffset: 18f,
-                    DestXOffset: 7f,
+                    NormalXOffset: 22f,
+                    DestXOffset: 13f,
                     YRecoilAmount: 0.2f,
-                    HoldOffset: new Vector2(0f, -2f),
-                    TipPos: new Vector2(30f, -4f),
-                    StarPos: new Vector2(27f, -4f)
+                    HoldOffset: new Vector2(0f, 2f),
+                    TipPos: new Vector2(30f, 0f),
+                    StarPos: new Vector2(27f, 0f)
                     ); 
             }
             Main.projectile[gun].scale = 0.9f;
@@ -105,10 +111,10 @@ namespace VFXPlus.Content.Weapons.Ranged.PreHardmode.Guns
             //SoundEngine.PlaySound(style, position);
 
             SoundStyle style3 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SniperShotA") with { Volume = .01f, Pitch = -1f, PitchVariance = 0.1f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style3, position);
+            //SoundEngine.PlaySound(style3, position);
 
             SoundStyle style5 = new SoundStyle("VFXPlus/Sounds/Effects/Gun/SingleShot") with { Volume = .45f, Pitch = -0.25f, PitchVariance = 0.1f, MaxInstances = -1 };
-            SoundEngine.PlaySound(style5, position);
+            //SoundEngine.PlaySound(style5, position);
 
             //Bullet Casing
             Gore.NewGore(source, position + velocity, new Vector2(velocity.X * -0.25f, -0.75f), ModContent.GoreType<BulletCasingSmallRed>());
